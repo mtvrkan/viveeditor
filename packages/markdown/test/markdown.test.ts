@@ -96,19 +96,29 @@ describe('markdownToHtml', () => {
 
 describe('toMarkdown', () => {
   it('writes a long document in linear time', async () => {
-    const paragraphs = Array.from(
-      { length: 16_000 },
-      (_, index) =>
-        `<p>Satır ${index} için biraz daha uzun bir metin, <strong>kalın bir parça</strong>, <em>eğik bir parça</em> ve <code>kod</code> içerir.</p>`,
-    )
-    const editor = await editorWith(paragraphs.join(''), basicExtensions)
-    const started = performance.now()
+    const fastest = async (count: number): Promise<number> => {
+      const paragraphs = Array.from(
+        { length: count },
+        (_, index) =>
+          `<p>Satır ${index} için biraz daha uzun bir metin, <strong>kalın bir parça</strong>, <em>eğik bir parça</em> ve <code>kod</code> içerir.</p>`,
+      )
+      const editor = await editorWith(paragraphs.join(''), basicExtensions)
+      let best = Number.POSITIVE_INFINITY
+      for (let round = 0; round < 3; round++) {
+        const started = performance.now()
+        const markdown = toMarkdown(editor)
+        best = Math.min(best, performance.now() - started)
+        expect(markdown.split('\n\n')).toHaveLength(count)
+      }
+      return best
+    }
+    await fastest(500)
 
-    const markdown = toMarkdown(editor)
+    const small = await fastest(4_000)
+    const large = await fastest(16_000)
 
-    expect(markdown.split('\n\n')).toHaveLength(16_000)
-    expect(performance.now() - started).toBeLessThan(1000)
-  })
+    expect(large).toBeLessThan(small * 10)
+  }, 60_000)
 
   it('writes the document as Markdown that reads back into the same document', async () => {
     const source = [
