@@ -1,0 +1,129 @@
+---
+key: code
+title: Kod blokları
+description: Dil seçicili kod blokları, varsayılan dil listesi ve Shiki ile isteğe bağlı sözdizimi renklendirme; CSP için WebAssembly'siz kurulum.
+updated: 2026-11-01
+faq:
+  - q: Renkler kaydedilen HTML'e girer mi?
+    a: Hayır. Renklendirme yalnızca editör içinde gösterilir. Kaydedilen HTML dil bilgisini taşır, renkleri taşımaz.
+  - q: Listede olmayan bir dil ne olur?
+    a: Yapıştırılan ya da yüklenen içerikteki geçerli bir dil adı korunur ve dil seçicide kendi adıyla görünür. Listeyi languages seçeneğiyle de değiştirebilirsiniz.
+  - q: Renklendirme olmadan kod bloğu kullanabilir miyim?
+    a: Evet. CodeHighlight isteğe bağlıdır. Tek betikli kurulumdaki kod bloğu da renklendiricisiz gelir.
+---
+
+`@viveeditor/ext-code-block` dil seçicili kod blokları ekler. Sözdizimi renklendirme isteğe bağlıdır: `CodeHighlight` sizin verdiğiniz renklendiriciyi yalnızca sayfada kod olduğunda yükler ve renkler kaydedilen HTML'e hiç girmez. Bu sayfa kod bloğunu, dil listesini ve Shiki ile renklendirmeyi anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CodeBlock } from '@viveeditor/ext-code-block'
+import { CodeHighlight, shikiHighlighter } from '@viveeditor/ext-code-block/highlight'
+import '@viveeditor/ext-code-block/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    CodeBlock.configure({ languageLabel: 'Dil', plainTextLabel: 'Düz metin' }),
+    CodeHighlight.configure({ highlighter: shikiHighlighter(() => import('shiki')) }),
+  ],
+})
+```
+
+Tek betikli kurulumda kod bloğu renklendiricisiz olarak zaten yüklüdür.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `languages` | `DEFAULT_LANGUAGES` | Dil seçicideki diller. |
+| `languageLabel` | `'Language'` | Dil seçicinin erişilebilir adı. |
+| `plainTextLabel` | `'Plain text'` | Dilsiz blok için seçenek adı. |
+| `tabSize` | `2` | <kbd>Tab</kbd> tuşunun eklediği boşluk sayısı. |
+
+## Kod bloğu eklemek
+
+- Satır başında üç ters tırnak ve boşluk yazın. Dili hemen belirtmek için ters tırnakların ardından dil adını yazın, örneğin `ts`, sonra boşluk.
+- <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd> (Mac'te <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>C</kbd>) bloğu açıp kapatır.
+- Blok menüsünden ya da `/` menüsünden "Kod bloğu" seçin.
+
+Birden fazla paragraf seçiliyken kod bloğu açarsanız satırlar tek bir blokta birleşir. Kod bloğunu kapatınca her satır ayrı bir paragraf olur.
+
+## Dil seçici
+
+Her bloğun üst köşesinde bir dil seçici vardır. İlk seçenek "Düz metin", ardından `languages` listesi gelir. Listede olmayan geçerli bir dil adı (örneğin yapıştırılan içerikten gelen) korunur ve seçicide kendi adıyla görünür.
+
+Dil adı harf, rakam ve `+ # . -` karakterlerinden oluşur, en fazla 32 karakterdir ve küçük harfe çevrilir. Kaydedilen HTML dili iki yerde taşır:
+
+```html
+<pre data-language="typescript"><code class="language-typescript">const a = 1</code></pre>
+```
+
+İçerik yüklenirken dil `data-language` özniteliğinden ya da `language-` veya `lang-` ile başlayan sınıftan okunur.
+
+### Varsayılan diller
+
+`DEFAULT_LANGUAGES` şu 19 dili içerir: JavaScript, TypeScript, HTML, CSS, JSON, Python, PHP, Java, Kotlin, Swift, C#, C++, Go, Rust, Ruby, SQL, Bash, YAML ve Markdown. Değerleri `javascript`, `typescript`, `html`, `css`, `json`, `python`, `php`, `java`, `kotlin`, `swift`, `csharp`, `cpp`, `go`, `rust`, `ruby`, `sql`, `bash`, `yaml` ve `markdown` şeklindedir.
+
+Listeye dil eklemek için:
+
+```ts
+import { CodeBlock, DEFAULT_LANGUAGES } from '@viveeditor/ext-code-block'
+
+const codeBlock = CodeBlock.configure({
+  languages: [...DEFAULT_LANGUAGES, { value: 'dart', label: 'Dart' }],
+})
+```
+
+## Kod bloğunda klavye
+
+- <kbd>Tab</kbd> imlecin bulunduğu yere `tabSize` kadar boşluk ekler. Birden fazla satır seçiliyse her satırı içeri alır.
+- <kbd>Shift</kbd>+<kbd>Tab</kbd> satır başındaki boşlukları geri alır.
+- <kbd>Enter</kbd> blok içinde yeni satır açar. Bloğun sonunda art arda üç kez <kbd>Enter</kbd> tuşuna basarsanız sondaki boş satırlar silinir ve yeni bir paragrafa geçersiniz.
+- Boş bir blokta <kbd>Backspace</kbd> bloğu paragrafa çevirir.
+- <kbd>Esc</kbd> ve ardından <kbd>Tab</kbd> odağı editörden çıkarır.
+
+Komutlar: `toggleCodeBlock(language)`, `setCodeBlockLanguage(language)`. `editor.query.codeBlockLanguage()` imlecin bulunduğu bloğun dilini döndürür.
+
+## Sözdizimi renklendirme
+
+`CodeHighlight` yalnızca dili seçilmiş blokları renklendirir. Renklendiriciyi ilk kez sayfada böyle bir blok olduğunda yükler, sonuçları önbellekte tutar ve renkleri kaydedilen HTML'e değil yalnızca editörün görünümüne uygular.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `highlighter` | `null` | Renklendirici fonksiyon. Verilmezse renklendirme yapılmaz. |
+| `delay` | `120` | Yazmaya ara verdikten kaç milisaniye sonra renklendirileceği. |
+| `cacheSize` | `200` | Önbellekte tutulan blok sayısı. |
+
+`shikiHighlighter(load, options)` [Shiki](https://shiki.style) için hazır bir köprüdür. Varsayılan temalar `github-light-default` ve `github-dark-default` olur; başka temalar için `{ themes: { light, dark } }` verin. Renkler arayüzün açık ve koyu temasını izler. Shiki bir dili tanımazsa ya da hata verirse o blok renksiz kalır.
+
+Kendi renklendiricinizi de yazabilirsiniz: `(code, language)` alan ve `{ from, to, style }` parçaları döndüren bir fonksiyon yeterlidir.
+
+### CSP WebAssembly'e izin vermiyorsa
+
+Shiki'nin varsayılan düzenli ifade motoru WebAssembly kullanır. Sayfanızın İçerik Güvenliği Politikası WebAssembly çalıştırmaya izin vermiyorsa Shiki'yi JavaScript düzenli ifade motoruyla kurun ve `shikiHighlighter` fonksiyonuna verin. `shikiHighlighter` yüklenen nesneden yalnızca `codeToTokens` yöntemini bekler:
+
+```ts
+import { CodeHighlight, shikiHighlighter } from '@viveeditor/ext-code-block/highlight'
+
+const loadShiki = async () => {
+  const { createHighlighterCore } = await import('shiki/core')
+  const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript')
+  return createHighlighterCore({
+    themes: [
+      import('shiki/themes/github-light-default.mjs'),
+      import('shiki/themes/github-dark-default.mjs'),
+    ],
+    langs: [import('shiki/langs/javascript.mjs'), import('shiki/langs/typescript.mjs')],
+    engine: createJavaScriptRegexEngine(),
+  })
+}
+
+const highlight = CodeHighlight.configure({ highlighter: shikiHighlighter(loadShiki) })
+```
+
+Bu kurulumda yalnızca `langs` içinde yüklediğiniz diller renklenir; diğerleri renksiz kalır. Temalar `shikiHighlighter` varsayılanlarıyla aynı olmalı ya da `themes` seçeneğiyle eşleşmelidir.
+
+## Dosyalarda kod blokları
+
+Markdown'a kaydederken kod blokları dil adıyla birlikte çitli blok olarak yazılır ve okunur. Word dosyasında kod korunur, dil bilgisi korunmaz. Ayrıntılar [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.
+
+Yayın sayfasında kodu renkli göstermek istiyorsanız orada ayrıca bir renklendirici çalıştırın; dil bilgisi `class` özniteliğinde durur.

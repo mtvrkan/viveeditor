@@ -1,0 +1,56 @@
+.vive-content .tableWrapper {
+  margin: 0 0 0.9em;
+  overflow-x: auto;
+}
+
+.vive-content table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.vive-content td,
+.vive-content th {
+  position: relative;
+  padding: 6px 10px;
+  border: 1px solid var(--ve-border, hsl(220 13% 85%));
+  text-align: start;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.vive-content th {
+  background: var(--ve-muted, hsl(220 14% 95%));
+  font-weight: 600;
+}
+
+.vive-content :is(td, th) > :first-child {
+  margin-top: 0;
+}
+
+.vive-content :is(td, th) > :last-child {
+  margin-bottom: 0;
+}
+
+.vive-content .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklab, var(--ve-primary, hsl(202 80% 36%)) 16%, transparent);
+  content: "";
+  pointer-events: none;
+}
+
+.vive-content .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -1px;
+  width: 4px;
+  background: var(--ve-primary, hsl(202 80% 36%));
+  pointer-events: none;
+}
+
+.vive-content.resize-cursor,
+.resize-cursor .vive-content {
+  cursor: col-resize;
+}

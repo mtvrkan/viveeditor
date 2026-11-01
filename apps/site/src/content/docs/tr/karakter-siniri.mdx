@@ -1,0 +1,73 @@
+---
+key: characterCount
+title: Karakter sınırı
+description: Karakter sayısını izleyin ve bir sınır koyun; yazma sınırda durur, yapıştırılan metin kısaltılır, araç çubuğu kalan alanı gösterir.
+updated: 2026-11-01
+faq:
+  - q: Tek betikli kurulumda karakter sınırı var mı?
+    a: Hayır. Karakter sayacı eklentisi tek betikli kuruluma dahil değildir; npm paketiyle eklenir.
+  - q: Sınırı aşan bir metni yüklersem ne olur?
+    a: Sizin yüklediğiniz içerik kesilmez. Yazar metni silebilir ve düzenleyebilir, ama karakter sayısını artıran değişiklikler sınırın altına inene kadar kabul edilmez.
+  - q: Boşluklar sayılır mı?
+    a: Evet. Metindeki her karakter, boşluklar dahil, sayılır. Görseller, videolar ve satır sonları sayılmaz.
+---
+
+`@viveeditor/ext-character-count` belgedeki karakterleri sayar ve isteğe bağlı bir sınır koyar. Sınıra gelince yazma durur, yapıştırılan metin kalan alana sığacak kadar kısaltılır ve silmek her zaman çalışır. Araç çubuğundaki sayaç kullanılan ve izin verilen karakteri gösterir. Bu sayfa eklentiyi kurmayı, nelerin sayıldığını ve arayüzün sınırı nasıl gösterdiğini anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CharacterCount } from '@viveeditor/ext-character-count'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [CharacterCount.configure({ limit: 280 })],
+})
+```
+
+Eklentinin tek seçeneği `limit`. Varsayılan `null` değeri sınır koymaz, yalnızca sayar. Sınır pozitif bir tam sayı olmalıdır; başka bir değer sınır yok sayılır.
+
+Karakter sayacı tek betikli kurulumda yoktur. Hazır eklenti listesini korumak için çerçeve bileşenlerinde ya da `mountEditor` ile listeye ekleyin:
+
+```ts
+import { CharacterCount } from '@viveeditor/ext-character-count'
+import { classicPreset, mountEditor } from 'viveeditor'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  extensions: [...classicPreset('tr'), CharacterCount.configure({ limit: 280 })],
+  locale: 'tr',
+})
+```
+
+## Sınır nasıl çalışır
+
+- Yazma sınırda durur.
+- Yapıştırılan ya da sürüklenip bırakılan metin kalan alana sığacak kadar kısaltılır.
+- Silmek her zaman çalışır. Karakter sayısını artırmayan her değişiklik kabul edilir.
+- `content` ya da `setContent` ile sizin yüklediğiniz içerik kesilmez. Bu içerik sınırı aşıyorsa yazar sayıyı artıran değişiklikleri ancak sınırın altına indikten sonra yapabilir.
+
+Tarayıcıdaki sınır yazara yardım eder, ama bir güvenlik önlemi değildir. Uzunluğu sunucuda da denetleyin.
+
+## Neler sayılır
+
+- Metindeki her karakter, boşluklar dahil.
+- Türkçe harfler ve çoğu emoji birer karakter sayılır. Sayım Unicode kod noktasına göre yapıldığı için birkaç parçadan oluşan emoji (ten rengi ya da aile emojileri gibi) parça sayısı kadar sayılır.
+- Görseller, videolar, satır sonları ve paragraf geçişleri sayılmaz.
+
+## Araç çubuğundaki sayaç
+
+Sınır tanımlıysa araç çubuğunun sonundaki sayaç kelime sayısı yerine `120/280 karakter` biçiminde kullanılan ve izin verilen karakteri gösterir. Sayılar arayüz diline göre biçimlenir.
+
+- Sınırın yüzde 90'ına gelince sayaç uyarı rengine döner.
+- Sınıra ulaşınca tehlike rengine döner ve ekran okuyucular "Karakter sınırına ulaşıldı" duyurusunu okur.
+
+Sayaca tıklamak metin ölçümü panelini açar: okunabilirlik, kelime ve cümle sayısı, okuma süresi. Ayrıntılar [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
+
+## Sayıyı kodla okumak
+
+```ts
+const used = editor.query.characterCount()
+const limit = editor.query.characterLimit()
+```
+
+`characterLimit()` sınır yoksa `null` döner. Paket, bir ProseMirror düğümündeki karakterleri aynı kurallarla sayan `countCharacters(node)` fonksiyonunu da dışa aktarır.

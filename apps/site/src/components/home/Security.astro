@@ -1,0 +1,27 @@
+---
+import type { Locale } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import { ANCHORS } from '../../i18n/ui'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const security = HOME[lang].security
+---
+<section class="sec" id={ANCHORS[lang].security} aria-labelledby="securityTitle">
+  <div class="wrap">
+    <header class="sec-head">
+      <p class="eyebrow">{security.eyebrow}</p>
+      <h2 id="securityTitle" class="title">{security.heading} <em>{security.headingEm}</em></h2>
+      <p class="lead">{security.lead}</p>
+    </header>
+    <ul class="points">
+      {security.points.map((point) => (
+        <li>
+          <svg class="ic" aria-hidden="true"><use href="#i-check"/></svg>
+          <h3>{point.title}</h3>
+          <p>{point.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

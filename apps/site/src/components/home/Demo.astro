@@ -1,0 +1,44 @@
+---
+import type { Locale } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import { ANCHORS } from '../../i18n/ui'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const demo = HOME[lang].demo
+const config = JSON.stringify({
+  locale: lang,
+  label: demo.label,
+  fileName: demo.fileName,
+  content: demo.content,
+  people: demo.people,
+  templates: demo.templates,
+  showHtml: demo.showHtml,
+  hideHtml: demo.hideHtml,
+})
+---
+<section class="sec demo-sec" id={ANCHORS[lang].demo} aria-labelledby="demoTitle">
+  <div class="wrap">
+    <header class="sec-head">
+      <p class="eyebrow">{demo.eyebrow}</p>
+      <h2 id="demoTitle" class="title">{demo.heading} <em>{demo.headingEm}</em></h2>
+      <p class="lead">{demo.lead}</p>
+    </header>
+    <div class="demo glass" data-demo data-state="waiting" data-config={config}>
+      <div class="demo-host" data-demo-host></div>
+      <div class="demo-status" data-demo-status role="status" aria-live="polite">
+        <span data-when="waiting">{demo.waiting}</span>
+        <span data-when="loading">{demo.loading}</span>
+        <span data-when="error">{demo.failed} <button class="btn btn-ghost" type="button" data-demo-retry>{demo.retry}</button></span>
+      </div>
+      <div class="demo-bar">
+        <p class="demo-note"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>{demo.note}</p>
+        <div class="demo-actions">
+          <button class="btn btn-ghost" type="button" data-demo-html aria-expanded="false" aria-controls="demoHtml" disabled>{demo.showHtml}</button>
+          <button class="btn btn-ghost" type="button" data-demo-reset disabled><svg class="ic" aria-hidden="true"><use href="#i-redo"/></svg>{demo.reset}</button>
+        </div>
+      </div>
+      <pre class="demo-html" id="demoHtml" tabindex="0" aria-label={demo.htmlLabel} hidden><code data-demo-output></code></pre>
+    </div>
+  </div>
+</section>

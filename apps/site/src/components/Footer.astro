@@ -1,0 +1,51 @@
+---
+import {
+  docsIndexPath,
+  FAMILY_URL,
+  homePath,
+  ISSUES_URL,
+  type Locale,
+  NPM_URL,
+  REPO_URL,
+} from '../i18n'
+import { ANCHORS, UI } from '../i18n/ui'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const f = UI[lang].foot
+const a = ANCHORS[lang]
+const home = homePath(lang)
+const product = [
+  { href: `${home}#${a.demo}`, label: f.demo },
+  { href: `${home}#${a.features}`, label: f.features },
+  { href: `${home}#${a.install}`, label: f.install },
+  { href: `${home}#${a.security}`, label: f.security },
+]
+const source = [
+  { href: REPO_URL, label: 'GitHub' },
+  { href: NPM_URL, label: f.npm },
+  { href: `${REPO_URL}/blob/main/CHANGELOG.md`, label: f.changelog },
+  { href: `${REPO_URL}/blob/main/LICENSE`, label: f.license },
+]
+const help = [
+  { href: docsIndexPath(lang), label: f.docs },
+  { href: ISSUES_URL, label: f.report },
+  { href: `${REPO_URL}/security/policy`, label: f.securityPolicy },
+  { href: FAMILY_URL, label: f.family },
+]
+---
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href={home} aria-label={UI[lang].homeLabel}><svg aria-hidden="true"><use href="#logo"/></svg><span>viveEditor</span></a>
+        <p>{f.blurb}</p>
+      </div>
+      <div><h2>{f.product}</h2><ul>{product.map((l) => <li><a class="ul" href={l.href}>{l.label}</a></li>)}</ul></div>
+      <div><h2>{f.source}</h2><ul>{source.map((l) => <li><a class="ul" href={l.href}>{l.label}</a></li>)}</ul></div>
+      <div><h2>{f.help}</h2><ul>{help.map((l) => <li><a class="ul" href={l.href}>{l.label}</a></li>)}</ul></div>
+    </div>
+  </div>
+  <p class="wordmark" aria-hidden="true">viveEditor</p>
+  <div class="wrap foot-bottom"><span>{f.copyright}</span><ul class="foot-tags" aria-label={f.tagsLabel}><li><span class="dot-ok"></span>MIT</li><li>{f.free}</li><li>{f.noWebfonts}</li><li>{f.noTracking}</li></ul></div>
+</footer>

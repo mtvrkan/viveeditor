@@ -1,0 +1,67 @@
+---
+import { absoluteUrl, homePath, type Locale, REPO_URL, SITE_URL } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import Base from '../../layouts/Base.astro'
+import { INLINE_SCRIPTS } from '../../seo/inlineScripts'
+import '../../styles/home.css'
+import Cta from './Cta.astro'
+import Demo from './Demo.astro'
+import Features from './Features.astro'
+import Hero from './Hero.astro'
+import Install from './Install.astro'
+import Security from './Security.astro'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const copy = HOME[lang]
+const path = homePath(lang)
+const orgId = `${SITE_URL}/#organization`
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': orgId,
+    name: 'viveEditor',
+    url: SITE_URL,
+    logo: absoluteUrl('/icon-512.png'),
+    sameAs: [REPO_URL],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    name: 'viveEditor',
+    url: absoluteUrl(path),
+    inLanguage: lang,
+    publisher: { '@id': orgId },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareSourceCode',
+    name: 'viveEditor',
+    description: copy.description,
+    url: absoluteUrl(path),
+    codeRepository: REPO_URL,
+    programmingLanguage: ['TypeScript', 'PHP'],
+    runtimePlatform: 'Web browser',
+    license: 'https://opensource.org/licenses/MIT',
+    isAccessibleForFree: true,
+    image: absoluteUrl('/icon-512.png'),
+    publisher: { '@id': orgId },
+  },
+]
+---
+<Base lang={lang} title={copy.title} description={copy.description} path={path} alternates={{ tr: homePath("tr"), en: homePath("en") }} jsonLd={jsonLd} hero>
+  {lang === "en" && <script is:inline slot="head" set:html={INLINE_SCRIPTS.langRedirect} />}
+  <main id="main">
+    <Hero lang={lang} />
+    <Demo lang={lang} />
+    <Features lang={lang} />
+    <Install lang={lang} />
+    <Security lang={lang} />
+    <Cta lang={lang} />
+  </main>
+  <script>
+    import "../../scripts/home";
+  </script>
+</Base>

@@ -1,0 +1,90 @@
+{
+  "name": "@viveeditor/docx",
+  "version": "0.0.0",
+  "description": "Word (.docx) import and export for viveEditor, with limits for untrusted files.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "docx",
+    "word",
+    "import",
+    "export"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/docx#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/docx"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "size": "size-limit"
+  },
+  "peerDependencies": {
+    "@viveeditor/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "@viveeditor/core": "workspace:*",
+    "@viveeditor/ext-basic": "workspace:*",
+    "@viveeditor/ext-code-block": "workspace:*",
+    "@viveeditor/ext-embed": "workspace:*",
+    "@viveeditor/ext-footnote": "workspace:*",
+    "@viveeditor/ext-list": "workspace:*",
+    "@viveeditor/ext-math": "workspace:*",
+    "@viveeditor/ext-mention": "workspace:*",
+    "@viveeditor/ext-table": "workspace:*",
+    "@viveeditor/ext-task-list": "workspace:*",
+    "fast-check": "^4.10.2",
+    "jsdom": "^30.1.3",
+    "size-limit": "^14.3.0",
+    "tsdown": "0.23.1",
+    "vitest": "^5.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "@viveeditor/docx",
+      "path": "dist/index.js",
+      "ignore": [
+        "@viveeditor/core",
+        "@viveeditor/ext-format",
+        "@viveeditor/ext-image",
+        "prosemirror-model"
+      ],
+      "limit": "16.5 KB"
+    }
+  ],
+  "dependencies": {
+    "@viveeditor/ext-format": "workspace:^",
+    "@viveeditor/ext-image": "workspace:^",
+    "fflate": "0.8.3",
+    "prosemirror-model": "^1.25.12"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

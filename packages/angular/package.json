@@ -1,0 +1,74 @@
+{
+  "name": "@viveeditor/angular",
+  "version": "0.0.0",
+  "description": "Angular component for viveEditor with ngModel and reactive forms, toolbar and every feature included.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "angular",
+    "ngmodel",
+    "reactive-forms"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/angular#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/angular"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "pnpm build && vitest run",
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "viveeditor": "workspace:^"
+  },
+  "devDependencies": {
+    "@angular/common": "22.2.3",
+    "@angular/compiler": "22.2.3",
+    "@angular/compiler-cli": "22.2.3",
+    "@angular/core": "22.2.3",
+    "@angular/forms": "22.2.3",
+    "@angular/platform-browser": "22.2.3",
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "jsdom": "^30.1.3",
+    "ng-packagr": "^22.2.5",
+    "rxjs": "^7.8.2",
+    "size-limit": "^14.3.0",
+    "tslib": "^2.8.1",
+    "vitest": "^5.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "@viveeditor/angular",
+      "path": "dist/fesm2022/viveeditor-angular.mjs",
+      "ignore": [
+        "viveeditor",
+        "@angular/core",
+        "@angular/forms"
+      ],
+      "limit": "2 KB"
+    }
+  ],
+  "peerDependencies": {
+    "@angular/core": "^21.0.0 || ^22.0.0",
+    "@angular/forms": "^21.0.0 || ^22.0.0"
+  },
+  "publishConfig": {
+    "directory": "dist",
+    "access": "public",
+    "provenance": true
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

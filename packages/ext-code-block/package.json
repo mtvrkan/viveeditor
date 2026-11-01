@@ -1,0 +1,103 @@
+{
+  "name": "@viveeditor/ext-code-block",
+  "version": "0.0.0",
+  "description": "Code block extension for viveEditor, with optional lazy syntax highlighting.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "code-block",
+    "syntax-highlighting",
+    "shiki"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/ext-code-block#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/ext-code-block"
+  },
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./highlight": {
+      "types": "./dist/highlight.d.ts",
+      "import": "./dist/highlight.js"
+    },
+    "./style.css": "./style.css"
+  },
+  "files": [
+    "dist",
+    "style.css"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "size": "size-limit"
+  },
+  "peerDependencies": {
+    "@viveeditor/core": "workspace:^"
+  },
+  "dependencies": {
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-model": "^1.25.12",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.42.7"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "@viveeditor/core": "workspace:*",
+    "jsdom": "^30.1.3",
+    "size-limit": "^14.3.0",
+    "tsdown": "0.23.1",
+    "vitest": "^5.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "@viveeditor/ext-code-block",
+      "path": "dist/index.js",
+      "ignore": [
+        "@viveeditor/core",
+        "prosemirror-commands",
+        "prosemirror-inputrules",
+        "prosemirror-model",
+        "prosemirror-state",
+        "prosemirror-view"
+      ],
+      "limit": "3 KB"
+    },
+    {
+      "name": "@viveeditor/ext-code-block/highlight",
+      "path": "dist/highlight.js",
+      "ignore": [
+        "@viveeditor/core",
+        "prosemirror-commands",
+        "prosemirror-inputrules",
+        "prosemirror-model",
+        "prosemirror-state",
+        "prosemirror-view"
+      ],
+      "limit": "2 KB"
+    }
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

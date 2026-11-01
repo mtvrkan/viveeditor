@@ -1,0 +1,130 @@
+---
+key: sanitize
+title: Sunucuda temizleme
+description: Gönderilen HTML'i Node için @viveeditor/sanitize, PHP 8.4+ için viveeditor/sanitizer ile kaydederken ve gösterirken temizleyin.
+updated: 2026-11-01
+faq:
+  - q: Editör zaten temiz HTML üretiyor; sunucuda neden yeniden temizlemeliyim?
+    a: Çünkü herkes editörü kullanmadan sunucunuza istediği HTML'i gönderebilir. Tarayıcı bir güvenlik sınırı değildir.
+  - q: Node ve PHP temizleyicileri aynı sonucu verir mi?
+    a: Evet. Tek bir izin listesini ve tek bir test derlemini paylaşırlar, aynı çıktıyı verirler.
+  - q: HTML çok büyük olursa ne olur?
+    a: Temizleyici HTML'i kesmek yerine TOO_LARGE hatası fırlatır. Varsayılan sınır 2 MB'tır.
+---
+
+Editör yalnızca bilinen bir HTML kümesi üretir, ama herkes sunucunuza istediği HTML'i gönderebilir. Bu yüzden içeriği saklamadan ya da göstermeden önce sunucuda temizleyin. Node için `@viveeditor/sanitize` ve PHP 8.4+ için `viveeditor/sanitizer`, editörün ürettiğini olduğu gibi tutar ve geri kalan her şeyi atar. İkisi tek bir izin listesini ve tek bir test derlemini paylaşır, aynı çıktıyı verir.
+
+## Kurulum
+
+Node.js 20.19 ya da daha yeni sürüm için:
+
+```sh
+npm install @viveeditor/sanitize
+```
+
+PHP 8.4 ya da daha yeni sürüm için; `dom` ve `mbstring` eklentileri dışında bağımlılığı yoktur:
+
+```sh
+composer require viveeditor/sanitizer
+```
+
+Laravel kullanıyorsanız PHP temizleyicisini de getiren [viveeditor/laravel](/dokumantasyon/laravel/) paketini kullanın.
+
+## HTML'i temizleme
+
+```ts
+import { sanitizeHtml } from '@viveeditor/sanitize'
+
+const clean = sanitizeHtml(request.body.html, { embeds: true })
+```
+
+```php
+use Viveeditor\Sanitizer\Sanitizer;
+
+$clean = Sanitizer::sanitize($html, ['embeds' => true]);
+```
+
+Her öğe ve öznitelik tam bir HTML5 ayrıştırıcısıyla (Node'da `parse5`, PHP'de `Dom\HTMLDocument`) yeniden kurulur; böylece çıktı her tarayıcıda aynı okunur. İki kez temizlemek aynı sonucu verir.
+
+## Seçenekler
+
+| Seçenek | Varsayılan | Etkisi |
+| --- | --- | --- |
+| `embeds` | `false` | Video ve ses yerleştirmelerini tutar. Oynatıcılar kopyalanmaz, sağlayıcı ve kimlikten yeniden kurulur. |
+| `allowBase64` | `false` | `data:` adresi olarak saklanan görsellere (PNG, JPEG, GIF, WebP, AVIF) izin verir. |
+| `allowRelativeImages` | `false` | Göreli görsel adreslerine izin verir. |
+| `maxBytes` | 2 MB | Bundan büyük HTML `TOO_LARGE` hatası fırlatır. |
+
+`allowRelativeImages`'ı yalnızca gerçekten gerekiyorsa açın: göreli bir görsel adresi, her okurun tarayıcısının kendi sitenize bir GET isteği göndermesine yol açar; bir yazar bunu bir şeyi değiştiren bir adrese yöneltebilir.
+
+## Hatalar
+
+Temizleyici HTML'i hiçbir zaman yarıda kesmez. Girdiyi temizleyemediğinde hata fırlatır:
+
+| Kod | Ne zaman |
+| --- | --- |
+| `TOO_LARGE` | HTML, `maxBytes` değerinden büyük. |
+| `TOO_COMPLEX` | Yapı, ayrıştırıcıyı yavaşlatacak ya da çok bellek harcatacak türden: bir etikette 64'ten fazla öznitelik, 512 düzeyden derin iç içe geçme ya da girdideki etiket sayısından çok daha fazla öğe. Editör böyle HTML yazmaz. |
+
+Node'da hata, `code` alanı taşıyan bir `SanitizeError`'dır:
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+export function cleanArticle(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+PHP'de ise `reason` değeri `SanitizeException::TOO_LARGE` ya da `SanitizeException::TOO_COMPLEX` olan bir `SanitizeException`'dır:
+
+```php
+use Viveeditor\Sanitizer\SanitizeException;
+use Viveeditor\Sanitizer\Sanitizer;
+
+try {
+    $clean = Sanitizer::sanitize($html);
+} catch (SanitizeException $error) {
+    $clean = null;
+    $reason = $error->reason;
+}
+```
+
+## Neler korunur
+
+- **Bağlantılar** `http`, `https`, `mailto`, `tel` ve göreli adresleri tutar ve her zaman `rel="noopener noreferrer nofollow"` alır.
+- **Görseller** `https` adresi ister. `allowBase64` ve `allowRelativeImages` bunu genişletir.
+- **Yerleştirmeler** `embeds: true` verilmedikçe kaldırılır.
+- **`style`** yalnızca metin hizalamasını, metin ve vurgu rengini ve tablo genişliklerini tutar.
+- **`id`, `name`, `form` ve olay işleyicileri** hiçbir zaman geçmez.
+- **Betikler, stiller, çerçeveler, SVG ve benzeri öğeler** içerikleriyle birlikte kaldırılır.
+- **Bahsetmeler, formüller ve dipnotlar** tam olarak editörün yazdığı biçimde tutulur. Kimliği ya da formülü denetimden geçmeyen, veya bir bağlantının ya da dipnotun içine konmuş bahsetme ve formüller düz metne indirilir. Dipnotlar yalnızca kalın, italik ve bağlantı tutar.
+
+## PHP bellek notu
+
+PHP'de ayrıştırıcı içeriden durdurulamaz; bu yüzden bazı kısa ve kötü niyetli girdiler (birkaç on KB kapatılmamış biçim etiketi) denetim çalışmadan önce PHP'nin `memory_limit` sınırına ulaşabilir. PHP o isteği ölümcül bir hatayla bitirir; bu güvenlidir ama temiz bir istisna değildir.
+
+Temizleme yapan uç noktalarda `memory_limit` ve `max_execution_time` değerlerini olağan düzeyde tutun ve istek gövdesinin boyutunu orada sınırlayın.
+
+## Ne zaman temizlenmeli
+
+<Steps>
+1. **Kaydederken.** Gönderilen HTML'i saklamadan önce temizleyin.
+2. **Gösterirken.** Saklanan HTML'i de bir temizleme yardımcısıyla gösterin (Laravel'de `@viveHtml`). Böylece temizlemeyi eklemeden önce ya da formlarınızın dışında yazılmış kayıtlar da güvende kalır.
+</Steps>
+
+<Callout type="warn" title="Ham HTML basmayın">
+Saklanan HTML'i, kaydederken bir kez temizlenmiş olsa bile, temizlemeden ve kaçışsız olarak sayfaya basmayın.
+</Callout>
+
+## İlgili sayfalar
+
+- [Laravel](/dokumantasyon/laravel/)
+- [Güvenlik ve CSP](/dokumantasyon/guvenlik-ve-csp/)
+- [Görseller ve yükleme](/dokumantasyon/gorseller-ve-yukleme/)
+- [Video](/dokumantasyon/video/)

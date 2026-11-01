@@ -1,0 +1,47 @@
+---
+key: faq
+title: Frequently asked questions
+description: Short answers about viveEditor's licence, setup, frameworks, safety, Word support, languages, extras and versions.
+updated: 2026-11-01
+faq:
+  - q: "Is viveEditor free?"
+    a: "Yes. viveEditor is open source under the MIT licence. Image uploads, tables, embeds and Word import and export are all included; there is no paid tier."
+  - q: "Do I need a build step?"
+    a: "No. One stylesheet, one script and a textarea with the data-editor attribute are enough. If you use a bundler, install the viveeditor package from npm instead."
+  - q: "Which frameworks are supported?"
+    a: "There are components for React 18 and 19, Vue 3.5, Svelte 5 and Angular 21 and 22. The vive-editor custom element works as a form field on any other page."
+  - q: "Can I store the HTML the editor sends as it is?"
+    a: "No. The editor only produces a known set of HTML, but anyone can post any HTML to your server. Clean it there with @viveeditor/sanitize for Node or viveeditor/sanitizer for PHP before you store or show it."
+  - q: "Can writers upload images?"
+    a: "Yes, once you give the Image extension your own upload function. The editor checks every file and address, but your server must still re-validate and re-encode each upload."
+  - q: "Does it work with Word?"
+    a: "Yes. Paste from Word, Google Docs and LibreOffice keeps real nested lists, and the File menu opens and saves .docx files. The older .doc, .odt and .rtf formats are not supported."
+  - q: "Which languages does the interface speak?"
+    a: "Turkish and English. Choose one with the locale option; without it, the editor follows the page's lang attribute and then the browser language."
+  - q: "Are mentions, emoji, formulas and the AI assistant in the CDN script?"
+    a: "No. Mentions, emoji, formulas, footnotes, templates and the AI assistant ship as npm packages only and plug into the toolbar through @viveeditor/ui/extras."
+  - q: "Does viveEditor send my text to an AI service?"
+    a: "No. viveEditor sends nothing anywhere itself. The AI assistant calls only the provider function you write, which should call your own server."
+  - q: "Is it accessible?"
+    a: "viveEditor targets WCAG 2.2 AA, with full keyboard control and screen reader announcements. Every editor still needs a label from you."
+  - q: "Will an update break my stored content?"
+    a: "No. HTML and JSON saved by any 0.x version stay readable by every later 0.x version. The API itself can still change in a minor version before 1.0."
+  - q: "Is there a Laravel package?"
+    a: "Yes. viveeditor/laravel works with Laravel 12 or newer and PHP 8.4 or newer. It adds a Blade component, serves the editor files from your own site and includes the PHP sanitizer."
+---
+
+These are the questions people ask most often before they add viveEditor to a site. Each answer is short; the linked pages have the details.
+
+## Where to read more
+
+- Setup: [Installation](/en/docs/installation/) and [Your first editor](/en/docs/first-editor/).
+- Frameworks and server rendering: [Frameworks](/en/docs/frameworks/).
+- Safe storage: [Server sanitizing](/en/docs/server-sanitizing/) and [Security and CSP](/en/docs/security-and-csp/).
+- Images: [Images and uploads](/en/docs/images-and-uploads/).
+- Word: [Paste from Office](/en/docs/paste-from-office/) and [Open, save and print](/en/docs/open-save-print/).
+- Extras: [Mentions](/en/docs/mentions/), [Formulas](/en/docs/formulas/) and [AI assistant](/en/docs/ai-assistant/).
+- Keyboard and screen readers: [Accessibility](/en/docs/accessibility/).
+- Updates: [Versioning](/en/docs/versioning/).
+- Something not working: [Troubleshooting](/en/docs/troubleshooting/).
+
+If your question is not here, search the [issues on GitHub](https://github.com/mtvrkan/viveeditor/issues) or open a new one. Report security problems privately, as described on [Security and CSP](/en/docs/security-and-csp/).

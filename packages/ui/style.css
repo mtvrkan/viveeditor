@@ -1,0 +1,1122 @@
+.ve-root {
+  --ve-fg: hsl(222 20% 12%);
+  --ve-card: hsl(0 0% 100%);
+  --ve-muted: hsl(220 14% 94%);
+  --ve-muted-fg: hsl(220 9% 40%);
+  --ve-primary: var(--ve-accent, hsl(202 80% 36%));
+  --ve-accent-bg: color-mix(in oklab, var(--ve-primary) 12%, var(--ve-card));
+  --ve-accent-fg: color-mix(in oklab, var(--ve-primary) 75%, var(--ve-fg));
+  --ve-code-bg: hsl(220 14% 97%);
+  --ve-border: color-mix(in oklab, var(--ve-fg) 10%, transparent);
+  --ve-glass: color-mix(in oklab, var(--ve-card) 90%, transparent);
+  --ve-glass-edge: linear-gradient(
+    135deg,
+    hsl(0 0% 100% / 0.7),
+    hsl(202 90% 55% / 0.34) 35%,
+    hsl(262 70% 60% / 0.26) 70%,
+    hsl(24 90% 58% / 0.2)
+  );
+  --ve-highlight: hsl(0 0% 100% / 0.7);
+  --ve-shadow: 0 12px 32px -14px hsl(222 40% 10% / 0.45), 0 1px 2px hsl(222 30% 10% / 0.08);
+  --ve-shadow-card: 0 1px 2px hsl(222 30% 10% / 0.04), 0 10px 30px -14px hsl(222 30% 10% / 0.16);
+  --ve-aurora-a: hsl(202 90% 60% / 0.2);
+  --ve-aurora-b: hsl(262 70% 65% / 0.16);
+  --ve-check: hsl(174 72% 26%);
+  --ve-check-soft: hsl(174 55% 91%);
+  --ve-warn: hsl(38 92% 28%);
+  --ve-warn-soft: hsl(40 95% 90%);
+  --ve-danger: hsl(0 72% 42%);
+  --ve-quote: hsl(262 52% 48%);
+  --ve-selection: hsl(202 85% 88%);
+  --ve-mark: hsl(51 100% 83%);
+  --ve-on-light: hsl(222 20% 12%);
+  --ve-swatch-any: linear-gradient(
+    90deg,
+    hsl(0 70% 48%),
+    hsl(38 90% 45%) 30%,
+    hsl(145 55% 36%) 55%,
+    hsl(212 78% 46%) 78%,
+    hsl(280 55% 46%)
+  );
+  --ve-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --ve-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --ve-target: 36px;
+  position: relative;
+  color: var(--ve-fg);
+  background: var(--ve-card);
+  border: 1px solid var(--ve-border);
+  border-radius: 18px;
+  box-shadow: var(--ve-shadow-card);
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    border-color 120ms ease-out,
+    box-shadow 120ms ease-out;
+}
+
+.ve-root[data-theme="dark"] {
+  --ve-fg: hsl(220 12% 89%);
+  --ve-card: hsl(224 14% 12%);
+  --ve-muted: hsl(224 12% 18%);
+  --ve-code-bg: hsl(224 13% 15%);
+  --ve-muted-fg: hsl(220 9% 66%);
+  --ve-primary: var(--ve-accent, hsl(202 70% 60%));
+  --ve-border: color-mix(in oklab, hsl(220 14% 92%) 12%, transparent);
+  --ve-glass-edge: linear-gradient(
+    135deg,
+    hsl(0 0% 100% / 0.12),
+    hsl(202 60% 62% / 0.14) 35%,
+    hsl(262 45% 68% / 0.12) 70%,
+    hsl(24 60% 62% / 0.06)
+  );
+  --ve-highlight: hsl(0 0% 100% / 0.06);
+  --ve-shadow: 0 16px 40px -16px hsl(0 0% 0% / 0.8), 0 0 0 1px hsl(0 0% 100% / 0.04) inset;
+  --ve-shadow-card: 0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 12px 32px -16px hsl(0 0% 0% / 0.7);
+  --ve-aurora-a: hsl(202 80% 55% / 0.14);
+  --ve-aurora-b: hsl(262 60% 60% / 0.1);
+  --ve-check: hsl(174 55% 58%);
+  --ve-check-soft: hsl(174 30% 18%);
+  --ve-warn: hsl(40 72% 60%);
+  --ve-warn-soft: hsl(40 34% 16%);
+  --ve-danger: hsl(0 72% 68%);
+  --ve-quote: hsl(262 55% 72%);
+  --ve-selection: hsl(202 60% 30%);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ve-root[data-theme="auto"] {
+    --ve-fg: hsl(220 12% 89%);
+    --ve-card: hsl(224 14% 12%);
+    --ve-muted: hsl(224 12% 18%);
+    --ve-code-bg: hsl(224 13% 15%);
+    --ve-muted-fg: hsl(220 9% 66%);
+    --ve-primary: var(--ve-accent, hsl(202 70% 60%));
+    --ve-border: color-mix(in oklab, hsl(220 14% 92%) 12%, transparent);
+    --ve-glass-edge: linear-gradient(
+      135deg,
+      hsl(0 0% 100% / 0.12),
+      hsl(202 60% 62% / 0.14) 35%,
+      hsl(262 45% 68% / 0.12) 70%,
+      hsl(24 60% 62% / 0.06)
+    );
+    --ve-highlight: hsl(0 0% 100% / 0.06);
+    --ve-shadow: 0 16px 40px -16px hsl(0 0% 0% / 0.8), 0 0 0 1px hsl(0 0% 100% / 0.04) inset;
+    --ve-shadow-card: 0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 12px 32px -16px hsl(0 0% 0% / 0.7);
+    --ve-aurora-a: hsl(202 80% 55% / 0.14);
+    --ve-aurora-b: hsl(262 60% 60% / 0.1);
+    --ve-check: hsl(174 55% 58%);
+    --ve-check-soft: hsl(174 30% 18%);
+    --ve-warn: hsl(40 72% 60%);
+    --ve-warn-soft: hsl(40 34% 16%);
+    --ve-danger: hsl(0 72% 68%);
+    --ve-quote: hsl(262 55% 72%);
+    --ve-selection: hsl(202 60% 30%);
+    color-scheme: dark;
+  }
+}
+
+.ve-root[data-size="narrow"] {
+  --ve-target: 44px;
+}
+
+@media (pointer: coarse) {
+  .ve-root {
+    --ve-target: 44px;
+  }
+}
+
+.ve-root:focus-within {
+  border-color: color-mix(in oklab, var(--ve-primary) 45%, transparent);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--ve-primary) 12%, transparent),
+    var(--ve-shadow-card);
+}
+
+.ve-root:has(.vive-content[aria-invalid="true"]) {
+  border-color: var(--ve-danger);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--ve-danger) 14%, transparent),
+    var(--ve-shadow-card);
+}
+
+.ve-root *,
+.ve-root *::before,
+.ve-root *::after {
+  box-sizing: border-box;
+}
+
+.ve-root [hidden] {
+  display: none;
+}
+
+.ve-root .vive-content {
+  min-height: 10em;
+  padding: 24px 28px 16px;
+  font-size: var(--ve-content-size, 1.0625rem);
+  line-height: 1.65;
+  color: var(--ve-fg);
+}
+
+.ve-root[data-size="narrow"] .vive-content {
+  padding: 20px 18px 12px;
+  font-size: var(--ve-content-size, 1rem);
+}
+
+.ve-root[data-source] .vive-content {
+  display: none;
+}
+
+.ve-source {
+  display: block;
+  width: 100%;
+  min-height: 10em;
+  padding: 24px 28px 16px;
+  border: 0;
+  outline: none;
+  resize: vertical;
+  background: transparent;
+  color: var(--ve-fg);
+  font: 0.875rem / 1.6 var(--ve-mono);
+  tab-size: 2;
+}
+
+.ve-root[data-size="narrow"] .ve-source {
+  padding: 20px 18px 12px;
+}
+
+@media (pointer: coarse) {
+  .ve-source,
+  .ve-input {
+    font-size: 16px;
+  }
+}
+
+.ve-root .vive-content ::selection {
+  background: var(--ve-selection);
+}
+
+.ve-root .vive-content :where(h1, h2, h3, h4, h5, h6) {
+  margin: 1.2em 0 0.5em;
+  line-height: 1.25;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+}
+
+.ve-root .vive-content :where(h1) {
+  font-size: 1.85em;
+}
+.ve-root .vive-content :where(h2) {
+  font-size: 1.5em;
+}
+.ve-root .vive-content :where(h3) {
+  font-size: 1.25em;
+}
+.ve-root .vive-content :where(h4, h5, h6) {
+  font-size: 1.05em;
+}
+
+.ve-root .vive-content :where(p, ul, ol, blockquote) {
+  margin: 0 0 0.9em;
+}
+
+.ve-root .vive-content :where(:first-child) {
+  margin-top: 0;
+}
+
+.ve-root .vive-content :where(ul, ol) {
+  padding-left: 1.4em;
+}
+
+.ve-root .vive-content :where(li > p) {
+  margin: 0 0 0.25em;
+}
+
+.ve-root .vive-content :where(a) {
+  color: var(--ve-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.ve-root .vive-content :where(blockquote) {
+  margin-left: 0;
+  padding: 2px 0 2px 16px;
+  border-left: 3px solid color-mix(in oklab, var(--ve-quote) 55%, transparent);
+  color: color-mix(in oklab, var(--ve-fg) 80%, var(--ve-card));
+}
+
+.ve-root .vive-content :where(:not(pre) > code) {
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
+  background: var(--ve-muted);
+  font: 0.88em var(--ve-mono);
+}
+
+.ve-root .vive-content :where(mark) {
+  padding: 0 0.1em;
+  border-radius: 3px;
+  background: var(--ve-mark);
+  color: var(--ve-on-light);
+}
+
+@supports (color: oklch(from red l c h)) {
+  .ve-root[data-theme="dark"] .vive-content [style*="--vive-ink"]:not(mark *) {
+    color: oklch(from var(--vive-ink) max(l, 0.74) c h) !important;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .ve-root[data-theme="auto"] .vive-content [style*="--vive-ink"]:not(mark *) {
+      color: oklch(from var(--vive-ink) max(l, 0.74) c h) !important;
+    }
+  }
+}
+
+.ve-root .vive-content :where(hr) {
+  margin: 1.5em 0;
+  border: 0;
+  border-top: 1px solid var(--ve-border);
+}
+
+.ve-glass {
+  position: relative;
+  isolation: isolate;
+  background: var(--ve-glass);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  border: 1px solid var(--ve-border);
+  box-shadow:
+    inset 0 1px 0 var(--ve-highlight),
+    var(--ve-shadow);
+}
+
+.ve-glass::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: var(--ve-glass-edge);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.ve-solid {
+  background: var(--ve-card);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.ve-dock,
+.ve-bubble,
+.ve-slash,
+.ve-panel,
+.ve-menu {
+  font: 14px / 1.4 var(--ve-ui);
+  color: var(--ve-fg);
+  text-align: left;
+}
+
+.ve-dock {
+  position: sticky;
+  bottom: var(--ve-keyboard, 0px);
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  padding: 4px 8px 12px;
+  pointer-events: none;
+}
+
+.ve-dock::before {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 0;
+  height: 140%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 60% at 32% 85%, var(--ve-aurora-a), transparent 70%),
+    radial-gradient(45% 55% at 70% 80%, var(--ve-aurora-b), transparent 70%);
+}
+
+.ve-dock > * {
+  pointer-events: auto;
+}
+
+.ve-pill {
+  display: flex;
+  align-items: center;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  height: calc(var(--ve-target) + 10px);
+  padding: 0 4px;
+  border-radius: 999px;
+}
+
+.ve-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ve-group + .ve-group::before {
+  content: "";
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--ve-border);
+  flex: none;
+}
+
+.ve-btn,
+.ve-type,
+.ve-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: var(--ve-target);
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.ve-btn {
+  min-width: var(--ve-target);
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 15px;
+}
+
+.ve-type {
+  gap: 4px;
+  padding: 0 8px 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ve-type-icon {
+  display: none;
+}
+
+.ve-root[data-size="narrow"] .ve-type {
+  padding: 0 6px 0 10px;
+}
+
+.ve-root[data-size="narrow"] .ve-type-icon {
+  display: inline-flex;
+}
+
+.ve-root[data-size="narrow"] .ve-type-label,
+.ve-root[data-size="narrow"] .ve-count-unit {
+  display: none;
+}
+
+.ve-pill::-webkit-scrollbar {
+  display: none;
+}
+
+.ve-count {
+  gap: 4px;
+  padding: 0 12px 0 8px;
+  border-radius: 999px;
+  font: 12px / 1 var(--ve-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ve-muted-fg);
+  white-space: nowrap;
+}
+
+.ve-btn:hover,
+.ve-type:hover,
+.ve-count:hover,
+.ve-type[aria-expanded="true"],
+.ve-count[aria-expanded="true"],
+.ve-btn[aria-expanded="true"] {
+  background: var(--ve-muted);
+}
+
+.ve-btn[aria-pressed="true"],
+.ve-btn.is-active {
+  background: var(--ve-accent-bg);
+  color: var(--ve-accent-fg);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 28%, transparent),
+    inset 0 1px 0 var(--ve-highlight);
+}
+
+.ve-btn[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+  background: transparent;
+}
+
+.ve-root :is(button, input):focus-visible {
+  outline: 2px solid var(--ve-primary);
+  outline-offset: 2px;
+}
+
+.ve-icon {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.ve-type > .ve-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--ve-muted-fg);
+}
+
+.ve-glyph {
+  font-size: 15px;
+  line-height: 1;
+}
+
+i.ve-glyph {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.ve-bubble {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.ve-menu,
+.ve-panel,
+.ve-slash {
+  position: absolute;
+  z-index: 6;
+  border-radius: 14px;
+}
+
+.ve-menu,
+.ve-slash {
+  min-width: 220px;
+  max-width: calc(100% - 16px);
+  padding: 6px;
+}
+
+.ve-slash {
+  width: 280px;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.ve-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--ve-target);
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ve-item:hover,
+.ve-item[aria-selected="true"] {
+  background: var(--ve-muted);
+}
+
+.ve-item[aria-selected="true"],
+.ve-item[aria-checked="true"] {
+  background: var(--ve-accent-bg);
+  color: var(--ve-accent-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 22%, transparent);
+}
+
+.ve-item[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ve-item-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 8px;
+  background: var(--ve-muted);
+}
+
+.ve-item-icon .ve-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.ve-item-label {
+  flex: 1;
+}
+
+.ve-item[aria-checked="true"] .ve-item-label {
+  font-weight: 600;
+}
+
+.ve-item-hint {
+  margin-left: 12px;
+  font: 12px var(--ve-mono);
+  color: var(--ve-muted-fg);
+}
+
+.ve-empty {
+  padding: 10px;
+  color: var(--ve-muted-fg);
+}
+
+.ve-eyebrow {
+  display: block;
+  padding: 6px 8px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ve-muted-fg);
+}
+
+.ve-panel {
+  width: min(340px, calc(100% - 16px));
+  padding: 10px 12px 12px;
+}
+
+.ve-dock > .ve-menu,
+.ve-dock > .ve-panel {
+  bottom: calc(100% - 2px);
+  overflow-y: auto;
+}
+
+.ve-dock > .ve-below {
+  top: calc(100% - 6px);
+  bottom: auto;
+}
+
+.ve-panel .ve-eyebrow {
+  padding: 2px 0 8px;
+}
+
+.ve-field-row {
+  display: flex;
+  gap: 6px;
+}
+
+.ve-ai {
+  width: min(380px, calc(100% - 16px));
+}
+
+.ve-ai-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.ve-ai .ve-field-row {
+  flex-wrap: wrap;
+}
+
+.ve-ai-result {
+  margin-top: 8px;
+}
+
+.ve-ai-preview {
+  max-height: 14em;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: var(--ve-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ve-input {
+  flex: 1;
+  min-width: 0;
+  height: var(--ve-target);
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ve-muted);
+  color: var(--ve-fg);
+  font: 13px var(--ve-mono);
+  box-shadow: inset 0 0 0 1px var(--ve-border);
+}
+
+.ve-root .ve-input:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px var(--ve-primary),
+    0 0 0 4px color-mix(in oklab, var(--ve-primary) 16%, transparent);
+}
+
+.ve-input[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 1px var(--ve-danger);
+}
+
+.ve-primary {
+  height: var(--ve-target);
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, hsl(203 88% 40%), hsl(207 86% 34%));
+  color: #fff;
+  font: 600 13px var(--ve-ui);
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.25),
+    0 10px 24px -12px hsl(203 90% 45% / 0.65);
+}
+
+.ve-primary:disabled,
+.ve-input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ve-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--ve-muted-fg);
+}
+
+.ve-hint:empty {
+  display: none;
+}
+
+.ve-hint .ve-icon {
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+}
+
+.ve-hint[data-tone="ok"] {
+  color: var(--ve-check);
+}
+
+.ve-hint[data-tone="error"] {
+  color: var(--ve-danger);
+}
+
+.ve-measure {
+  width: min(280px, calc(100% - 16px));
+  padding: 16px;
+}
+
+.ve-notice {
+  width: min(320px, calc(100% - 16px));
+  padding: 10px 14px;
+  cursor: default;
+}
+
+.ve-notice .ve-hint {
+  margin: 0;
+}
+
+.ve-measure .ve-eyebrow {
+  padding: 0;
+}
+
+.ve-big {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 6px 0 10px;
+}
+
+.ve-numeral {
+  font: 600 64px / 0.9 var(--ve-mono);
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-of {
+  font: 14px var(--ve-mono);
+  color: var(--ve-muted-fg);
+}
+
+.ve-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--ve-check-soft);
+  color: var(--ve-check);
+}
+
+.ve-chip[data-band="0"],
+.ve-chip[data-band="1"] {
+  background: var(--ve-warn-soft);
+  color: var(--ve-warn);
+}
+
+.ve-scale {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+  margin: 12px 0 4px;
+}
+
+.ve-scale span {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ve-muted);
+}
+
+.ve-scale span.on {
+  background: var(--ve-check);
+}
+
+.ve-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--ve-muted-fg);
+}
+
+.ve-stats {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--ve-border);
+  font-size: 13px;
+}
+
+.ve-measure .ve-stats:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ve-stats dt {
+  color: var(--ve-muted-fg);
+}
+
+.ve-stats dd {
+  margin: 0;
+  text-align: right;
+  font: 600 13px var(--ve-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-btn[data-tool="textColor"] {
+  position: relative;
+}
+
+.ve-btn[data-tool="textColor"]::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 8px);
+  bottom: 6px;
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ve-swatch, var(--ve-swatch-any));
+}
+
+.ve-swatches {
+  width: auto;
+}
+
+.ve-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--ve-border);
+}
+
+.ve-swatch-grid {
+  display: grid;
+  grid-template-columns: repeat(5, var(--ve-target));
+  gap: 8px;
+  padding: 4px 4px 8px;
+}
+
+.ve-swatch {
+  display: grid;
+  place-items: center;
+  width: var(--ve-target);
+  height: var(--ve-target);
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ve-swatch);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-fg) 16%, transparent);
+  color: hsl(0 0% 100%);
+  cursor: pointer;
+}
+
+.ve-swatches[data-tone="light"] .ve-swatch {
+  color: var(--ve-on-light);
+}
+
+.ve-swatch .ve-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.4;
+  opacity: 0;
+}
+
+.ve-swatch[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 2px var(--ve-card),
+    0 0 0 4px var(--ve-swatch);
+}
+
+.ve-swatch[aria-pressed="true"] .ve-icon {
+  opacity: 1;
+}
+
+.ve-clear .ve-item-icon .ve-icon {
+  color: var(--ve-muted-fg);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ve-glass {
+    background: var(--ve-card);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ve-root,
+  .ve-btn,
+  .ve-type,
+  .ve-count {
+    transition: none;
+  }
+}
+
+.ve-root .ve-panel:focus-visible {
+  outline: none;
+}
+
+.ve-table-panel {
+  width: auto;
+  min-width: 0;
+}
+
+.ve-table-panel .ve-table-actions {
+  min-width: 220px;
+}
+
+.ve-table-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 24px);
+  gap: 4px;
+}
+
+.ve-cell {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--ve-border);
+  border-radius: 5px;
+  background: var(--ve-card);
+  cursor: pointer;
+}
+
+.ve-cell.is-on {
+  border-color: color-mix(in oklab, var(--ve-primary) 55%, transparent);
+  background: var(--ve-accent-bg);
+}
+
+.ve-cell:focus-visible {
+  outline: 2px solid var(--ve-primary);
+  outline-offset: 1px;
+}
+
+.ve-table-size {
+  padding-top: 8px;
+  font: 600 12px var(--ve-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--ve-muted-fg);
+}
+
+@media (pointer: coarse) {
+  .ve-table-grid {
+    grid-template-columns: repeat(6, 36px);
+  }
+
+  .ve-cell {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.ve-search .ve-eyebrow + .ve-field-row {
+  margin-bottom: 8px;
+}
+
+.ve-search-options,
+.ve-search-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.ve-search-actions {
+  justify-content: flex-end;
+  margin: 2px 0 0;
+}
+
+.ve-toggle {
+  width: auto;
+  padding: 0 10px;
+  font: 600 13px var(--ve-mono);
+}
+
+.ve-toggle::before {
+  content: attr(data-glyph);
+}
+
+.ve-search-count {
+  margin-left: auto;
+  font: 12px var(--ve-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ve-muted-fg);
+}
+
+.ve-quiet {
+  height: var(--ve-target);
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ve-muted);
+  color: var(--ve-fg);
+  font: 600 13px var(--ve-ui);
+  cursor: pointer;
+}
+
+.ve-quiet:disabled,
+.ve-search .ve-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ve-image-upload-row {
+  margin-bottom: 12px;
+}
+
+.ve-image-choose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.ve-panel .ve-image-choose .ve-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.ve-image-url {
+  margin-bottom: 10px;
+}
+
+.ve-image-panel .ve-input {
+  width: 100%;
+}
+
+.ve-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--ve-target);
+  margin-top: 4px;
+  font: 14px var(--ve-ui);
+  color: var(--ve-fg);
+  cursor: pointer;
+}
+
+.ve-checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--ve-primary);
+}
+
+.ve-image-sizes {
+  margin-top: 6px;
+}
+
+.ve-image-scale {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.ve-image-scale .ve-quiet {
+  padding: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-image-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.ve-count[data-limit="near"] {
+  color: var(--ve-warn);
+}
+
+.ve-count[data-limit="full"] {
+  color: var(--ve-danger);
+  font-weight: 600;
+}
+
+.ve-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ve-ai .ve-hint:empty {
+  display: none;
+}

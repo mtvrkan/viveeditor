@@ -1,0 +1,69 @@
+---
+key: emoji
+title: Emoji
+description: İki nokta yazınca açılan bir emoji menüsü ekleyin; küçük İngilizce emoji listesi yalnızca ilk kullanımda yüklenir.
+updated: 2026-11-01
+faq:
+  - q: Emoji listesi editörle birlikte mi yüklenir?
+    a: Hayır. Liste, yazar ilk kez iki nokta ve iki harf yazdığında yüklenir; menüyü hiç kullanmayan sayfalar onu indirmez.
+  - q: Kendi emoji listemi kullanabilir miyim?
+    a: Evet. load işlevi emoji, ad ve anahtar sözcüklerden oluşan en çok 5.000 satırlık herhangi bir liste döndürebilir.
+---
+
+Emoji menüsü, yazarın `:` ve iki harf yazıp adına ya da anahtar sözcüğüne göre bir emoji seçmesini sağlar. Emoji metne sıradan bir karakter olarak girer; saklanan HTML'de ek bir öğe olmaz, menü de bir editör eklentisine ihtiyaç duymaz.
+
+Emoji menüsü yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+<Steps>
+1. Arayüzü ve veriyi kurun: `npm install @viveeditor/ui @viveeditor/emoji-data`.
+2. `@viveeditor/ui/extras` içindeki `emojiMenu`'yü `createUI`'nin `plugins` listesine ekleyin.
+3. Listeyi içe aktaran bir `load` işlevi verin; böylece liste yalnızca gerektiğinde iner.
+</Steps>
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { emojiMenu } from '@viveeditor/ui/extras'
+
+createUI(editor, {
+  plugins: [emojiMenu({ load: () => import('@viveeditor/emoji-data/en') })],
+})
+```
+
+## Menü nasıl çalışır
+
+- Menü, satır başında ya da bir boşluktan sonra `:` ve ardından en az iki harf ya da rakam yazılınca açılır.
+- Adlarda ve anahtar sözcüklerde arar. Önce adı tam eşleşen, sonra adı yazılan metinle başlayan, en son anahtar sözcüğü eşleşen emojiler gelir.
+- En çok 8 sonuç gösterir. <kbd>Enter</kbd> ya da <kbd>Tab</kbd> emojiyi ekler, <kbd>Esc</kbd> menüyü kapatır.
+- Liste ilk kullanımda bir kez yüklenir. Yükleme başarısız olursa sonraki denemede yeniden istenir.
+
+## Veri paketi
+
+`@viveeditor/emoji-data/en` yaklaşık 39 KB'lık küçük bir İngilizce listedir. [emojibase-data](https://www.npmjs.com/package/emojibase-data) 18.0.0 sürümünden üretilir ve yalnızca İngilizce adlar vardır. Türkçe arama için kendi listenizi verebilirsiniz.
+
+Her satırın üç parçası vardır: emoji, adı ve anahtar sözcükleri. Menü listeyi yüklerken denetler; 5.000 satırdan uzun bir listeyi, başka biçimde bir satırı ya da 16 kod noktasından uzun bir emojiyi kabul etmez.
+
+## Kendi listeniz
+
+`load` aynı biçimde herhangi bir liste döndürebilir: doğrudan dizi ya da `default` dışa aktarımı olan bir modül. Daha kısa bir liste ya da Türkçe adlar için bunu kullanın.
+
+```ts
+import { type EmojiRow, emojiMenu } from '@viveeditor/ui/extras'
+
+const rows: EmojiRow[] = [
+  ['👍', 'onay', ['evet', 'tamam']],
+  ['🎉', 'kutlama', ['tebrik', 'parti']],
+]
+
+emojiMenu({ load: async () => rows })
+```
+
+## Lisans
+
+Paketin kendisi MIT lisanslıdır. Emoji adları ve anahtar sözcükleri MIT lisanslı Emojibase'den gelir; Emojibase de bunları Unicode Lisansı v3 altındaki Unicode CLDR ve Unicode emoji veri dosyalarından türetir. İki bildirim de paketteki `NOTICE` dosyasındadır. Veriyi yeniden dağıtırken bu dosyayı koruyun.
+
+## İlgili sayfalar
+
+- [Paketler](/dokumantasyon/paketler/)
+- [Bahsetme](/dokumantasyon/bahsetme/)

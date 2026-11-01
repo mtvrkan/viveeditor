@@ -1,0 +1,49 @@
+{
+  "name": "@viveeditor/emoji-data",
+  "version": "0.0.0",
+  "description": "Compact emoji list for the viveEditor emoji menu, generated from Emojibase.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "emoji",
+    "emojibase"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/emoji-data#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/emoji-data"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./en": {
+      "types": "./data/en.d.ts",
+      "import": "./data/en.js"
+    }
+  },
+  "files": [
+    "data",
+    "NOTICE"
+  ],
+  "scripts": {
+    "generate": "node ../../scripts/build-emoji.mjs"
+  },
+  "devDependencies": {
+    "emojibase-data": "18.0.0"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

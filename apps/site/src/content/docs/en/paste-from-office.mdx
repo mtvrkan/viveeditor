@@ -1,0 +1,87 @@
+---
+key: officePaste
+title: Paste from Office
+description: Clean paste from Word, Google Docs and LibreOffice; fake bullets become real lists, and pasted Markdown text becomes formatted content.
+updated: 2026-11-01
+faq:
+  - q: Why are images pasted from Word missing?
+    a: Word puts some images on the clipboard as addresses of files on the copying computer. The browser cannot read those, so they are left out; onDropped tells you how many.
+  - q: Is Office paste on in the one-script build?
+    a: Yes. The Office paste extension is loaded by default in the one-script build, and Markdown paste is on in the CDN version.
+  - q: When does Markdown paste kick in?
+    a: Only when the clipboard has no HTML and the plain text looks like Markdown. Text pasted inside a code block is never converted.
+---
+
+`@viveeditor/ext-office-paste` cleans content pasted from Word, Google Docs and LibreOffice. It turns Word's fake bullets and numbers into real nested lists, keeps Word's title and quote styles and fixes lists that Google Docs nests the wrong way. This page also covers `MarkdownPaste`, which turns Markdown pasted as plain text into formatted content.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { OfficePaste } from '@viveeditor/ext-office-paste'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    OfficePaste.configure({ onDropped: ({ images }) => console.warn(`${images} images left out`) }),
+  ],
+})
+```
+
+The one-script build already includes the extension. Its only option is `onDropped`.
+
+## What gets fixed
+
+In content from Word:
+
+- Word's lists are not real lists but paragraphs with markers. These paragraphs become real, nested bulleted and numbered lists. The list type and start number come from Word's list definition, or from the marker itself.
+- Marker characters are removed everywhere.
+- Word's Title style becomes a level 1 heading, and its Quote style becomes a quote.
+
+From every source:
+
+- A sub-list sitting directly inside a list moves into the item above it. Google Docs copies lists this way.
+- Text that is both underlined and struck through keeps both.
+- Images that point at files on the copying computer (`file:` and `blob:` addresses) are left out and counted.
+
+HTML that does not come from Word, Google Docs or LibreOffice passes through this extension unchanged. Every paste, whatever its source, then goes through the document rules, so unknown markup never reaches the output.
+
+## Left-out images
+
+Images that point at files on the copying computer cannot be pasted. When images are left out, `onDropped` is called with:
+
+| Field | Value |
+| --- | --- |
+| `source` | `'word'`, `'docs'` or `'libreoffice'` |
+| `images` | The number of images left out |
+
+Use it to show the writer a message asking them to upload those images separately. For image uploads, see [Images and uploads](/en/docs/images-and-uploads/).
+
+## Helper functions
+
+To run the same cleaning outside paste, the package exports three functions:
+
+| Function | Returns |
+| --- | --- |
+| `detectOffice(html)` | `'word'`, `'docs'`, `'libreoffice'` or `null` |
+| `cleanOffice(html)` | `{ html, source, droppedImages }` |
+| `cleanOfficeHtml(html)` | Only the cleaned HTML |
+
+## Markdown paste
+
+`MarkdownPaste` from `@viveeditor/markdown/paste` turns Markdown pasted as plain text into formatted content. The converter loads only when needed:
+
+```ts
+import { MarkdownPaste } from '@viveeditor/markdown/paste'
+
+const markdownPaste = MarkdownPaste.configure({ load: () => import('@viveeditor/markdown') })
+```
+
+It converts only when:
+
+- the clipboard holds plain text and no HTML,
+- the text looks like Markdown: it has a heading, fenced code, a quote, a table, bold text, a link, a checklist item or at least two list lines,
+- the cursor is not in a code block.
+
+If the converter fails to load, the text is pasted as plain text. Text longer than one million characters is not converted. Raw HTML inside Markdown is never let through. To check in advance whether text would be converted, use `looksLikeMarkdown(text)` from the same package.
+
+Markdown paste is on in the one-script CDN version; the converter loads from the add-on file on first use. To open and save Markdown files, see [Open, save and print](/en/docs/open-save-print/).

@@ -1,0 +1,57 @@
+.vive-content {
+  position: relative;
+  outline: none;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: break-spaces;
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vive-content pre {
+  white-space: pre-wrap;
+}
+
+.vive-content li {
+  position: relative;
+}
+
+.vive-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+
+.ProseMirror-hideselection {
+  caret-color: transparent;
+}
+
+.ProseMirror [draggable][contenteditable="false"] {
+  user-select: text;
+}
+
+.ProseMirror-selectednode {
+  outline: 2px solid #2563eb;
+}
+
+li.ProseMirror-selectednode {
+  outline: none;
+}
+
+li.ProseMirror-selectednode::after {
+  content: "";
+  position: absolute;
+  inset: -2px -2px -2px -32px;
+  border: 2px solid #2563eb;
+  pointer-events: none;
+}
+
+img.ProseMirror-separator {
+  display: inline !important;
+  border: none !important;
+  margin: 0 !important;
+}

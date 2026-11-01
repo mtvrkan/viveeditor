@@ -1,0 +1,130 @@
+.vive-content img {
+  max-width: 100%;
+  height: auto;
+}
+
+.vive-content .vive-image {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 0.9em;
+  line-height: 0;
+}
+
+.vive-content .vive-image img {
+  display: block;
+  border-radius: 8px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.vive-content .vive-image.ProseMirror-selectednode {
+  outline: none;
+}
+
+.vive-content .vive-image.ProseMirror-selectednode img {
+  outline: 2px solid var(--ve-primary, hsl(221 83% 53%));
+  outline-offset: 2px;
+}
+
+.vive-content .vive-image-resize {
+  position: absolute;
+  inset-inline-end: -6px;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ve-card, hsl(0 0% 100%));
+  border-radius: 50%;
+  background: var(--ve-primary, hsl(221 83% 53%));
+  cursor: nwse-resize;
+  touch-action: none;
+  opacity: 0;
+}
+
+.vive-content .vive-image.ProseMirror-selectednode .vive-image-resize,
+.vive-content .vive-image.is-resizing .vive-image-resize {
+  opacity: 1;
+}
+
+.vive-content[contenteditable="false"] .vive-image .vive-image-resize {
+  display: none;
+}
+
+.vive-content .vive-image-alt {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-start: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--ve-warn-soft, hsl(38 92% 90%));
+  color: var(--ve-warn, hsl(30 80% 28%));
+  font: 600 12px / 1.4 var(--ve-ui, system-ui, sans-serif);
+  user-select: none;
+  pointer-events: none;
+}
+
+.vive-content .vive-image-alt[hidden] {
+  display: none;
+}
+
+.vive-content .vive-image-upload {
+  display: grid;
+  gap: 8px;
+  max-width: 320px;
+  margin: 0 0 0.9em;
+  padding: 12px;
+  border: 1px dashed var(--ve-border, hsl(220 13% 85%));
+  border-radius: 12px;
+  background: var(--ve-muted, hsl(220 14% 95%));
+  color: var(--ve-muted-fg, hsl(220 9% 40%));
+  font: 13px / 1.4 var(--ve-ui, system-ui, sans-serif);
+  user-select: none;
+}
+
+.vive-content .vive-image-preview {
+  max-height: 160px;
+  border-radius: 8px;
+  object-fit: contain;
+  opacity: 0.6;
+}
+
+.vive-content .vive-image-upload-label {
+  overflow-wrap: anywhere;
+}
+
+.vive-content .vive-image-progress {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ve-border, hsl(220 13% 85%));
+}
+
+.vive-content .vive-image-progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--ve-primary, hsl(221 83% 53%));
+  transform: scaleX(0.05);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+
+.vive-content .vive-image-upload.is-failed {
+  border-style: solid;
+  border-color: var(--ve-danger, hsl(0 72% 51%));
+  color: var(--ve-danger, hsl(0 72% 42%));
+}
+
+@media (pointer: coarse) {
+  .vive-content .vive-image-resize {
+    width: 24px;
+    height: 24px;
+    inset-inline-end: -12px;
+    bottom: -12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vive-content .vive-image-progress-bar {
+    transition: none;
+  }
+}

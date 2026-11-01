@@ -1,0 +1,131 @@
+---
+key: firstEditor
+title: İlk editör
+description: Bir textarea'yı editöre çevirin, editörü herhangi bir öğeye yerleştirin ya da Editor.create ve createUI ile kendiniz kurun.
+updated: 2026-11-01
+---
+
+Bir editörü başlatmanın üç yolu var: formdaki bir textarea'yı editöre çevirmek, `mountEditor` ile herhangi bir öğeye editör yerleştirmek ya da `Editor.create` ve `createUI` ile editörü kendiniz kurmak. Bu sayfa üçünü de gösteriyor; ardından içeriği okumayı, değişiklikleri dinlemeyi, etiketi ve dili ayarlamayı anlatıyor.
+
+## Textarea'yı editöre çevirin
+
+En kısa yol budur; CDN betiğiyle de npm ile de çalışır.
+
+<Steps>
+1. `viveeditor.css` ve `viveeditor.classic.iife.js` dosyalarını [Kurulum](/dokumantasyon/kurulum/) sayfasındaki gibi tam sürümle yükleyin.
+2. Textarea'ya `data-editor` ekleyin. `name` özniteliğini ve ona bağlı bir `<label for>` öğesini koruyun.
+3. Sunucuda alanı her zamanki gibi okuyun ve HTML'i kaydetmeden önce temizleyin; bkz. [Sunucuda temizleme](/dokumantasyon/sunucuda-temizleme/).
+</Steps>
+
+```html
+<form method="post">
+  <label for="body">Makale</label>
+  <textarea id="body" name="body" data-editor required></textarea>
+  <button>Yayımla</button>
+</form>
+```
+
+Textarea gizlenir ama formda kalır ve her zaman en güncel HTML'i tutar (belge boşsa `''`). Her değişiklikte `input` olayı tetiklenir. `required` varsa boş editör gönderimi durdurur, kendini `aria-invalid="true"` olarak işaretler, textarea üzerinde `vive:invalid` olayını tetikler ve odağı alır. Görseller hâlâ yükleniyorsa gönderim bekler ve yüklemeler bitince yapılır. Bir textarea'nın Dosya menüsünü gizlemek için ona `data-files="false"` ekleyin.
+
+### Kendi kodunuzdan
+
+npm ile her `textarea[data-editor]` öğesini çevirmek için `upgradeAll()`, tek bir alan için `upgradeTextarea()` çağırın:
+
+```ts
+import { upgradeTextarea } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const field = await upgradeTextarea(document.querySelector('#body'), {
+  label: 'Makale metni',
+  ui: { locale: 'tr' },
+})
+
+console.log(field.editor.getHTML())
+```
+
+`upgradeAll(root, options)` aramayı `root` içiyle sınırlar. `upgradeTextarea` aynı anda iki kez çağrılırsa aynı promise döner. `field.destroy()` textarea'yı geri getirir ve son HTML'i içinde bırakır. Araç çubuğunu istemiyorsanız `ui: false` verin.
+
+## Herhangi bir öğeye yerleştirin
+
+`mountEditor`, tüm eklentileri ve araç çubuğuyla editörün tamamını istediğiniz öğeye yerleştirir. Çerçeve bileşenleri de bunun üzerine kuruludur.
+
+```ts
+import { mountEditor } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  value: '<p>Merhaba</p>',
+  locale: 'tr',
+  label: 'Makale metni',
+  onChange: (html) => console.log(html),
+})
+
+const editor = await mount.ready
+```
+
+- Değer HTML'dir; boş belge `''` olur.
+- `getValue()`, `setValue(html)`, `setEditable(editable)` ve `destroy()` ile yönetilir. `setValue` ile verilen yeni değer `onChange` çağırmaz ve geri alma geçmişine girmez.
+- `extensions` varsayılan eklenti listesinin yerini alır; `ui: false` araç çubuğunu kaldırır.
+- Editör hazır olmadan `destroy()` çağırırsanız `ready`, `MountDestroyedError` ile reddedilir.
+- Dosya menüsü dönüştürücüleri varsayılan olarak yüklenmez; onları `ui.files` içinde verin.
+
+## Kendiniz kurun
+
+`Editor.create` yalnızca listelediğiniz eklentilerle motoru verir. `createUI` araç çubuğunu, seçim balonunu, `/` menüsünü ve panelleri ekler.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import '@viveeditor/core/style.css'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { listExtensions } from '@viveeditor/ext-list'
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, ...listExtensions],
+  content: '<p>Merhaba <strong>dünya</strong></p>',
+  label: 'Makale metni',
+})
+
+const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
+```
+
+`createUI` yazma alanının yanına yerleşir ve editör kapatılınca kaldırılır. Yalnızca komutları kayıtlı araçları gösterir; yani bir araç, eklentisini eklediğinizde görünür. Daha önce kaldırmak için `ui.destroy()` çağırın. Seçenekler [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
+
+## İçeriği okuyun
+
+- `editor.getHTML()` belgeyi HTML olarak verir.
+- `editor.getJSON()` asıl saklama biçimi olan ProseMirror JSON'unu verir.
+- `editor.getText()` her blok bir satır olacak şekilde düz metin verir.
+- `editor.isEmpty` belgenin boş olup olmadığını söyler.
+- `editor.setContent(content)` HTML ya da JSON yükler. Geri alma geçmişine girmez.
+
+HTML ya da JSON saklayabilirsiniz. İkisi de sonraki 0.x sürümlerinde okunabilir kalır; bkz. [Sürüm politikası](/dokumantasyon/surum-politikasi/).
+
+## Değişiklikleri dinleyin
+
+```ts
+const stop = editor.on('change', ({ editor }) => {
+  console.log(editor.getHTML())
+})
+
+editor.on('error', ({ error }) => console.error(error))
+```
+
+- `change`, belge değişince tetiklenir.
+- `update`, seçimin değişmesi gibi her durum değişikliğinde tetiklenir.
+- `focus`, `blur`, `destroy` ve `error` olayları da var.
+- `on` dinleyiciyi kaldıran bir fonksiyon döndürür; `off` da aynı işi yapar.
+
+Bir dinleyicinin içinde oluşan hata diğerlerini durdurmaz; `error` olayıyla bildirilir.
+
+## Etiket ve dil
+
+Her editöre `label: 'Makale metni'` gibi bir `label` verin. Ekran okuyucular bunu yazma alanının adı olarak okur. Textarea kullanıyorsanız görünür bir `<label for>` bırakın; `label` vermezseniz editör adını oradan alır.
+
+Arayüz Türkçe ve İngilizce konuşur. Dili `locale` ile seçin. Verilmezse editör önce `<html lang="...">` değerine, sonra tarayıcı diline bakar: `tr` ile başlayan her değer Türkçe, geri kalan her şey İngilizce olur. Tek tek metinleri değiştirmek için `createUI` içine `messages` verin; örneğin `createUI(editor, { messages: { toolbar: 'Biçim' } })`.
+
+## Sonraki adımlar
+
+- [Çerçeveler](/dokumantasyon/cerceveler/): aynı editör React, Vue, Svelte ve Angular'da.
+- [Görseller ve yükleme](/dokumantasyon/gorseller-ve-yukleme/): yükleme adresinizi bağlayın.

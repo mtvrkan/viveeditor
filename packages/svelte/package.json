@@ -1,0 +1,77 @@
+{
+  "name": "@viveeditor/svelte",
+  "version": "0.0.0",
+  "description": "Svelte 5 component and action for viveEditor with bind:value, toolbar and every feature included.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "svelte",
+    "svelte5"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/svelte#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/svelte"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "svelte-package -i src -o dist",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
+    "test": "vitest run",
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "viveeditor": "workspace:^"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "@sveltejs/package": "^3.0.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@testing-library/svelte": "^5.4.2",
+    "jsdom": "^30.1.3",
+    "size-limit": "^14.3.0",
+    "svelte": "^5.57.2",
+    "svelte-check": "^4.7.7",
+    "vitest": "^5.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "@viveeditor/svelte action",
+      "path": "dist/action.js",
+      "ignore": [
+        "viveeditor"
+      ],
+      "limit": "1 KB"
+    }
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "svelte": "^5.0.0"
+  },
+  "svelte": "./dist/index.js",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

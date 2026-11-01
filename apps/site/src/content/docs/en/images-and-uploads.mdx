@@ -1,0 +1,187 @@
+---
+key: images
+title: Images and uploads
+description: Set up the image extension, write the upload function, handle progress and abort, secure your server and track alt text.
+updated: 2026-11-01
+faq:
+  - q: What happens if I do not pass an upload function?
+    a: Images can only be added by https address. The "Choose from device" button in the image panel is hidden, and dropped or pasted files are not uploaded.
+  - q: Can images be embedded in the document as base64?
+    a: Not by default. With allowBase64 true, data addresses of type png, jpeg, gif, webp and avif are accepted, limited by maxBase64Length. SVG is never accepted.
+  - q: What happens if the form is submitted during an upload?
+    a: With the one-script build, the form waits until uploads finish and then submits itself. If an upload fails while it waits, the submit is cancelled and an error message appears.
+---
+
+`@viveeditor/ext-image` handles inserting images, uploading files and image sizes. Every image address and every file is checked before it reaches the document; an upload function that you write sends files to your server. This page covers setup, the upload function contract, what your server must do and the alt text reminders.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Image } from '@viveeditor/ext-image'
+import '@viveeditor/ext-image/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    Image.configure({
+      upload,
+      onError: ({ code, fileName }) => console.warn(code, fileName),
+    }),
+  ],
+})
+```
+
+In the one-script build the image extension comes without an uploader: images can only be added by address. To upload files, set up the extension from npm with your own `upload` function.
+
+## Options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `upload` | `null` | The function that sends files to your server. |
+| `rehost` | `null` | The function that moves an image from another site to your server. |
+| `remoteImages` | `'allow'` | Images pasted from other sites: `'allow'`, `'drop'` or `'rehost'`. |
+| `allowBase64` | `false` | Allows images embedded as data addresses. |
+| `maxBase64Length` | `1500000` | The maximum number of characters in one data address. |
+| `insecure` | `'upgrade'` | Turns `http:` addresses into `https:`; `'block'` rejects them. |
+| `allowRelative` | `false` | Allows relative image addresses. |
+| `mimeTypes` | png, jpeg, gif, webp, avif | Accepted file types. |
+| `maxSize` | 10 MB | The largest size of one file. |
+| `maxFiles` | `10` | How many files can be added at once. |
+| `concurrency` | `3` | How many files upload at the same time. |
+| `timeout` | 60 s | The longest time one upload may take. |
+| `maxPreviewPixels` | 25 million | Files above this pixel count get no preview. |
+| `requireAlt` | `'warn'` | Shows a badge on images without alt text; `'off'` turns it off. |
+| `labels` | English | Labels for uploading, failure and missing alt text. |
+| `onError` | `null` | Receives `{ code, fileName }` for a failed file. |
+
+## The upload function
+
+The upload function receives a file and a context, and returns the image address:
+
+```ts
+import type { ImageUploader } from '@viveeditor/ext-image'
+
+const upload: ImageUploader = async (file, { signal, onProgress }) => {
+  const body = new FormData()
+  body.append('file', file)
+  const response = await fetch('/uploads', { method: 'POST', body, signal })
+  if (!response.ok) throw new Error('Upload failed')
+  const { url, width, height } = await response.json()
+  return { src: url, width, height }
+}
+```
+
+- Return an address string or a `{ src, width, height }` object. `width` and `height` are optional, but it is best when your server measures and returns the real size.
+- The returned address goes through the same check: `blob:` never passes, and `data:` passes only with `allowBase64`. If it fails, the image is not inserted.
+- If the function throws, a box saying "Image could not be added" stays in place of the image and `onError` is called.
+- Before a file reaches your function, its type, size and first bytes are checked. This check gives the writer early feedback; your server is the security boundary.
+
+During an upload, a placeholder with a progress bar stands where the image will go. The placeholder is never written to the document, and `getHTML()` never contains it.
+
+### Progress
+
+`onProgress` expects a value between 0 and 1; values outside that range are clamped. `fetch` does not report upload progress. If you want a progress bar, you can use `XMLHttpRequest`:
+
+```ts
+import type { ImageUploader } from '@viveeditor/ext-image'
+
+const upload: ImageUploader = (file, { signal, onProgress }) =>
+  new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', '/uploads')
+    request.responseType = 'json'
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total)
+    }
+    request.onload = () => {
+      if (request.status !== 200) return reject(new Error('Upload failed'))
+      const { url, width, height } = request.response
+      resolve({ src: url, width, height })
+    }
+    request.onerror = () => reject(new Error('Upload failed'))
+    request.onabort = () => reject(signal.reason)
+    signal.addEventListener('abort', () => request.abort())
+    const body = new FormData()
+    body.append('file', file)
+    request.send(body)
+  })
+```
+
+### Abort
+
+Every upload has its own `AbortSignal`. The signal is aborted when:
+
+- the writer deletes the placeholder or undoes the insert,
+- the content is replaced with `setContent`,
+- the editor is destroyed,
+- the `timeout` runs out.
+
+Pass the signal to `fetch` or `XMLHttpRequest` so the request to your server stops too. The result of an aborted upload is never inserted.
+
+### Error codes
+
+`onError` receives only a code and the file name; server responses and file contents are never passed on.
+
+| Code | Meaning |
+| --- | --- |
+| `TYPE` | The file type is not allowed, or its content does not match its type. |
+| `SIZE` | The file is larger than `maxSize`. |
+| `COUNT` | More than `maxFiles` files were added at once. |
+| `TIMEOUT` | The upload did not finish within `timeout`. |
+| `UPLOAD` | The upload function threw an error. |
+| `SOURCE` | The address the function returned failed the check. |
+
+### Pending uploads
+
+`editor.query.isUploading()` returns `true` while an upload is running. `editor.query.pendingUploads()` counts running and failed uploads as `{ uploading, failed }`. If you submit the form yourself, wait with these queries; the one-script build does it for you.
+
+## Server checklist
+
+The editor checks every address and file, but the browser is not a security boundary. Your server must also:
+
+- Sanitize the posted HTML again and allow only the `https` image addresses you expect. See [Server sanitizing](/en/docs/server-sanitizing/).
+- Re-validate and re-encode every upload. This strips EXIF and GPS data and polyglot files. Return the real width and height.
+- Serve uploads from a cookieless domain, with a server-set `Content-Type` and `X-Content-Type-Options: nosniff`.
+- Require authentication, a CSRF token and a rate limit on the upload endpoint.
+- Restrict `img-src` in your Content Security Policy. See [Security and CSP](/en/docs/security-and-csp/).
+- Guard against SSRF if your server fetches remote images (for `remoteImages: 'rehost'`).
+
+## Images pasted from other sites
+
+Content copied from another page brings the addresses of that site's images. When a reader's browser shows them, it tells that site who read the page and when. `remoteImages` decides what happens to these images:
+
+| Value | Result |
+| --- | --- |
+| `'allow'` | Default. The image keeps its original address. |
+| `'drop'` | Pasted `https` images are removed. |
+| `'rehost'` | Your `rehost` function moves the image to your server. Without that function, the image is removed. |
+
+The `rehost` function receives an address instead of a file, gets the same context (`signal`, `onProgress`) and returns an address like the upload function. For a hardened setup, choose `'drop'` or `'rehost'`.
+
+## Alt text
+
+The image panel has an alt text field and a "Decorative, no description needed" checkbox. Images that never got alt text show a "No alt text" badge inside the editor; the badge never enters the saved HTML. `requireAlt: 'off'` turns the badge off.
+
+The saved value keeps two cases apart: alt text left empty counts as missing, while an image marked decorative is saved with an empty `alt=""`. Before publishing, `editor.query.imagesWithoutAlt()` counts the missing ones so you can remind the writer.
+
+## Width and height
+
+Every saved image carries `width` and `height`, so the layout does not jump while the page loads. The values come from:
+
+- the size your upload function returns, which always wins,
+- otherwise, for PNG, GIF and WebP files, the size read from the file.
+
+In the editor, drag the handle at the image corner to change its width; the height follows the ratio. The 25%, 50%, 75% and 100% buttons in the image panel scale the image to the content width.
+
+Saved images are written with `loading="lazy"`, `decoding="async"` and `referrerpolicy="no-referrer"`. Add this rule to the pages that show the content:
+
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+## Image panel
+
+The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text and size.

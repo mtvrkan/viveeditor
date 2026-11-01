@@ -1,0 +1,145 @@
+---
+key: toolbar
+title: Araç çubuğu ve kısayollar
+description: Yüzen araç çubuğu, seçim balonu, / menüsü, blok menüsü, kelime sayacı, okunabilirlik ölçümü ve tüm klavye kısayolları.
+updated: 2026-11-01
+faq:
+  - q: Araç çubuğunu tamamen kapatabilir miyim?
+    a: Evet. Çerçeve bileşenlerinde ve mountEditor ile ui false verin; npm ile kendiniz kuruyorsanız createUI çağırmayın. Klavye kısayolları eklentilerden geldiği için araç çubuğu olmadan da çalışır.
+  - q: Okunabilirlik puanı neden çizgi olarak görünüyor?
+    a: Puan en az 10 kelimeden sonra hesaplanır. Daha kısa metinlerde panel "Puan için en az 10 kelime yazın." der; kelime, cümle ve okuma süresi yine gösterilir.
+  - q: Bir aracı neden göremiyorum?
+    a: Araç çubuğu yalnızca komutu kayıtlı araçları gösterir. Örneğin tablo eklentisi yüklü değilse tablo düğmesi de çıkmaz. Dar alanlarda bazı araçlar Diğer araçlar menüsüne taşınır.
+---
+
+viveEditor'ün arayüzü `@viveeditor/ui` paketinden gelir: metnin altında duran yüzen bir araç çubuğu, metin seçince açılan küçük bir balon, `/` ile açılan blok menüsü ve kelime sayacı. Bu sayfa her parçanın ne yaptığını, nasıl kapatılacağını ve klavye kısayollarını anlatır. Tek betikli kurulumda ve çerçeve bileşenlerinde araç çubuğu zaten açıktır; npm paketleriyle kendiniz kuruyorsanız `createUI` çağırırsınız.
+
+## Arayüzü kurmak
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
+```
+
+`createUI` editörün bulunduğu kapsayıcıya yerleşir ve editör kapatılınca kendini kaldırır. Yalnızca komutu kayıtlı araçları gösterir: tablo eklentisi yoksa tablo düğmesi de yoktur. Arayüz editörle yalnızca komutlar ve sorgular üzerinden konuşur.
+
+| Seçenek | Ne yapar |
+| --- | --- |
+| `locale` | `'tr'` ya da `'en'`. Verilmezse sayfanın `lang` değerine bakar; `tr` ile başlıyorsa Türkçe, değilse İngilizce olur. |
+| `messages` | Etiketlerin bir kısmını kendi metinlerinizle değiştirir. |
+| `theme` | `'light'` (varsayılan), `'dark'` ya da `'auto'`. Marka renginiz için `--ve-accent` CSS değişkenini kullanın. |
+| `readability` | `'atesman'`, `'flesch'` ya da `false`. Varsayılan dile göre seçilir. |
+| `bubble` | `false` seçim balonunu kapatır. |
+| `slash` | `false` `/` menüsünü kapatır. |
+| `source` | `false` HTML kaynağı düğmesini kaldırır. |
+| `files` | Dosya menüsü; `false` gizler. Ayrıntılar [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında. |
+| `plugins` | Bahsetme, emoji, şablon gibi ek menüler `@viveeditor/ui/extras` paketinden buraya takılır. |
+| `onError` | Arayüzde oluşan hataları alır. |
+
+## Yüzen araç çubuğu
+
+Araç çubuğu yazı alanının altında durur ve uzun bir yazıda aşağı kaydırırken ekranın altında kalır. Telefonda ekran klavyesi açılınca onun üstüne çıkar.
+
+Soldan sağa şunlar vardır: blok türü düğmesi; kalın, italik, altı çizili, üstü çizili ve satır içi kod; yazı rengi ve vurgu; madde işaretli liste, numaralı liste, görev listesi, alıntı, tablo, görsel ve video; hizalama; bağlantı ile bul ve değiştir; geri al, yinele, Dosya ve HTML kaynağı. En sonda kelime sayacı durur.
+
+Alan 560 pikselden darsa yalnızca kalın, italik ve bağlantı yerinde kalır, diğer araçlar "Diğer araçlar" menüsüne geçer. Daha geniş alanlarda sığmayan araçlar belirli bir sırayla bu menüye taşınır; menü yalnızca taşınan araçları gösterir.
+
+HTML kaynağı düğmesi belgenin HTML'ini düzenlenebilir bir metin alanında açar. Kaynak açıkken diğer araçlar devre dışıdır; kapattığınızda değişiklikler editöre uygulanır.
+
+## Seçim balonu
+
+Metin seçince seçimin hemen üstünde küçük bir araç çubuğu açılır. Dokunmatik ekranlarda, parmağınızın altında kalmaması için seçimin altında açılır. İçinde kalın, italik, bağlantı ve satır içi kod düğmeleri bulunur; [yapay zeka asistanı](/dokumantasyon/yapay-zeka/) gibi eklentiler kendi düğmelerini buraya ekler. Bir görsel seçiliyken balon açılmaz. <kbd>Esc</kbd> balonu kapatır, `bubble: false` tamamen kaldırır.
+
+## / menüsü
+
+Bir paragrafın başında `/` yazınca blok ekleme menüsü açılır. Ardından yazdığınız harfler listeyi süzer. Arama Türkçe harfleri sadeleştirir, bu yüzden `/baslik` da "Başlık" girişini bulur; İngilizce anahtar kelimeler de çalışır (`/table`, `/video`).
+
+Menüdeki girişler: Başlık 1, 2 ve 3, madde işaretli liste, numaralı liste, görev listesi, alıntı, kod bloğu, tablo (başlık satırlı 3×3), görsel, video ve yatay çizgi. Görsel ve video doğrudan eklenmez, ilgili paneli açar.
+
+<kbd>↑</kbd> ve <kbd>↓</kbd> ile gezinin, <kbd>Enter</kbd> ya da <kbd>Tab</kbd> ile seçin, <kbd>Esc</kbd> ile kapatın. Odak hep metinde kalır, ekran okuyucu etkin girişi duyurur. Bahsetme, emoji, formül, dipnot ve şablon eklentileri bu menüye kendi girişlerini ekler.
+
+## Blok menüsü
+
+Araç çubuğunun başındaki düğme imlecin bulunduğu bloğun türünü gösterir: Paragraf, Başlık 2, Alıntı gibi. Açınca paragraf, Başlık 1–3, listeler, alıntı ve kod bloğu arasında geçiş yaparsınız. Paragraf seçmek bloğu sarmalayan listeyi ya da alıntıyı da kaldırır.
+
+## Kelime sayacı ve okunabilirlik
+
+Araç çubuğunun sonundaki sayaç belgedeki kelime sayısını gösterir. [Karakter sınırı](/dokumantasyon/karakter-siniri/) tanımladıysanız onun yerine kullanılan ve kalan karakteri gösterir. Sayaç yazmaya kısa bir ara verdiğinizde güncellenir.
+
+Sayaca tıklayınca "Metin ölçümü" paneli açılır:
+
+- okunabilirlik puanı (0–100) ve zorluk derecesi,
+- kelime ve cümle sayısı,
+- ortalama cümle uzunluğu,
+- okuma süresi (dakikada 200 kelime üzerinden).
+
+Türkçe arayüz Ateşman formülünü, İngilizce arayüz Flesch formülünü kullanır. Başka bir formül için `readability` verin; `false` puanı gizler, istatistikler kalır. Puan en az 10 kelimeden sonra hesaplanır.
+
+| Derece | Ateşman | Flesch |
+| --- | --- | --- |
+| Çok kolay | 90 ve üstü | 80 ve üstü |
+| Kolay | 70–89 | 60–79 |
+| Orta | 50–69 | 50–59 |
+| Zor | 30–49 | 30–49 |
+| Çok zor | 30'un altı | 30'un altı |
+
+Aynı ölçümü kendi kodunuzda kullanmak için `@viveeditor/ui` paketinden `measureText(text, 'atesman')` çağırabilirsiniz.
+
+## Klavye kısayolları
+
+Mac'te <kbd>Ctrl</kbd> yerine <kbd>⌘</kbd>, <kbd>Alt</kbd> yerine <kbd>⌥</kbd> kullanılır. Araç çubuğundaki ipuçları da kısayolu işletim sisteminize göre gösterir. Bir kısayol, ilgili eklenti yüklüyse çalışır.
+
+| İşlem | Windows ve Linux | Mac |
+| --- | --- | --- |
+| Kalın | <kbd>Ctrl</kbd>+<kbd>B</kbd> | <kbd>⌘</kbd>+<kbd>B</kbd> |
+| İtalik | <kbd>Ctrl</kbd>+<kbd>I</kbd> | <kbd>⌘</kbd>+<kbd>I</kbd> |
+| Altı çizili | <kbd>Ctrl</kbd>+<kbd>U</kbd> | <kbd>⌘</kbd>+<kbd>U</kbd> |
+| Üstü çizili | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd> |
+| Satır içi kod | <kbd>Ctrl</kbd>+<kbd>E</kbd> | <kbd>⌘</kbd>+<kbd>E</kbd> |
+| Vurgu | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd> |
+| Başlık 1–6 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>6</kbd> | <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>1</kbd> … <kbd>6</kbd> |
+| Madde işaretli liste | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>8</kbd> |
+| Numaralı liste | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>7</kbd> |
+| Görev listesi | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>9</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>9</kbd> |
+| Alıntı | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>B</kbd> |
+| Kod bloğu | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>C</kbd> | <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>C</kbd> |
+| Sola hizala | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd> |
+| Ortala | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd> |
+| Sağa hizala | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd> |
+| İki yana yasla | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>J</kbd> |
+| Bağlantı | <kbd>Ctrl</kbd>+<kbd>K</kbd> | <kbd>⌘</kbd>+<kbd>K</kbd> |
+| Bul ve değiştir | <kbd>Ctrl</kbd>+<kbd>F</kbd> | <kbd>⌘</kbd>+<kbd>F</kbd> |
+| Geri al | <kbd>Ctrl</kbd>+<kbd>Z</kbd> | <kbd>⌘</kbd>+<kbd>Z</kbd> |
+| Yinele | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> ya da <kbd>Ctrl</kbd>+<kbd>Y</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> ya da <kbd>⌘</kbd>+<kbd>Y</kbd> |
+| Aynı paragrafta yeni satır | <kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>⇧</kbd>+<kbd>Enter</kbd> |
+| Araç çubuğuna geç | <kbd>Alt</kbd>+<kbd>F10</kbd> | <kbd>⌥</kbd>+<kbd>F10</kbd> |
+| Yapay zeka asistanı | <kbd>Ctrl</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>J</kbd> |
+
+Yapay zeka kısayolu yalnızca [yapay zeka asistanı](/dokumantasyon/yapay-zeka/) eklentisi takılıysa çalışır.
+
+### Gezinme
+
+- Araç çubuğunda <kbd>←</kbd> ve <kbd>→</kbd> düğmeler arasında, <kbd>Home</kbd> ve <kbd>End</kbd> başa ve sona gider. <kbd>Esc</kbd> sizi metne geri götürür.
+- Listede <kbd>Tab</kbd> maddeyi içeri alır, <kbd>Shift</kbd>+<kbd>Tab</kbd> dışarı çıkarır.
+- Tabloda <kbd>Tab</kbd> sonraki hücreye geçer, son hücrede yeni satır açar; <kbd>Shift</kbd>+<kbd>Tab</kbd> önceki hücreye döner.
+- Kod bloğunda <kbd>Tab</kbd> girinti ekler, <kbd>Shift</kbd>+<kbd>Tab</kbd> geri alır.
+- Tablodan ya da kod bloğundan klavyeyle çıkmak için önce <kbd>Esc</kbd>, sonra <kbd>Tab</kbd> tuşuna basın; odak editörden sonraki öğeye geçer.
+- Paneller ve menüler <kbd>Esc</kbd> ile kapanır, odak açıldıkları düğmeye ya da metne döner.
+
+### Yazarken dönüşenler
+
+Satır başında yazdığınız bazı işaretler bloğa dönüşür:
+
+| Yazın | Sonuç |
+| --- | --- |
+| `#` ile `######` arası ve boşluk | Başlık 1–6 |
+| `-`, `*` ya da `+` ve boşluk | Madde işaretli liste |
+| `1.` ve boşluk | Numaralı liste (başka bir sayı o sayıdan başlatır) |
+| `[ ]` ve boşluk | Görev listesi (`[x]` işaretli başlar) |
+| `>` ve boşluk | Alıntı |
+| `` ``` `` ve boşluk | Kod bloğu (dil adıyla da yazılabilir) |
+| `---` | Yatay çizgi |
+
+Metin içinde `**kalın**` ya da `__kalın__`, `*italik*` ya da `_italik_`, `~~üstü çizili~~` ve ters tırnak içinde satır içi kod da yazarken biçimlenir.

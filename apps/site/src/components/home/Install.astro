@@ -1,0 +1,40 @@
+---
+import { Code } from 'astro:components'
+import type { Locale } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import { ANCHORS } from '../../i18n/ui'
+import { localizedSnippet } from './snippets'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const install = HOME[lang].install
+---
+<section class="sec" id={ANCHORS[lang].install} aria-labelledby="installTitle">
+  <div class="wrap">
+    <header class="sec-head">
+      <p class="eyebrow">{install.eyebrow}</p>
+      <h2 id="installTitle" class="title">{install.heading} <em>{install.headingEm}</em></h2>
+      <p class="lead">{install.lead}</p>
+    </header>
+    <div class="install glass" data-tabs>
+      <div class="tabs" role="tablist" aria-label={install.tabsLabel}>
+        {install.tabs.map((tab, i) => (
+          <button type="button" role="tab" id={`tab-${tab.id}`} aria-controls={`panel-${tab.id}`} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1}>{tab.label}</button>
+        ))}
+      </div>
+      {install.tabs.map((tab, i) => {
+        const snippet = localizedSnippet(tab.id, lang);
+        return (
+          <div class="tab-panel" role="tabpanel" id={`panel-${tab.id}`} aria-labelledby={`tab-${tab.id}`} tabindex="0" hidden={i !== 0}>
+            <p class="tab-lead">{tab.lead}</p>
+            <div class="code-wrap">
+              <Code code={snippet.code} lang={snippet.lang} theme="github-dark-default" />
+              <button class="btn btn-ghost btn-copy" type="button" data-copy={snippet.code} data-copied={install.copied}><svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><span>{install.copy}</span></button>
+            </div>
+          </div>
+        );
+      })}
+      <p class="install-note mini-label">{install.versionNote}</p>
+    </div>
+  </div>
+</section>

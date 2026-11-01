@@ -1,0 +1,98 @@
+---
+key: packages
+title: Paketler
+description: viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri.
+updated: 2026-11-01
+---
+
+viveEditor küçük paketlere bölünmüştür; yalnızca kullandığınızı yüklersiniz. Bu sayfada her paketi, ne yaptığını ve ek giriş noktalarını bulacaksınız. Her npm paketinin genel API'si deponun [`api/` klasöründe](https://github.com/mtvrkan/viveeditor/tree/main/api) kayıtlıdır.
+
+## Nereden başlamalı
+
+| Paket | Ne yapar |
+| --- | --- |
+| `viveeditor` | Textarea'ları araç çubuklu editöre çeviren tek betik. `mountEditor`, `upgradeTextarea`, `upgradeAll` ve içerdiği paketlerin dışa aktardığı her şey de buradan alınabilir. |
+| `@viveeditor/core` | ProseMirror üzerine kurulu editör motoru ve eklenti sistemi: şema, komutlar, HTML ve JSON, yapıştırma temizliği. Araç çubuğu yoktur. |
+| `@viveeditor/ui` | Yüzen araç çubuğu, seçim balonu, `/` menüsü, paneller, Dosya menüsü ve okunabilirlik göstergesi. |
+
+`viveeditor` paketi `core`, `ui`, `ext-basic`, `ext-code-block`, `ext-embed`, `ext-format`, `ext-image`, `ext-list`, `ext-office-paste`, `ext-search`, `ext-table` ve `ext-task-list` paketlerini yeniden dışa aktarır. CDN sürümünde de aynı özellikler vardır.
+
+## Düzenleme özellikleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/ext-basic` | Kalın, italik, altı çizili, üstü çizili, satır içi kod, bağlantılar, başlıklar, alıntılar, yatay çizgiler, satır sonları |
+| `@viveeditor/ext-list` | Madde işaretli ve numaralı listeler |
+| `@viveeditor/ext-format` | Metin hizalama, yazı rengi ve vurgu |
+| `@viveeditor/ext-task-list` | Yapılacaklar listeleri |
+| `@viveeditor/ext-code-block` | Dil seçicili kod blokları ve isteğe bağlı sözdizimi renklendirmesi |
+| `@viveeditor/ext-table` | Birleştirilmiş hücreler, başlık satırları ve sütun genişlikleriyle tablolar |
+| `@viveeditor/ext-search` | Türkçe büyük harfleri doğru eşleştiren bul ve değiştir |
+| `@viveeditor/ext-character-count` | Karakter sayacı ve sınırı |
+| `@viveeditor/ext-image` | Adresleri denetlenen görseller, güvenli yükleme ve alternatif metin hatırlatmaları |
+| `@viveeditor/ext-embed` | Denetlenmiş bağlantılardan yeniden kurulan YouTube, Vimeo ve Spotify oynatıcıları |
+| `@viveeditor/ext-office-paste` | Word, Google Dokümanlar ve LibreOffice'ten gerçek listelerle temiz yapıştırma |
+
+## Ekstralar (yalnızca npm)
+
+Bunlar CDN betiğinde yoktur. Menüleri ve panelleri `@viveeditor/ui/extras` sağlar.
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/ext-mention` | Kimlikleri denetlenen `@` bahsetmeleri |
+| `@viveeditor/ext-math` | Kendi KaTeX kopyanızla çizilen LaTeX formülleri |
+| `@viveeditor/ext-footnote` | Yerinde düzenlenen, yayımlanan sayfada numaralanan dipnotlar |
+| `@viveeditor/emoji-data` | Emoji menüsü için sıkıştırılmış emoji listesi |
+
+Şablonlar ve yapay zekâ asistanı için ayrı bir eklenti paketi gerekmez; ikisi de `@viveeditor/ui/extras` içindeki arayüz eklentileridir.
+
+## Dosya dönüştürücüleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/markdown` | Markdown içe ve dışa aktarma, Markdown'ı tanıyan yapıştırma |
+| `@viveeditor/docx` | Güvenilmeyen dosyalar için sınırlarla Word (`.docx`) içe ve dışa aktarma |
+
+Dosya menüsü bunları yükleyici fonksiyon olarak alır; yalnızca kullanıldıklarında indirilirler.
+
+## Çerçeve bileşenleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/react` | React bileşeni ve `useViveEditor` kancası |
+| `@viveeditor/vue` | `v-model` destekli Vue bileşeni ve `useViveEditor` birleşimi |
+| `@viveeditor/svelte` | `bind:value` destekli Svelte bileşeni ve `use:viveEditor` eylemi |
+| `@viveeditor/angular` | `ngModel` ve reaktif formlar için Angular bileşeni |
+| `@viveeditor/element` | Her sayfada çalışan `<vive-editor>` form alanı |
+
+Bkz. [Çerçeveler](/dokumantasyon/cerceveler/).
+
+## Sunucu paketleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/sanitize` | Editör çıktısıyla birebir uyumlu, Node için sunucu tarafı HTML temizleme |
+| `viveeditor/sanitizer` (PHP) | Aynı temizleyicinin bağımlılıksız PHP 8.4+ sürümü |
+| `viveeditor/laravel` (PHP) | Laravel 12+ için Blade bileşeni, yerel editör dosyaları ve `@viveHtml` |
+
+PHP paketleri Composer ile kurulur ve ayrı sürümlenir. Bkz. [Sunucuda temizleme](/dokumantasyon/sunucuda-temizleme/) ve [Laravel](/dokumantasyon/laravel/).
+
+## Ek giriş noktaları
+
+Bazı paketlerin birden fazla girişi vardır; böylece ağır kod ya da yalnızca yayın sayfasında gereken kod editör paketinin dışında kalır:
+
+- `@viveeditor/ui/extras`: `mentionMenu`, `emojiMenu`, `templateMenu`, `mathTools`, `footnoteTools`, `aiAssistant` ve `suggestionMenu`.
+- `@viveeditor/ui/panels`: panel kiti; ilk açılışta yüklenmesi yerine paketinize dahil etmek isterseniz.
+- `@viveeditor/ext-code-block/highlight`: `CodeHighlight` ve `shikiHighlighter`.
+- `@viveeditor/ext-embed/activate`: yayın sayfaları için `activateEmbeds()`.
+- `@viveeditor/ext-math/render`: yayın sayfaları için `renderMath()`.
+- `@viveeditor/ext-footnote/render`: yayın sayfaları için `renderFootnotes()`.
+- `@viveeditor/markdown/paste`: `MarkdownPaste`.
+- `@viveeditor/element/define`: `<vive-editor>` öğesini kaydeder.
+- `@viveeditor/emoji-data/en`: İngilizce emoji listesi.
+
+Yerleşim kuralı gereken paketler bir `style.css` dosyası da sunar; liste [Kurulum](/dokumantasyon/kurulum/) sayfasında.
+
+## API raporları
+
+Her npm paketinin [`api/`](https://github.com/mtvrkan/viveeditor/tree/main/api) altında bir klasörü vardır; örneğin [`api/core`](https://github.com/mtvrkan/viveeditor/tree/main/api/core) ya da [`api/ui`](https://github.com/mtvrkan/viveeditor/tree/main/api/ui). Bu klasörlerde yayımlanan `.d.ts` tür bildirimleri durur. Genel API değiştiğinde değişiklik inceleme sırasında bu dosyalarda görünür; bir paketin belirli bir sürümde tam olarak neyi dışa aktardığını buradan okuyabilirsiniz.

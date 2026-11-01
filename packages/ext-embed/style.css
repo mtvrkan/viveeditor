@@ -1,0 +1,115 @@
+.vive-content .vive-embed {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: var(--vive-embed-height, auto);
+  aspect-ratio: var(--vive-embed-ratio, 16 / 9);
+  margin: 0 0 0.9em;
+  overflow: hidden;
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 90% at 20% 0%, hsl(222 30% 26%), transparent 60%),
+    var(--ve-embed-bg, hsl(222 24% 13%));
+  color: hsl(0 0% 100%);
+  font: 14px / 1.4 var(--ve-ui, system-ui, sans-serif);
+  user-select: none;
+}
+
+.vive-content .vive-embed.ProseMirror-selectednode {
+  outline: 2px solid var(--ve-primary, hsl(221 83% 53%));
+  outline-offset: 2px;
+}
+
+.vive-content .vive-embed-play {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: hsl(0 0% 100% / 0.92);
+  color: hsl(222 24% 13%);
+  cursor: pointer;
+  box-shadow: 0 6px 24px hsl(0 0% 0% / 0.35);
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.vive-content .vive-embed-play:hover {
+  transform: scale(1.06);
+}
+
+.vive-content .vive-embed-play:focus-visible {
+  outline: 3px solid var(--ve-primary, hsl(221 83% 53%));
+  outline-offset: 3px;
+}
+
+.vive-content .vive-embed-play svg {
+  width: 28px;
+  height: 28px;
+  margin-left: 3px;
+  fill: currentColor;
+}
+
+.vive-content .vive-embed-meta {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px;
+  background: linear-gradient(transparent, hsl(0 0% 0% / 0.55));
+}
+
+.vive-content .vive-embed-provider {
+  flex: none;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.vive-content .vive-embed-title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.vive-content .vive-embed[data-provider="spotify"] {
+  justify-items: start;
+  padding-inline-start: 16px;
+}
+
+.vive-content .vive-embed[data-provider="spotify"] .vive-embed-play {
+  width: 48px;
+  height: 48px;
+}
+
+.vive-content .vive-embed[data-provider="spotify"] .vive-embed-meta {
+  inset: 0 0 0 80px;
+  align-items: center;
+  background: none;
+}
+
+.vive-content .vive-embed.is-playing {
+  display: block;
+  background: none;
+}
+
+.vive-content .vive-embed.is-playing iframe {
+  display: block;
+}
+
+.vive-content .vive-embed.is-invalid {
+  aspect-ratio: auto;
+  padding: 16px;
+  border: 1px dashed var(--ve-border, hsl(220 13% 85%));
+  background: var(--ve-muted, hsl(220 14% 95%));
+  color: var(--ve-muted-fg, hsl(220 9% 40%));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vive-content .vive-embed-play {
+    transition: none;
+  }
+}

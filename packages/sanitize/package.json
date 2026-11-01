@@ -1,0 +1,66 @@
+{
+  "name": "@viveeditor/sanitize",
+  "version": "0.0.0",
+  "description": "Server-side sanitizer that keeps exactly the HTML viveEditor produces and removes everything else.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "sanitizer",
+    "html-sanitizer",
+    "xss",
+    "server"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/sanitize#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/sanitize"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./profile.json": "./dist/profile.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsdown && cp src/profile.json dist/profile.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "parse5": "8.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@viveeditor/core": "workspace:*",
+    "@viveeditor/ext-basic": "workspace:*",
+    "@viveeditor/ext-footnote": "workspace:*",
+    "@viveeditor/ext-math": "workspace:*",
+    "@viveeditor/ext-mention": "workspace:*",
+    "fast-check": "^4.10.2",
+    "jsdom": "^30.1.3",
+    "tsdown": "0.23.1",
+    "vitest": "^5.0.5",
+    "viveeditor": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

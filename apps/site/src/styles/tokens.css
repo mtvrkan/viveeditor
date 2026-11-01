@@ -1,0 +1,98 @@
+@property --ocr {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 0%;
+}
+@property --rk {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+:root {
+  color-scheme: light;
+  --wash: light-dark(#eaf2fb, #0f1115);
+  --wash-2: light-dark(#f4f8fd, #14151a);
+  --deep: light-dark(#0a1a33, #e0e2e6);
+  --on-deep: light-dark(#ffffff, #0f1115);
+  --navy: #14305a;
+  --night: #0a1a33;
+  --ink: var(--deep);
+  --ink-2: light-dark(#34496a, #bcc0c8);
+  --ink-3: light-dark(#53678a, #9ba0ab);
+  --sky: light-dark(#7fd0ff, #8bcaee);
+  --glow-sky: 127, 208, 255;
+  --glow-blue: 47, 143, 230;
+  --on-night: 230, 239, 250;
+  --blue: light-dark(#2f8fe6, #45a6de);
+  --blue-ink: light-dark(#1a62b0, #8bcaee);
+  --amber: #ffc46b;
+  --amber-ink: light-dark(#8a5100, #ffc46b);
+  --paper: #ffffff;
+  --line: light-dark(#dce5f0, #24272e);
+  --hair: light-dark(rgba(20, 48, 90, 0.1), rgba(224, 226, 230, 0.1));
+  --hair-2: light-dark(rgba(20, 48, 90, 0.16), rgba(224, 226, 230, 0.17));
+  --sh: light-dark(rgb(20, 48, 90), rgb(0, 0, 0));
+  --sh2: light-dark(rgb(10, 26, 51), rgb(0, 0, 0));
+  --tint: light-dark(rgb(10, 26, 51), rgb(214, 218, 226));
+  --surf: light-dark(#ffffff, #22242b);
+  --solid: light-dark(#ffffff, #1b1d23);
+  --hl: light-dark(#ffffff, rgba(255, 255, 255, 0.14));
+  --glass: light-dark(rgba(255, 255, 255, 0.5), rgba(23, 25, 31, 0.62));
+  --glass-strong: light-dark(rgba(255, 255, 255, 0.74), rgba(27, 29, 35, 0.84));
+  --edge: linear-gradient(
+    135deg,
+    light-dark(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.18)) 0%,
+    light-dark(rgba(127, 208, 255, 0.8), rgba(127, 208, 255, 0.42)) 46%,
+    light-dark(rgba(255, 196, 107, 0.75), rgba(255, 196, 107, 0.4)) 100%
+  );
+  --edge-dark: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(127, 208, 255, 0.45) 50%,
+    rgba(255, 196, 107, 0.4) 100%
+  );
+  --shadow:
+    inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.06)),
+    0 40px 80px -40px light-dark(rgba(20, 48, 90, 0.38), rgba(0, 0, 0, 0.8)),
+    0 2px 6px light-dark(rgba(20, 48, 90, 0.05), rgba(0, 0, 0, 0.35));
+  --shadow-soft:
+    inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.06)),
+    0 14px 34px -20px light-dark(rgba(20, 48, 90, 0.32), rgba(0, 0, 0, 0.7));
+  --ok: light-dark(#14855a, #37be7f);
+  --ok-ink: light-dark(#0b6a46, #37be7f);
+  --ok-soft: light-dark(rgba(20, 133, 90, 0.13), rgba(55, 190, 127, 0.14));
+  --bad: light-dark(#c23a52, #e66565);
+  --bad-ink: light-dark(#a82c43, #e66565);
+  --bad-soft: light-dark(rgba(194, 58, 82, 0.12), rgba(230, 101, 101, 0.15));
+  --btn-top: light-dark(#2179cf, #1f77ad);
+  --btn-bot: light-dark(#134c8f, #1b5a8d);
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-2xl: 40px;
+  --s-1: 8px;
+  --s-2: 16px;
+  --s-3: 24px;
+  --s-4: 32px;
+  --s-5: 48px;
+  --s-6: 64px;
+  --s-7: 96px;
+  --s-8: 144px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --f-display: "Geist Variable", "Geist", system-ui, sans-serif;
+  --f-body: "Geist Variable", "Geist", system-ui, sans-serif;
+  --f-serif: "Instrument Serif", Georgia, serif;
+  --f-mono: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+  --f-hand: "Caveat", "Geist Variable", cursive;
+  --f-ar: "Geist Variable", sans-serif;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --glow-sky: 69, 166, 222;
+  --glow-blue: 31, 119, 173;
+  --on-night: 224, 226, 230;
+}
+:root {
+  scrollbar-color: color-mix(in srgb, var(--ink-3) 50%, transparent) transparent;
+}

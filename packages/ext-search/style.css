@@ -1,0 +1,10 @@
+.vive-content .ProseMirror-search-match {
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--ve-mark, hsl(52 100% 83%)) 70%, transparent);
+  color: var(--ve-on-light, hsl(220 20% 12%));
+}
+
+.vive-content .ProseMirror-active-search-match {
+  background: var(--ve-mark, hsl(52 100% 83%));
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ve-primary, hsl(202 80% 36%)) 70%, transparent);
+}

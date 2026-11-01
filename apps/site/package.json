@@ -1,0 +1,42 @@
+{
+  "name": "@viveeditor/site",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro check && astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "test": "vitest run",
+    "icons": "node scripts/icons.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "5.3.0",
+    "@fontsource-variable/geist-mono": "5.3.0",
+    "@fontsource/instrument-serif": "5.3.0",
+    "@viveeditor/core": "workspace:*",
+    "@viveeditor/docx": "workspace:*",
+    "@viveeditor/emoji-data": "workspace:*",
+    "@viveeditor/ext-code-block": "workspace:*",
+    "@viveeditor/ext-embed": "workspace:*",
+    "@viveeditor/ext-footnote": "workspace:*",
+    "@viveeditor/ext-math": "workspace:*",
+    "@viveeditor/ext-mention": "workspace:*",
+    "@viveeditor/markdown": "workspace:*",
+    "@viveeditor/ui": "workspace:*",
+    "katex": "0.19.1",
+    "shiki": "4.5.0",
+    "viveeditor": "workspace:*"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@astrojs/mdx": "8.0.2",
+    "@resvg/resvg-js": "2.6.2",
+    "astro": "7.3.5",
+    "pagefind": "1.5.2",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

@@ -1,0 +1,122 @@
+---
+key: files
+title: Open, save and print
+description: Use the File menu to open Word, Markdown, HTML and text files, save as Word, Markdown or HTML, and print the document.
+updated: 2026-11-01
+faq:
+  - q: How do I save as PDF?
+    a: Choose "Print or PDF" from the File menu, then pick "Save as PDF" in the browser's print dialog.
+  - q: Can I open .doc, .odt or .rtf files?
+    a: No. Only .docx, .md, .html, .htm and .txt files open. Save older files as .docx in Word or LibreOffice first.
+  - q: Does an opened file replace my text?
+    a: If the document is empty, the file replaces it. If there is text, the file goes in at the cursor. Either way, one undo takes it back.
+---
+
+The toolbar has a File menu. It opens `.docx`, `.md`, `.html` and `.txt` files, saves the text as Word, Markdown or HTML, and prints it (choose "Save as PDF" in the print dialog for a PDF). This page covers turning the menu on and off, loading the converters, and what Word and Markdown files keep and drop.
+
+## The File menu
+
+The menu holds: "Open file…", "Save as Word (.docx)", "Save as Markdown (.md)", "Save as HTML (.html)" and "Print or PDF".
+
+- An opened file replaces an empty document. If there is text, the file goes in at the cursor. One undo takes it back.
+- In text files, blank lines separate paragraphs and single line breaks stay as line breaks.
+- Every opened file goes through the same document rules as pasted content, so unknown markup never reaches the output. Sanitize the saved HTML on the server as well.
+- Saved files are named from the `fileName` option ("document" if not set). Characters that file names cannot hold are replaced, and the name is at most 100 characters.
+- Errors appear in a visible notice. Progress messages such as "Opening file…" are announced to screen readers.
+
+## With the one-script build
+
+The menu is there by default, with the Word and Markdown converters. The converters live in two extra files next to the main script and load on first use. To hide the menu for one textarea, add `data-files="false"`:
+
+```html
+<textarea name="body" data-editor data-files="false"></textarea>
+```
+
+For the add-on addresses, the fingerprint check and Content Security Policy settings, see [Security and CSP](/en/docs/security-and-csp/).
+
+## With npm
+
+Pass the converters as loader functions, so they download only when used:
+
+```ts
+import { createUI } from '@viveeditor/ui'
+
+createUI(editor, {
+  files: {
+    docx: () => import('@viveeditor/docx'),
+    markdown: () => import('@viveeditor/markdown'),
+    upload,
+    fileName: 'Report',
+  },
+})
+```
+
+In the framework components, pass the same object inside `ui: { files: { … } }`; the components add no loaders by default.
+
+| Option | Description |
+| --- | --- |
+| `docx` | A loader that returns the `@viveeditor/docx` module. Turns on opening and saving Word files. |
+| `markdown` | A loader that returns the `@viveeditor/markdown` module. Turns on opening and saving Markdown. |
+| `html` | `false` removes saving as HTML. |
+| `print` | `false` removes printing. |
+| `fileName` | The name of saved files. |
+| `upload` | The function that uploads images from Word files to your server. It follows the same contract as the upload function in [Images and uploads](/en/docs/images-and-uploads/). |
+| `allowBase64` | Embeds images from Word files in the document instead of uploading them. |
+
+Without loaders, the menu opens HTML and text files, saves as HTML and prints. `files: false` hides the menu.
+
+## Limits
+
+- Word files can be up to 20 MB; HTML, Markdown and text files up to 5 MB. The Markdown converter handles up to 1 MB of text.
+- Password-protected files and files that unpack too large or too deep are refused with a message.
+- `.doc`, `.odt` and `.rtf` are not supported.
+- If some images in a Word file cannot be added, the menu says how many. If other unsupported content was left out, it says so too.
+
+## Printing
+
+"Print or PDF" opens the browser's print dialog. The document is prepared in a hidden frame that runs no scripts and loads only images and styles. Video players print as links.
+
+For your own button, call `printDocument(editor, { title, css })` from `@viveeditor/ui`.
+
+## Markdown
+
+Headings, bold, italic, strikethrough, inline code, links, images, bullet, numbered and nested lists, checklists, quotes, rules, fenced code with its language and tables are read and written.
+
+Markdown has no form for text colour, highlight, underline and alignment, so they are left out when saving. Video players are saved as links. Raw HTML inside Markdown is never let through.
+
+## Word (.docx)
+
+| Kept when opening and saving | Left out |
+| --- | --- |
+| Headings (a Word title opens as a level 1 heading), bold, italic, underline, strikethrough, text colour, highlight, alignment | Comments, footnotes, headers and footers, text boxes, equations |
+| Bullet, numbered and nested lists | Tracked deletions (insertions are kept), hidden text |
+| Links to web and mail addresses | Other links become plain text; field codes keep only their visible text |
+| Tables with merged cells and header rows, quotes, code | Code block language |
+| Images (opening needs your upload function or `allowBase64`) | Without one, images are dropped and the menu says how many |
+
+Checklists are saved as ☐ and ☑ text and video players as links. The saved file uses A4 pages and carries no author.
+
+<Callout type="note" title="Images saved to Word">
+Images stored as data addresses are embedded in the file. Images at web addresses are downloaded and embedded only when you call `exportDocx` yourself with `fetchImages: true`; the File menu does not, and writes those images as links.
+</Callout>
+
+## Use the converters directly
+
+You can convert without the menu:
+
+```ts
+import { exportDocx, importDocx } from '@viveeditor/docx'
+import { markdownToHtml, toMarkdown } from '@viveeditor/markdown'
+
+const { html, warnings } = await importDocx(file, { upload })
+editor.commands.replaceContent(html)
+
+const blob = await exportDocx(editor, { title: 'Report' })
+
+editor.commands.replaceContent(markdownToHtml('# Title\n\nSome **bold** text'))
+const markdown = toMarkdown(editor)
+```
+
+For files it refuses, `importDocx` throws a `DocxError` with the code `TOO_LARGE`, `NOT_DOCX`, `ENCRYPTED`, `UNSUPPORTED`, `DAMAGED`, `TOO_COMPLEX` or `ABORTED`. `warnings` lists left-out content as `{ code, count }`.
+
+To format pasted Markdown text, see `MarkdownPaste` on the [Paste from Office](/en/docs/paste-from-office/) page.

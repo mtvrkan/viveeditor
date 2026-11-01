@@ -1,0 +1,47 @@
+---
+key: versioning
+title: Versioning
+description: How viveEditor versions its packages before 1.0, what stays compatible, and why the CDN script needs an exact version.
+updated: 2026-11-01
+---
+
+viveEditor follows semantic versioning with the usual 0.x rule, and all npm packages share one version number. This page explains what may change between versions, what never breaks, and how to pin a version safely.
+
+## The 0.x rule
+
+viveEditor is in 0.x, before its first stable release.
+
+- A breaking change can ship in a minor version, such as 0.1 to 0.2. It is described in that release's notes.
+- Patch versions, such as 0.1.0 to 0.1.1, never break.
+
+Read the release notes before you move to a new minor version. Each version is tagged and published as a [GitHub release](https://github.com/mtvrkan/viveeditor/releases).
+
+## One version for every package
+
+All npm packages, `viveeditor` and every `@viveeditor/*` package, are released together with the same version number. Install them at the same version, so the editor, its extensions and your framework component always match.
+
+The PHP packages, `viveeditor/sanitizer` and `viveeditor/laravel`, are versioned separately through Composer.
+
+## Stored content stays readable
+
+HTML and JSON saved by any 0.x version stay readable by every later 0.x version. Stored content never needs a migration when you update.
+
+The canonical storage format is ProseMirror JSON (`editor.getJSON()`); HTML (`editor.getHTML()`) is a rendering format. You can store either.
+
+## The public API is recorded
+
+The public API of each package is recorded as `.d.ts` files in the [`api/` folder](https://github.com/mtvrkan/viveeditor/tree/main/api) of the repository. The build fails when the API changes without an update to these files, so every change to the public API is visible in review. To see what changed between two versions, compare the `api/` folder at their tags.
+
+## Pin the CDN version
+
+Always load the CDN script with an exact version:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"></script>
+```
+
+Replace `x.y.z` with the exact version you use. The script loads its add-ons from the same folder and checks them against fingerprints built into that exact version, and an add-on is accepted only when its version matches. A short address such as `cdn.jsdelivr.net/npm/viveeditor` cannot find them. Load `viveeditor.css` from the same version folder.
+
+## Security fixes
+
+Until 1.0, only the latest published minor version receives security fixes. A fix ships as a patch release of every package, because all packages share one version number. Staying on the latest minor is the way to get them. See [Security and CSP](/en/docs/security-and-csp/).

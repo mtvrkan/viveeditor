@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>viveEditor — React</title>
+  </head>
+  <body>
+    <main class="page">
+      <header class="site">
+        <strong>React bileşeni</strong>
+        <button type="button" class="action" data-testid="set-value">Örnek metni yükle</button>
+      </header>
+      <div id="editor" data-testid="editor"></div>
+      <h2 class="output-title">Bağlı değer</h2>
+      <pre class="output" data-testid="output" aria-live="polite"></pre>
+    </main>
+    <script type="module" src="/src/adapters/react.ts"></script>
+  </body>
+</html>

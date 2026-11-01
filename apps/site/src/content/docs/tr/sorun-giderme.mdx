@@ -1,0 +1,148 @@
+---
+key: troubleshooting
+title: Sorun giderme
+description: Yüklenmeyen CDN ek dosyalarından reddedilen dosyalara, çalışmayan oynatıcılardan temizleyici hatalarına sık görülen sorunlar ve çözümleri.
+updated: 2026-11-01
+---
+
+Bu sayfa viveEditor'le en sık karşılaşılan sorunları ve nedenlerini listeliyor. Yaşadığınız belirtiyi bulun, nedenleri sırayla kontrol edin; kurulumun tamamı gerekiyorsa bağlantıyı izleyin.
+
+## CDN betiği ve ek dosyalar
+
+### Word, Markdown ya da bir panel yüklenmiyor
+
+CDN betiği `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` ve `viveeditor.panels.iife.js` dosyalarını ilk kullanımda kendi klasöründen yükler. Yüklenemezlerse Dosya menüsü "Dönüştürücü yüklenemedi" der ya da panel "Bu panel yüklenemedi" mesajını Tekrar dene düğmesiyle gösterir. Şu nedenlere bakın:
+
+- Betik adresinde tam sürüm yok; örneğin `cdn.jsdelivr.net/npm/viveeditor`. Tam sürümünüzle `viveeditor@x.y.z` yazın.
+- Dosyaların adı değiştirilmiş ya da dosyalar birleştirilmiş. Ana betiğin adı `viveeditor.classic.iife.js` olarak kalmalı, ek dosyalar da kendi adlarıyla onun yanında durmalı.
+- Dosyaları `Access-Control-Allow-Origin` olmadan kendiniz barındırıyorsunuz; bu yüzden parmak izi denetimi çalışamıyor.
+- İçerik Güvenliği Politikanız `script-src` içinde klasörü engelliyor ya da Trusted Types zorunlu ama `trusted-types` yönergesinde `viveeditor` ilke adı yok.
+
+Başarısız olan ek dosya kaldırılır; bir sonraki kullanımda yeniden denenir. Yükleme 30 saniye sonra bırakılır. Bkz. [Güvenlik ve CSP](/dokumantasyon/guvenlik-ve-csp/).
+
+### Bütünlük denetimi başarısız oluyor
+
+Her ek dosya, ana betiğin o tam sürümüne gömülü bir `sha384` parmak iziyle denetlenir ve yalnızca sürümü birebir tutuyorsa kabul edilir. Tüm dosyaları aynı sürüm klasöründen yükleyin ve derlemeden sonra dosyaları değiştirmeyin.
+
+### İkinci kopya uyarısı
+
+Ana betik iki kez yüklenmiş. İkinci kopya bir uyarı verir ve kendisine ait olmayan ek dosyaları ilk kopyaya devreder. Fazla `<script>` etiketini kaldırın.
+
+### npm ile Word ve Markdown görünmüyor
+
+Paketleyiciyle CDN ek dosyaları yoktur. Yükleyiciler verilmezse Dosya menüsü yalnızca HTML ve metin dosyalarını açar. Dönüştürücüleri `files` içinde verin; bkz. [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/).
+
+## Dosyalar ve yapıştırılan içerik
+
+### Bir dosya reddediliyor
+
+- 20 MB'tan büyük Word dosyaları ve 5 MB'tan büyük metin dosyaları reddedilir.
+- Parola korumalı dosyalar açılamaz. Parolayı kaldırıp tekrar deneyin.
+- Açıldığında çok büyüyen ya da çok derin iç içe geçen Word dosyaları "Dosya çok büyük ya da çok karmaşık." mesajıyla reddedilir.
+- `.doc`, `.odt` ve `.rtf` desteklenmez. Dosyayı önce `.docx` olarak kaydedin.
+
+### Word dosyası açılınca görseller kayboluyor
+
+Word dosyasındaki görselleri açmak için Dosya menüsü seçeneklerinde `upload` fonksiyonunuz ya da `allowBase64` gerekir. İkisi de yoksa görseller atlanır ve menü kaç tane atlandığını söyler.
+
+### Word'den yapıştırınca görseller eksik
+
+Kopyalayan bilgisayardaki dosyalara işaret eden görseller yapıştırılamaz. `OfficePaste` eklentisinin `onDropped` geri çağırması kaç görselin atlandığını söyler. Bu görselleri görsel paneliyle ekleyin.
+
+### Görsel ya da bağlantı adresi reddediliyor
+
+- Görseller `https` adresi ister. `data:` adresleri yalnızca `allowBase64` ile çalışır, SVG görseller hiçbir zaman.
+- Bağlantılar yalnızca `http`, `https`, `mailto` ve `tel` kabul eder.
+
+## Video gömme
+
+### Bağlantı oynatıcıya dönüşmüyor
+
+- Sağlayıcı `providers` listenizde yok. Yerleşik sağlayıcılar YouTube, Vimeo ve Spotify'dır.
+- Bağlantı bir kısaltma hizmetinden geliyor. Editör yönlendirmeleri ve kısa bağlantıları hiçbir zaman izlemez.
+- Yapıştırırken panoda yalnızca bağlantı olmalı ve boş bir satıra yapıştırılmalı. Aksi hâlde araç çubuğundaki video düğmesini kullanın.
+- Belgede izin verilen en fazla oynatıcı sayısına ulaşılmış (`maxEmbeds`, varsayılan 50).
+
+### Yayımlanan sayfada oynatıcılar çalışmıyor
+
+- Sayfa genelindeki `Referrer-Policy: no-referrer` ayarı YouTube oynatıcılarını durdurur.
+- `frame-src` yönergeniz sağlayıcıyı listelemiyor.
+- `facade: true` kullanıyorsunuz ama sayfada `@viveeditor/ext-embed/activate` içinden `activateEmbeds()` çağırmıyorsunuz.
+- `embeds: true` verilmediği için sunucu temizleyiciniz oynatıcıları sildi.
+
+Bkz. [Video](/dokumantasyon/video/).
+
+## Ekstralar
+
+### Formüller LaTeX kaynağıyla görünüyor
+
+0.18.2'den eski KaTeX `KATEX_OUTDATED` hata koduyla reddedilir ve yerine kaynak gösterilir. KaTeX'i güncelleyin. KaTeX yüklenemezse kod `KATEX_LOAD` olur. Yayımlanan sayfalarda `@viveeditor/ext-math/render` içinden `renderMath(root, { load: () => import('katex') })` çağırın ve `katex/dist/katex.min.css` dosyasını yükleyin.
+
+### Dipnotlar yayımlanan sayfada numaralanmıyor
+
+İçeriği gösteren sayfada `@viveeditor/ext-footnote/render` içinden `renderFootnotes(root)` çağırın.
+
+## Sunucuda temizleme
+
+### `TOO_LARGE` ya da `TOO_COMPLEX`
+
+`sanitizeHtml`, kesilmiş ya da yarım bir çıktı döndürmek yerine `SanitizeError` fırlatır:
+
+- `TOO_LARGE`: HTML, `maxBytes` değerinden (varsayılan 2 MB) büyük.
+- `TOO_COMPLEX`: yapı, ayrıştırıcıyı yavaşlatacak ya da çok bellek harcatacak türden; örneğin bir etikette 64'ten fazla öznitelik ya da 512 düzeyden derin iç içe geçme. Editör böyle HTML yazmaz.
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+function cleanOrNull(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+`null` aldığınızda isteği reddedin.
+
+### PHP isteği ölümcül hatayla bitiyor
+
+Bazı kısa ve kötü niyetli girdiler, denetim çalışmadan PHP'nin `memory_limit` sınırına ulaşabilir. Bu güvenlidir ama temiz bir istisna değildir. Temizleme yapan uç noktalarda `memory_limit` ve `max_execution_time` değerlerini olağan düzeyde tutun ve oradaki istek gövdesi boyutunu sınırlayın.
+
+### Laravel'de bir alan boş metin olarak okunuyor
+
+`ViveHtml` dönüştürücüsü o kaydı çok büyük ya da çok karmaşık olduğu için temizleyemedi. Hata, istisna işleyicinize gider. Bkz. [Laravel](/dokumantasyon/laravel/).
+
+## Formlar ve kurulum
+
+### Form gönderilmiyor
+
+- `required` olan editör boş. Textarea, `detail.reason` değeri `'required'` olan bir `vive:invalid` olayı tetikler.
+- Görseller hâlâ yükleniyor. Form, yüklemeler bitince gönderilir. Beklerken bir yükleme başarısız olursa gönderim iptal edilir ve `detail.reason` değeri `'upload'` olan `vive:invalid` olayı tetiklenir.
+
+```ts
+document.querySelector('#body').addEventListener('vive:invalid', (event) => {
+  console.log((event as CustomEvent).detail.reason)
+})
+```
+
+### Araç çubuğunda bir düğme yok
+
+Araç çubuğu yalnızca komutları kayıtlı araçları gösterir. Kendi `extensions` listenizi veriyorsanız eksik aracın eklentisini ekleyin. Dosya menüsü, textarea üzerindeki `data-files="false"` ya da `createUI` içindeki `files: false` ile gizlenir.
+
+### `Editor.create` bir `ViveEditorError` fırlatıyor
+
+- `DUPLICATE_EXTENSION`: aynı eklenti listede iki kez var.
+- `INVALID_SCHEMA`: bir bağımlılık eksik; örneğin liste için liste maddesi.
+- `SCHEMA_CONFLICT`: iki eklenti aynı şeyi tanımlıyor.
+- `DESTROYED`: editörü `destroy()` sonrasında kullandınız.
+- `UNKNOWN_COMMAND`: komutun eklentisi yüklü değil.
+
+### Arayüz yanlış dilde
+
+`locale` verin. Verilmezse editör önce `<html lang="...">` değerine, sonra tarayıcı diline bakar.
+
+### Yayımlanan sayfada görseller çok geniş
+
+Kayıtlı görseller `width` ve `height` değerlerini taşır. İçeriği gösteren sayfalara `img { max-width: 100%; height: auto; }` kuralını ekleyin.

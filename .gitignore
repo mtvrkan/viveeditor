@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.DS_Store
+.svelte-kit
+vendor/
+php/*/composer.lock
+integrations/**/composer.lock
+integrations/laravel/resources/dist/

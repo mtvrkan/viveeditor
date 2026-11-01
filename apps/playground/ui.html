@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>viveEditor — Arayüz</title>
+  </head>
+  <body>
+    <main class="page">
+      <header class="site">
+        <strong>Örnek Haber</strong>
+        <span>Yazı ekle</span>
+      </header>
+      <label class="field-label" for="article">Makale metni</label>
+      <div id="article" class="article" data-testid="ui-editor"></div>
+      <h2 class="output-title">HTML çıktısı</h2>
+      <pre class="output" data-testid="output" aria-live="polite"></pre>
+    </main>
+    <script type="module" src="/src/ui.ts"></script>
+  </body>
+</html>

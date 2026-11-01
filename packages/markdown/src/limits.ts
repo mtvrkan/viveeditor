@@ -1,0 +1,1 @@
+export const MAX_MARKDOWN_LENGTH = 1_000_000

@@ -1,0 +1,106 @@
+{
+  "name": "@viveeditor/markdown",
+  "version": "0.0.0",
+  "description": "Markdown import and export for viveEditor, plus Markdown-aware paste.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "markdown",
+    "import",
+    "export"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/markdown#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/markdown"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./paste": {
+      "types": "./dist/paste.d.ts",
+      "import": "./dist/paste.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "size": "size-limit"
+  },
+  "peerDependencies": {
+    "@viveeditor/core": "workspace:^"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "@types/markdown-it": "^14.2.0",
+    "@viveeditor/core": "workspace:*",
+    "@viveeditor/ext-basic": "workspace:*",
+    "@viveeditor/ext-code-block": "workspace:*",
+    "@viveeditor/ext-embed": "workspace:*",
+    "@viveeditor/ext-footnote": "workspace:*",
+    "@viveeditor/ext-format": "workspace:*",
+    "@viveeditor/ext-image": "workspace:*",
+    "@viveeditor/ext-list": "workspace:*",
+    "@viveeditor/ext-math": "workspace:*",
+    "@viveeditor/ext-mention": "workspace:*",
+    "@viveeditor/ext-table": "workspace:*",
+    "@viveeditor/ext-task-list": "workspace:*",
+    "fast-check": "^4.10.2",
+    "jsdom": "^30.1.3",
+    "size-limit": "^14.3.0",
+    "tsdown": "0.23.1",
+    "vitest": "^5.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "@viveeditor/markdown",
+      "path": "dist/index.js",
+      "ignore": [
+        "@viveeditor/core",
+        "prosemirror-model"
+      ],
+      "limit": "44 KB"
+    },
+    {
+      "name": "@viveeditor/markdown/paste",
+      "path": "dist/paste.js",
+      "ignore": [
+        "@viveeditor/core",
+        "prosemirror-model",
+        "prosemirror-state",
+        "prosemirror-view"
+      ],
+      "limit": "1 KB"
+    }
+  ],
+  "dependencies": {
+    "markdown-it": "^14.3.3",
+    "prosemirror-markdown": "^1.13.9",
+    "prosemirror-model": "^1.25.12",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-view": "^1.42.7"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

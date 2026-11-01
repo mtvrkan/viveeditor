@@ -1,0 +1,31 @@
+---
+import { type DocKey, docByKey } from '../../docs/structure'
+import { docPath, type Locale } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import { ANCHORS } from '../../i18n/ui'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const features = HOME[lang].features
+---
+<section class="sec" id={ANCHORS[lang].features} aria-labelledby="featuresTitle">
+  <div class="wrap">
+    <header class="sec-head">
+      <p class="eyebrow">{features.eyebrow}</p>
+      <h2 id="featuresTitle" class="title">{features.heading} <em>{features.headingEm}</em></h2>
+      <p class="lead">{features.lead}</p>
+    </header>
+    <ul class="feature-grid">
+      {features.items.map((item) => (
+        <li>
+          <a class="feature glass" href={docPath(lang, docByKey(item.doc as DocKey).slug[lang])}>
+            <span class="feature-ic"><svg class="ic" aria-hidden="true"><use href={`#${item.icon}`}/></svg></span>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+            <svg class="ic feature-go" aria-hidden="true"><use href="#i-arrow"/></svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,98 @@
+---
+key: packages
+title: Packages
+description: Every viveEditor package, what it does, which entry points it has and where its public API report lives.
+updated: 2026-11-01
+---
+
+viveEditor is split into small packages so you load only what you use. This page lists every package, what it does and its extra entry points. The public API of each npm package is recorded in the [`api/` folder](https://github.com/mtvrkan/viveeditor/tree/main/api) of the repository.
+
+## Where to start
+
+| Package | What it does |
+| --- | --- |
+| `viveeditor` | One script that turns textareas into editors, with the toolbar. Also exports `mountEditor`, `upgradeTextarea`, `upgradeAll` and everything from the packages it bundles. |
+| `@viveeditor/core` | Editor engine and extension system built on ProseMirror: schema, commands, HTML and JSON, paste cleaning. No toolbar. |
+| `@viveeditor/ui` | Floating toolbar, selection bubble, `/` menu, panels, File menu and readability meter. |
+
+The `viveeditor` package re-exports `core`, `ui`, `ext-basic`, `ext-code-block`, `ext-embed`, `ext-format`, `ext-image`, `ext-list`, `ext-office-paste`, `ext-search`, `ext-table` and `ext-task-list`. Its CDN build carries the same features.
+
+## Editing features
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/ext-basic` | Bold, italic, underline, strikethrough, inline code, links, headings, quotes, rules, line breaks |
+| `@viveeditor/ext-list` | Bullet and ordered lists |
+| `@viveeditor/ext-format` | Text alignment, text colour and highlight |
+| `@viveeditor/ext-task-list` | Checklists |
+| `@viveeditor/ext-code-block` | Code blocks with a language picker and optional syntax colouring |
+| `@viveeditor/ext-table` | Tables with merged cells, header rows and column widths |
+| `@viveeditor/ext-search` | Find and replace that handles Turkish capitals |
+| `@viveeditor/ext-character-count` | Character count and limit |
+| `@viveeditor/ext-image` | Images with checked addresses, safe uploads and alt-text reminders |
+| `@viveeditor/ext-embed` | YouTube, Vimeo and Spotify players rebuilt from checked links |
+| `@viveeditor/ext-office-paste` | Clean paste from Word, Google Docs and LibreOffice with real lists |
+
+## Extras (npm only)
+
+These are not in the CDN script. Their menus and panels come from `@viveeditor/ui/extras`.
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/ext-mention` | `@` mentions with checked ids |
+| `@viveeditor/ext-math` | LaTeX formulas drawn by your own KaTeX |
+| `@viveeditor/ext-footnote` | Footnotes edited in place, numbered on published pages |
+| `@viveeditor/emoji-data` | Compact emoji list for the emoji menu |
+
+Templates and the AI assistant need no extension package; they are UI plugins in `@viveeditor/ui/extras`.
+
+## File converters
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/markdown` | Markdown import and export, and Markdown-aware paste |
+| `@viveeditor/docx` | Word (`.docx`) import and export with limits for untrusted files |
+
+The File menu receives them as loader functions, so they download only when used.
+
+## Framework components
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/react` | React component and `useViveEditor` hook |
+| `@viveeditor/vue` | Vue component with `v-model` and `useViveEditor` composable |
+| `@viveeditor/svelte` | Svelte component with `bind:value` and a `use:viveEditor` action |
+| `@viveeditor/angular` | Angular component for `ngModel` and reactive forms |
+| `@viveeditor/element` | `<vive-editor>` form field for any page |
+
+See [Frameworks](/en/docs/frameworks/).
+
+## Server packages
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/sanitize` | Server-side HTML cleaning for Node that matches the editor output |
+| `viveeditor/sanitizer` (PHP) | The same sanitizer for PHP 8.4+, without dependencies |
+| `viveeditor/laravel` (PHP) | Blade component, local editor files and `@viveHtml` for Laravel 12+ |
+
+The PHP packages are installed with Composer and versioned separately. See [Server sanitizing](/en/docs/server-sanitizing/) and [Laravel](/en/docs/laravel/).
+
+## Extra entry points
+
+Some packages have more than one entry, so heavy or page-side code stays out of the editor bundle:
+
+- `@viveeditor/ui/extras`: `mentionMenu`, `emojiMenu`, `templateMenu`, `mathTools`, `footnoteTools`, `aiAssistant` and `suggestionMenu`.
+- `@viveeditor/ui/panels`: the panel kit, if you want it in your bundle instead of loaded on first open.
+- `@viveeditor/ext-code-block/highlight`: `CodeHighlight` and `shikiHighlighter`.
+- `@viveeditor/ext-embed/activate`: `activateEmbeds()` for published pages.
+- `@viveeditor/ext-math/render`: `renderMath()` for published pages.
+- `@viveeditor/ext-footnote/render`: `renderFootnotes()` for published pages.
+- `@viveeditor/markdown/paste`: `MarkdownPaste`.
+- `@viveeditor/element/define`: registers `<vive-editor>`.
+- `@viveeditor/emoji-data/en`: the English emoji list.
+
+Packages that need layout ship a `style.css` export; the list is on [Installation](/en/docs/installation/).
+
+## API reports
+
+Each npm package has a folder under [`api/`](https://github.com/mtvrkan/viveeditor/tree/main/api), for example [`api/core`](https://github.com/mtvrkan/viveeditor/tree/main/api/core) or [`api/ui`](https://github.com/mtvrkan/viveeditor/tree/main/api/ui). It holds the published `.d.ts` type declarations. When the public API changes, the change shows up in these files during review, so you can read them to see exactly what a package exports in a given version.

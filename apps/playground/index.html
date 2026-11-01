@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>viveEditor Playground</title>
+  </head>
+  <body>
+    <main class="playground">
+      <h1>viveEditor</h1>
+      <div class="toolbar" role="toolbar" aria-label="Biçimlendirme">
+        <button type="button" data-testid="bold" aria-label="Kalın" data-command="toggleBold" data-active="bold" aria-pressed="false"><strong>K</strong></button>
+        <button type="button" data-testid="italic" aria-label="İtalik" data-command="toggleItalic" data-active="italic" aria-pressed="false"><em>İ</em></button>
+        <button type="button" data-testid="underline" aria-label="Altı çizili" data-command="toggleUnderline" data-active="underline" aria-pressed="false"><u>A</u></button>
+        <button type="button" data-testid="strike" aria-label="Üstü çizili" data-command="toggleStrike" data-active="strike" aria-pressed="false"><s>Ü</s></button>
+        <button type="button" data-testid="code" aria-label="Satır içi kod" data-command="toggleCode" data-active="code" aria-pressed="false">Kod</button>
+        <button type="button" data-testid="heading-2" aria-label="Başlık 2" data-command="toggleHeading" data-args='{"level":2}' data-active="heading" data-active-attrs='{"level":2}' aria-pressed="false">Başlık 2</button>
+        <button type="button" data-testid="heading-3" aria-label="Başlık 3" data-command="toggleHeading" data-args='{"level":3}' data-active="heading" data-active-attrs='{"level":3}' aria-pressed="false">Başlık 3</button>
+        <button type="button" data-testid="bullet-list" aria-label="Madde işaretli liste" data-command="toggleBulletList" data-active="bulletList" aria-pressed="false">Madde</button>
+        <button type="button" data-testid="ordered-list" aria-label="Numaralı liste" data-command="toggleOrderedList" data-active="orderedList" aria-pressed="false">Numaralı</button>
+        <button type="button" data-testid="blockquote" aria-label="Alıntı" data-command="toggleBlockquote" data-active="blockquote" aria-pressed="false">Alıntı</button>
+        <button type="button" data-testid="horizontal-rule" aria-label="Yatay çizgi" data-command="setHorizontalRule">Çizgi</button>
+        <button type="button" data-testid="link" aria-label="Bağlantı" data-action="link" data-active="link" aria-pressed="false">Bağlantı</button>
+        <button type="button" data-testid="undo" aria-label="Geri al" data-command="undo">Geri al</button>
+        <button type="button" data-testid="redo" aria-label="Yinele" data-command="redo">Yinele</button>
+      </div>
+      <div id="editor" class="editor" data-testid="editor"></div>
+      <h2>HTML çıktısı</h2>
+      <pre class="output" data-testid="output" aria-live="polite"></pre>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

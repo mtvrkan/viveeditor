@@ -1,0 +1,103 @@
+---
+key: math
+title: Formüller (LaTeX)
+description: MathExtension ve kendi KaTeX 0.18.2 ya da yeni sürümünüzle LaTeX formül yazın, yayındaki sayfada renderMath ile çizin.
+updated: 2026-11-01
+faq:
+  - q: viveEditor KaTeX'i içinde getiriyor mu?
+    a: Hayır. KaTeX sizin bağımlılığınızdır. Bir load işlevi verirsiniz; editör 0.18.2'den eski sürümleri reddeder.
+  - q: Çizilmiş formül kaydediliyor mu?
+    a: Hayır. Yalnızca LaTeX kaynağı saklanır. Yayındaki sayfa onu renderMath ile yeniden çizer.
+---
+
+Formül eklentisi, yazarın LaTeX yazmasını ve düzenlerken bunu [KaTeX](https://katex.org) ile çizilmiş olarak görmesini sağlar. Editör çizimi değil, yalnızca LaTeX kaynağını saklar; kaydedilen HTML küçük ve temiz kalır. Yayındaki sayfada formülleri `renderMath` ile yeniden çizersiniz.
+
+Formüller yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+<Steps>
+1. Eklentiyi, arayüzü ve KaTeX'i kurun: `npm install @viveeditor/ext-math @viveeditor/ui @viveeditor/core katex`.
+2. `MathExtension`'ı KaTeX'i içe aktaran bir `load` işleviyle ekleyin. KaTeX böylece yalnızca bir formül gösterileceği zaman iner.
+3. KaTeX'in ve eklentinin stil dosyalarını içe aktarın.
+4. `/` menüsündeki girişler için `mathTools()`'u `createUI`'nin `plugins` listesine ekleyin.
+</Steps>
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { MathExtension } from '@viveeditor/ext-math'
+import { createUI } from '@viveeditor/ui'
+import { mathTools } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-math/style.css'
+import 'katex/dist/katex.min.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    ...basicExtensions,
+    MathExtension.configure({
+      load: () => import('katex'),
+      onError: (error) => console.warn(error.code, error.version),
+    }),
+  ],
+})
+
+createUI(editor, { plugins: [mathTools()] })
+```
+
+## KaTeX sürümü
+
+KaTeX **0.18.2 ya da daha yeni** olmalıdır (`MIN_KATEX_VERSION`). Bu alt sınır KaTeX güvenlik bildirimi GHSA-238p-pmpm-9mq7'den gelir. Daha eski bir sürüm reddedilir; formülün yerinde çizim yerine kaynağı görünür.
+
+`onError` iki koddan birini taşıyan bir hata alır:
+
+| Kod | Anlamı |
+| --- | --- |
+| `KATEX_OUTDATED` | Yüklenen KaTeX 0.18.2'den eski; `version` sürümünü taşır. |
+| `KATEX_LOAD` | `load` işlevi başarısız oldu. |
+
+Editör KaTeX'e `trust: false` dahil sabit seçenekler verir; bu yüzden bir formül bağlantı ya da başka HTML ekleyemez.
+
+## Formül yazma
+
+- **Satır içi:** `$x^2$` yazın. Kapanış `$` işaretini yazdığınızda iki dolar arasındaki metin formüle dönüşür. Metin boşlukla başlayıp bitmemelidir.
+- **Blok:** boş bir satıra `$$` yazıp <kbd>Enter</kbd>'a basın.
+- **Menü:** `/` menüsünden "Formül" ya da "Blok formül"ü seçin. Bu girişler `mathTools()`'tan gelir.
+- **Düzenleme:** kaynağı canlı önizlemeyle düzenlemek için formüle tıklayın ya da onu seçip <kbd>Enter</kbd>'a basın. Satır içi formülü <kbd>Enter</kbd>, blok formülü <kbd>Ctrl</kbd>+<kbd>Enter</kbd> (Mac'te <kbd>⌘</kbd>+<kbd>Enter</kbd>) bitirir; <kbd>Esc</kbd> değişiklik yapmadan çıkar.
+
+Koddan `editor.commands.insertMath({ display: true, latex: 'E = mc^2' })` bir blok formül ekler. Satır içi formül için `display`'i vermeyin.
+
+Bir formül en çok 2.000 karakter (`MAX_LATEX_LENGTH`) ve en çok 64 düzey iç içe süslü parantez içerebilir.
+
+## Ne saklanır
+
+```html
+<p>Alan: <span data-math="inline">\pi r^2</span></p>
+<div data-math="block">\int_0^1 x\,dx</div>
+```
+
+[Sunucu temizleyicisi](/dokumantasyon/sunucuda-temizleme/) formülleri tam olarak bu biçimde tutar. Denetimden geçmeyen ya da bir bağlantının veya dipnotun içine konan formül düz metne indirilir.
+
+Metin Markdown olarak kaydedildiğinde formüller `$…$` ve `$$` blokları olarak yazılır. Word olarak kaydedildiğinde LaTeX kaynağı kod yazı tipiyle yazılır.
+
+## Yayındaki sayfalar
+
+İçeriği taşıyan öğe üzerinde `renderMath`'i çağırın. KaTeX'i aynı yolla yükler ve çizdiği formül sayısını döndürür. Sayfada KaTeX'in stil dosyası da gerekir.
+
+```ts
+import { renderMath } from '@viveeditor/ext-math/render'
+import 'katex/dist/katex.min.css'
+
+const article = document.querySelector('article')
+if (article) await renderMath(article, { load: () => import('katex') })
+```
+
+- Bir çağrıda en çok 1.000 formülü parça parça çizer; uzun sayfalar donmaz.
+- Önceden çizilmiş formülleri atlar; yeniden çağırmak güvenlidir.
+- Çizilen her formül, LaTeX kaynağını `aria-label` olarak alır.
+
+## İlgili sayfalar
+
+- [Sunucuda temizleme](/dokumantasyon/sunucuda-temizleme/)
+- [Dipnotlar](/dokumantasyon/dipnot/)
+- [Dosya açma, kaydetme ve yazdırma](/dokumantasyon/dosya-ac-kaydet-yazdir/)

@@ -1,0 +1,352 @@
+{
+  "version": 1,
+  "limits": {
+    "maxBytes": 2000000,
+    "maxDepth": 64,
+    "maxAttributeLength": 2048,
+    "maxTextAttributeLength": 1000,
+    "maxStyleValueLength": 64,
+    "maxSpan": 100,
+    "maxImageSize": 10000,
+    "maxListStart": 99999,
+    "maxTableWidth": 99999,
+    "maxEmbedStart": 86400,
+    "maxEmbedTitle": 200,
+    "maxImageSrcLength": 1500000,
+    "maxUrlLength": 4096,
+    "maxMentionId": 128,
+    "maxMentionLabel": 100,
+    "maxMathLength": 2000,
+    "maxMathDepth": 64,
+    "maxFootnoteLength": 5000,
+    "maxAttributes": 64,
+    "maxNesting": 512,
+    "maxExtraElements": 2048
+  },
+  "dropWithContent": [
+    "script",
+    "style",
+    "textarea",
+    "title",
+    "xmp",
+    "noscript",
+    "noembed",
+    "noframes",
+    "plaintext",
+    "template",
+    "iframe",
+    "svg",
+    "math",
+    "object",
+    "embed",
+    "select",
+    "option",
+    "button",
+    "head",
+    "frameset",
+    "frame"
+  ],
+  "elements": {
+    "p": {
+      "styles": ["text-align"]
+    },
+    "h1": {
+      "styles": ["text-align"]
+    },
+    "h2": {
+      "styles": ["text-align"]
+    },
+    "h3": {
+      "styles": ["text-align"]
+    },
+    "h4": {
+      "styles": ["text-align"]
+    },
+    "h5": {
+      "styles": ["text-align"]
+    },
+    "h6": {
+      "styles": ["text-align"]
+    },
+    "blockquote": {},
+    "hr": {},
+    "br": {},
+    "strong": {},
+    "em": {},
+    "u": {},
+    "s": {},
+    "code": {
+      "attributes": ["class"]
+    },
+    "a": {
+      "attributes": ["href", "title", "target"]
+    },
+    "ul": {
+      "attributes": ["data-type"]
+    },
+    "ol": {
+      "attributes": ["start"]
+    },
+    "li": {
+      "attributes": ["data-type", "data-checked"]
+    },
+    "input": {
+      "attributes": ["type", "checked", "disabled"]
+    },
+    "div": {
+      "attributes": [
+        "class",
+        "data-embed",
+        "data-id",
+        "data-hash",
+        "data-start",
+        "data-title",
+        "data-math"
+      ]
+    },
+    "pre": {
+      "attributes": ["data-language"]
+    },
+    "table": {
+      "styles": ["width", "min-width"]
+    },
+    "colgroup": {},
+    "col": {
+      "styles": ["width"]
+    },
+    "tbody": {},
+    "tr": {},
+    "td": {
+      "attributes": ["colspan", "rowspan", "data-colwidth"]
+    },
+    "th": {
+      "attributes": ["colspan", "rowspan", "data-colwidth"]
+    },
+    "span": {
+      "styles": ["color"],
+      "attributes": ["class", "data-mention", "data-math"]
+    },
+    "mark": {
+      "styles": ["background-color"]
+    },
+    "img": {
+      "attributes": [
+        "src",
+        "alt",
+        "title",
+        "width",
+        "height",
+        "loading",
+        "decoding",
+        "referrerpolicy"
+      ]
+    },
+    "sup": {
+      "attributes": ["data-footnote"]
+    }
+  },
+  "mentionClass": "vive-mention",
+  "footnoteElements": ["strong", "em", "a"],
+  "textAlign": ["left", "center", "right", "justify"],
+  "linkProtocols": ["http", "https", "mailto", "tel"],
+  "linkRel": "noopener noreferrer nofollow",
+  "image": {
+    "loading": "lazy",
+    "decoding": "async",
+    "referrerpolicy": "no-referrer",
+    "base64Types": ["png", "jpeg", "gif", "webp", "avif"]
+  },
+  "embedProviders": {
+    "youtube": {
+      "label": "YouTube",
+      "host": "www.youtube-nocookie.com",
+      "width": 560,
+      "sandbox": "allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox",
+      "allow": "fullscreen; picture-in-picture; encrypted-media",
+      "height": 315,
+      "fluid": true
+    },
+    "vimeo": {
+      "label": "Vimeo",
+      "host": "player.vimeo.com",
+      "width": 640,
+      "sandbox": "allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox",
+      "allow": "fullscreen; picture-in-picture; encrypted-media",
+      "height": 360,
+      "fluid": true
+    },
+    "spotify": {
+      "label": "Spotify",
+      "host": "open.spotify.com",
+      "width": 560,
+      "sandbox": "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox",
+      "allow": "fullscreen; encrypted-media",
+      "height": 352,
+      "compactHeight": 152,
+      "compactTypes": ["track", "episode"],
+      "fluid": false
+    }
+  },
+  "colorKeywordsRejected": [
+    "inherit",
+    "initial",
+    "unset",
+    "revert",
+    "currentcolor",
+    "transparent",
+    "auto",
+    "none",
+    "windowtext"
+  ],
+  "namedColors": [
+    "aliceblue",
+    "antiquewhite",
+    "aqua",
+    "aquamarine",
+    "azure",
+    "beige",
+    "bisque",
+    "black",
+    "blanchedalmond",
+    "blue",
+    "blueviolet",
+    "brown",
+    "burlywood",
+    "cadetblue",
+    "chartreuse",
+    "chocolate",
+    "coral",
+    "cornflowerblue",
+    "cornsilk",
+    "crimson",
+    "cyan",
+    "darkblue",
+    "darkcyan",
+    "darkgoldenrod",
+    "darkgray",
+    "darkgreen",
+    "darkgrey",
+    "darkkhaki",
+    "darkmagenta",
+    "darkolivegreen",
+    "darkorange",
+    "darkorchid",
+    "darkred",
+    "darksalmon",
+    "darkseagreen",
+    "darkslateblue",
+    "darkslategray",
+    "darkslategrey",
+    "darkturquoise",
+    "darkviolet",
+    "deeppink",
+    "deepskyblue",
+    "dimgray",
+    "dimgrey",
+    "dodgerblue",
+    "firebrick",
+    "floralwhite",
+    "forestgreen",
+    "fuchsia",
+    "gainsboro",
+    "ghostwhite",
+    "gold",
+    "goldenrod",
+    "gray",
+    "green",
+    "greenyellow",
+    "grey",
+    "honeydew",
+    "hotpink",
+    "indianred",
+    "indigo",
+    "ivory",
+    "khaki",
+    "lavender",
+    "lavenderblush",
+    "lawngreen",
+    "lemonchiffon",
+    "lightblue",
+    "lightcoral",
+    "lightcyan",
+    "lightgoldenrodyellow",
+    "lightgray",
+    "lightgreen",
+    "lightgrey",
+    "lightpink",
+    "lightsalmon",
+    "lightseagreen",
+    "lightskyblue",
+    "lightslategray",
+    "lightslategrey",
+    "lightsteelblue",
+    "lightyellow",
+    "lime",
+    "limegreen",
+    "linen",
+    "magenta",
+    "maroon",
+    "mediumaquamarine",
+    "mediumblue",
+    "mediumorchid",
+    "mediumpurple",
+    "mediumseagreen",
+    "mediumslateblue",
+    "mediumspringgreen",
+    "mediumturquoise",
+    "mediumvioletred",
+    "midnightblue",
+    "mintcream",
+    "mistyrose",
+    "moccasin",
+    "navajowhite",
+    "navy",
+    "oldlace",
+    "olive",
+    "olivedrab",
+    "orange",
+    "orangered",
+    "orchid",
+    "palegoldenrod",
+    "palegreen",
+    "paleturquoise",
+    "palevioletred",
+    "papayawhip",
+    "peachpuff",
+    "peru",
+    "pink",
+    "plum",
+    "powderblue",
+    "purple",
+    "rebeccapurple",
+    "red",
+    "rosybrown",
+    "royalblue",
+    "saddlebrown",
+    "salmon",
+    "sandybrown",
+    "seagreen",
+    "seashell",
+    "sienna",
+    "silver",
+    "skyblue",
+    "slateblue",
+    "slategray",
+    "slategrey",
+    "snow",
+    "springgreen",
+    "steelblue",
+    "tan",
+    "teal",
+    "thistle",
+    "tomato",
+    "turquoise",
+    "violet",
+    "wheat",
+    "white",
+    "whitesmoke",
+    "yellow",
+    "yellowgreen"
+  ],
+  "spotifyTypes": ["track", "album", "playlist", "episode", "show", "artist"]
+}

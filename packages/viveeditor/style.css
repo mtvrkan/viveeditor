@@ -1,0 +1,44 @@
+.vive-notice {
+  margin: 8px 2px 0;
+  font:
+    600 13px / 1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: hsl(220 9% 38%);
+}
+
+.vive-notice[hidden] {
+  display: none;
+}
+
+.vive-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 2px 0;
+  font:
+    600 13px / 1.4 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  color: hsl(0 72% 42%);
+}
+
+.vive-error[hidden] {
+  display: none;
+}
+
+.vive-error::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 50%;
+  background:
+    linear-gradient(#fff, #fff) 50% 4px / 2px 5px no-repeat,
+    linear-gradient(#fff, #fff) 50% 10.5px / 2px 2px no-repeat,
+    hsl(0 72% 42%);
+}

@@ -1,0 +1,40 @@
+{
+  "name": "viveeditor/sanitizer",
+  "description": "Server-side sanitizer that keeps exactly the HTML viveEditor produces and removes everything else.",
+  "type": "library",
+  "license": "MIT",
+  "keywords": ["html", "sanitizer", "xss", "wysiwyg", "rich-text-editor", "viveeditor"],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/php/sanitizer#readme",
+  "support": {
+    "issues": "https://github.com/mtvrkan/viveeditor/issues",
+    "source": "https://github.com/mtvrkan/viveeditor/tree/main/php/sanitizer",
+    "security": "https://github.com/mtvrkan/viveeditor/security/policy"
+  },
+  "require": {
+    "php": ">=8.4",
+    "ext-dom": "*",
+    "ext-mbstring": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^13.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Viveeditor\\Sanitizer\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Viveeditor\\Sanitizer\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {},
+    "sort-packages": true,
+    "policy": {
+      "cooldown": {
+        "period": "7 days"
+      }
+    }
+  }
+}

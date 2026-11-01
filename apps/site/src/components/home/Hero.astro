@@ -1,0 +1,63 @@
+---
+import { measureText } from '@viveeditor/ui'
+import { homePath, type Locale } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import { plural } from '../../i18n/plural'
+import { ANCHORS } from '../../i18n/ui'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const { hero, meter } = HOME[lang]
+const formula = lang === 'tr' ? 'atesman' : 'flesch'
+const measure = measureText(hero.sheet.join('\n\n'), formula)
+const numbers = new Intl.NumberFormat(lang, { maximumFractionDigits: 1 })
+const band = measure.band
+const install = 'npm i viveeditor'
+const labels = JSON.stringify({
+  bands: meter.bands,
+  minutes: meter.minutes,
+  formula,
+  label: hero.sheetLabel,
+})
+---
+<section class="hero wrap" aria-labelledby="heroTitle">
+  <div class="hero-copy">
+    <p class="eyebrow">{hero.eyebrow}</p>
+    <h1 id="heroTitle" class="hero-title">{hero.heading}<em>{hero.headingEm}</em></h1>
+    <p class="lead hero-lede">{hero.lede[0]}<code>&lt;script&gt;</code>{hero.lede[1]}<code>&lt;textarea&gt;</code>{hero.lede[2]}</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href={`${homePath(lang)}#${ANCHORS[lang].demo}`}>{hero.tryIt}<svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <button class="btn btn-glass copy-cmd" type="button" data-copy={install} data-copied={hero.copied}>
+        <svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><code>{install}</code><span class="sr">, {hero.copyLabel}</span>
+      </button>
+      <span class="copy-state" role="status" aria-live="polite"></span>
+    </div>
+    <ul class="facts" aria-label={hero.factsLabel}>
+      {hero.facts.map((fact, i) => <li>{i === 0 && <span class="dot-ok" aria-hidden="true"></span>}{fact}</li>)}
+    </ul>
+  </div>
+  <div class="stage" data-hero-stage data-labels={labels} data-lang={lang}>
+    <div class="meter">
+      <div class="meter-side">
+        <span class="m-eyebrow">{meter.eyebrow}</span>
+        <span class="chip" data-band={band ?? undefined} hidden={band === null}>{band === null ? "" : meter.bands[band]}</span>
+        <div class="scale" aria-hidden="true">{[0, 1, 2, 3, 4].map((i) => <i class:list={{ on: band !== null && i < band, cur: band === i }}></i>)}</div>
+        <div class="scale-l" aria-hidden="true"><span>{meter.hard}</span><span>{meter.easy}</span></div>
+        <p class="hint" hidden={measure.score !== null}>{meter.hint}</p>
+        <dl class="stats">
+          <dt>{meter.words}</dt><dd data-k="words">{numbers.format(measure.words)}</dd>
+          <dt>{meter.sentences}</dt><dd data-k="sentences">{numbers.format(measure.sentences)}</dd>
+          <dt>{meter.average}</dt><dd data-k="average">{numbers.format(measure.averageSentence)}</dd>
+          <dt>{meter.reading}</dt><dd data-k="reading">{plural(lang, meter.minutes, measure.readingMinutes)}</dd>
+        </dl>
+      </div>
+      <p class="big"><span class="sr">{meter.scoreLabel}: </span><span class="num" data-k="score">{measure.score ?? "–"}</span><span class="of">/100</span></p>
+    </div>
+    <div class="sheet glass">
+      <div class="sheet-host" data-hero-editor>
+        <div class="sheet-static">{hero.sheet.map((p) => <p>{p}</p>)}</div>
+      </div>
+      <div class="aurora" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>

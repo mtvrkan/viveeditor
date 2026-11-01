@@ -1,0 +1,2702 @@
+[
+  {
+    "name": "parity 0",
+    "input": "pt:alert(1)\">x</a>om\" target=\"_top\">x</a>ate><p>görünür</pnclick=",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "pt:alert(1)\"&gt;xom\" target=\"_top\"&gt;xate&gt;<p>görünür</p>"
+  },
+  {
+    "name": "parity 1",
+    "input": " 0)\">a</span>ef=\"\\\\evil.com\">x</a>><span class=\"vive-mention\" data-mention=\"u1\n\">@x</span></p>ww.youtube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"></iframe></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": " 0)\"&gt;aef=\"\\\\evil.com\"&gt;x&gt;@x<p></p>ww.youtube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 2",
+    "input": "6;avascript:alert(1)\">x</a>a</span><span class=\"vive-mention\" data-mention=\"a..b\">@b</span></p> data-bs-html=\"true\" data-bs-title=\"<img src=x onerror=alert(1)>\">a</span>ath=\"inline\"><span class=\"katex\"><svg><p",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "6;avascript:alert(1)\"&gt;xa@b<p></p> data-bs-html=\"true\" data-bs-title=\"\"&gt;aath=\"inline\"&gt;<span></span>"
+  },
+  {
+    "name": "parity 3",
+    "input": "ecked=\"true\"><input type=\"checkbox\"te=\"\">not</sup></a></p>l=\"true\" data-bs-title=\"<img src=x onerror=alert(1)>\">a</span>p",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ecked=\"true\"&gt;not<p></p>l=\"true\" data-bs-title=\"<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">\"&gt;ap"
+  },
+  {
+    "name": "parity 4",
+    "input": "on=\"u1\">@@ a‮b​  c⁦ </span></p>>x</a>pe=\"text\" name=\"x\"></p>pan class=\"vive-mention\" data-mention=\"a..b\">@b</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "on=\"u1\"&gt;@@ a‮b​  c⁦ <p></p>&gt;xpe=\"text\" name=\"x\"&gt;<p></p>pan class=\"vive-mention\" data-mention=\"a..b\"&gt;@b<p></p>"
+  },
+  {
+    "name": "parity 5",
+    "input": "href=\"https://example.com\" target=\"_blank\" rel=\"opener\">x</aw4w9WgXcQ\"></iframe>p>şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "href=\"https://example.com\" target=\"_blank\" rel=\"opener\"&gt;xp&gt;şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş"
+  },
+  {
+    "name": "parity 6",
+    "input": "e.com\" target=\"_top\">x</a>\u0000b\u0007ctps://b.example\">b</a></span></a></sup></p>\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "e.com\" target=\"_top\"&gt;xb\u0007ctps://b.example\"&gt;b<p></p>\"&gt;"
+  },
+  {
+    "name": "parity 7",
+    "input": "1)\">@a</span><span class=\"vive-mention\" data-mention=\"a..b\">@b</span></p>ention\" data-mention=\"u1\">@@ a‮b​  c⁦ </span></p>>a<!-- <img src=x onerror=alert(1)> --></p><p title=\u0000b\u0007c",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "1)\"&gt;@a@b<p></p>ention\" data-mention=\"u1\"&gt;@@ a‮b​  c⁦ <p></p>&gt;a<p></p>"
+  },
+  {
+    "name": "parity 8",
+    "input": "\">x</a>om/a.png\">text></form><form><mglyph><style></math><img src onerror=alert(1)>9999\" rowspan=\"0\" data-colwidth=\"100,abc\">a</td><th colspan=\"3\" data-colwidth=\"1,2,3\">b</th></tr></tbody></table>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;xom/a.png\"&gt;text&gt;"
+  },
+  {
+    "name": "parity 9",
+    "input": "ex: 999XcQ\"></iframe>e.c1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ex: 999XcQ\"&gt;e.c1)\"&gt;x"
+  },
+  {
+    "name": "parity 10",
+    "input": "VaScRiPt:alert(1)\">x</a>r: red; @import url(x)\">a</span><div><p>a</p></div></li></ul>or: red\">a</p><span style=\"text-align: center\">b</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "VaScRiPt:alert(1)\"&gt;xr: red; @import url(x)\"&gt;a<p>a</p>or: red\"&gt;a<p></p><span>b</span>"
+  },
+  {
+    "name": "parity 11",
+    "input": "ata-mention=\"u1\"> @ </span></p>noscink=\"http://www.w3.org/1999/xlink\">a</p>png\" alt=\"a\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ata-mention=\"u1\"&gt; @ <p></p>noscink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>png\" alt=\"a\"&gt;"
+  },
+  {
+    "name": "parity 12",
+    "input": "a-bs-title=\"<img src=x onerror=alert(1)>\">a</span>ntion\" data-mention=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-hx-od src=\"evil.swf\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "a-bs-title=\"<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">\"&gt;antion\" data-mention=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-hx-od src=\"evil.swf\"&gt;"
+  },
+  {
+    "name": "parity 13",
+    "input": "ath=\"inline\">y</span><table><tr><td>z</n class=\"vive-mention\" data-a</p>ript>alert(1)</script>\"></iframe>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ath=\"inline\"&gt;y<table><tbody><tr><td>zript&gt;alert(1)\"&gt;</td></tr></tbody></table>"
+  },
+  {
+    "name": "parity 14",
+    "input": "script:alert(1)\">x</a>data-math=\"inline\">y</span><table><tr><td>z</td></tr></table></sup>adio\"><div><p>a</p></div></li></ul>ct><embed src=\"evil.swf\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "script:alert(1)\"&gt;xdata-math=\"inline\"&gt;y<table><tbody><tr><td>z</td></tr></tbody></table>adio\"&gt;<p>a</p>ct&gt;"
+  },
+  {
+    "name": "parity 15",
+    "input": "=x onerror=alert(1)>\"></noscript>ript:alert(1)\">x</a>rc=\"http://example.com/a.png\" alt=\"a\">center></font><div><p>blok</p></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "=x onerror=alert(1)&gt;\"&gt;ript:alert(1)\"&gt;xrc=\"http://example.com/a.png\" alt=\"a\"&gt;center&gt;<p>blok</p>"
+  },
+  {
+    "name": "parity 16",
+    "input": "\"></object><embed src=\"evil.swme>/span></p>or=alert(1)></style></",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;"
+  },
+  {
+    "name": "parity 17",
+    "input": "m/a.png\" alt=\"a\">ref=\"https://example.com\">a<sup data-footnote=\"\">np><script>alert(1)</script><p>b</p>x onerror=alert(1)></template><p>görünür</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "m/a.png\" alt=\"a\"&gt;ref=\"https://example.com\"&gt;a<sup data-footnote=\"\">np&gt;bx onerror=alert(1)&gt;görünür</sup>"
+  },
+  {
+    "name": "parity 18",
+    "input": "  </span>b</p>ube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>/uploads/a b.png\" alt=\"a\">ath=\"inline\">  </span>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "  b<p></p>ube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;/uploads/a b.png\" alt=\"a\"&gt;ath=\"inline\"&gt;  b<p></p>"
+  },
+  {
+    "name": "parity 19",
+    "input": "e\">  </span>b</p>k\" class=\"k\"><a href=\"javascript&colon;alert(1)\">x</a>yle=\"color: red/**/\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "e\"&gt;  b<p></p>k\" class=\"k\"&gt;<a rel=\"noopener noreferrer nofollow\">x</a>yle=\"color: red/**/\"&gt;a"
+  },
+  {
+    "name": "parity 20",
+    "input": "class=\"vive-mention\" data-mention=lert(1)\">x</a>late><img src=x onerror=alert(1)></template><p>/a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "class=\"vive-mention\" data-mention=lert(1)\"&gt;xlate&gt;<p>/a&gt;</p>"
+  },
+  {
+    "name": "parity 21",
+    "input": "><span class=\"vive-mention\" data-mention=\"user_42\" style=\"color: red\" onclick=\"x()\">@Ayşe <b>Yılmaz</b></span></p>d !important\">a</span>=\"javascript:alert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">a</p>1\">@@ a‮b​  c⁦ </span></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;<span class=\"vive-mention\" data-mention=\"user_42\">@Ayşe Yılmaz</span><p></p>d !important\"&gt;a=\"javascript:alert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>1\"&gt;@@ a‮b​  c⁦ <p></p>"
+  },
+  {
+    "name": "parity 22",
+    "input": " data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\"><iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" sandbox=\"allow-topan><span data-math=\"inline\">y</span><table><tr><td>z</td></tr></table></le>on\" data-mention",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": " data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 23",
+    "input": "a\u0000script:alert(1)\">a‮b\u0007c</span></p>loading=\"eager\" referrerpolicy=\"unsafe-url\">eckbox\" checked><input type=\"text\" name=\"x\"></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ascript:alert(1)\"&gt;a‮b\u0007c<p></p>loading=\"eager\" referrerpolicy=\"unsafe-url\"&gt;eckbox\" checked&gt;<p></p>"
+  },
+  {
+    "name": "parity 24",
+    "input": "okie.com/e\">x</a>aaaaaaaa\">@x</.png\" alt=\"a\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "okie.com/e\"&gt;xaaaaaaaa\"&gt;@x"
+  },
+  {
+    "name": "parity 25",
+    "input": "/iframe>or=alert(1)></span></span></p>)\">a</span>><tr><td>a</td></tr></table>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "/iframe&gt;or=alert(1)&gt;<p></p>)\"&gt;a&gt;a"
+  },
+  {
+    "name": "parity 26",
+    "input": ">=\"color: red\">@x</span></p><span class=\"vive-mention x\" data-mention=\"u1\" style=\"color: red\">@x</span></p>t(1)\"",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;=\"color: red\"&gt;@x<p></p><span style=\"color: red\">@x</span><p></p>t(1)\""
+  },
+  {
+    "name": "parity 27",
+    "input": "iVBORw0KGgo=\">avascript:alert(1)\">x</a>vil.com\">x</a>ef=\"java\u0000script:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "iVBORw0KGgo=\"&gt;avascript:alert(1)\"&gt;xvil.com\"&gt;xef=\"javascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 28",
+    "input": "c=x onerror=alert(1)>\"></noscript>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxdiv></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "c=x onerror=alert(1)&gt;\"&gt;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxdiv&gt;{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x<p></p>"
+  },
+  {
+    "name": "parity 29",
+    "input": "\tjavascript:alert(1)\">x</a>>2</sup></p>ube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"></ifline\"><span class=\"katex\"><svg><path d=\"M0\"/></svg>x<img src=x one",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\tjavascript:alert(1)\"&gt;x&gt;2<p></p>ube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"&gt;<span>x</span>"
+  },
+  {
+    "name": "parity 30",
+    "input": "op-navigation allow-scripts\"></iframe></div data-type=\"taskItem\" data-checked=\"yes\"><input type=\"radio\"><div><p>a</p></div></li></ul>com\">x</a>ve-mention\" data-mention=\"u1\">@@ a‮b​  c⁦ </span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "op-navigation allow-scripts\"&gt;<p>a</p>com\"&gt;xve-mention\" data-mention=\"u1\"&gt;@@ a‮b​  c⁦ <p></p>"
+  },
+  {
+    "name": "parity 31",
+    "input": "=\" \tjavascript:alert(1)\">x</a>; inset: 0; z-index: 9999\">a</span>.swf\">şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "=\" \tjavascript:alert(1)\"&gt;x; inset: 0; z-index: 9999\"&gt;a.swf\"&gt;şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş"
+  },
+  {
+    "name": "parity 32",
+    "input": "-embed\" data-embed=\"vimeo\" data-id=\"76979871\" data-title=\"Film\"><a href=\"javascript:alert(1)\" oame>ror=alert(1)>]]><p>c--!></p>rm><form><mglyph><style></math><img src onerror=alert(1)>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "-embed\" data-embed=\"vimeo\" data-id=\"76979871\" data-title=\"Film\"&gt;<a rel=\"noopener noreferrer nofollow\">ror=alert(1)&gt;]]&gt;<p>c--!&gt;</p>rm&gt;</a>"
+  },
+  {
+    "name": "parity 33",
+    "input": "vil.com\">x</a>mention=\"u1\"> @ </span></p>script:alert(1)\">x</a>d><inp",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "vil.com\"&gt;xmention=\"u1\"&gt; @ <p></p>script:alert(1)\"&gt;xd&gt;"
+  },
+  {
+    "name": "parity 34",
+    "input": "{{{{{{{{{{{{{{{{{{{{{{{{alert(1)\">script:alert(1)\">x</a>\"><center>yazı</ce",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "{{{{{{{{{{{{{{{{{{{{{{{{alert(1)\"&gt;script:alert(1)\"&gt;x\"&gt;yazı"
+  },
+  {
+    "name": "parity 35",
+    "input": "=\"a\">.png\"></sup></p>f=\"javascript:alert(1)\" onclick=\"x()\">Film</a></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "=\"a\"&gt;.png\"&gt;<p></p>f=\"javascript:alert(1)\" onclick=\"x()\"&gt;Film"
+  },
+  {
+    "name": "parity 36",
+    "input": " style=\"color: rgb(255, 0, 0)\">a</span>ked=\"true\"><input type=\"checkbox\"><div><p>a</p></div></li></ul>w.youtube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"></iframe></div>://example.com\">a<sup data-footnote=\"\">not</sup></a></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": " style=\"color: rgb(255, 0, 0)\"&gt;aked=\"true\"&gt;<p>a</p>w.youtube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"&gt;://example.com\"&gt;a<sup data-footnote=\"\">not</sup><p></p>"
+  },
+  {
+    "name": "parity 37",
+    "input": "ression(alert(1))\">a</span>lor: red !important\">a</span>span><mark style=\"background-color: transparent\">b</mark>va\u0000script:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ression(alert(1))\"&gt;alor: red !important\"&gt;aspan&gt;<mark>b</mark>vascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 38",
+    "input": "-mention=\"javascript:alert(1)\">@a</span><span class=\"me srcdoc=\"<script>alert(1)</script>\"></iframe>>2</sup></p>pan>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "-mention=\"javascript:alert(1)\"&gt;@a<span>alert(1)\"&gt;&gt;2<p></p>pan&gt;</span>"
+  },
+  {
+    "name": "parity 39",
+    "input": "g;base64,iVBORw0KGgo=\">e></iframe></div>şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşa href=\"JaVaScRiPt:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "g;base64,iVBORw0KGgo=\"&gt;e&gt;şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşa href=\"JaVaScRiPt:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 40",
+    "input": "s/a b.png\" alt=\"a\">n=\"u1\"> @ </span></p>1)</script><p>b</p>{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "s/a b.png\" alt=\"a\"&gt;n=\"u1\"&gt; @ <p></p>1)<p>b</p>{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x<p></p>"
+  },
+  {
+    "name": "parity 41",
+    "input": "se64,PHN2Zz48L3N2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>href=\"javascript:alert(1)\">x</a>)</script>\"></iframe>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "se64,PHN2Zz48L3N2aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>href=\"javascript:alert(1)\"&gt;x)\"&gt;"
+  },
+  {
+    "name": "parity 42",
+    "input": "cript>\" sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>n: center\">b</span>ef=\"java&#x09;script:alert(1)\">x</a>t=\"0;url=https://evil.com\"><link rel=\"stylesheet\" href=\"https://evil.com/a.css\"><p>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "cript&gt;\" sandbox=\"allow-top-navigation allow-scripts\"&gt;n: center\"&gt;bef=\"java\tscript:alert(1)\"&gt;xt=\"0;url=https://evil.com\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 43",
+    "input": "iVBORw0KGgo=\">set-0 z-50\">a</p>href=\"javan style=\"color: rgb(255, 0, 0)\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "iVBORw0KGgo=\"&gt;set-0 z-50\"&gt;a<p></p>href=\"javan style=\"color: rgb(255, 0, 0)\"&gt;a"
+  },
+  {
+    "name": "parity 44",
+    "input": "</p>lass=\"viror=alert(1)></style></svg>eckbox\"><div><p>a</p></div></li></ul>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "<p></p>lass=\"viror=alert(1)&gt;eckbox\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 45",
+    "input": "vg><style><img src=x onerror=alert(1)></style></svg>t>alert(1)</script>\"></iframe>RiPt:alert(1)\">x</a>tnote=\"\">not</sup></a></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "vg&gt;t&gt;alert(1)\"&gt;RiPt:alert(1)\"&gt;xtnote=\"\"&gt;not<p></p>"
+  },
+  {
+    "name": "parity 46",
+    "input": "\"><link rel=\"stylesheet\" href=\"https://evil.com/a.css\"><p>a</p>d/**/\">a</span>bed\" dataaVaScRiPt:alert(1)\">x",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;<p>a</p>d/**/\"&gt;abed\" dataaVaScRiPt:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 47",
+    "input": "src=\"x\" onerror=\"alen></p>=\"x\">></ol>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "src=\"x\" onerror=\"alen&gt;<p></p>=\"x\"&gt;&gt;"
+  },
+  {
+    "name": "parity 48",
+    "input": "a href=\"javascript:alert(1)\">x</a></a>sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "a href=\"javascript:alert(1)\"&gt;xsandbox=\"allow-top-navigation allow-scripts\"&gt;&gt;b<p></p>"
+  },
+  {
+    "name": "parity 49",
+    "input": "m\">x</a>/p>d\"><center>yazı</center></font><div><p>blok</p></div>script:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "m\"&gt;x/p&gt;d\"&gt;yazı<p>blok</p>script:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 50",
+    "input": "le.com/a.png\" omplate><img src=x onerror=alert(1)></template><p>görünür</p></span><table><tr><td>z</td></tr></table></sup>ext\" name=\"x\"></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "le.com/a.png\" omplate&gt;<p>görünür</p><table><tbody><tr><td>z</td></tr></tbody></table>ext\" name=\"x\"&gt;<p></p>"
+  },
+  {
+    "name": "parity 51",
+    "input": "></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></d64,PHN2Zz48L3N2Zz4=\">an style=\"color: evilcolor\">a</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;an style=\"color: evilcolor\"&gt;axxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "parity 52",
+    "input": "\"/uploads/a.png\">ive-embed\" data-embed=\"evil\" data-id=\"abc\"><iframe src=\"https://evil.com\"></iframe></div>div><p>a</p></div></li></ul>0KGgo=\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"/uploads/a.png\"&gt;ive-embed\" data-embed=\"evil\" data-id=\"abc\"&gt;div&gt;<p>a</p>0KGgo=\"&gt;"
+  },
+  {
+    "name": "parity 53",
+    "input": "\"x\" onerror=\"alert(1)\"><img title=\"--&gt;&lt;img src=x onerror=alert(1)&gt;\"></style></mglyph></table></mtext></math>er>yazı</center></font><div><p>blok</p></div>h=\"100,abc\">a</td><th colspan=\"3\" data-colwidth=\"1,2,3\">b</th></tr></tbody></ta",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\"x\" onerror=\"alert(1)\"&gt;er&gt;yazı<p>blok</p>h=\"100,abc\"&gt;ab"
+  },
+  {
+    "name": "parity 54",
+    "input": "onmouseover=alert(1)\">x</a>a-type=\"taskItem\" data-checked=\"yes\"><input type=\"radio\"><div><p>a</p></div></li></ul>>a</p><img src=\"/uploads/a b.png\" alt=\"a\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "onmouseover=alert(1)\"&gt;xa-type=\"taskItem\" data-checked=\"yes\"&gt;<p>a</p>&gt;a<p></p><img src=\"/uploads/a%20b.png\" alt=\"a\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">"
+  },
+  {
+    "name": "parity 55",
+    "input": "e=\"color: red\">@x</span></p>> @ </span></p>a</p></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "e=\"color: red\"&gt;@x<p></p>&gt; @ <p></p>a<p></p><p></p>"
+  },
+  {
+    "name": "parity 56",
+    "input": "pan data-math=\"block\">z</span>or=\"alert(1)\" alt=\"a\">mglyph></table></mtext></math>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "pan data-math=\"block\"&gt;zor=\"alert(1)\" alt=\"a\"&gt;mglyph&gt;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "parity 57",
+    "input": "ink=\"http://www.w3.org/1999/xlink\">a</p><tr><td>a</td></tr></table>t><p>b</p>math>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>at&gt;<p>b</p>math&gt;"
+  },
+  {
+    "name": "parity 58",
+    "input": "/div></li></ul><span style=\"color: rgb(255, 0, 0)\">a</span>youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>\"x\"></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "/div&gt;<span style=\"color: #ff0000\">a</span>youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"\" sandbox=\"allow-top-navigation allow-scripts\"&gt;\"x\"&gt;<p></p>"
+  },
+  {
+    "name": "parity 59",
+    "input": "><span class=\"vive-mention\" data-mention=\"１２\">@x</span></p>t>alert(1)</script>\" sandbox=\"allow-top-navigatiu1\">@@ a‮b​  c⁦ </span></p>\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;@x<p></p>t&gt;alert(1)\" sandbox=\"allow-top-navigatiu1\"&gt;@@ a‮b​  c⁦ <p></p>\"&gt;"
+  },
+  {
+    "name": "parity 60",
+    "input": "ipt>css\"><p>a</p>red\">x^2 &lt; y</span></p><div data-math=\"block\" class=\"k\">\\sum_i a_i\n\\int f</div>-footnote=\"x\" class=\"y\">not <strong>kalın</strong> <em>eğik</em> <a href=\"https://example.com\" onclick=\"x\">bağ</a> <u>altı</u> <code>kod</c",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "ipt&gt;css\"&gt;<p>a</p>red\"&gt;x^2 &lt; y<p></p><div data-math=\"block\">\\sum_i a_i\n\\int f</div>-footnote=\"x\" class=\"y\"&gt;not <strong>kalın</strong> <em>eğik</em> <a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\">bağ</a> <u>altı</u> <code>kod</code>"
+  },
+  {
+    "name": "parity 61",
+    "input": "\" data-mention=\"a..b\">@b</span></p>type=\"taskItem\" data-checked=\"true\"><input type=\"checkbox\"><div><p>a</p></div></li></ul>il.com\">x</a>or=\"red\"><center>yazı</center></font><div><p>blok</p></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\" data-mention=\"a..b\"&gt;@b<p></p>type=\"taskItem\" data-checked=\"true\"&gt;<p>a</p>il.com\"&gt;xor=\"red\"&gt;yazı<p>blok</p>"
+  },
+  {
+    "name": "parity 62",
+    "input": "999\">a</span>ps:evil.com\">x</a>/noscript>iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "999\"&gt;aps:evil.com\"&gt;x/noscript&gt;iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 63",
+    "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxlert(1)\">x</a>1\">z</a>ript:alert(1)\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxlert(1)\"&gt;x1\"&gt;zript:alert(1)\"&gt;"
+  },
+  {
+    "name": "parity 64",
+    "input": "/spanimg src=\"/uploads/a.png\">le>;onmouseover=alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "/spanimg src=\"/uploads/a.png\"&gt;le&gt;;onmouseover=alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 65",
+    "input": "src=\"https://user:pass@example.com/a.png\">(1)>\"></noscript><img src=\"javascript:alert(1)\">/example.com\">a<sup data-footnote=\"\">not</sup></a></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "src=\"https://user:pass@example.com/a.png\"&gt;(1)&gt;\"&gt;/example.com\"&gt;a<sup data-footnote=\"\">not</sup><p></p>"
+  },
+  {
+    "name": "parity 66",
+    "input": "/tr></table>span data-math=\"inline\" style=\"color: red\">x^2 &lt; y</span></p><div data-math=\"block\" class=\"k\">\\sum_i a_i\n\\int f</div>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx://example.com/a.png\" onerror=\"alert(1)\" alt=\"a\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "/tr&gt;span data-math=\"inline\" style=\"color: red\"&gt;x^2 &lt; y<p></p><div data-math=\"block\">\\sum_i a_i\n\\int f</div>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx://example.com/a.png\" onerror=\"alert(1)\" alt=\"a\"&gt;"
+  },
+  {
+    "name": "parity 67",
+    "input": "art=\"1\"><li>a</li></ol><ol start=\"-5\"><li>b</li></ol><ol start=\"0042\"><li>c</le>g src=\"http://example.com/a.png\" alt=\"a\">.youtube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"></iframe></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "art=\"1\"&gt;<li>a</li><ol><li>b</li></ol><ol start=\"42\"><li>cg src=\"http://example.com/a.png\" alt=\"a\"&gt;.youtube-nocookie.com.evil.com/embed/dQw4w9WgXcQ\"&gt;</li></ol>"
+  },
+  {
+    "name": "parity 68",
+    "input": ">a<span data-math=\"inline\">  </span>b</p>nline\">  </span>b</p>m/embed/dQw4w9W{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;a  b<p></p>nline\"&gt;  b<p></p>m/embed/dQw4w9W{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x<p></p>"
+  },
+  {
+    "name": "parity 69",
+    "input": "p>color: transparent\">b</mark>>a</p>tyle=\"color: red !important\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "p&gt;color: transparent\"&gt;b&gt;a<p></p>tyle=\"color: red !important\"&gt;a"
+  },
+  {
+    "name": "parity 70",
+    "input": "orm action=\"https://evil.com\"><input name=\"password\"><button>gönderp><span style=\"text-align: center\">b</span>span style=\"color: inherit\">a</span><mark style=\"background-color: transparent\">b</mark>ta-math=\"INLINE\">x</span></p><div data-math=\"inline\">y</div><span data-math=\"block\">z</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "orm action=\"https://evil.com\"&gt;"
+  },
+  {
+    "name": "parity 71",
+    "input": "p>a</p></div></li></ul>style>body{display:none}</style><p>a</p>askItem\" data-checked=\"yes\"><input type=\"radio\"><div><p>a</p></div></li></ul>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "p&gt;a<p></p>style&gt;body{display:none}<p>a</p>askItem\" data-checked=\"yes\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 72",
+    "input": "img src=\"/uploads/a.png\">e=\"Bad Lang!\"><code class=\"language-js x\">b</code></pre>a><a href=\"?q=1\">z</a>https://example.com\" target=\"_top\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "img src=\"/uploads/a.png\"&gt;e=\"Bad Lang!\"&gt;<code>b</code>a&gt;<a rel=\"noopener noreferrer nofollow\" href=\"?q=1\">z</a>https://example.com\" target=\"_top\"&gt;x"
+  },
+  {
+    "name": "parity 73",
+    "input": ">>@@ a‮b​  c⁦ </span></p>n></a></p>x<sup>2</sup></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;&gt;@@ a‮b​  c⁦ <p></p>n&gt;<p></p>x2<p></p>"
+  },
+  {
+    "name": "parity 74",
+    "input": "href=\"\\\\evil.com\">x</a>ploads/a.png\">ta-type=\"taskItem\" data-checked=\"yes\"><input type=\"radio\"><div><p>a</p></div></li></ul>></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "href=\"\\\\evil.com\"&gt;xploads/a.png\"&gt;ta-type=\"taskItem\" data-checked=\"yes\"&gt;<p>a</p>&gt;"
+  },
+  {
+    "name": "parity 75",
+    "input": "ipt:msgbox(1)\">x</a></noscript><img src=x onerror=alert(1)>\"></noscript>g>kalın</strong> <em>eğik</em> <a href=\"https://example.com\" onclick=\"xef=\" \tjavascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ipt:msgbox(1)\"&gt;x<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">\"&gt;g&gt;kalın <em>eğik</em> <a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\">x</a>"
+  },
+  {
+    "name": "parity 76",
+    "input": "src=\"https://www.youtube-nocookie.cript><p>b</p>ot;onmouseover=alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "src=\"https://www.youtube-nocookie.cript&gt;<p>b</p>ot;onmouseover=alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 77",
+    "input": "rent\">b</-align: centps:evil.com\">x</a>\"><link rel=\"stylesheet\" href=\"https://evil.com/a.css\"><p>a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "rent\"&gt;bx\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 78",
+    "input": "data:text/html;base64,PH</p>(1)\">x</a>https://www.youtube-nocook",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "data:text/html;base64,PH<p></p>(1)\"&gt;xhttps://www.youtube-nocook"
+  },
+  {
+    "name": "parity 79",
+    "input": "><td>z</td></tr></table></sup>t(1)\" data-hx-get=\"/x\"><p>a</p></div>c=x onerror=alert(1)>]]><p>c--!></p>metin</p></form>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;zt(1)\" data-hx-get=\"/x\"&gt;<p>a</p>c=x onerror=alert(1)&gt;]]&gt;<p>c--!&gt;</p>metin<p></p>"
+  },
+  {
+    "name": "parity 80",
+    "input": "ef=\"https://example.com\" href=\"javascript:alert(1)\">x</a>=\"x()\">Film</a></div>l;base64,PHN2Zz48L3N2Zz4=\">alert(1)> --></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ef=\"https://example.com\" href=\"javascript:alert(1)\"&gt;x=\"x()\"&gt;Filml;base64,PHN2Zz48L3N2Zz4=\"&gt;alert(1)&gt; --&gt;<p></p><p>b</p>]]&gt;<p>c--!&gt;</p>"
+  },
+  {
+    "name": "parity 81",
+    "input": "/script>\" sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>\">x</a>\u0000b\u0007c transparent\">b</mark>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "/script&gt;\" sandbox=\"allow-top-navigation allow-scripts\"&gt;\"&gt;xb\u0007c transparent\"&gt;b"
+  },
+  {
+    "name": "parity 82",
+    "input": "ww.youtube-nocookie.com/embed/../a>ğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğ zzzzzzzzzzzzzzzzzzzz</span></p><template><img src=x onerror=alert(1)></template><p>görünür</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ww.youtube-nocookie.com/embed/../a&gt;ğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğ zzzzzzzzzzzzzzzzzzzz<p></p><p>görünür</p>"
+  },
+  {
+    "name": "parity 83",
+    "input": "p><sup data-footnote=\"\"ğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğ zzzzzzzzzzzzzzzzzzzz</span></p>\"https://example.com\">a<sup data-footnote=\"\">not</sup></a></p>t:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "p&gt;<sup data-footnote=\"\">\"https://example.com\"&gt;anott:alert(1)\"&gt;x</sup>"
+  },
+  {
+    "name": "parity 84",
+    "input": "tps://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>ef=\"https:evil.com\">x</a>: red\">@x</span></p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "tps://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;ef=\"https:evil.com\"&gt;x: red\"&gt;@x<p></p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>"
+  },
+  {
+    "name": "parity 85",
+    "input": "ut type=\"text\" name=\"x\"></p>ta-footnote=\"\">not</sup></a></p>rc onerror=alert(1)>v data-embed-invalid=\"\"></div><p>a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ut type=\"text\" name=\"x\"&gt;<p></p>ta-footnote=\"\"&gt;not<p></p>rc onerror=alert(1)&gt;v data-embed-invalid=\"\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 86",
+    "input": "</div><p>a</p>> zzzzzzzzzzzzzzzzzzzz</span></p>r\">b</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "<p>a</p>&gt; zzzzzzzzzzzzzzzzzzzz<p></p>r\"&gt;b"
+  },
+  {
+    "name": "parity 87",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>)\">x</a>ta-hx-on:click=\"alert(1)\" data-hx-get=\"/x\"><p>a</p></div>href=\"https://b.example\">b</a></span></a></sup></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>)\"&gt;xta-hx-on:click=\"alert(1)\" data-hx-get=\"/x\"&gt;<p>a</p>href=\"https://b.example\"&gt;b<p></p>"
+  },
+  {
+    "name": "parity 88",
+    "input": "rror=alert(1)>\"></noscript><div><p>blok</p></div>ple.com/a.png\" alt=\"a\">></font><div><p>blok</p></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "rror=alert(1)&gt;\"&gt;<p>blok</p>ple.com/a.png\" alt=\"a\"&gt;&gt;<p>blok</p>"
+  },
+  {
+    "name": "parity 89",
+    "input": "\">x</a>\"katex\"><svg><path d=\"M0\"/></svg>x<img src=x onerror=alert(1)></span></span></p>ads/a.png\">a-embed=\"youtube\" data-id=\"../../x\"><iframe src=\"https://www.youtube-nocookie.com/embed/.",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;x\"katex\"&gt;x<p></p>ads/a.png\"&gt;a-embed=\"youtube\" data-id=\"../../x\"&gt;"
+  },
+  {
+    "name": "parity 90",
+    "input": "il.com\">x</a>ntion=\"u1\"> @ </span></p>onclick=\"alert(1)\">tıkla</p>om\" target=\"_blank\" rel=\"opener\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "il.com\"&gt;xntion=\"u1\"&gt; @ <p></p>onclick=\"alert(1)\"&gt;tıkla<p></p>om\" target=\"_blank\" rel=\"opener\"&gt;x"
+  },
+  {
+    "name": "parity 91",
+    "input": "ject=\"color: rgb(255, 0, 0)\">a</span>sup data-footnote=\"\"><div>bir</div><sup data-footnote=\"\">iç</sup><span class=\"vive-mention\" data-mention=\"u1\">@x</spa/mark>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ject=\"color: rgb(255, 0, 0)\"&gt;asup data-footnote=\"\"&gt;bir<sup data-footnote=\"\">iç</sup><span class=\"vive-mention\" data-mention=\"u1\">@x</span>"
+  },
+  {
+    "name": "parity 92",
+    "input": "<p><span data-math=\"inline\">{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{r=alert(1)></template><p>görünür</p> href=\"javascript&colon;alert(1)\">x</a>/script><p>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "<p><span data-math=\"inline\">{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{r=alert(1)&gt;</span></p><p>görünür</p> href=\"javascript:alert(1)\"&gt;x/script&gt;<p>b</p>"
+  },
+  {
+    "name": "parity 93",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" s(1)\">x</a>om/?q=&quot;&gt;&lt;script&gt;\" title=\"&quot;onmouseover=alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"\" s(1)\"&gt;xom/?q=\"&gt;&lt;script&gt;\" title=\"\"onmouseover=alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 94",
+    "input": "<img src=\"http://example.com/a.png\" alt=\"a\">ed><input type=\"text\" name=\"x\"></p>ng\" onerror=\"alert(1)\" alt=\"a\">>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "<img src=\"https://example.com/a.png\" alt=\"a\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">ed&gt;<p></p>ng\" onerror=\"alert(1)\" alt=\"a\"&gt;&gt;"
+  },
+  {
+    "name": "parity 95",
+    "input": "ol>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaav></div></div></divt=\"1e9\"><li>d</li></ol>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ol&gt;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaav&gt;<li>d</li>"
+  },
+  {
+    "name": "parity 96",
+    "input": "cript:alert(1)\"><sup>2</sup></p>c</span></p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "cript:alert(1)\"&gt;2<p></p>c<p></p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "parity 97",
+    "input": "e.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" data-mention=\"u1\" style=\"color: red\">@x</span></p>>></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "e.com/embed/dQw4w9WgXcQ\" srcdoc=\"\" data-mention=\"u1\" style=\"color: red\"&gt;@x<p></p>&gt;&gt;"
+  },
+  {
+    "name": "parity 98",
+    "input": "rt(1)\">x</a>:alert(1)\">\"u1\">@@ a‮b​  c⁦ </span></p>09;script:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "rt(1)\"&gt;x:alert(1)\"&gt;\"u1\"&gt;@@ a‮b​  c⁦ <p></p>09;script:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 99",
+    "input": "ody><tr><td colspan=\"99999\" rowm_i a_i\n\\int f</div>\">x</a>=\"JaVaScRiPt:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ody&gt;\"&gt;x=\"JaVaScRiPt:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 100",
+    "input": "-- <img src=x onerror=alert(1)> --></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p> id=\"x\">\"/page#part\">x</a><a href=\"#top\">y</a><a href=\"?q=1\">z</a>ipt>alert(1)</script>\"></iframe>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "--  --&gt;<p></p><p>b</p>]]&gt;<p>c--!&gt;</p> id=\"x\"&gt;\"/page#part\"&gt;x<a rel=\"noopener noreferrer nofollow\" href=\"#top\">y</a><a rel=\"noopener noreferrer nofollow\" href=\"?q=1\">z</a>ipt&gt;alert(1)\"&gt;"
+  },
+  {
+    "name": "parity 101",
+    "input": "id=\"\"></div><p>a</p>/example.com\" target=\"_top\">x</a><img src=\"//example.com/a.png\">jav\nascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "id=\"\"&gt;<p>a</p>/example.com\" target=\"_top\"&gt;x<img src=\"https://example.com/a.png\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">jav\nascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 102",
+    "input": "iframe></div>cli/../x\"><iframe src=\"https://www.youtube-nocookie.com/embed/../x\"></iframe></div>d; @import url(x)\">a</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "iframe&gt;cli/../x\"&gt;d; @import url(x)\"&gt;a"
+  },
+  {
+    "name": "parity 103",
+    "input": "\">e>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></pta-id=\"76979871\" data-title=\"Film\"><a href=\"javascript:alert(1)\" onclick=\"x()\">Film</a></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;e&gt;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<a rel=\"noopener noreferrer nofollow\">Film</a>"
+  },
+  {
+    "name": "parity 104",
+    "input": "xample.com\" onclick=\"x\">bağ</a> <u>altı</u> <code>kod</code><img src=\"https://example.com/a.png\"></sup></p>1))\">a</span>div class=\"vive-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=\"999999\" datolor: expression(alert(1))\">a</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "xample.com\" onclick=\"x\"&gt;bağ <u>altı</u> <code>kod</code><img src=\"https://example.com/a.png\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"><p></p>1))\"&gt;adiv class=\"vive-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=\"999999\" datolor: expression(alert(1))\"&gt;a"
+  },
+  {
+    "name": "parity 105",
+    "input": "e><img src=x onerror=alert(1)></style></svg>www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe></p>0,abc\">a</td><th c",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "e&gt;<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;<p></p>0,abc\"&gt;a"
+  },
+  {
+    "name": "parity 106",
+    "input": "rt(1)\">x</a>gt;&lt;script&gt;\" title=\"&quot;onmouseover=alert(1)\">x</a>href={{{{x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "rt(1)\"&gt;xgt;&lt;script&gt;\" title=\"\"onmouseover=alert(1)\"&gt;xhref={{{{x<p></p>"
+  },
+  {
+    "name": "parity 107",
+    "input": "a href=\"javascript:alert(1)\">x</a><tr><td>a</td></tr></table>\"vive-mention\" data-mention=\"a..b\">@b</span></p>e><p>görünür</p><!--</style><img title=\"--&gt;&lt;img src=x onerror=alert(1)&gt;\"></style></mglyph></table></mtext></math>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "a href=\"javascript:alert(1)\"&gt;xa\"vive-mention\" data-mention=\"a..b\"&gt;@b<p></p>e&gt;<p>görünür</p>"
+  },
+  {
+    "name": "parity 108",
+    "input": ">x</a>><span data-math=\"inline\">a‮b\u0007c</span></p>mg src=\"https://example.com/a.png\" width=\"0\" height=\"99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;x&gt;<span data-math=\"inline\">abc</span><p></p>mg src=\"https://example.com/a.png\" width=\"0\" height=\"99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\"&gt;"
+  },
+  {
+    "name": "parity 109",
+    "input": "ref=\"JaVaScRiPt:alert(1)\">x</a>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaap></formta=\"evil.swf\"></object><embed src=\"evil.swf\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ref=\"JaVaScRiPt:alert(1)\"&gt;xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaap&gt;"
+  },
+  {
+    "name": "parity 110",
+    "input": "script:msgbox(1)\">x</a>c=\"https://uan data-math=\"inline\"><span class=\"katex\"><svg><path d=\"M0\"/></svg>x<img src=x onerror=alert(1)></span></span></p>pan",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "script:msgbox(1)\"&gt;xc=\"https://uan data-math=\"inline\"&gt;<span>x</span><p></p>pan"
+  },
+  {
+    "name": "parity 111",
+    "input": "ass=\"vive-mention\" dx</a>le=\"</noscript><img src=x onerror=alert(1)>\"></noscript>\"></object><embed src=\"evil.swf\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ass=\"vive-mention\" dxle=\"<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">\"&gt;\"&gt;"
+  },
+  {
+    "name": "parity 112",
+    "input": "</iframe>color: #00ff00; position: fixedp>k\" rel=\"opener\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "color: #00ff00; position: fixedp&gt;k\" rel=\"opener\"&gt;x"
+  },
+  {
+    "name": "parity 113",
+    "input": "\"\"><a href=\"https://a.example\">a<span><a href=\"https://b.example\">b</a></span></a></sup></p>img src=x onerror=alert(1)></span></span></p>/a>vive-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=\"99",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\"\"&gt;<a rel=\"noopener noreferrer nofollow\" href=\"https://a.example\">a<span></span></a><a rel=\"noopener noreferrer nofollow\" href=\"https://b.example\">b</a><p></p>img src=x onerror=alert(1)&gt;<p></p>/a&gt;vive-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=\"99"
+  },
+  {
+    "name": "parity 114",
+    "input": "ref=\"jav\nascript:alert(1)\">x</a>bscript:msgbox(1)\">x</a>op-navigation allow-scripts\"></iframe></div>h></table></mtext></math>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "ref=\"jav\nascript:alert(1)\"&gt;xbscript:msgbox(1)\"&gt;xop-navigation allow-scripts\"&gt;h&gt;"
+  },
+  {
+    "name": "parity 115",
+    "input": "rror=alert(1)></span></span></p>\u0007cspan></p>click=",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "rror=alert(1)&gt;<p></p>\u0007cspan&gt;<p></p>click="
+  },
+  {
+    "name": "parity 116",
+    "input": "vil.com\">x</a>n></p>x</a>-scripts\"></iframe></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "vil.com\"&gt;xn&gt;<p></p>x-scripts\"&gt;"
+  },
+  {
+    "name": "parity 117",
+    "input": "op\">x</a>class=\"vive-mention\" data-mention=\"u1\">@x</span><span data-math=\"inline\">y</span><table><tr><td>z</td></tr></table></sup>text-align: center; background: url(https://evil.com/x)\">a</p>pan style=\"col\\6f r: red\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "op\"&gt;xclass=\"vive-mention\" data-mention=\"u1\"&gt;@x<span data-math=\"inline\">y</span><table><tbody><tr><td>z</td></tr></tbody></table>text-align: center; background: url(https://evil.com/x)\"&gt;a<p></p>pan style=\"col\\6f r: red\"&gt;a"
+  },
+  {
+    "name": "parity 118",
+    "input": "a.png\">/www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>n x\" data-mention=\"u1\" style=\"color: red\">@x</s class=\"vive-mention\" data-mention=\"u1\"> @ </span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "a.png\"&gt;/www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;n x\" data-mention=\"u1\" style=\"color: red\"&gt;@x @ <p></p>"
+  },
+  {
+    "name": "parity 119",
+    "input": "a>mport url(x)\">a</span>d/dQw4w9WgXcQ\"></iframe></div>a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "a&gt;mport url(x)\"&gt;ad/dQw4w9WgXcQ\"&gt;a&gt;"
+  },
+  {
+    "name": "parity 120",
+    "input": "\tjavascript:alert(1)\">x</a>=\"color: #00ff00; position: fixed; inset: 0; z-index: 9999\">a</span>/a><script>alert(1)</script><p>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "\tjavascript:alert(1)\"&gt;x=\"color: #00ff00; position: fixed; inset: 0; z-index: 9999\"&gt;a/a&gt;<p>b</p>"
+  },
+  {
+    "name": "parity 121",
+    "input": "none}</style><p>a</p>red\">x^2 &lt; y</span></p><div data-math=\"block\" class=\"k\">\\sum_i a_i\n\\int f</div>d=\"location\" name=\"cookie\">a</p><img src=\"https://example.com/a.pntion\" d",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "none}<p>a</p>red\"&gt;x^2 &lt; y<p></p><div data-math=\"block\">\\sum_i a_i\n\\int f</div>d=\"location\" name=\"cookie\"&gt;a<p></p>"
+  },
+  {
+    "name": "parity 122",
+    "input": "</p>\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>text\" name=\"x\"></p>note=\"\">not</sup></a></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "<p></p>\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;text\" name=\"x\"&gt;<p></p>note=\"\"&gt;not<p></p>"
+  },
+  {
+    "name": "parity 123",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaion=\"u1\">@x</span></a></p>/span></p>pt>alert(1)</script>\"></iframe>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaion=\"u1\"&gt;@x<p></p>/span&gt;<p></p>pt&gt;alert(1)\"&gt;"
+  },
+  {
+    "name": "parity 124",
+    "input": "\"true\":image/png;base64,iVBORw0KGgo=\">lick=\"x()\">Film</a></div>aaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"true\":image/png;base64,iVBORw0KGgo=\"&gt;lick=\"x()\"&gt;Filmaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "name": "parity 125",
+    "input": "mport url(x)\">a</span>pan=\"3\" data-colwidth=\"1,2,3\">b</t></p>ript><p title=\"</noscript><img src=x onerror=alert(1)>\"></noscript>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "mport url(x)\"&gt;apan=\"3\" data-colwidth=\"1,2,3\"&gt;b<p></p>ript&gt;<p></p>"
+  },
+  {
+    "name": "parity 126",
+    "input": "x<sup>2</sup><: red\">a</span>ert(1)</script>\"></iframe>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "x2&lt;: red\"&gt;aert(1)\"&gt;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>"
+  },
+  {
+    "name": "parity 127",
+    "input": "ğğ zzzzzzzzzzzzzzzzzzzz</span></p>#x09;fe-url\"> onerror=alert(1)>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ğğ zzzzzzzzzzzzzzzzzzzz<p></p>#x09;fe-url\"&gt; onerror=alert(1)&gt;"
+  },
+  {
+    "name": "parity 128",
+    "input": "a</p>om\" onclick=\"x\">bağ</a> <u>altı</u> <code>kod</code><img src=\"https://span>a</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "a<p></p>om\" onclick=\"x\"&gt;bağ <u>altı</u> <code>kod</code>"
+  },
+  {
+    "name": "parity 129",
+    "input": "r: rgb(255, 0,\"a\">>=\"x\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "r: rgb(255, 0,\"a\"&gt;&gt;=\"x\"&gt;"
+  },
+  {
+    "name": "parity 130",
+    "input": "><div><p>blok</p></div>VaScRiPt:alert(1)\">x</a>>blok</p></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;<p>blok</p>VaScRiPt:alert(1)\"&gt;x&gt;blok<p></p>"
+  },
+  {
+    "name": "parity 131",
+    "input": "ng!\"><code class=\"language-js ml;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==\">x</a>4,iVBORw0KGgo=\">bed-invalid=\"\"><",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ng!\"&gt;<code>x4,iVBORw0KGgo=\"&gt;bed-invalid=\"\"&gt;&lt;</code>"
+  },
+  {
+    "name": "parity 132",
+    "input": "ve-mention\" data-mention=\"u1\n\">@x</span></p>n x\" data-mention=\"u1\" style=\"color: red\">@x</span></p>utube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe></div><p>a</p>/p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "ve-mention\" data-mention=\"u1\n\"&gt;@x<p></p>n x\" data-mention=\"u1\" style=\"color: red\"&gt;@x<p></p>utube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;<p>a</p>/p&gt;"
+  },
+  {
+    "name": "parity 133",
+    "input": "c=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>ref=\"javascript:alert(1)\">x</a><tr><td>a</td></tr></table>div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div>< href=\"https://evil.com/a.css\"><p>a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "c=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;ref=\"javascript:alert(1)\"&gt;xadiv&gt;&lt; href=\"https://evil.com/a.css\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 134",
+    "input": "enter>yazı</center></font><div><p>blok</p></div>(1)\" alt=\"a\">rame>href=\"javascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "enter&gt;yazı<p>blok</p>(1)\" alt=\"a\"&gt;rame&gt;href=\"javascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 135",
+    "input": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtion=\"u1\n\">@x</span></p>cript:alert(1)\">x</a>t:msgbox(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtion=\"u1\n\"&gt;@x<p></p>cript:alert(1)\"&gt;xt:msgbox(1)\"&gt;x"
+  },
+  {
+    "name": "parity 136",
+    "input": "t-0 z-50\">a</p>ript:msgbox(1)\">x</a>ef=\"?q=1\">z</a>pt>alert(1)</script>\"></iframe>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "t-0 z-50\"&gt;a<p></p>ript:msgbox(1)\"&gt;xef=\"?q=1\"&gt;zpt&gt;alert(1)\"&gt;"
+  },
+  {
+    "name": "parity 137",
+    "input": "/ol>ript:alert(1)\">alt=\"a\"><tr><td>a</td></tr></table>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "/ol&gt;ript:alert(1)\"&gt;alt=\"a\"&gt;a"
+  },
+  {
+    "name": "parity 138",
+    "input": "/example.com\" target=\"_top\">x</a>rame></div>on:click=\"alert(1)\" data-hx-get=\"/x\"><p>a</p></div>\" title=\"&quot;onmouseover=alert(1",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "/example.com\" target=\"_top\"&gt;xrame&gt;on:click=\"alert(1)\" data-hx-get=\"/x\"&gt;<p>a</p>\" title=\"\"onmouseover=alert(1"
+  },
+  {
+    "name": "parity 139",
+    "input": "ol>\"http://www.w3.org/19p>f=\"https://b.example\">b</a></span></a></sup></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ol&gt;\"http://www.w3.org/19p&gt;f=\"https://b.example\"&gt;b<p></p>"
+  },
+  {
+    "name": "parity 140",
+    "input": "ta-type=\"taskList\"><li data-typ>tyle=\"text-align: center; background: url(https://evil.com/x)\">a</p>2</sup></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ta-type=\"taskList\"&gt;<li>tyle=\"text-align: center; background: url(https://evil.com/x)\"&gt;a<p></p>2<p></p></li>"
+  },
+  {
+    "name": "parity 141",
+    "input": "vil.swf\">ref=\"java\u0000script:alert(1)\">x</a>ript>alert(1)</script><p>bxt></form><form><mglyph><style></math><img src onerror=alert(1)>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "vil.swf\"&gt;ref=\"javascript:alert(1)\"&gt;xript&gt;alert(1)<p>bxt&gt;</p>"
+  },
+  {
+    "name": "parity 142",
+    "input": "\"x\" onerror=\"alert(1)\">mbed-invalid=\"\"></div><p>a</p>p>x<sup>2</sup></p>tr></tbody></table>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"x\" onerror=\"alert(1)\"&gt;mbed-invalid=\"\"&gt;<p>a</p>p&gt;x2<p></p>tr&gt;"
+  },
+  {
+    "name": "parity 143",
+    "input": "tion=\"u1\n\">@x</span></p>div><p>a</p>aaaaaaaaaaaaaaaaaaaaa\">@x</span><e.com/a.png\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "tion=\"u1\n\"&gt;@x<p></p>div&gt;<p>a</p>aaaaaaaaaaaaaaaaaaaaa\"&gt;@x"
+  },
+  {
+    "name": "parity 144",
+    "input": "<iframe srcdoc=\"<script>alert(1)</script>\"></iframe>vil.com\">x</a>osition: fixed; inset: 0; z-index: 9999\">a</span>span class=\"vive-mention\" data-mention=\"１２\">@x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "vil.com\"&gt;xosition: fixed; inset: 0; z-index: 9999\"&gt;aspan class=\"vive-mention\" data-mention=\"１２\"&gt;@x<p></p>"
+  },
+  {
+    "name": "parity 145",
+    "input": "ton><p>metin</p></form>/p>c=\"data:image/png;base64,iVBORw0KGgo=\">mtext><table><mglyph><style><!--</style><img title=\"--&gt;&lt;img src=x onerror=alert(1)&gt;\"></style></mglyph></tab",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ton&gt;<p>metin</p>/p&gt;c=\"data:image/png;base64,iVBORw0KGgo=\"&gt;mtext&gt;<table></table>"
+  },
+  {
+    "name": "parity 146",
+    "input": "table>/p>A[<img src=x onhref=\"https://example.com\" target=\"_blank\" rel=\"opener\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "table&gt;/p&gt;A[x"
+  },
+  {
+    "name": "parity 147",
+    "input": "a href=\"//evil.com\">x</a>mplate><p>görünür</p>ascript:alert(1)\">x</a><tr><td>a</td></tr></table>\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "a href=\"//evil.com\"&gt;xmplate&gt;<p>görünür</p>ascript:alert(1)\"&gt;xa\"&gt;"
+  },
+  {
+    "name": "parity 148",
+    "input": "p>: red/**/\">a</span>ext-align: center; backg-math=\"inline\">  </span>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "p&gt;: red/**/\"&gt;aext-align: center; backg-math=\"inline\"&gt;  b<p></p>"
+  },
+  {
+    "name": "parity 149",
+    "input": "-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\"><iframe src=\"https://www.yout</ul>math=\"inline\"><span class=\"katex\"><svg><path d=\"M0></a></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 150",
+    "input": "xmlns:xlink=\"http://www.w3.org/1999/xlink\">a</p>\">x</a>l.swf\"></object><embed src=\"evil.swf\"> href=\"Ja",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>\"&gt;xl.swf\"&gt; href=\"Ja"
+  },
+  {
+    "name": "parity 151",
+    "input": "=\"true\"><input type=\"checkbox\"><div><p>a</p></div></li></ul>N2Zz4=\">B0Pg==\">x</a>><svg><path d=\"M0\"/></svg>x<img src=x oner",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "=\"true\"&gt;<p>a</p>N2Zz4=\"&gt;B0Pg==\"&gt;x&gt;x"
+  },
+  {
+    "name": "parity 152",
+    "input": "<p>a</p>)\">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>nter>yazı</center></font><div><p>blok</p></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "<p>a</p>)\"&gt;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>nter&gt;yazı<p>blok</p>"
+  },
+  {
+    "name": "parity 153",
+    "input": "idth: 99999999px\"><tbody><tr><td>a</td></tr></tbody></table>w4w9WgXcQ\"><iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>pan class=\"vive-mention\" data-mention=\"u1\n\">@x</span></p>ef=\"https://example.com\" target=\"_blank\" rel=\"opener\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "idth: 99999999px\"&gt;aw4w9WgXcQ\"&gt;pan class=\"vive-mention\" data-mention=\"u1\n\"&gt;@x<p></p>ef=\"https://example.com\" target=\"_blank\" rel=\"opener\"&gt;x"
+  },
+  {
+    "name": "parity 154",
+    "input": "8L3N2Zz4=\">/p><sup>2</sup></p>put type=\"",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "8L3N2Zz4=\"&gt;/p&gt;2<p></p>put type=\""
+  },
+  {
+    "name": "parity 155",
+    "input": "Q\" data-start=\"999999\" data-title=\"  Başlık\u0007  \"><iframe></iframe></div>nvalid=\"\"></div><p>a</p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxample.com/a.png\" onerror=\"alert(1)\" alt=\"a\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "Q\" data-start=\"999999\" data-title=\"  Başlık\u0007  \"&gt;nvalid=\"\"&gt;<p>a</p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxample.com/a.png\" onerror=\"alert(1)\" alt=\"a\"&gt;"
+  },
+  {
+    "name": "parity 156",
+    "input": "=\"https://a.example\">a<span><a href=\"https://b.example\">b</a></span></a></sup></p> inset: 0; z-index: 9999\">a</span>t(1)> --></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]>Ggo=\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "=\"https://a.example\"&gt;a<span><a rel=\"noopener noreferrer nofollow\" href=\"https://b.example\">b</a></span><p></p> inset: 0; z-index: 9999\"&gt;at(1)&gt; --&gt;<p></p><p>b</p>]]&gt;Ggo=\"&gt;"
+  },
+  {
+    "name": "parity 157",
+    "input": "://evil.com\"></iframe></div>div><p>a</p></div></li></ul> src=x onerror=alert(1)></span></span></p>a\u0000b\u0007c",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "://evil.com\"&gt;div&gt;<p>a</p> src=x onerror=alert(1)&gt;<p></p>ab\u0007c"
+  },
+  {
+    "name": "parity 158",
+    "input": "rget=rl(https://evil.com/x)\">a</p>ecked><input type=\"text\" name=\"x\"></p>lass=\"vive-mention x\" data-mention=\"u1\" style=\"color: red\">@x</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "rget=rl(https://evil.com/x)\"&gt;a<p></p>ecked&gt;<p></p>lass=\"vive-mention x\" data-mention=\"u1\" style=\"color: red\"&gt;@x<p></p>"
+  },
+  {
+    "name": "parity 159",
+    "input": ">a</td></tr></tbody></table>şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşe\">  </span>b</p>kie.com/embed/dQw4w9WgXcQ\"></iframe>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;aşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşe\"&gt;  b<p></p>kie.com/embed/dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 160",
+    "input": "/p>/a>il.com\">x</a>nerror=alert(1)>]]><p>c--!></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "/p&gt;/a&gt;il.com\"&gt;xnerror=alert(1)&gt;]]&gt;<p>c--!&gt;</p>"
+  },
+  {
+    "name": "parity 161",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</sp/evil.com/x)\">a</p>pt:alert(1)\">x</a>uploads/a.png\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@xa<p></p>pt:alert(1)\"&gt;xuploads/a.png\"&gt;"
+  },
+  {
+    "name": "parity 162",
+    "input": ">x</a></a>/a>javascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;x/a&gt;javascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 163",
+    "input": "(1)\">tıkla</p>vascript:alert(1)\">x</a>p>a<span data-math=\"inline\">  </span>b</p>/a><a href=\"#top\">y</a><a href=\"?q=1\">z</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "(1)\"&gt;tıkla<p></p>vascript:alert(1)\"&gt;xp&gt;a  b<p></p>/a&gt;<a rel=\"noopener noreferrer nofollow\" href=\"#top\">y</a><a rel=\"noopener noreferrer nofollow\" href=\"?q=1\">z</a>"
+  },
+  {
+    "name": "parity 164",
+    "input": "an>ttps://example.com\" target=\"_top\">x</a>a>mport url(x)\">a</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "an&gt;ttps://example.com\" target=\"_top\"&gt;xa&gt;mport url(x)\"&gt;a"
+  },
+  {
+    "name": "parity 165",
+    "input": "div><div><div><div><div><div><div><div><div><div><div><div><dv><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><div><-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>.png\"></s",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "div&gt;&lt;-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"\" sandbox=\"allow-top-navigation allow-scripts\"&gt;.png\"&gt;"
+  },
+  {
+    "name": "parity 166",
+    "input": ">x</a>x\"></p>\"width: 99999999px\"><tbody><tr><td>a</td></tr></tbody></table>>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;xx\"&gt;<p></p>\"width: 99999999px\"&gt;a&gt;"
+  },
+  {
+    "name": "parity 167",
+    "input": "der</button><p>metin</p></form>le></matha:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==\">x</a>r\">b</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "der<p>metin</p>le&gt;xr\"&gt;b"
+  },
+  {
+    "name": "parity 168",
+    "input": "le=\"color: red/**/\">a</span>o=\">aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaation=\"javascript:alert(1)\"",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "le=\"color: red/**/\"&gt;ao=\"&gt;aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaation=\"javascript:alert(1)\""
+  },
+  {
+    "name": "parity 169",
+    "input": "<img src=\"/uploads/a.png\">an style=\"color: red; @import url(x)\">a</span>evil.com\">x</a>ath=\"INLINE\">x</span></p><div data-math=\"inline\">y</div><span da",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "an style=\"color: red; @import url(x)\"&gt;aevil.com\"&gt;xath=\"INLINE\"&gt;x<p></p>y"
+  },
+  {
+    "name": "parity 170",
+    "input": "ortant\">a<or: red\">@x</span></p>xample.com/a.png\" width=\"0\" height=\"99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\">blok</p></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ortant\"&gt;a@x<p></p>xample.com/a.png\" width=\"0\" height=\"99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\"&gt;blok<p></p>"
+  },
+  {
+    "name": "parity 171",
+    "input": "g src=\"//example.com/a.png\">ta-type=\"taskItem\" data-checked=\"true\"><input type=\"checkbox\"><div><p>a</p></div></li></ul>: 9999\">a</span>1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "g src=\"//example.com/a.png\"&gt;ta-type=\"taskItem\" data-checked=\"true\"&gt;<p>a</p>: 9999\"&gt;a1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>"
+  },
+  {
+    "name": "parity 172",
+    "input": "<mglyph><style></math><img src onerror=alertspan style=\"color: inherit\">a</span><mark style=\"background-color: transptr></table>ive-mention\" data-mention=\"u1\">@x</span></a></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": ""
+  },
+  {
+    "name": "parity 173",
+    "input": "ascript:alert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">a</p>e><img src=x onerror=alert(1)></style></svg>x</a>te><img src=x onerror=alert(1)></temp",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ascript:alert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>e&gt;xte&gt;"
+  },
+  {
+    "name": "parity 174",
+    "input": "/evil.com\">x</apan style=\"color: evilcolor\">a</span>d inset-0 z-50\">a</p>avascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "/evil.com\"&gt;xad inset-0 z-50\"&gt;a<p></p>avascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 175",
+    "input": "rt=\"0042\"><li>c</li></ol><ol start=\"1e9\"><li>d</li></ol>pt:alert(1)\">x</a>ootnote=\"\"><a href=\"https://a.example\">a<span><a href=\"https://b.example\">b</aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "rt=\"0042\"&gt;<li>c</li><ol><li>d</li></ol>pt:alert(1)\"&gt;xootnote=\"\"&gt;<a rel=\"noopener noreferrer nofollow\" href=\"https://a.example\">a<span></span></a><a rel=\"noopener noreferrer nofollow\" href=\"https://b.example\">b@x<p></p></a>"
+  },
+  {
+    "name": "parity 176",
+    "input": "g\">yle><!--</style><img title=\"--&gt;&lt;img src=x onerror=alert(1)&gt;\"></style></mglyph></table></\\int f</div> data-title=\"  Başlık\u0007  \"><iframe></iframe></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "g\"&gt;yle&gt;"
+  },
+  {
+    "name": "parity 177",
+    "input": "=\"java\u0000scripgbox(1)\">x</a>rt(1)\">x</a>ata=\"evil.swf\"></object><embed src=\"evil.swf\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "=\"javascripgbox(1)\"&gt;xrt(1)\"&gt;xata=\"evil.swf\"&gt;"
+  },
+  {
+    "name": "parity 178",
+    "input": ":evil.com\">x</a>cript>alert(1)</script><p>b</p><a href=\" \tjavascript:alert(1)\">x<ed\">a</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": ":evil.com\"&gt;xcript&gt;alert(1)<p>b</p><a rel=\"noopener noreferrer nofollow\">xa</a>"
+  },
+  {
+    "name": "parity 179",
+    "input": ">b</p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;b<p></p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş"
+  },
+  {
+    "name": "parity 180",
+    "input": "x<sup>2</sup></p>tyle><img src=x onerror=alert(1)></style></svg>\"/uploads/a.png\">ext\" name=\"x\"></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "x2<p></p>tyle&gt;<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">\"/uploads/a.png\"&gt;ext\" name=\"x\"&gt;<p></p>"
+  },
+  {
+    "name": "parity 181",
+    "input": "evil.ript:alert(1ta-math=\"inline\">a‮b\u0007c</span></p>=\"alert(1)\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "evil.ript:alert(1ta-math=\"inline\"&gt;a‮b\u0007c<p></p>=\"alert(1)\"&gt;"
+  },
+  {
+    "name": "parity 182",
+    "input": "</iframe>< src=\"x\" onerror=\"alert(1)\">style><p>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&lt; src=\"x\" onerror=\"alert(1)\"&gt;style&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 183",
+    "input": "yle=\"color: evilcolor\">a</span>v>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn=\"https://evil.com\"><input name=\"password\"><but",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "yle=\"color: evilcolor\"&gt;av&gt;xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxn=\"https://evil.com\"&gt;"
+  },
+  {
+    "name": "parity 184",
+    "input": "\"https://example.com/a.png\" onerror=\"alert(1)\" alt=\"a\">\\\\evil.com\">x</a>.png\">ı</u> <code>kod</code><img src=\"https://example.com/a.png\"></sup></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"https://example.com/a.png\" onerror=\"alert(1)\" alt=\"a\"&gt;\\\\evil.com\"&gt;x.png\"&gt;ı <code>kod</code><img src=\"https://example.com/a.png\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"><p></p>"
+  },
+  {
+    "name": "parity 185",
+    "input": "onerror=\"alert(1)\">tion=\"u1\"> @ </span></p>g src=\"http://example.com/a.png\" alt=\"a\">e=\"checkbox\"><div><p>a</p></div></li></ul>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "onerror=\"alert(1)\"&gt;tion=\"u1\"&gt; @ <p></p>g src=\"http://example.com/a.png\" alt=\"a\"&gt;e=\"checkbox\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 186",
+    "input": ".com/x)\">a</p>com/a.png\">ata:image/svg+xml;base64,PHN2Zz48L3N2Zz4=\">ttps://example.com/a.png\" width=\"0\" height=\"9",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": ".com/x)\"&gt;a<p></p>com/a.png\"&gt;ata:image/svg+xml;base64,PHN2Zz48L3N2Zz4=\"&gt;ttps://example.com/a.png\" width=\"0\" height=\"9"
+  },
+  {
+    "name": "parity 187",
+    "input": "(1)</script>\" sandbox=\"allow-top-navigation allow-scripts\"></iframe></div>>c--!></p>=\"javascript:alert(1)\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "(1)\" sandbox=\"allow-top-navigation allow-scripts\"&gt;&gt;c--!&gt;<p></p>=\"javascript:alert(1)\"&gt;"
+  },
+  {
+    "name": "parity 188",
+    "input": "tyle><p>a</p>\u0007cg\">/../x\"></iframe></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "tyle&gt;<p>a</p>\u0007cg\"&gt;/../x\"&gt;"
+  },
+  {
+    "name": "parity 189",
+    "input": "rt=\"0042\"><li>c</li></ol><ol start=\"1e9\"><li>d</li></ol><span style=\"color: expression(alert(1))\">a</span>k\" rel=\"opener\">x</a><span style=\"color: red; @import url(x)\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "rt=\"0042\"&gt;<li>c</li><ol><li>d</li></ol><span>a</span>k\" rel=\"opener\"&gt;x<span>a</span>"
+  },
+  {
+    "name": "parity 190",
+    "input": "t(1)\">x</a>n>\" rel=\"opener\">x</a>=\"java&#x09;script:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "t(1)\"&gt;xn&gt;\" rel=\"opener\"&gt;x=\"java\tscript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 191",
+    "input": "object data=\"evil.swf\"></object><embed src=\"evil.swf\">/p>tyle><!--</style><img title=\"--&gt;&lt;img src=x onerror=alert(1)&gt;\"></style></mglyph><\"fixed inset-0 z-50\">a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "object data=\"evil.swf\"&gt;/p&gt;tyle&gt;"
+  },
+  {
+    "name": "parity 192",
+    "input": "a>aaaaaaaaaaaaa\">@x</span></p>t:alert(1)\">(1)\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "a&gt;aaaaaaaaaaaaa\"&gt;@x<p></p>t:alert(1)\"&gt;(1)\"&gt;"
+  },
+  {
+    "name": "parity 193",
+    "input": "rc=\"x\" onerror=\"alert(1)\">=\"=\"http://www.w3.org/1999/xlink\">a</p>th=\"inline\" style=\"color: red\">x^2 &lt; y</span></p><div data-math=\"block\" class=\"k\">\\sum_i a_i\n\\int f</div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "rc=\"x\" onerror=\"alert(1)\"&gt;=\"=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>th=\"inline\" style=\"color: red\"&gt;x^2 &lt; y<p></p><div data-math=\"block\">\\sum_i a_i\n\\int f</div>"
+  },
+  {
+    "name": "parity 194",
+    "input": "ata-math=\"inline\">{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x</span></p>n=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>src=\"x\" onerror=\"alert(1)\">s x\">b</code></pre>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ata-math=\"inline\"&gt;{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{{x<p></p>n=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>src=\"x\" onerror=\"alert(1)\"&gt;s x\"&gt;b"
+  },
+  {
+    "name": "parity 195",
+    "input": "/../x\"><iframe src=\"https://www.youtube-nocookie.com/embed/../x\"></iframe></div>example.com/a.png\" onerror=\"alert(1)\" alt=\"a\">pt>\"></iframe></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "/../x\"&gt;example.com/a.png\" onerror=\"alert(1)\" alt=\"a\"&gt;pt&gt;\"&gt;"
+  },
+  {
+    "name": "parity 196",
+    "input": "rm><math><mtext></form><form><mglyph><style></matalt=\"a\">=\"color: inherit\">a</span><mark style=\"background-color: transparent\">b</mark>vascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "rm&gt;"
+  },
+  {
+    "name": "parity 197",
+    "input": "nerror=\"alert(1)\">/pre>><a href=\"javascript:alert(1)\">x<",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "nerror=\"alert(1)\"&gt;/pre&gt;&gt;<a rel=\"noopener noreferrer nofollow\">x&lt;</a>"
+  },
+  {
+    "name": "parity 198",
+    "input": "evil.com\"><link rel=\"stylesheet\" href=\"https://evil.com/a.css\">\"eager\" referrerpolicy=\"unsafe-url\">be-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>script:alert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "evil.com\"&gt;\"eager\" referrerpolicy=\"unsafe-url\"&gt;be-nocookie.com/embed/dQw4w9WgXcQ\"&gt;script:alert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p>"
+  },
+  {
+    "name": "parity 199",
+    "input": "ef=\"java&#x09;script:alert(1)\">x</a></a>e=\"cookie\">a</p><img src=\"https://example.com/a.png\" name=\"getElementById\" id=\"x\">me src=\"https://www.youtube-nocookie.com/embed/../x\"></iframe></div>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ef=\"java\tscript:alert(1)\"&gt;xe=\"cookie\"&gt;a<p></p><img src=\"https://example.com/a.png\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">me src=\"https://www.youtube-nocookie.com/embed/../x\"&gt;"
+  },
+  {
+    "name": "parity 200",
+    "input": "n>-embed\" data-embed=\"vim><div><p>a</p></div></li></ul>a><a href=\"?q=1\">z</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "n&gt;-embed\" data-embed=\"vim&gt;<p>a</p>a&gt;<a rel=\"noopener noreferrer nofollow\" href=\"?q=1\">z</a>"
+  },
+  {
+    "name": "parity 201",
+    "input": "sp<img src=x onerror=alert(1)></style></svg>script:alert(1)\">x</a>an>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "sp<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">script:alert(1)\"&gt;xan&gt;"
+  },
+  {
+    "name": "parity 202",
+    "input": "src=\"/uploads/a b.png\" alt=\"a\">div><p>a</p></div></li></ul>//example.com/a.png\" alt=\"a\"></a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "src=\"/uploads/a b.png\" alt=\"a\"&gt;div&gt;<p>a</p>//example.com/a.png\" alt=\"a\"&gt;"
+  },
+  {
+    "name": "parity 203",
+    "input": ")\">x</a>span></p>g+xml;base64,PHN2Zz48L3N2Zz4=\">red\">a</p><span style=\"text-align: center\">b</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": ")\"&gt;xspan&gt;<p></p>g+xml;base64,PHN2Zz48L3N2Zz4=\"&gt;red\"&gt;a<p></p><span>b</span>"
+  },
+  {
+    "name": "parity 204",
+    "input": "o></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p>>\\sum_i a_i\n\\int f</div>w4w9WgXcQ\"></iframe></div><",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "o&gt;<p></p><p>b</p>]]&gt;<p>c--!&gt;</p>&gt;\\sum_i a_i\n\\int fw4w9WgXcQ\"&gt;&lt;"
+  },
+  {
+    "name": "parity 205",
+    "input": "lass=\"vive-mention\" data-mention=\"u1\n\">@x</span></p> src=\"/uploads/a.png\">></p><div data-math=\"block\" class=\"k\">\\sum_i a_i\np>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "lass=\"vive-mention\" data-mention=\"u1\n\"&gt;@x<p></p> src=\"/uploads/a.png\"&gt;&gt;<p></p><div data-math=\"block\">\\sum_i a_i\np&gt;</div>"
+  },
+  {
+    "name": "parity 206",
+    "input": "an class=\"vive-mention x\" data-mention=\"u1\" style=\"color: red\">@x</span></p><a href=\"https://example.com/?q=&quot;&gt;&lt;script&gt;\" title=\"&quot;onmouseover=alert(1)\">x</a>n: e-nocookie.com/embed/../x\"></iframe></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "an class=\"vive-mention x\" data-mention=\"u1\" style=\"color: red\"&gt;@x<p></p><a rel=\"noopener noreferrer nofollow\" href=\"https://example.com/?q=&quot;><script>\" title=\"&quot;onmouseover=alert(1)\">x</a>n: e-nocookie.com/embed/../x\"&gt;"
+  },
+  {
+    "name": "parity 207",
+    "input": "ion\" data-mention=\"u1\">@x</span></a></p>pt&colonote=\"\"><a href=\"https://a.example\">a<span><a href=\"https://b.example\">b</a></span></a></sup></p>ascript:alert(1",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ion\" data-mention=\"u1\"&gt;@x<p></p>pt&amp;colonote=\"\"&gt;<a rel=\"noopener noreferrer nofollow\" href=\"https://a.example\">a<span></span></a><a rel=\"noopener noreferrer nofollow\" href=\"https://b.example\">b</a><p></p>ascript:alert(1"
+  },
+  {
+    "name": "parity 208",
+    "input": "mglyph><style></math><img src onerror=alert(1)>XcQ\"><iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe></div><p>a</p>ps://www.youtube-nocookie.com/embedascript:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "mglyph&gt;"
+  },
+  {
+    "name": "parity 209",
+    "input": "</a>şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşne\">a‮b\u0007c</span></p>mg src=x onerror=alert(1)></template><p>görünür</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşne\"&gt;a‮b\u0007c<p></p>mg src=x onerror=alert(1)&gt;<p>görünür</p>"
+  },
+  {
+    "name": "parity 210",
+    "input": "an style=\"color: #00ff00; position: fixed; inset: 0; z-index: 9999\">a</span>=\"color: #00ff00; position: fixed; inset: 0; z-index: 9999\">a</span><p>a<!-- <img src=x onerror=alert(1)> --></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p>>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "an style=\"color: #00ff00; position: fixed; inset: 0; z-index: 9999\"&gt;a=\"color: #00ff00; position: fixed; inset: 0; z-index: 9999\"&gt;a<p>a</p><p>b</p>]]&gt;<p>c--!&gt;</p>&gt;"
+  },
+  {
+    "name": "parity 211",
+    "input": "ttps://www.youtube-48L3N2Zzrt(1)\">tıkla</p>lid=\"\"></div><p>a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ttps://www.youtube-48L3N2Zzrt(1)\"&gt;tıkla<p></p>lid=\"\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 212",
+    "input": "=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<scripe=\"<img src=x onerror=alert(1)>\">a</span>> <em>eğik</em> <a href=\"https://example.com\" onclick=\"x\">bağ</a> <u>altı</u> a\u0000b\u0007c",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"\"&gt;a&gt; <em>eğik</em> <a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\">bağ</a> <u>altı</u> ab\u0007c"
+  },
+  {
+    "name": "parity 213",
+    "input": "\"https://example.com\"><span class=\"vive-mention\" data-mention=\"u1\">@x</span></a></p>/example.com/a.png\">tps://example.com\" target=\"_top\">x</a>-al",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "\"https://example.com\"&gt;<span class=\"vive-mention\" data-mention=\"u1\">@x</span><p></p>/example.com/a.png\"&gt;tps://example.com\" target=\"_top\"&gt;x-al"
+  },
+  {
+    "name": "parity 214",
+    "input": "\"></iframe></div>lert(1)\">@a</span><span class=\"vive-mention\" data-mention=\"a.. src=\"x\" onerror=\"alert(1)\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;lert(1)\"&gt;@a"
+  },
+  {
+    "name": "parity 215",
+    "input": "ss=\"vive-embed\" data-embed=\"youtube\" data-id=\"../../x\"><iframe src=\"https://www.youtubention\" data-mention=\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:alert(1)\">x</a></span></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ss=\"vive-embed\" data-embed=\"youtube\" data-id=\"../../x\"&gt;"
+  },
+  {
+    "name": "parity 216",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{display:none}</style><p>a</p>href=\"javascript:alert(1)\">x</a>or: transparent\">b</mark>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa{display:none}<p>a</p>href=\"javascript:alert(1)\"&gt;xor: transparent\"&gt;b"
+  },
+  {
+    "name": "parity 217",
+    "input": "on=\"aart(1)</script><p>b</p></a>n>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "on=\"aart(1)<p>b</p>n&gt;"
+  },
+  {
+    "name": "parity 218",
+    "input": "ata-math=\"inline\">  </span>b</p>\" oncli1)\" onclick=\"x()\">Film</a></div>=\"</noscript><img src=x onerror=alert(1)>\"></noscript>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ata-math=\"inline\"&gt;  b<p></p>\" oncli1)\" onclick=\"x()\"&gt;Film=\"\"&gt;"
+  },
+  {
+    "name": "parity 219",
+    "input": "\">x</a>c=x a href=\"/\\evil.com\">x</a>v><div><div><div><",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "\"&gt;xc=x a href=\"/\\evil.com\"&gt;xv&gt;&lt;"
+  },
+  {
+    "name": "parity 220",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>lass=\"language-js\">a</code></p><pre data-language=\"Bad Lang!\"><code class=\"language-js x\">b</codnerror=\"alert(1)\" alt=\"a\">/x\"><iframe src=\"https://www.youtube-nocookie.com/embed/../x\"></iframe></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>lass=\"language-js\"&gt;a<p></p><pre><code>b/x\"&gt;</code></pre>"
+  },
+  {
+    "name": "parity 221",
+    "input": "t:alert(1)\">x</a>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>th: 99999999px\"><tbody><tr><td>a</td rel=\"stylesheet\" href=\"https://evil.com/a.css\"><p>a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "t:alert(1)\"&gt;xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"&gt;@x<p></p>th: 99999999px\"&gt;a<p>a</p>"
+  },
+  {
+    "name": "parity 222",
+    "input": "ript:alert(1)\">x</a> r: red\">a</span>data-type=\"taskItem\" data-checked=\"yes\"><input type=\"radio\"><div><p>a</p></div></li></ul>n data-math=\"inline\">  </span>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "ript:alert(1)\"&gt;x r: red\"&gt;adata-type=\"taskItem\" data-checked=\"yes\"&gt;<p>a</p>n data-math=\"inline\"&gt;  b<p></p>"
+  },
+  {
+    "name": "parity 223",
+    "input": ": red !important\">a</span>img src=\"https://user:pass@example.com/a.png\">cript:alert(1)\" onclimg src=\"data:image/png;base64,iVBORw0KGgo=\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": ": red !important\"&gt;aimg src=\"https://user:pass@example.com/a.png\"&gt;cript:alert(1)\" onclimg src=\"data:image/png;base64,iVBORw0KGgo=\"&gt;"
+  },
+  {
+    "name": "parity 224",
+    "input": "\"https://www.youtube-nocookie.com/embed/../x\"></işşşşşşşşşşşşşşşşş style=\"color: expression(alert(1))\">a</span>e></div><p>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"https://www.youtube-nocookie.com/embed/../x\"&gt;ae&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 225",
+    "input": "one}</style><p>a</p>t:alertpan>le\">a<span><a href=\"https://b.example\">b</a></span></a></sup></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "one}<p>a</p>t:alertpan&gt;le\"&gt;a<span><a rel=\"noopener noreferrer nofollow\" href=\"https://b.example\">b</a></span><p></p>"
+  },
+  {
+    "name": "parity 226",
+    "input": "/example.com\" target=\"_blank\" rel=\"opener\">x</a>com\">x</a>b\u0007c</span></p>ğğ zzzzzzzzzzzzzzzzzzzz</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "/example.com\" target=\"_blank\" rel=\"opener\"&gt;xcom\"&gt;xb\u0007c<p></p>ğğ zzzzzzzzzzzzzzzzzzzz<p></p>"
+  },
+  {
+    "name": "parity 227",
+    "input": "href=\"java&#x09;script:alert(1)\">x</a> src=\"data:image/png;base64,iVBORw0KGgo=\"> style=\"color: red\" onclick=\"x()\">@Ayşe <b>Yılmaz</b></span></p>ta http-equiv=\"refresh\" content=\"0;url=https://evil.com\"><link rel=\"stylesheet\" href=\"https://evil.com/a.css\"><p>a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "href=\"java\tscript:alert(1)\"&gt;x src=\"data:image/png;base64,iVBORw0KGgo=\"&gt; style=\"color: red\" onclick=\"x()\"&gt;@Ayşe Yılmaz<p></p>ta http-equiv=\"refresh\" content=\"0;url=https://evil.com\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 228",
+    "input": "v\nascript:alert(1)\">x</a>tp://eğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğ zzzzzzzzzzzzzzzzzzzz</span></p>t(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "v\nascript:alert(1)\"&gt;xtp://eğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğğ zzzzzzzzzzzzzzzzzzzz<p></p>t(1)\"&gt;x"
+  },
+  {
+    "name": "parity 229",
+    "input": " red; @import url(x)\">a</span>v></li></ul>href=\"https://evil.com/a.css\"><p>a</p>ion=\"u1\n\">@x</span></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": " red; @import url(x)\"&gt;av&gt;href=\"https://evil.com/a.css\"&gt;<p>a</p>ion=\"u1\n\"&gt;@x<p></p>"
+  },
+  {
+    "name": "parity 230",
+    "input": ">x</a><tr><td>a</td></tr></table>/div>avascript:alert(1)\">x</a>ass=\"katex\"><svg><path d=\"M0\"/></svg>x<img src=x onerror=alert(1)></span></span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;xa/div&gt;avascript:alert(1)\"&gt;xass=\"katex\"&gt;x<p></p>"
+  },
+  {
+    "name": "parity 231",
+    "input": "ılmaz</b></span></p>\">r: reef=\"javascript&colon;alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ılmaz<p></p>\"&gt;r: reef=\"javascript:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 232",
+    "input": "ert(1)\">tıkla</p> 0, 0)\">a</span>embed-invalid=\"\"></div><p>a</p>on\" data-mention=\"u1\"> @ </span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ert(1)\"&gt;tıkla<p></p> 0, 0)\"&gt;aembed-invalid=\"\"&gt;<p>a</p>on\" data-mention=\"u1\"&gt; @ <p></p>"
+  },
+  {
+    "name": "parity 233",
+    "input": "om/a.png\">x</a>></div></div></div></div></div></div></div></div></div></divsrc=\"data:image/png;base64,iVBORw0KGgo=\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "om/a.png\"&gt;x&gt;"
+  },
+  {
+    "name": "parity 234",
+    "input": "ase64,iVBORw0KGgo>lcolor\">a</span>p>b</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "ase64,iVBORw0KGgo&gt;lcolor\"&gt;ap&gt;b<p></p>"
+  },
+  {
+    "name": "parity 235",
+    "input": "embed-invalid=\"\"></div><p>a</p>/span><span class=\"vive-mention\" data-mention=\"a..b\">@b</span></p>span>ndex: 9999\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "embed-invalid=\"\"&gt;<p>a</p>/span&gt;@b<p></p>span&gt;ndex: 9999\"&gt;a"
+  },
+  {
+    "name": "parity 236",
+    "input": "mg src=\"//example.com/a.png\">lert(1)\">x</a> src=x onerror=alelid=\"\"></div><p>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "mg src=\"//example.com/a.png\"&gt;lert(1)\"&gt;x src=x onerror=alelid=\"\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 237",
+    "input": "><li>a</li></ol><ol start=\"-5\"><li>b</li></ol><ol start=\"0042\"><li>c</li></ol><ol start=\"1e9\"><li>d</li></ol>vascript&colon;alert(1)\">x</a>inline\">  </span>b</p>a href=\"//evil.com\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;<li>a</li><ol><li>b</li></ol><ol start=\"42\"><li>c</li></ol><ol><li>d</li></ol>vascript:alert(1)\"&gt;xinline\"&gt;  b<p></p>a href=\"//evil.com\"&gt;x"
+  },
+  {
+    "name": "parity 238",
+    "input": "-mention=\"u1\">@x</span></a></p>ror=alert(1)>\"></noscript>m\">x</a>\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "-mention=\"u1\"&gt;@x<p></p>ror=alert(1)&gt;\"&gt;m\"&gt;x\"&gt;x"
+  },
+  {
+    "name": "parity 239",
+    "input": "\"><svg><path d=\"M0\"/></svg>x<img src=x onerror=alert(1)></span></span></p>mark style=\"background-color: transparent\">b</mark>img src onerror=alert(1)>t(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;x<p></p>mark style=\"background-color: transparent\"&gt;bimg src onerror=alert(1)&gt;t(1)\"&gt;x"
+  },
+  {
+    "name": "parity 240",
+    "input": "lert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">a</p></p></div>example.com/a.png\" onerror=\"alert(1)\" alt=\"a\">ref=\"https://example.com\" target=\"_blank\" rel=\"opener\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "lert(1)\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"&gt;a<p></p><p></p>example.com/a.png\" onerror=\"alert(1)\" alt=\"a\"&gt;ref=\"https://example.com\" target=\"_blank\" rel=\"opener\"&gt;x"
+  },
+  {
+    "name": "parity 241",
+    "input": "yle=\"text-align: center; background: url(https://evil.com/x)\">a</p></a>expression(alert(1))\">a</span>x",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "yle=\"text-align: center; background: url(https://evil.com/x)\"&gt;a<p></p>expression(alert(1))\"&gt;ax"
+  },
+  {
+    "name": "parity 242",
+    "input": "ntion\" data-mention=\"javascript:alert(1)\">@a</span><span class=\"vive-mention\" data-mention=\"a..b\">@b</span></p>KGgo=\">ipt>\"></iframe>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ntion\" data-mention=\"javascript:alert(1)\"&gt;@a@b<p></p>KGgo=\"&gt;ipt&gt;\"&gt;"
+  },
+  {
+    "name": "parity 243",
+    "input": "om\" onclick=\"x\">bağ</a> <u>altı</u> <code>kod</code><img src=\"https://example.com/a.png\"></sup></p>)\">x</a>ton><p>ark>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "om\" onclick=\"x\"&gt;bağ <u>altı</u> <code>kod</code><img src=\"https://example.com/a.png\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"><p></p>)\"&gt;xton&gt;<p>ark&gt;</p>"
+  },
+  {
+    "name": "parity 244",
+    "input": "\">x</a>>x</a>\u0007cinset-0 z-50\">a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;x&gt;x\u0007cinset-0 z-50\"&gt;a<p></p>"
+  },
+  {
+    "name": "parity 245",
+    "input": "g src=x onerror=alert(1)></style></svg>ref=\"jav\nascript:alert(1)\">x</a>>x</a>e=\"color: red !important\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "g src=x onerror=alert(1)&gt;ref=\"jav\nascript:alert(1)\"&gt;x&gt;xe=\"color: red !important\"&gt;a"
+  },
+  {
+    "name": "parity 246",
+    "input": "avascript:alert(1)\">an data-math=\"inline\">{{{{{{VBORw0KGgo=\">\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "avascript:alert(1)\"&gt;an data-math=\"inline\"&gt;{{{{{{VBORw0KGgo=\"&gt;\"&gt;b<p></p>]]&gt;<p>c--!&gt;</p>"
+  },
+  {
+    "name": "parity 247",
+    "input": ".png\">ata-mention=\"u1\n\">@x</span></p>or=alert(1)></span></span></p>guage",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": ".png\"&gt;ata-mention=\"u1\n\"&gt;@x<p></p>or=alert(1)&gt;<p></p>guage"
+  },
+  {
+    "name": "parity 248",
+    "input": "/p>//example.com/a.png\" alt=\"a\">.w3.org/1999/xlink\">a</p>rame src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe></div><p>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "/p&gt;//example.com/a.png\" alt=\"a\"&gt;.w3.org/1999/xlink\"&gt;a<p></p>rame src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"&gt;<p>a</p>"
+  },
+  {
+    "name": "parity 249",
+    "input": "style=\"color: expression(alert(1))\">a</span>a-mention=\"u1\"> @ </span></p>>n style=\"color: red !important\">a</span>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "style=\"color: expression(alert(1))\"&gt;aa-mention=\"u1\"&gt; @ <p></p>&gt;n style=\"color: red !important\"&gt;a"
+  },
+  {
+    "name": "parity 250",
+    "input": "<tr><td>a</td></tr></table><img src=\"javascript:alert(1)\">/a></span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "a/a&gt;<p></p>"
+  },
+  {
+    "name": "parity 251",
+    "input": "/form><form><mglyph><style></mat;onmouseover=alert(1)\">x</a><p>c--!></p>e-me",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "/form&gt;"
+  },
+  {
+    "name": "parity 252",
+    "input": "style=\"width: 99999999px\"><tbody><tr><td>a</td></tr></tbody></table><tr><td>z</td></tr></table></sup>ploads/a.png\">a_i\n\\int f</div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "style=\"width: 99999999px\"&gt;azploads/a.png\"&gt;a_i\n\\int f"
+  },
+  {
+    "name": "parity 253",
+    "input": "an></il.com/a.css\"><p>a</p>c=x onerror=alf=\"https://b.example\">b</a></span></a></sup></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "an&gt;<p>a</p>c=x onerror=alf=\"https://b.example\"&gt;b<p></p>"
+  },
+  {
+    "name": "parity 254",
+    "input": "ect data=\"evil.swf\"></object><embed srcbed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</script>\" sandbox=<table style=\"width: 99999999px\"><tbody><tr><td>a</td></tr></tbody></table>nline\">y</span><table><tr><td>z</td></tr></table></sup>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ect data=\"evil.swf\"&gt;anline\"&gt;y<table><tbody><tr><td>z</td></tr></tbody></table>"
+  },
+  {
+    "name": "parity 255",
+    "input": "-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=div><p>a</p>\"><button>gönder</button><p>metin</p><<script",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "-embed\" data-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=div&gt;<p>a</p>\"&gt;<p>metin</p>&lt;"
+  },
+  {
+    "name": "parity 256",
+    "input": "alert(1)></template><p>görünür</p> red !important\">a</sp>a<span><a href=\"https://b.example\">b</a></span></a></sup></p>pt:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "alert(1)&gt;<p>görünür</p> red !important\"&gt;aa<span><a rel=\"noopener noreferrer nofollow\" href=\"https://b.example\">b</a></span><p></p>pt:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 257",
+    "input": "tto(1)\">x</a></td></tr></tbody></table>a-math=\"inline\">a‮b\u0007c</span></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "tto(1)\"&gt;xa-math=\"inline\"&gt;a‮b\u0007c<p></p>"
+  },
+  {
+    "name": "parity 258",
+    "input": "n>64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==\">a-mention=\"u1\">@ğğğğğğğğğğğğğğğğğğaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "n&gt;64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==\"&gt;a-mention=\"u1\"&gt;@ğğğğğğğğğğğğğğğğğğaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "name": "parity 259",
+    "input": "li></ul>ript:alert(1)\">x</a>;base64,iVBORw0KGgo=\">a></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "li&gt;ript:alert(1)\"&gt;x;base64,iVBORw0KGgo=\"&gt;a&gt;<p></p>"
+  },
+  {
+    "name": "parity 260",
+    "input": "a-checked=\"yes\"><input type=\"radio\"><div><p>a</p></div></li></ul>><span data-math=\"inline\">a‮b\u0007c</span></p>language-js x\">b</code></pre></style><p>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "a-checked=\"yes\"&gt;<p>a</p>&gt;<span data-math=\"inline\">abc</span><p></p>language-js x\"&gt;b<p>a</p>"
+  },
+  {
+    "name": "parity 261",
+    "input": "com\">a<sup data-foan></span></p>/p></b></span></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "com\"&gt;a<p></p>/p&gt;<p></p>"
+  },
+  {
+    "name": "parity 262",
+    "input": "pt><p>b</p>/uploads/a.png\">a href=\"&#106;avascript:alert(1)\">x</a>box\" checked><input type=\"text\" name=\"x\"></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "pt&gt;<p>b</p>/uploads/a.png\"&gt;a href=\"javascript:alert(1)\"&gt;xbox\" checked&gt;<p></p>"
+  },
+  {
+    "name": "parity 263",
+    "input": ">svg+xml;base64,PHN2Zz48L3N2Zz4=c</span><//p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;svg+xml;base64,PHN2Zz48L3N2Zz4=c"
+  },
+  {
+    "name": "parity 264",
+    "input": "99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\">mg src=\"/uploads/a b.png\" alt=\"a\">ata-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\"><iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdot:alert(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\"&gt;mg src=\"/uploads/a b.png\" alt=\"a\"&gt;ata-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 265",
+    "input": "e><p>a</p>or=alert(1)></style></svol\\6f r: red\">a</span>/table>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "e&gt;<p>a</p>or=alert(1)&gt;a/table&gt;"
+  },
+  {
+    "name": "parity 266",
+    "input": "ntion=\"u1\"> @ </span></p>alert(1)\">x</a>-index: 9999\">a</span>1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ntion=\"u1\"&gt; @ <p></p>alert(1)\"&gt;x-index: 9999\"&gt;a1)\"&gt;x"
+  },
+  {
+    "name": "parity 267",
+    "input": "><span class=\"vive-mention x\" data-mention=\"u1\" style=\"color: red\">@x</spanbackground: url(httpg\" alt=\"a\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;<span style=\"color: red\">@x</span>"
+  },
+  {
+    "name": "parity 268",
+    "input": "f\"></object><embed src=\"evil.swf\">vascript:alert(1)\">x</a>d=\"e></math><img src onerror=alert(1)>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "f\"&gt;vascript:alert(1)\"&gt;xd=\"e&gt;"
+  },
+  {
+    "name": "parity 269",
+    "input": "0042\"><li>c</li></ol><ol start=\"1e9\"><li>d</li></ol>e>Twvc2NyaXB0Pg==\">x</a>rl(https://evil.com/x)\">a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "0042\"&gt;<li>c</li><ol><li>d</li></ol>e&gt;Twvc2NyaXB0Pg==\"&gt;xrl(https://evil.com/x)\"&gt;a<p></p>"
+  },
+  {
+    "name": "parity 270",
+    "input": "e=\"color: rgb(255, 0, 0)\">a</span>nvalid=\"\"></div><p>a</p>>op\">y</a><a href=\"?q=1\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "e=\"color: rgb(255, 0, 0)\"&gt;anvalid=\"\"&gt;<p>a</p>&gt;op\"&gt;y<a rel=\"noopener noreferrer nofollow\" href=\"?q=1\"></a>"
+  },
+  {
+    "name": "parity 271",
+    "input": "evil\" data-id=\"abc\"><iframe src=\"https://evil.com\"></iframe></div>-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=\"999999\" data-title=\"  Başlık\u0007  \"><iframe></iframe></div>/span><></ul>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "evil\" data-id=\"abc\"&gt;-embed=\"youtube\" data-id=\"dQw4w9WgXcQ\" data-start=\"999999\" data-title=\"  Başlık\u0007  \"&gt;/span&gt;&lt;&gt;"
+  },
+  {
+    "name": "parity 272",
+    "input": "><div>bir</div><sup data-footnote=\"\">iç</sup><span class=\"vive-mention\" data-mention=\"u1\">@x</span><suot;&gt;&lt;script&gt;\" title=\"&quot;onmouseover=alert(1)\">x</a>a.png\" width=\"0\" height=\"99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\">1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;bir<sup data-footnote=\"\">iç</sup><span class=\"vive-mention\" data-mention=\"u1\">@x</span>xa.png\" width=\"0\" height=\"99999999\" loading=\"eager\" referrerpolicy=\"unsafe-url\"&gt;1)\"&gt;x"
+  },
+  {
+    "name": "parity 273",
+    "input": "ntion=\"u1\"> @ </span></p>ortant\">a</span><mtext><table><mglyph><style><!--</style><img title=\"--&gt;&lt;img src=x onerror=alert(1)&gt;\"a</spa",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "ntion=\"u1\"&gt; @ <p></p>ortant\"&gt;a<table></table>"
+  },
+  {
+    "name": "parity 274",
+    "input": ">\" data-embed=\"youtube\" data=\"alert(1)\" alt=\"a\">>a</p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;\" data-embed=\"youtube\" data=\"alert(1)\" alt=\"a\"&gt;&gt;a<p></p>"
+  },
+  {
+    "name": "parity 275",
+    "input": ">-- <img src=x onerror=alert(1)> --></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p>onerror=alert(1)></span></span></p>span data-math=\"inline\">  </span>b</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;--  --&gt;<p></p><p>b</p>]]&gt;<p>c--!&gt;</p>onerror=alert(1)&gt;<p></p>span data-math=\"inline\"&gt;  b<p></p>"
+  },
+  {
+    "name": "parity 276",
+    "input": "<iframe src=\"https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ\"></iframe>f=\"java&#x09;script:/td></tr></table>)\">a</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "f=\"java\tscript:/td&gt;)\"&gt;a"
+  },
+  {
+    "name": "parity 277",
+    "input": "=alert(1)>\">a</span>ion\" data-mention=\"u1\"> @ </span></p> itp://example.com/a.png\" alt=\"a\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "=alert(1)&gt;\"&gt;aion\" data-mention=\"u1\"&gt; @ <p></p> itp://example.com/a.png\" alt=\"a\"&gt;"
+  },
+  {
+    "name": "parity 278",
+    "input": "<script>alert(1)</script>\"></iframe>></div>vascript:alert(1)\" onclick=\"x()\">Film</a></div>nter\">b</span>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "\"&gt;&gt;vascript:alert(1)\" onclick=\"x()\"&gt;Filmnter\"&gt;b"
+  },
+  {
+    "name": "parity 279",
+    "input": "n style=\"color: inherit\">a</span><mark style=\"background-color: transparent\">b</mark>\"</noscript><img src=x onerror=alert(1)>\"></noscripipt:alert(1)\">x</a>ert(1)> --></p><p title=\"<!--\">b</p><![CDATA[<img src=x onerror=alert(1)>]]><p>c--!></p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "n style=\"color: inherit\"&gt;a<mark>b</mark>\"<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\">\"&gt;xert(1)&gt; --&gt;<p></p><p>b</p>]]&gt;<p>c--!&gt;</p>"
+  },
+  {
+    "name": "parity 280",
+    "input": "nheried-invalid=\"\"></div><p>a</p>: red\" onclick=\"x()\">@Ayşe <b>Yılmaz</b></span></p> class=\"vive-mention\" data-mention=\"a..b\">@b</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "nheried-invalid=\"\"&gt;<p>a</p>: red\" onclick=\"x()\"&gt;@Ayşe Yılmaz<p></p> class=\"vive-mention\" data-mention=\"a..b\"&gt;@b<p></p>"
+  },
+  {
+    "name": "parity 281",
+    "input": "/a.png\"> z-50\">a</p>ath=\"inline\">y</div><span data-math=\"block\">z</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "/a.png\"&gt; z-50\"&gt;a<p></p>ath=\"inline\"&gt;y<span>z</span>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  },
+  {
+    "name": "parity 282",
+    "input": "javasa href=\"/\\evil.com\">x</a>e></div>orm><math><mtext></form><form><mglyph><style></math><img src onerror=alert(1)>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "javasa href=\"/\\evil.com\"&gt;xe&gt;orm&gt;"
+  },
+  {
+    "name": "parity 283",
+    "input": "evil.com\"></iframe></div><span style=\"color: red/**/\">a</span>\">a</span>\"red\"><center>yazı</center></font",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "evil.com\"&gt;<span>a</span>\"&gt;a\"red\"&gt;yazı"
+  },
+  {
+    "name": "parity 284",
+    "input": ">span>th=\"inline\">  </span>b</p>></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;span&gt;th=\"inline\"&gt;  b<p></p>&gt;"
+  },
+  {
+    "name": "parity 285",
+    "input": "om/x)\">a</p>ert(1)>\"n style=\"col\\6f r: red\">a</span>ta-id=\"dQw4w9WgXcQ\"><iframe src=\"https://www.youtube",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "om/x)\"&gt;a<p></p>ert(1)&gt;\"n style=\"col\\6f r: red\"&gt;ata-id=\"dQw4w9WgXcQ\"&gt;"
+  },
+  {
+    "name": "parity 286",
+    "input": "><span class=\"vive-mention\" data-mention=\"user_42\" style=\"color: red\" onclick=\"x()\">@Ayşe <b>Yılmaz</b></<p><span data-math=\"INLINE\">x</span></p><div data-math=\"inline\">y</div><span data-math=\"block\">z</span> class=\"language-js\">a</rc=\"javascript:alert(1)\">",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;<span class=\"vive-mention\" data-mention=\"user_42\">@Ayşe Yılmazxyz class=\"language-js\"&gt;a</span>"
+  },
+  {
+    "name": "parity 287",
+    "input": ">a</p>1)\">arget=\"_top\">x</a>\"https://example.com/a.png\" name=\"getElementById\" id=\"x\">",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;a<p></p>1)\"&gt;arget=\"_top\"&gt;x\"https://example.com/a.png\" name=\"getElementById\" id=\"x\"&gt;"
+  },
+  {
+    "name": "parity 288",
+    "input": "/div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></div></d=\"katex\"><svg><path d=\"M0\"/></svg>x<img src=x one></ol><ol start=\"1e9\"><li>d</li></ol>t(1)\">x</a>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "/div&gt;x<img src=\"x\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"><ol><li>d</li></ol>t(1)\"&gt;x"
+  },
+  {
+    "name": "parity 289",
+    "input": "page#part\">x</a><a href=\"#top\">y</a><a href=\"?q=1\">z</a></mtext></math>example.com/a.png\" alt=\"a\">pt:alert(1)\">x</a>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "page#part\"&gt;x<a rel=\"noopener noreferrer nofollow\" href=\"#top\">y</a><a rel=\"noopener noreferrer nofollow\" href=\"?q=1\">z</a>example.com/a.png\" alt=\"a\"&gt;pt:alert(1)\"&gt;x"
+  },
+  {
+    "name": "parity 290",
+    "input": "ata:image/svg+xml;base64,PHN2Zz48L3N2Zz4=\">title=\"</noscript><img src=x onerror=alert(1)>\"></noscript>1)\">img src=\"//example.com/a.pn",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "ata:image/svg+xml;base64,PHN2Zz48L3N2Zz4=\"&gt;title=\"\"&gt;1)\"&gt;img src=\"//example.com/a.pn"
+  },
+  {
+    "name": "parity 291",
+    "input": ">x</a>{{{{{{{http://example.com/a.png\" alt=\"a\">50\">a</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "&gt;x{{{{{{{http://example.com/a.png\" alt=\"a\"&gt;50\"&gt;a<p></p>"
+  },
+  {
+    "name": "parity 292",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" width=\"0\" hei></iframe></div>a‮b\u0007c</span></p>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\" width=\"0\" hei&gt;a‮b\u0007c<p></p>"
+  },
+  {
+    "name": "parity 293",
+    "input": "n=\"u1\"> @ </span></p>.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\"<script>alert(1)</saaaaaaaaaaaaaaaaaaaaaaaa\">@x</span></p>mtext></form><form><mglyph><style></math><img src onerror=alert(1)>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "n=\"u1\"&gt; @ <p></p>.youtube-nocookie.com/embed/dQw4w9WgXcQ\" srcdoc=\""
+  },
+  {
+    "name": "parity 294",
+    "input": "@x</span></p>a\u0000b\u0007ch=\"block\">z</span>n class=\"vive-mention\" data-mention=\"aaaaaaaaaaaaaa",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": true
+    },
+    "expected": "@x<p></p>ab\u0007ch=\"block\"&gt;zn class=\"vive-mention\" data-mention=\"aaaaaaaaaaaaaa"
+  },
+  {
+    "name": "parity 295",
+    "input": "k\">a</p>rc=\"//example.com/a.png\">x</a><a href=\"https",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "k\"&gt;a<p></p>rc=\"//example.com/a.png\"&gt;x"
+  },
+  {
+    "name": "parity 296",
+    "input": "rt(1)\">x</a>=\"color: red; @impogXcQ\" data-start=\"999999\" data-ef=\"",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "rt(1)\"&gt;x=\"color: red; @impogXcQ\" data-start=\"999999\" data-ef=\""
+  },
+  {
+    "name": "parity 297",
+    "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaao=\">l>(1)</script>\"></iframe>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": true
+    },
+    "expected": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaao=\"&gt;l&gt;(1)\"&gt;"
+  },
+  {
+    "name": "parity 298",
+    "input": "><img src=x onerror=alert(1)></template><p>görünür</p>x</a></div></li></ul>center>yazı</center></font><div><p>blok</p></div>",
+    "options": {
+      "embeds": true,
+      "allowRelativeImages": false
+    },
+    "expected": "&gt;<p>görünür</p>xcenter&gt;yazı<p>blok</p>"
+  },
+  {
+    "name": "parity 299",
+    "input": "ixed inset-0 z-50\">a</p>nd-color: transparent\">b</mark>s=\"vive/script><p>b</p>",
+    "options": {
+      "embeds": false,
+      "allowRelativeImages": false
+    },
+    "expected": "ixed inset-0 z-50\"&gt;a<p></p>nd-color: transparent\"&gt;bs=\"vive/script&gt;<p>b</p>"
+  }
+]

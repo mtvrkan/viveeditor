@@ -1,0 +1,48 @@
+.vive-content ul[data-type="taskList"] {
+  padding-left: 0;
+  list-style: none;
+}
+
+.vive-content li[data-type="taskItem"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.vive-content li[data-type="taskItem"] > label,
+.vive-content li[data-type="taskItem"] > input {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 1lh;
+  margin: 0;
+  user-select: none;
+}
+
+.vive-content li[data-type="taskItem"] input[type="checkbox"] {
+  width: 1.05em;
+  height: 1.05em;
+  margin: 0;
+  accent-color: var(--ve-primary, currentColor);
+  cursor: pointer;
+}
+
+.vive-content li[data-type="taskItem"] input[type="checkbox"]:disabled {
+  cursor: default;
+}
+
+.vive-content li[data-type="taskItem"] > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.vive-content li[data-type="taskItem"] > div > p {
+  margin-top: 0;
+  margin-bottom: 0.25em;
+}
+
+.vive-content li[data-type="taskItem"][data-checked="true"] > div {
+  color: color-mix(in oklab, currentColor 68%, transparent);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in oklab, currentColor 50%, transparent);
+}

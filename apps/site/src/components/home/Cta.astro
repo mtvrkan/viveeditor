@@ -1,0 +1,24 @@
+---
+import { docsIndexPath, type Locale, REPO_URL } from '../../i18n'
+import { HOME } from '../../i18n/home'
+import { ANCHORS } from '../../i18n/ui'
+
+type Props = { lang: Locale }
+const { lang } = Astro.props
+const cta = HOME[lang].cta
+---
+<section class="sec cta-sec" id={ANCHORS[lang].docs} aria-labelledby="ctaTitle">
+  <div class="wrap">
+    <div class="cta glass">
+      <svg class="cta-mark" aria-hidden="true"><use href="#mark"/></svg>
+      <div>
+        <h2 id="ctaTitle" class="title">{cta.heading}</h2>
+        <p class="lead">{cta.lead}</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href={docsIndexPath(lang)}><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg>{cta.docs}</a>
+        <a class="btn btn-glass" href={REPO_URL}><svg class="ic" aria-hidden="true"><use href="#i-gh"/></svg>{cta.github}</a>
+      </div>
+    </div>
+  </div>
+</section>

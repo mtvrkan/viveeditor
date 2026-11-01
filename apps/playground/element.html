@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>viveEditor — Özel öğe</title>
+  </head>
+  <body>
+    <main class="page">
+      <header class="site">
+        <strong>&lt;vive-editor&gt; özel öğesi</strong>
+      </header>
+      <form class="adapter-form" data-testid="form">
+        <vive-editor name="body" locale="tr" label="Makale metni" required value="&lt;p&gt;İlk metin&lt;/p&gt;"></vive-editor>
+        <div class="form-actions">
+          <button type="submit" class="action">Gönder</button>
+          <button type="reset" class="action">Sıfırla</button>
+        </div>
+      </form>
+      <h2 class="output-title">Gönderilen değer</h2>
+      <pre class="output" data-testid="output" aria-live="polite"></pre>
+    </main>
+    <script type="module" src="/src/adapters/element.ts"></script>
+  </body>
+</html>

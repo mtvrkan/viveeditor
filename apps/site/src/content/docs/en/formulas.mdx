@@ -1,0 +1,103 @@
+---
+key: math
+title: Formulas (LaTeX)
+description: Write LaTeX formulas with MathExtension and your own KaTeX 0.18.2 or newer, then draw them on published pages with renderMath.
+updated: 2026-11-01
+faq:
+  - q: Does viveEditor include KaTeX?
+    a: No. KaTeX is your own dependency. You pass a load function, and the editor refuses versions older than 0.18.2.
+  - q: Is the drawn formula saved?
+    a: No. Only the LaTeX source is stored. Published pages draw it again with renderMath.
+---
+
+The formula extension lets writers type LaTeX and see it drawn by [KaTeX](https://katex.org) while they edit. The editor stores only the LaTeX source, never the drawing, so the saved HTML stays small and clean. On the published page you draw the formulas again with `renderMath`.
+
+Formulas ship as npm packages only. The one-script build does not include them.
+
+## Set it up
+
+<Steps>
+1. Install the extension, the UI and KaTeX: `npm install @viveeditor/ext-math @viveeditor/ui @viveeditor/core katex`.
+2. Add `MathExtension` with a `load` function that imports KaTeX. KaTeX then downloads only when a formula is shown.
+3. Import KaTeX's stylesheet and the extension's stylesheet.
+4. Add `mathTools()` to the `plugins` of `createUI` for the `/` menu entries.
+</Steps>
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { MathExtension } from '@viveeditor/ext-math'
+import { createUI } from '@viveeditor/ui'
+import { mathTools } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-math/style.css'
+import 'katex/dist/katex.min.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    ...basicExtensions,
+    MathExtension.configure({
+      load: () => import('katex'),
+      onError: (error) => console.warn(error.code, error.version),
+    }),
+  ],
+})
+
+createUI(editor, { plugins: [mathTools()] })
+```
+
+## KaTeX version
+
+KaTeX must be **0.18.2 or newer** (`MIN_KATEX_VERSION`). The floor follows the KaTeX security advisory GHSA-238p-pmpm-9mq7. An older version is refused and the formula's source is shown instead of a drawing.
+
+`onError` receives an error with one of two codes:
+
+| Code | Meaning |
+| --- | --- |
+| `KATEX_OUTDATED` | The loaded KaTeX is older than 0.18.2; `version` holds its version. |
+| `KATEX_LOAD` | The `load` function failed. |
+
+The editor passes fixed options to KaTeX, including `trust: false`, so a formula cannot add links or other HTML.
+
+## Writing formulas
+
+- **Inline:** type `$x^2$`. When you type the closing `$`, the text between the dollars becomes a formula. It must not start or end with a space.
+- **Block:** type `$$` on an empty line and press <kbd>Enter</kbd>.
+- **Menu:** pick "Formula" or "Block formula" from the `/` menu. These entries come from `mathTools()`.
+- **Edit:** click a formula, or select it and press <kbd>Enter</kbd>, to edit its source with a live preview. <kbd>Enter</kbd> finishes an inline formula, <kbd>Ctrl</kbd>+<kbd>Enter</kbd> (<kbd>⌘</kbd>+<kbd>Enter</kbd> on a Mac) finishes a block formula, and <kbd>Esc</kbd> leaves without changes.
+
+From code, `editor.commands.insertMath({ display: true, latex: 'E = mc^2' })` inserts a block formula. Leave out `display` for an inline one.
+
+A formula holds at most 2,000 characters (`MAX_LATEX_LENGTH`) and at most 64 levels of nested braces.
+
+## What is stored
+
+```html
+<p>Area: <span data-math="inline">\pi r^2</span></p>
+<div data-math="block">\int_0^1 x\,dx</div>
+```
+
+[The server sanitizer](/en/docs/server-sanitizing/) keeps formulas in exactly this form. A formula that fails its check, or one placed inside a link or a footnote, is reduced to its text.
+
+When the text is saved as Markdown, formulas are written as `$…$` and `$$` blocks. When it is saved as Word, the LaTeX source is written in a code font.
+
+## Published pages
+
+Call `renderMath` on the element that holds the content. It loads KaTeX the same way and returns the number of formulas it drew. The page needs KaTeX's stylesheet too.
+
+```ts
+import { renderMath } from '@viveeditor/ext-math/render'
+import 'katex/dist/katex.min.css'
+
+const article = document.querySelector('article')
+if (article) await renderMath(article, { load: () => import('katex') })
+```
+
+- It draws at most 1,000 formulas per call, in batches, so long pages stay responsive.
+- Formulas already drawn are skipped, so calling it again is safe.
+- Each drawn formula gets its LaTeX source as `aria-label`.
+
+## Related pages
+
+- [Server sanitizing](/en/docs/server-sanitizing/)
+- [Footnotes](/en/docs/footnotes/)
+- [Open, save and print](/en/docs/open-save-print/)

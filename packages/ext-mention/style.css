@@ -1,0 +1,13 @@
+.vive-content .vive-mention {
+  padding: 0 0.2em;
+  border-radius: 0.3em;
+  background: var(--ve-mention-bg, hsl(221 83% 53% / 0.1));
+  color: var(--ve-mention-fg, hsl(224 76% 40%));
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.vive-content .vive-mention.ProseMirror-selectednode {
+  outline: 2px solid var(--ve-primary, hsl(221 83% 53%));
+  outline-offset: 1px;
+}

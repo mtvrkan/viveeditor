@@ -1,0 +1,57 @@
+.vive-content {
+  counter-reset: vive-footnote;
+}
+
+.vive-content .vive-footnote {
+  position: relative;
+  counter-increment: vive-footnote;
+  cursor: pointer;
+}
+
+.vive-content .vive-footnote::before {
+  content: "[" counter(vive-footnote) "]";
+  color: var(--ve-primary, hsl(221 83% 53%));
+}
+
+.vive-content .vive-footnote.ProseMirror-selectednode {
+  outline: 2px solid var(--ve-primary, hsl(221 83% 53%));
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
+.vive-content .vive-footnote-popup {
+  position: absolute;
+  inset-inline-start: 50%;
+  top: calc(100% + 6px);
+  z-index: 10;
+  width: max-content;
+  max-width: min(28rem, 80vw);
+  translate: -50% 0;
+  padding: 6px 10px;
+  border: 1px solid var(--ve-border, hsl(220 13% 85%));
+  border-radius: 8px;
+  background: var(--ve-bg, hsl(0 0% 100%));
+  box-shadow: 0 8px 24px hsl(220 30% 10% / 0.14);
+  color: var(--ve-fg, hsl(222 24% 13%));
+  font-size: 14px;
+  line-height: 1.5;
+  vertical-align: baseline;
+  cursor: text;
+}
+
+.vive-content .vive-footnote-field {
+  min-width: 10ch;
+  outline: none;
+  white-space: pre-wrap;
+}
+
+.vive-footnotes {
+  margin-top: 2em;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--ve-border, hsl(220 13% 85%));
+  font-size: 0.9em;
+}
+
+.vive-footnote-back {
+  text-decoration: none;
+}

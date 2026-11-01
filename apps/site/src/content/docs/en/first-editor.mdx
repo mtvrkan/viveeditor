@@ -1,0 +1,131 @@
+---
+key: firstEditor
+title: Your first editor
+description: Turn a textarea into an editor, mount one into any element, or build it from Editor.create and createUI, then read its HTML.
+updated: 2026-11-01
+---
+
+There are three ways to start an editor: upgrade a textarea in a form, mount an editor into any element with `mountEditor`, or build one yourself from `Editor.create` and `createUI`. This page shows each, then how to read the content, listen for changes, and set the label and the language.
+
+## Upgrade a textarea
+
+This is the shortest way, and it works with the CDN script or with npm.
+
+<Steps>
+1. Load `viveeditor.css` and `viveeditor.classic.iife.js` with your exact version, as shown on [Installation](/en/docs/installation/).
+2. Add `data-editor` to the textarea. Keep its `name`, and a `<label for>` that points at it.
+3. On the server, read the field as usual and sanitize the HTML before you store it; see [Server sanitizing](/en/docs/server-sanitizing/).
+</Steps>
+
+```html
+<form method="post">
+  <label for="body">Article</label>
+  <textarea id="body" name="body" data-editor required></textarea>
+  <button>Publish</button>
+</form>
+```
+
+The textarea stays in the form, hidden, and always holds the latest HTML (`''` when the document is empty). It fires `input` on every change. With `required`, an empty editor cancels the submit, marks itself `aria-invalid="true"`, fires a `vive:invalid` event on the textarea and takes the focus. While images are still uploading, the submit waits and goes out once they are done. Add `data-files="false"` to a textarea to hide its File menu.
+
+### From your own code
+
+With npm, call `upgradeAll()` to upgrade every `textarea[data-editor]`, or `upgradeTextarea()` for one:
+
+```ts
+import { upgradeTextarea } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const field = await upgradeTextarea(document.querySelector('#body'), {
+  label: 'Article body',
+  ui: { locale: 'en' },
+})
+
+console.log(field.editor.getHTML())
+```
+
+`upgradeAll(root, options)` limits the search to `root`. Calling `upgradeTextarea` twice at the same time returns the same promise. `field.destroy()` brings the textarea back and leaves the final HTML in it. Pass `ui: false` to leave out the toolbar.
+
+## Mount into any element
+
+`mountEditor` puts the full editor, with every extension and the toolbar, into any element. The framework components are built on it.
+
+```ts
+import { mountEditor } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  value: '<p>Hello</p>',
+  locale: 'en',
+  label: 'Article body',
+  onChange: (html) => console.log(html),
+})
+
+const editor = await mount.ready
+```
+
+- The value is HTML, and an empty document is `''`.
+- `getValue()`, `setValue(html)`, `setEditable(editable)` and `destroy()` control it. `setValue` with a new value does not call `onChange` and does not go into the undo history.
+- `extensions` replaces the default set; `ui: false` drops the toolbar.
+- If you call `destroy()` before the editor is ready, `ready` rejects with `MountDestroyedError`.
+- No File menu converters are loaded by default; pass them in `ui.files`.
+
+## Build it yourself
+
+`Editor.create` gives you the engine with only the extensions you list. `createUI` adds the toolbar, the selection bubble, the `/` menu and the panels.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import '@viveeditor/core/style.css'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { listExtensions } from '@viveeditor/ext-list'
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, ...listExtensions],
+  content: '<p>Hello <strong>world</strong></p>',
+  label: 'Article body',
+})
+
+const ui = createUI(editor, { locale: 'en', theme: 'auto' })
+```
+
+`createUI` mounts next to the editing area and is removed when the editor is destroyed. It shows only the tools whose commands are registered, so a tool appears once you add its extension. `ui.destroy()` removes it earlier. The options are covered on [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/).
+
+## Read the content
+
+- `editor.getHTML()` returns the document as HTML.
+- `editor.getJSON()` returns ProseMirror JSON, the canonical storage format.
+- `editor.getText()` returns plain text, one line per block.
+- `editor.isEmpty` tells you whether the document is empty.
+- `editor.setContent(content)` loads HTML or JSON. It does not go into the undo history.
+
+Store either HTML or JSON. Both stay readable by later 0.x versions; see [Versioning](/en/docs/versioning/).
+
+## Listen for changes
+
+```ts
+const stop = editor.on('change', ({ editor }) => {
+  console.log(editor.getHTML())
+})
+
+editor.on('error', ({ error }) => console.error(error))
+```
+
+- `change` fires when the document changes.
+- `update` fires on any state change, such as a new selection.
+- `focus`, `blur`, `destroy` and `error` are also available.
+- `on` returns a function that removes the listener; `off` does the same.
+
+An error thrown inside one listener does not stop the others. It is reported through the `error` event.
+
+## Label and language
+
+Give every editor a `label`, such as `label: 'Article body'`. Screen readers announce it as the name of the editing area. With a textarea, keep a visible `<label for>`; the editor takes its name from it when you pass no `label`.
+
+The interface speaks Turkish and English. Pass `locale` to choose. Without it, the editor follows `<html lang="...">`, then the browser language: anything starting with `tr` gives Turkish, everything else English. To change single strings, pass `messages` to `createUI`, for example `createUI(editor, { messages: { toolbar: 'Formatting' } })`.
+
+## Next steps
+
+- [Frameworks](/en/docs/frameworks/): the same editor in React, Vue, Svelte and Angular.
+- [Images and uploads](/en/docs/images-and-uploads/): connect your upload endpoint.

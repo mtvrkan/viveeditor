@@ -1,0 +1,114 @@
+{
+  "name": "viveeditor",
+  "version": "0.0.0",
+  "description": "Free, open-source rich text editor that drops into any website. One script tag turns a textarea into an editor.",
+  "license": "MIT",
+  "keywords": [
+    "viveeditor",
+    "rich-text-editor",
+    "wysiwyg",
+    "editor",
+    "prosemirror",
+    "textarea",
+    "cdn",
+    "drop-in",
+    "ckeditor-alternative"
+  ],
+  "homepage": "https://github.com/mtvrkan/viveeditor/tree/main/packages/viveeditor#readme",
+  "bugs": {
+    "url": "https://github.com/mtvrkan/viveeditor/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mtvrkan/viveeditor.git",
+    "directory": "packages/viveeditor"
+  },
+  "type": "module",
+  "sideEffects": [
+    "*.css",
+    "./dist/viveeditor.classic.iife.js",
+    "./dist/viveeditor.markdown.iife.js",
+    "./dist/viveeditor.docx.iife.js",
+    "./dist/viveeditor.panels.iife.js"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style.css": "./dist/viveeditor.css"
+  },
+  "unpkg": "./dist/viveeditor.classic.iife.js",
+  "jsdelivr": "./dist/viveeditor.classic.iife.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown -c tsdown.addons.config.ts && tsdown && cat ../core/style.css ../ui/style.css ../ext-task-list/style.css ../ext-code-block/style.css ../ext-table/style.css ../ext-search/style.css ../ext-image/style.css ../ext-embed/style.css style.css > dist/viveeditor.css",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "size": "size-limit"
+  },
+  "dependencies": {
+    "@viveeditor/core": "workspace:^",
+    "@viveeditor/docx": "workspace:^",
+    "@viveeditor/ext-basic": "workspace:^",
+    "@viveeditor/ext-code-block": "workspace:^",
+    "@viveeditor/ext-embed": "workspace:^",
+    "@viveeditor/ext-format": "workspace:^",
+    "@viveeditor/ext-image": "workspace:^",
+    "@viveeditor/ext-list": "workspace:^",
+    "@viveeditor/ext-office-paste": "workspace:^",
+    "@viveeditor/ext-search": "workspace:^",
+    "@viveeditor/ext-table": "workspace:^",
+    "@viveeditor/ext-task-list": "workspace:^",
+    "@viveeditor/markdown": "workspace:^",
+    "@viveeditor/ui": "workspace:^"
+  },
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^14.3.0",
+    "jsdom": "^30.1.3",
+    "size-limit": "^14.3.0",
+    "tsdown": "0.23.1",
+    "vitest": "^5.0.5"
+  },
+  "size-limit": [
+    {
+      "name": "viveeditor (CDN script, everything included)",
+      "path": "dist/viveeditor.classic.iife.js",
+      "limit": "110 KB",
+      "rolldown": false
+    },
+    {
+      "name": "viveeditor.markdown add-on (loaded on first use)",
+      "path": "dist/viveeditor.markdown.iife.js",
+      "limit": "52 KB",
+      "rolldown": false
+    },
+    {
+      "name": "viveeditor.docx add-on (loaded on first use)",
+      "path": "dist/viveeditor.docx.iife.js",
+      "limit": "17 KB",
+      "rolldown": false
+    },
+    {
+      "name": "viveeditor.panels add-on (loaded on first panel open)",
+      "path": "dist/viveeditor.panels.iife.js",
+      "limit": "5.5 KB",
+      "rolldown": false
+    },
+    {
+      "name": "viveeditor.css",
+      "path": "dist/viveeditor.css",
+      "limit": "6 KB",
+      "rolldown": false
+    }
+  ],
+  "engines": {
+    "node": ">=20.19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

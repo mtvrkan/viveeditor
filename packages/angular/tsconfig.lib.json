@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "angularCompilerOptions": {
+    "compilationMode": "partial",
+    "strictTemplates": true,
+    "strictInjectionParameters": true
+  },
+  "include": ["src"]
+}
