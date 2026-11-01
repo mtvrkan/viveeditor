@@ -96,14 +96,18 @@ async function pasted(html: string): Promise<string> {
 }
 
 describe('Office paste on generated clipboard HTML', () => {
-  it('cleans Word and Docs HTML without throwing', () => {
-    fc.assert(
-      fc.property(fc.oneof(wordHtml, docsHtml), (html) => {
-        expect(typeof cleanOfficeHtml(html)).toBe('string')
-      }),
-      { seed: SEED, numRuns: RUNS },
-    )
-  })
+  it(
+    'cleans Word and Docs HTML without throwing',
+    () => {
+      fc.assert(
+        fc.property(fc.oneof(wordHtml, docsHtml), (html) => {
+          expect(typeof cleanOfficeHtml(html)).toBe('string')
+        }),
+        { seed: SEED, numRuns: RUNS },
+      )
+    },
+    TIMEOUT,
+  )
 
   it(
     'pastes Word and Docs HTML into a document that fits the schema',

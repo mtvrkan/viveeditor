@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { dispatchPaste } from './clipboard'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -16,14 +17,7 @@ function wordItem(list: string, level: number, marker: string, text: string): st
 async function pasteHtml(page: Page, html: string): Promise<void> {
   await page.goto('/ui.html?empty')
   await surface(page).click()
-  await surface(page).evaluate((element, data) => {
-    const transfer = new DataTransfer()
-    transfer.setData('text/html', data)
-    transfer.setData('text/plain', 'yedek')
-    element.dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: transfer, bubbles: true, cancelable: true }),
-    )
-  }, html)
+  await dispatchPaste(surface(page), { 'text/html': html, 'text/plain': 'yedek' })
 }
 
 test('pastes Word fake bullets and numbers as real nested lists', async ({ page }) => {

@@ -111,7 +111,7 @@ Server rendering (Next.js, Nuxt, SvelteKit, Angular SSR): the server renders an 
 
 ## Development
 
-Requirements: Node.js 20.19+ and pnpm 10.
+Requirements: Node.js 22.12+ and pnpm 10.
 
 ```sh
 pnpm install

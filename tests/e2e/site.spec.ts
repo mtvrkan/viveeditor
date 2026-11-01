@@ -6,6 +6,14 @@ const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
 test.use({ baseURL: SITE, locale: 'en-US' })
 
+test.beforeEach(async ({ page, browserName }) => {
+  if (browserName !== 'webkit' || process.platform !== 'linux') return
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 2 })
+  })
+})
+
 async function watchCsp(page: Page): Promise<string[]> {
   const violations: string[] = []
   await page.exposeFunction('reportCspViolation', (entry: string) => violations.push(entry))

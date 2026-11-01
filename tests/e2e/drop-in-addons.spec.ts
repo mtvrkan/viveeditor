@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { expect, type Page, test } from '@playwright/test'
+import { dispatchPaste } from './clipboard'
 
 const dist = fileURLToPath(new URL('../../packages/viveeditor/dist/', import.meta.url))
 const CDN = 'https://cdn.viveeditor.test/viveeditor@0/dist/'
@@ -75,11 +76,7 @@ test('turns pasted Markdown into formatted text with the Markdown add-on', async
   const surface = page.getByRole('textbox', { name: 'Makale' })
   await surface.click()
 
-  await surface.evaluate((element) => {
-    const data = new DataTransfer()
-    data.setData('text/plain', '## Başlık\n\n- **bir**\n- iki')
-    element.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true }))
-  })
+  await dispatchPaste(surface, { 'text/plain': '## Başlık\n\n- **bir**\n- iki' })
 
   await expect(surface.locator('h2')).toHaveText('Başlık')
   await expect(surface.locator('li strong')).toHaveText('bir')

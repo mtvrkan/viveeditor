@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { expect, type Page, test } from '@playwright/test'
+import { dispatchPaste } from './clipboard'
 
 function fixture(name: string): string {
   return readFileSync(fileURLToPath(new URL(`../fixtures/paste/${name}`, import.meta.url)), 'utf8')
@@ -11,17 +12,7 @@ async function pasteHtml(page: Page, html: string, text: string): Promise<void> 
   await surface.click()
   await page.keyboard.press('ControlOrMeta+a')
   await page.keyboard.press('Backspace')
-  await surface.evaluate(
-    (element, data) => {
-      const transfer = new DataTransfer()
-      transfer.setData('text/html', data.html)
-      transfer.setData('text/plain', data.text)
-      element.dispatchEvent(
-        new ClipboardEvent('paste', { clipboardData: transfer, bubbles: true, cancelable: true }),
-      )
-    },
-    { html, text },
-  )
+  await dispatchPaste(surface, { 'text/html': html, 'text/plain': text })
 }
 
 test.beforeEach(async ({ page }) => {

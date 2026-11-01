@@ -18,6 +18,7 @@ env:
 jobs:
   version:
     name: version pull request
+    if: vars.RELEASE_APP_CLIENT_ID != ''
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:

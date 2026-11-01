@@ -26,7 +26,14 @@ test('shows the selection bubble and applies italic from it', async ({ page }) =
   await page.goto('/ui.html')
   const bubble = page.getByRole('toolbar', { name: 'Seçim araçları' })
 
-  await surface(page).locator('strong').first().dblclick()
+  const word = await surface(page)
+    .locator('strong')
+    .first()
+    .evaluate((element) => {
+      const line = element.getClientRects()[0] ?? element.getBoundingClientRect()
+      return { x: line.left + 8, y: line.top + line.height / 2 }
+    })
+  await page.mouse.dblclick(word.x, word.y)
   await expect(bubble).toBeVisible()
   await bubble.getByRole('button', { name: /^İtalik/ }).click()
 

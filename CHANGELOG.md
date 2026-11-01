@@ -10,7 +10,7 @@
 - Extension system in `@viveeditor/core`: `defineExtension`, typed command registry, `editor.can`, `editor.isActive`, `update` event, clear errors for duplicate or missing extensions. [2026-10-30]
 - `@viveeditor/ext-basic`: bold, italic, underline, strike, inline code, links with a protocol allowlist, headings, blockquote, horizontal rule, hard break, and Markdown shortcuts. [2026-10-30]
 - `@viveeditor/ext-list`: bullet and ordered lists with Enter, Tab and Shift-Tab handling and Markdown shortcuts. [2026-10-30]
-- GitHub Actions CI: lint, type checks, unit tests, build and size budget on Node 20.19 and 24, plus end-to-end tests in Chromium, Firefox, WebKit and mobile Safari; actions pinned to commit SHAs with a read-only token. [2026-10-30]
+- GitHub Actions CI: lint, type checks, unit tests, build and size budget on Node 22 and 24, plus end-to-end tests in Chromium, Firefox, WebKit and mobile Safari; actions pinned to commit SHAs with a read-only token. [2026-10-30]
 - `viveeditor` package: one `<script>` turns every `<textarea data-editor>` into an editor; form submit, reset, `required`, labels and disabled state keep working, and `npm i viveeditor` exposes everything with `upgradeTextarea` / `upgradeAll`. [2026-10-30]
 - Core stylesheet `@viveeditor/core/style.css` (also shipped as `viveeditor/style.css`). [2026-10-30]
 - Paste cleanup for Word and Google Docs: Office metadata, fake list bullets, empty `o:p` paragraphs, the Docs wrapper and the trailing copy newline are removed. [2026-10-30]
@@ -85,6 +85,8 @@
 ### Changed
 
 - The repository lives at github.com/mtvrkan/viveeditor; package manifests, READMEs, Composer files and the site link there. [2026-11-01]
+- Every package now requires Node.js 22.12 or newer (Node 20 reached end of life and the build tools need 22); CI tests Node 22 and 24. [2026-11-01]
+- The release workflow is skipped until the release GitHub App is configured, so pushes to main no longer show a failed release run. [2026-11-01]
 - Size budgets: `@viveeditor/ui` 9 → 15 KB and the one-script build 74 → 78 KB, sized for the rich-content panels (colour, alignment, table, find and replace, images, source view). [2026-10-30]
 - Size budget for the one-file stylesheet `viveeditor.css` 4 → 4.5 KB for the image panel. [2026-10-30]
 - `editor.can.<command>()` now passes the editor view to the command (still without dispatching), so commands that depend on the view answer correctly. [2026-10-30]
@@ -102,6 +104,9 @@
 
 ### Fixed
 
+- After "Replace all" the find field takes focus again, so Escape still closes the search panel in Firefox. [2026-11-01]
+- End-to-end paste tests now work in Firefox, timing tests check how cleanup time grows instead of a fixed wall-clock limit, and site tests run in light mode on Linux WebKit, so CI runners give stable results. [2026-11-01]
+- The docs search button's accessible name now matches its visible label. [2026-11-01]
 - The README now says that the File menu saves web images to Word as links, and the character-count README explains that emoji made of several code points count more than once. [2026-11-01]
 - Typing over a formatted selection, including select-all, keeps its formatting instead of turning into plain text. [2026-10-30]
 - A mention label cut at 100 characters no longer ends with a space. [2026-10-31]

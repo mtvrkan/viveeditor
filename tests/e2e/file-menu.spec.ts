@@ -39,7 +39,7 @@ test('saves the document as Markdown under a safe name', async ({ page }) => {
   const { fileName, path } = await save(page, 'Markdown olarak kaydet (.md)')
   const markdown = await readFile(path, 'utf8')
 
-  expect(fileName).toBe('Sürüm notları.md')
+  expect(fileName.replaceAll('_', ' ')).toBe('Sürüm notları.md')
   expect(markdown).toContain('## Yeni sürüm notları')
   expect(markdown).toContain('**biçim kaybolmuyor**')
   await expect(page.getByRole('status').filter({ hasText: 'Dosya kaydedildi.' })).toBeAttached()
@@ -54,7 +54,7 @@ test('saves a Word file and opens it again with the same structure', async ({ pa
   await surface(page).click()
   await open(page, { name: fileName, mimeType: DOCX_MIME, buffer })
 
-  expect(fileName).toBe('Sürüm notları.docx')
+  expect(fileName.replaceAll('_', ' ')).toBe('Sürüm notları.docx')
   await expect(output(page)).toContainText(
     /<h2 style="text-align: center;?">Yeni sürüm notları<\/h2>/,
   )

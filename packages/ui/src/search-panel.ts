@@ -100,7 +100,10 @@ export function createSearchPanel(options: SearchPanelOptions): Popover {
   }
 
   const keepFocus = (): void => {
-    if (!element.contains(document.activeElement)) find.focus()
+    const active = document.activeElement
+    const lost = !element.contains(active)
+    const stranded = active instanceof HTMLButtonElement && active.disabled
+    if (lost || stranded) find.focus()
   }
 
   const step = (command: string): void => {

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { dispatchPaste } from './clipboard'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
@@ -59,16 +60,10 @@ test('strips script and event handlers from pasted HTML', async ({ page }) => {
   await surface.click()
   await page.keyboard.press('ControlOrMeta+a')
 
-  await surface.evaluate((element) => {
-    const data = new DataTransfer()
-    data.setData(
-      'text/html',
+  await dispatchPaste(surface, {
+    'text/html':
       '<p onclick="alert(1)">güvenli<img src=x onerror="alert(2)"><script>alert(3)</script></p>',
-    )
-    data.setData('text/plain', 'güvenli')
-    element.dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }),
-    )
+    'text/plain': 'güvenli',
   })
 
   await expect(page.getByTestId('output')).toHaveText('<p>güvenli</p>')

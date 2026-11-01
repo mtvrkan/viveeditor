@@ -119,18 +119,37 @@ describe('cleanOfficeHtml for Word', () => {
   })
 
   it.each([
-    ['unclosed list rules', `<style>${'@list l1:level1 {'.repeat(30_000)}</style>`],
+    [
+      'unclosed list rules',
+      (count: number) => `<style>${'@list l1:level1 {'.repeat(count)}</style>`,
+    ],
     [
       'unclosed marker comments',
-      `<p style='mso-list:l1 level1'>${'<![if !supportLists]><span>x</span>'.repeat(20_000)}</p>`,
+      (count: number) =>
+        `<p style='mso-list:l1 level1'>${'<![if !supportLists]><span>x</span>'.repeat(count)}</p>`,
     ],
-  ])('cleans %s quickly', (_name, body) => {
-    const started = performance.now()
+  ])(
+    'cleans %s in linear time',
+    (_name, body) => {
+      const fastest = (count: number): number => {
+        const html = word(body(count))
+        let best = Number.POSITIVE_INFINITY
+        for (let round = 0; round < 3; round++) {
+          const started = performance.now()
+          cleanOfficeHtml(html)
+          best = Math.min(best, performance.now() - started)
+        }
+        return best
+      }
+      fastest(1_000)
 
-    cleanOfficeHtml(word(body))
+      const small = fastest(5_000)
+      const large = fastest(20_000)
 
-    expect(performance.now() - started).toBeLessThan(2000)
-  })
+      expect(large).toBeLessThan(small * 10)
+    },
+    60_000,
+  )
 })
 
 describe('cleanOfficeHtml for Google Docs and LibreOffice', () => {

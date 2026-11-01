@@ -97,7 +97,7 @@
     "prosemirror-view": "^1.42.7"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=22.12"
   },
   "publishConfig": {
     "access": "public",

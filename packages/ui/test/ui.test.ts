@@ -241,6 +241,29 @@ describe('search panel', () => {
     expect(panel?.hidden).toBe(true)
     expect(editor.dom.querySelector('.ProseMirror-search-match')).toBeNull()
   })
+
+  it('moves focus to the find field when the clicked button turns disabled', async () => {
+    const { editor, root } = await mount('<p>eski eski</p>', { locale: 'tr' }, [
+      ...basicExtensions,
+      Search,
+    ])
+    editor.focus()
+    openSearch(editor)
+    const panel = root.querySelector<HTMLElement>('.ve-search')
+    const [find, replacement] = [...(panel?.querySelectorAll<HTMLInputElement>('input') ?? [])]
+    const replaceEvery = panel?.querySelector<HTMLButtonElement>('.ve-search-actions .ve-primary')
+    if (!find || !replacement || !replaceEvery) throw new Error('Missing search controls')
+    find.value = 'eski'
+    find.dispatchEvent(new Event('input'))
+    replacement.value = 'yeni'
+    replacement.dispatchEvent(new Event('input'))
+    replaceEvery.focus()
+
+    replaceEvery.click()
+
+    expect(replaceEvery.disabled).toBe(true)
+    expect(document.activeElement).toBe(find)
+  })
 })
 
 describe('character limit', () => {

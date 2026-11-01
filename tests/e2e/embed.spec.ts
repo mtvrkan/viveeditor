@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { dispatchPaste } from './clipboard'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -62,13 +63,7 @@ test('turns a pasted Vimeo link into an embed that one undo turns back into text
 }) => {
   await surface(page).click()
 
-  await surface(page).evaluate((element) => {
-    const transfer = new DataTransfer()
-    transfer.setData('text/plain', 'https://vimeo.com/76979871')
-    element.dispatchEvent(
-      new ClipboardEvent('paste', { clipboardData: transfer, bubbles: true, cancelable: true }),
-    )
-  })
+  await dispatchPaste(surface(page), { 'text/plain': 'https://vimeo.com/76979871' })
 
   await expect(output(page)).toContainText('data-embed="vimeo" data-id="76979871"')
   await page.keyboard.press('ControlOrMeta+z')
@@ -79,6 +74,8 @@ test('opens the video panel from the slash menu', async ({ page }) => {
   await surface(page).click()
 
   await page.keyboard.type('/youtube')
+  await expect(page.getByRole('listbox', { name: 'Blok ekle' })).toBeVisible()
+  await expect(surface(page)).toHaveAttribute('aria-activedescendant', /.+/)
   await page.keyboard.press('Enter')
   const dialog = page.getByRole('dialog', { name: 'Video veya ses ekle' })
   await expect(dialog.getByLabel('Bağlantı')).toBeFocused()
