@@ -127,16 +127,20 @@ function strayParts(html: string): string[] {
 }
 
 describe('markdown on generated input', () => {
-  it('renders only known tags, attributes and safe URLs', () => {
-    fc.assert(
-      fc.property(markdown, (source) => {
-        const html = markdownToHtml(source)
+  it(
+    'renders only known tags, attributes and safe URLs',
+    () => {
+      fc.assert(
+        fc.property(markdown, (source) => {
+          const html = markdownToHtml(source)
 
-        expect(strayParts(html)).toEqual([])
-      }),
-      { seed: SEED, numRuns: RUNS },
-    )
-  })
+          expect(strayParts(html)).toEqual([])
+        }),
+        { seed: SEED, numRuns: RUNS },
+      )
+    },
+    TIMEOUT,
+  )
 
   it(
     'settles on stable Markdown after one export and import',

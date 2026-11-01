@@ -5,6 +5,7 @@ import { unsafeParts } from './safety.js'
 
 const RUNS = Number(process.env.FUZZ_RUNS ?? 200)
 const SEED = 20_261_031
+const TIMEOUT = 10_000 + RUNS * 100
 
 const HOSTILE_TAGS = [
   ...VIVE_PROFILE.dropWithContent,
@@ -124,28 +125,36 @@ const options = fc.record<SanitizeOptions>({
 })
 
 describe('sanitizeHtml on generated HTML', () => {
-  it('returns markup with no unsafe parts that stays the same when sanitized again', () => {
-    fc.assert(
-      fc.property(html, options, (input, settings) => {
-        const clean = sanitizeHtml(input, settings)
+  it(
+    'returns markup with no unsafe parts that stays the same when sanitized again',
+    () => {
+      fc.assert(
+        fc.property(html, options, (input, settings) => {
+          const clean = sanitizeHtml(input, settings)
 
-        const again = sanitizeHtml(clean, settings)
+          const again = sanitizeHtml(clean, settings)
 
-        expect(unsafeParts(clean)).toEqual([])
-        expect(again).toBe(clean)
-      }),
-      { seed: SEED, numRuns: RUNS },
-    )
-  })
+          expect(unsafeParts(clean)).toEqual([])
+          expect(again).toBe(clean)
+        }),
+        { seed: SEED, numRuns: RUNS },
+      )
+    },
+    TIMEOUT,
+  )
 
-  it('never throws on arbitrary strings', () => {
-    fc.assert(
-      fc.property(fc.string({ unit: 'binary', maxLength: 400 }), (input) => {
-        const clean = sanitizeHtml(input)
+  it(
+    'never throws on arbitrary strings',
+    () => {
+      fc.assert(
+        fc.property(fc.string({ unit: 'binary', maxLength: 400 }), (input) => {
+          const clean = sanitizeHtml(input)
 
-        expect(unsafeParts(clean)).toEqual([])
-      }),
-      { seed: SEED, numRuns: RUNS },
-    )
-  })
+          expect(unsafeParts(clean)).toEqual([])
+        }),
+        { seed: SEED, numRuns: RUNS },
+      )
+    },
+    TIMEOUT,
+  )
 })

@@ -105,7 +105,7 @@
 ### Fixed
 
 - After "Replace all" the find field takes focus again, so Escape still closes the search panel in Firefox. [2026-11-01]
-- End-to-end paste tests now work in Firefox, timing tests for Office cleanup and Markdown output check how the time grows instead of a fixed wall-clock limit, and site tests run in light mode on Linux WebKit, so CI runners give stable results. [2026-11-01]
+- End-to-end paste tests now work in Firefox, timing tests for Office cleanup and Markdown output check how the time grows instead of a fixed wall-clock limit, every fuzz test allows for slower machines, and site tests run in light mode on Linux WebKit, so CI runners give stable results. [2026-11-01]
 - The docs search button's accessible name now matches its visible label. [2026-11-01]
 - The README now says that the File menu saves web images to Word as links, and the character-count README explains that emoji made of several code points count more than once. [2026-11-01]
 - Typing over a formatted selection, including select-all, keeps its formatting instead of turning into plain text. [2026-10-30]
