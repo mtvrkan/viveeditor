@@ -1,0 +1,105 @@
+# Video and audio embeds
+
+> Turn YouTube, Vimeo and Spotify links into safe players, with the preview card, activateEmbeds, server checks and CSP settings.
+
+URL: https://editor.vivepdf.com/en/docs/video-embeds/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-embed` turns YouTube, Vimeo and Spotify links into players. The saved HTML never keeps the address it was given; it stores only the provider and the video id, and every player address is rebuilt from them. This page covers setup, loading players on the published page, and the server and Content Security Policy settings.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Embed } from '@viveeditor/ext-embed'
+import '@viveeditor/ext-embed/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Embed.configure({ providers: ['youtube', 'vimeo'], facade: true })],
+})
+```
+
+The one-script build already includes the extension with all three providers.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `providers` | `['youtube', 'vimeo', 'spotify']` | The enabled providers. |
+| `facade` | `false` | With `true`, the saved HTML holds a link instead of a player. |
+| `pasteToEmbed` | `true` | Turns a link pasted on an empty line into a player. |
+| `maxEmbeds` | `50` | The maximum number of players in one document. |
+| `labels` | English | Labels for the play button and for unsupported content. |
+
+## Add a video
+
+- Paste just the link on an empty line. It turns into a player; one undo turns it back into a link.
+- Press the video button in the toolbar or the "Video" entry in the `/` menu. Enter the link and a title in the panel; screen readers announce that title.
+- In code, use `editor.commands.insertEmbed(url)` to insert and `editor.commands.setEmbedTitle(title)` to change the title.
+
+Inside the editor a card stands in for the player, with the provider name, the title and a play button. Nothing loads from the provider until play is pressed.
+
+## Supported links
+
+| Provider | Accepted links | Player address |
+| --- | --- | --- |
+| YouTube | `youtube.com/watch?v=…`, `youtu.be/…`, `/shorts/`, `/live/` and `/embed/` addresses; start time from `t` or `start` | `www.youtube-nocookie.com` |
+| Vimeo | `vimeo.com/…`, addresses with the private key of unlisted videos, `player.vimeo.com/video/…`; start time from `#t=` | `player.vimeo.com`, with `dnt=1` |
+| Spotify | Track, album, playlist, episode, show and artist addresses on `open.spotify.com` | `open.spotify.com/embed` |
+
+Links are parsed as addresses and the host name is compared exactly. Short links and redirects are never followed, and nothing is requested from the provider.
+
+## Saved HTML
+
+The player is always rebuilt from the provider and id; `sandbox`, `allow` and `referrerpolicy` are fixed and never read from the content. The saved HTML holds a `div[data-embed]` wrapper in one of two forms:
+
+- `facade: false` (default): the wrapper holds the player `iframe`. The player loads from the provider when the reader opens the page.
+- `facade: true`: the wrapper holds a link to the video's page at the provider. The player loads when the reader clicks.
+
+When you save as Word or Markdown, players are written as links.
+
+### Publish facade output
+
+On the page that shows content saved with `facade: true`, call `activateEmbeds()`. Clicking the link replaces it with the player and starts playback:
+
+```ts
+import { activateEmbeds } from '@viveeditor/ext-embed/activate'
+
+activateEmbeds(document.querySelector('article'), { providers: ['youtube', 'vimeo'] })
+```
+
+The first argument is the root element to search (the whole document if left out), and `providers` lists the allowed providers. The player address is built from the provider and id on the wrapper, never from the link's `href`. Without `activateEmbeds`, the link opens the video on the provider's site.
+
+## On the server
+
+- Clean the HTML on the server too, but never allow every `iframe`. Pass `embeds: true` to `@viveeditor/sanitize`; players are rebuilt from the provider and id. See [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/).
+- With your own sanitizer, rebuild players from `div[data-embed]`, or accept only addresses for which `isAllowedEmbedSrc()` returns `true`.
+
+```ts
+import { isAllowedEmbedSrc } from '@viveeditor/ext-embed'
+
+const allowed = isAllowedEmbedSrc(src, ['youtube', 'vimeo'])
+```
+
+`isAllowedEmbedSrc` checks that the address is exactly the player address the editor builds. In the same package, `matchEmbedUrl(url)` reads the provider and id from a link, and `buildEmbedSrc(attrs)` builds the player address. None of the three needs a browser DOM.
+
+## Content Security Policy and privacy
+
+- List only the providers you enabled in your CSP `frame-src`. With all three: `frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com`.
+- A player loads content and cookies from the provider. Tell readers about it where your consent rules require it; facade output loads the player only after a click.
+
+> **Referrer-Policy**
+>
+> A page-wide `Referrer-Policy: no-referrer` stops YouTube players from working. This is why players are built with `strict-origin-when-cross-origin`.
+
+For the other CSP settings, see [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+
+## Why does the video not load right away in the editor?
+
+Inside the editor a card stands in for the player. Nothing loads from the provider until someone presses play, which protects the writer's privacy and keeps the page light.
+
+## Can I embed videos from other sites?
+
+No. Only YouTube, Vimeo and Spotify are supported. Other links are not turned into players, and the panel lists the supported providers.
+
+## My page sends Referrer-Policy no-referrer. Why does YouTube not work?
+
+YouTube rejects embedded players that arrive without a Referer. A page-wide no-referrer policy stops YouTube players from working.

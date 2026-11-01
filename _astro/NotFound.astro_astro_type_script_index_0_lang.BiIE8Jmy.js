@@ -1,0 +1,1 @@
+var e=decodeURI(location.pathname),t=document.getElementById(`nfAsked`),n=document.getElementById(`nfPath`);t&&n&&!/^\/(tr\/)?404(\.html|\/)?$/.test(e)&&(n.textContent=e,t.hidden=!1);

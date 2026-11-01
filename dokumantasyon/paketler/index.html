@@ -1,0 +1,201 @@
+<!DOCTYPE html><html lang="tr" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Paketler · viveEditor</title><meta name="referrer" content="strict-origin-when-cross-origin"><meta name="description" content="viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri."><link rel="canonical" href="https://editor.vivepdf.com/dokumantasyon/paketler/"><link rel="alternate" hreflang="tr" href="https://editor.vivepdf.com/dokumantasyon/paketler/"><link rel="alternate" hreflang="en" href="https://editor.vivepdf.com/en/docs/packages/"><link rel="alternate" hreflang="x-default" href="https://editor.vivepdf.com/en/docs/packages/"><meta name="theme-color" content="#EAF2FB"><meta property="og:site_name" content="viveEditor"><meta property="og:type" content="article"><meta property="og:title" content="Paketler · viveEditor"><meta property="og:description" content="viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri."><meta property="og:url" content="https://editor.vivepdf.com/dokumantasyon/paketler/"><meta property="og:image" content="https://editor.vivepdf.com/og/docs/tr/paketler.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:type" content="image/png"><meta property="og:image:alt" content="Paketler · viveEditor"><meta property="og:locale" content="tr_TR"><meta property="og:locale:alternate" content="en_US"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Paketler · viveEditor"><meta name="twitter:description" content="viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri."><meta name="twitter:image" content="https://editor.vivepdf.com/og/docs/tr/paketler.png"><meta name="twitter:image:alt" content="Paketler · viveEditor"><link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/icon-192.png" sizes="192x192" type="image/png"><link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png"><link rel="apple-touch-icon" href="/icon-256.png"><link rel="manifest" href="/site.webmanifest"><link rel="alternate" type="text/markdown" href="/dokumantasyon/paketler.md"><script>(function(){var d=document.documentElement,t=new URLSearchParams(location.search).get("theme");if(t!=="dark"&&t!=="light"){try{t=localStorage.getItem("ve-theme")}catch(e){}}if(t!=="dark"&&t!=="light")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";d.dataset.theme=t;if(t==="dark")document.querySelector('meta[name="theme-color"]').content="#0F1115"})();</script><script>(function(){var d=document.documentElement,q=new URLSearchParams(location.search),s=q.has("still")||matchMedia("(prefers-reduced-motion: reduce)").matches,n=navigator,c=n.hardwareConcurrency||8,m=n.deviceMemory||8,l=q.has("lite");d.classList.add(s?"still":"motion");if(!l&&!q.has("full"))l=c<=2||m<=2||(c<=4&&m<=4);if(l)d.classList.add("lite")})();</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Paketler","description":"viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri.","inLanguage":"tr","dateModified":"2026-11-01","url":"https://editor.vivepdf.com/dokumantasyon/paketler/","mainEntityOfPage":"https://editor.vivepdf.com/dokumantasyon/paketler/","articleSection":"Başvuru","image":"https://editor.vivepdf.com/og/docs/tr/paketler.png","isPartOf":{"@id":"https://editor.vivepdf.com/#website"},"publisher":{"@id":"https://editor.vivepdf.com/#organization"},"about":{"@type":"SoftwareSourceCode","name":"viveEditor","codeRepository":"https://github.com/mtvrkan/viveeditor","license":"https://opensource.org/licenses/MIT"}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"viveEditor","item":"https://editor.vivepdf.com/tr/"},{"@type":"ListItem","position":2,"name":"Belgeler","item":"https://editor.vivepdf.com/dokumantasyon/"},{"@type":"ListItem","position":3,"name":"Paketler","item":"https://editor.vivepdf.com/dokumantasyon/paketler/"}]}</script><script>(function(){var k;try{k=localStorage.getItem("ve-keys")}catch(e){}if(k!=="mac"&&k!=="win")k=/mac/i.test(navigator.platform)?"mac":"win";document.documentElement.dataset.keys=k})();</script><meta http-equiv="content-security-policy" content="default-src 'self';img-src 'self' data: https:;font-src 'self';connect-src 'self';frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com;object-src 'none';base-uri 'self';form-action 'self';manifest-src 'self'; script-src 'self' 'sha256-Y4uIRNf5aeN3L5C98RvFnnDk3V4GMsYu9rXDLzxHYIQ=' 'sha256-+AN/iyGJbhrgGpP+IPM5b0jzdSlJXy+Sa8+Jt1cKIFw=' 'sha256-xghkCydn3mb1h/fNcHGASOu3PdYM0x3qtHkQM3UbaDo=' 'sha256-A3vGw6fyDgJ+muLBO3eV+t/BOq0c2AIunp/g64L0OSE=' 'sha256-l0A+q+GDS9xJZPnuW0PORLvnxOowXYKEWvRMbZSX7wA=' 'sha256-BF0290pkb3jxQsE7z00xR8Imp8X34FLC88L0lkMnrGw=' 'sha256-QzWFZi+FLIx23tnm9SBU4aEgx4x8DsuASP07mfqol/c=' 'sha256-0chmwFk0zaA528yFfGV7J9ppIpdfTPPULncDF3WG7Zs=' 'sha256-eIXWvAmxkr251LJZkjniEK5LcPF3NkapbJepohwYRIc=' 'sha256-Q2BPg90ZMplYY+FSdApNErhpWafg2hcRRbndmvxuL/Q=' 'sha256-Ya0pUYrC7nM5Cn/056TyVuEiz6dFGrzmkWzgON0pF0U=' 'sha256-SHXg3YtOAVshUMT3f+eElYDgbV0kaujWj8DSaXSS4Vs='; style-src 'self' 'unsafe-inline' ;"><link rel="stylesheet" href="/_astro/Base.DLMS-bYt.css"><link rel="stylesheet" href="/_astro/Docs.B4muMh_D.css"></head><body><a class="skip" href="#main">İçeriğe geç</a><svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="lg-edge" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"></stop><stop offset=".46" stop-color="#7FD0FF" stop-opacity=".9"></stop><stop offset="1" stop-color="#FFC46B" stop-opacity=".85"></stop></linearGradient><linearGradient id="lg-left" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".95"></stop><stop offset=".6" stop-color="#DDECFB" stop-opacity=".7"></stop><stop offset="1" stop-color="#fff" stop-opacity=".8"></stop></linearGradient><linearGradient id="lg-right" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="#AAE0FF"></stop><stop offset=".62" stop-color="#2F8FE6"></stop><stop offset="1" stop-color="#7FD0FF"></stop></linearGradient><linearGradient id="lg-cursor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD58F"></stop><stop offset="1" stop-color="#F5A524"></stop></linearGradient><linearGradient id="lg-tile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2179CF"></stop><stop offset="1" stop-color="#134C8F"></stop></linearGradient><linearGradient id="lg-tile-right" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DDF2FF"></stop><stop offset="1" stop-color="#7FD0FF"></stop></linearGradient></defs><symbol id="logo" viewBox="0 0 256 256"><rect width="256" height="256" rx="60" fill="url(#lg-tile)"></rect><g transform="translate(-14 4)"><path d="M60 60H104L148 196H104Z" fill="#fff"></path><path d="M152 60H196L152 196H108Z" fill="url(#lg-tile-right)"></path><rect x="212" y="52" width="18" height="152" rx="9" fill="#FFC46B"></rect></g></symbol><symbol id="mark" viewBox="0 0 256 256"><g transform="translate(-14 0)" stroke="url(#lg-edge)" stroke-width="3.2" stroke-linejoin="round"><path d="M60 60H104L148 196H104Z" fill="url(#lg-left)"></path><path d="M152 60H196L152 196H108Z" fill="url(#lg-right)"></path><rect x="212" y="52" width="16" height="152" rx="8" fill="url(#lg-cursor)"></rect></g></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z"></path></symbol><symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"></path></symbol><symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"></path><circle cx="12" cy="12" r="3"></circle></symbol><symbol id="i-pages" viewBox="0 0 24 24"><rect x="4" y="7" width="12" height="14" rx="2"></rect><path d="M8 3h10a2 2 0 0 1 2 2v12"></path></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-4-4L4 16z"></path><path d="m13.5 6.5 4 4"></path></symbol><symbol id="i-convert" viewBox="0 0 24 24"><path d="M4 8h14l-3.5-3.5M20 16H6l3.5 3.5"></path></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M8 10h8M8 14h5"></path></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></symbol><symbol id="i-form" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="2.5"></rect><path d="M8 8h8M8 12h8M8 16h4"></path></symbol><symbol id="i-compare" viewBox="0 0 24 24"><rect x="3" y="5" width="7.5" height="14" rx="1.5"></rect><rect x="13.5" y="5" width="7.5" height="14" rx="1.5"></rect></symbol><symbol id="i-a11y" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.6"></circle><path d="M5 8.5h14M12 8.5v6M8.5 21l3.5-6.5 3.5 6.5"></path></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"></path></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m20 20-4.2-4.2"></path></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13.5 6.5 19 12l-5.5 5.5"></path></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"></path></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"></path></symbol><symbol id="i-min" viewBox="0 0 24 24"><path d="M6 12h12"></path></symbol><symbol id="i-max" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect></symbol><symbol id="i-cloudoff" viewBox="0 0 24 24"><path d="M3 3l18 18M8 7.5A5.5 5.5 0 0 1 17 9.5a4 4 0 0 1 3 6.6M16.5 18H7a4.5 4.5 0 0 1-1.3-8.8"></path></symbol><symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.6A10 10 0 0 1 12 5.5C18 5.5 21.5 12 21.5 12a17 17 0 0 1-3 3.8M6.4 6.9C3.9 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></symbol><symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 7-5 5 5 5M15.5 7l5 5-5 5"></path></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.5"></rect><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"></path></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 8h16M4 16h16"></path></symbol><symbol id="i-merge" viewBox="0 0 24 24"><path d="M6 3.5v4.5a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4V3.5M12 12v8.5M8.5 17l3.5 3.5 3.5-3.5"></path></symbol><symbol id="i-shrink" viewBox="0 0 24 24"><path d="M4 9.5h5.5V4M20 9.5h-5.5V4M4 14.5h5.5V20M20 14.5h-5.5V20"></path></symbol><symbol id="i-archive" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="4.5" rx="1.2"></rect><path d="M5 9v9.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V9M10 13h4"></path></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 21H20"></path></symbol><symbol id="i-sign" viewBox="0 0 24 24"><path d="M3 17c3-6 5-9 6-8s-2 7 0 7 3-5 5-5 1 4 3 4 2-2 4-2"></path><path d="M3 21h18"></path></symbol><symbol id="i-gh" viewBox="0 0 16 16"><path fill="currentColor" stroke="none" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></symbol><symbol id="i-present" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"></rect><path d="M12 16v4M8 20h8"></path></symbol><symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l1.2-4.6L15.6 5a2 2 0 0 1 2.8 0l.6.6a2 2 0 0 1 0 2.8L8.6 18.8z"></path></symbol><symbol id="i-hl" viewBox="0 0 24 24"><path d="m9 15-3 3H3v-1.5L6 14"></path><path d="m6 14 8.5-8.5a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L10 18z"></path><path d="M13 21h8"></path></symbol><symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="1.5"></rect><path d="M7 21l2-4M17 21l-2-4M7 13c2-3 3.5-3 5-1s3 2 5-1"></path></symbol><symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 6 8.5 12l6 6"></path></symbol><symbol id="i-right" viewBox="0 0 24 24"><path d="m9.5 6 6 6-6 6"></path></symbol><symbol id="i-redo" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"></path></symbol><symbol id="i-gift" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"></rect><path d="M3 9h18M12 9v11M12 9c-2-3-6-4-6-1.5S10 9 12 9zM12 9c2-3 6-4 6-1.5S14 9 12 9z"></path></symbol><symbol id="i-life" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><circle cx="12" cy="12" r="3.5"></circle><path d="m6 6 3.5 3.5M14.5 14.5 18 18M18 6l-3.5 3.5M9.5 14.5 6 18"></path></symbol><symbol id="i-key" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"></rect><path d="M6.5 10h1M10.5 10h1M14.5 10h1M8 14h8"></path></symbol></svg><div class="atmo" aria-hidden="true"><i class="l1"></i><i class="l2"></i><i class="l3"></i></div><header class="nav-wrap" id="top"><nav class="nav glass solid" aria-label="Ana menü"><a class="brand" href="/tr/" aria-label="viveEditor ana sayfa"><svg aria-hidden="true"><use href="#logo"></use></svg><span>viveEditor</span></a><ul class="nav-links"><li><a href="/tr/#ozellikler">Özellikler</a></li><li><a href="/tr/#kurulum">Kurulum</a></li><li><a href="/dokumantasyon/">Belgeler</a></li></ul><div class="nav-end"><div class="seg" role="group" aria-label="Site dili"><a href="/dokumantasyon/paketler/" hreflang="tr" lang="tr" aria-current="page">TR</a><a href="/en/docs/packages/" hreflang="en" lang="en">EN</a></div><button class="icon-btn theme-btn" id="themeBtn" type="button" aria-pressed="false" aria-label="Koyu tema"><svg class="ic t-moon" aria-hidden="true"><use href="#i-moon"></use></svg><svg class="ic t-sun" aria-hidden="true"><use href="#i-sun"></use></svg></button><a class="icon-btn" href="https://github.com/mtvrkan/viveeditor" aria-label="viveEditor GitHub deposu"><svg class="ic" aria-hidden="true"><use href="#i-gh"></use></svg></a><a class="btn btn-primary btn-sm" href="/tr/#dene">Dene</a><button class="menu-btn" type="button" aria-expanded="false" aria-controls="mnav" aria-label="Menüyü aç" data-open="Menüyü aç" data-close="Menüyü kapat"><svg class="ic" aria-hidden="true"><use href="#i-menu"></use></svg></button></div></nav><div class="mnav glass" id="mnav" hidden><a href="/tr/#ozellikler">Özellikler<svg class="ic" aria-hidden="true"><use href="#i-arrow"></use></svg></a><a href="/tr/#kurulum">Kurulum<svg class="ic" aria-hidden="true"><use href="#i-arrow"></use></svg></a><a href="/dokumantasyon/">Belgeler<svg class="ic" aria-hidden="true"><use href="#i-arrow"></use></svg></a><a href="https://github.com/mtvrkan/viveeditor">GitHub<svg class="ic" aria-hidden="true"><use href="#i-gh"></use></svg></a><a href="/en/docs/packages/" hreflang="en" lang="en">English<span class="kbd" aria-hidden="true">EN</span></a></div></header><div class="docs-shell wrap"><button type="button" class="docs-menu-btn btn btn-ghost" aria-expanded="false" aria-controls="docsSide" data-side-toggle><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg>Menü</button><aside class="docs-side" id="docsSide" aria-label="Belge menüsü"><button type="button" class="docs-search-btn" data-search-open aria-label="Belgelerde ara"><svg class="ic" aria-hidden="true"><use href="#i-search"></use></svg><span>Ara</span><span class="kbd" aria-hidden="true"><span class="k-win">Ctrl K</span><span class="k-mac">⌘K</span></span></button><nav aria-label="Belge menüsü"><a class="side-home" href="/dokumantasyon/">Belgeler</a><div class="side-group"><p class="side-label">Başlarken</p><ul><li><a href="/dokumantasyon/kurulum/"><svg class="ic" aria-hidden="true"><use href="#i-down"></use></svg>Kurulum</a></li><li><a href="/dokumantasyon/ilk-editor/"><svg class="ic" aria-hidden="true"><use href="#i-edit"></use></svg>İlk editör</a></li><li><a href="/dokumantasyon/cerceveler/"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg>Çerçeveler</a></li></ul></div><div class="side-group"><p class="side-label">Özellikler</p><ul><li><a href="/dokumantasyon/arac-cubugu-ve-kisayollar/"><svg class="ic" aria-hidden="true"><use href="#i-key"></use></svg>Araç çubuğu ve kısayollar</a></li><li><a href="/dokumantasyon/gorseller-ve-yukleme/"><svg class="ic" aria-hidden="true"><use href="#i-pages"></use></svg>Görseller ve yükleme</a></li><li><a href="/dokumantasyon/video/"><svg class="ic" aria-hidden="true"><use href="#i-present"></use></svg>Video ve ses ekleme</a></li><li><a href="/dokumantasyon/tablolar/"><svg class="ic" aria-hidden="true"><use href="#i-board"></use></svg>Tablolar</a></li><li><a href="/dokumantasyon/kod-bloklari/"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg>Kod blokları</a></li><li><a href="/dokumantasyon/bul-ve-degistir/"><svg class="ic" aria-hidden="true"><use href="#i-search"></use></svg>Bul ve değiştir</a></li><li><a href="/dokumantasyon/karakter-siniri/"><svg class="ic" aria-hidden="true"><use href="#i-min"></use></svg>Karakter sınırı</a></li><li><a href="/dokumantasyon/dosya-ac-kaydet-yazdir/"><svg class="ic" aria-hidden="true"><use href="#i-convert"></use></svg>Dosya aç, kaydet, yazdır</a></li><li><a href="/dokumantasyon/word-den-yapistirma/"><svg class="ic" aria-hidden="true"><use href="#i-merge"></use></svg>Word&#39;den yapıştırma</a></li></ul></div><div class="side-group"><p class="side-label">Ekler</p><ul><li><a href="/dokumantasyon/bahsetme/"><svg class="ic" aria-hidden="true"><use href="#i-pen"></use></svg>Bahsetme (@)</a></li><li><a href="/dokumantasyon/emoji/"><svg class="ic" aria-hidden="true"><use href="#i-gift"></use></svg>Emoji</a></li><li><a href="/dokumantasyon/formul/"><svg class="ic" aria-hidden="true"><use href="#i-form"></use></svg>Formüller (LaTeX)</a></li><li><a href="/dokumantasyon/dipnot/"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg>Dipnotlar</a></li><li><a href="/dokumantasyon/sablonlar/"><svg class="ic" aria-hidden="true"><use href="#i-archive"></use></svg>Şablonlar</a></li><li><a href="/dokumantasyon/yapay-zeka/"><svg class="ic" aria-hidden="true"><use href="#i-hl"></use></svg>Yapay zekâ yardımı</a></li></ul></div><div class="side-group"><p class="side-label">Sunucu</p><ul><li><a href="/dokumantasyon/sunucuda-temizleme/"><svg class="ic" aria-hidden="true"><use href="#i-lock"></use></svg>Sunucuda temizleme</a></li><li><a href="/dokumantasyon/laravel/"><svg class="ic" aria-hidden="true"><use href="#i-code"></use></svg>Laravel</a></li></ul></div><div class="side-group"><p class="side-label">Başvuru</p><ul><li><a class="on" href="/dokumantasyon/paketler/" aria-current="page"><svg class="ic" aria-hidden="true"><use href="#i-archive"></use></svg>Paketler</a></li><li><a href="/dokumantasyon/guvenlik-ve-csp/"><svg class="ic" aria-hidden="true"><use href="#i-lock"></use></svg>Güvenlik ve CSP</a></li><li><a href="/dokumantasyon/erisilebilirlik/"><svg class="ic" aria-hidden="true"><use href="#i-a11y"></use></svg>Erişilebilirlik</a></li><li><a href="/dokumantasyon/surum-politikasi/"><svg class="ic" aria-hidden="true"><use href="#i-gift"></use></svg>Sürüm politikası</a></li><li><a href="/dokumantasyon/sss/"><svg class="ic" aria-hidden="true"><use href="#i-book"></use></svg>Sık sorulan sorular</a></li><li><a href="/dokumantasyon/sorun-giderme/"><svg class="ic" aria-hidden="true"><use href="#i-life"></use></svg>Sorun giderme</a></li></ul></div></nav></aside><main id="main" class="docs-main"><nav class="crumbs" aria-label="Konum"><ol><li><a class="ul" href="/dokumantasyon/">Belgeler</a></li><li><span>Başvuru</span></li><li><span aria-current="page">Paketler</span></li></ol></nav><article class="doc" data-pagefind-body><p class="eyebrow" data-pagefind-ignore>Başvuru</p><h1>Paketler</h1><p class="doc-lead">viveEditor&#39;ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri.</p><div class="prose"><p>viveEditor küçük paketlere bölünmüştür; yalnızca kullandığınızı yüklersiniz. Bu sayfada her paketi, ne yaptığını ve ek giriş noktalarını bulacaksınız. Her npm paketinin genel API’si deponun <a href="https://github.com/mtvrkan/viveeditor/tree/main/api"><code>api/</code> klasöründe</a> kayıtlıdır.</p>
+<h2 id="nereden-başlamalı">Nereden başlamalı</h2>
+<table>
+<thead>
+<tr>
+<th>Paket</th>
+<th>Ne yapar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>viveeditor</code></td>
+<td>Textarea’ları araç çubuklu editöre çeviren tek betik. <code>mountEditor</code>, <code>upgradeTextarea</code>, <code>upgradeAll</code> ve içerdiği paketlerin dışa aktardığı her şey de buradan alınabilir.</td>
+</tr>
+<tr>
+<td><code>@viveeditor/core</code></td>
+<td>ProseMirror üzerine kurulu editör motoru ve eklenti sistemi: şema, komutlar, HTML ve JSON, yapıştırma temizliği. Araç çubuğu yoktur.</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ui</code></td>
+<td>Yüzen araç çubuğu, seçim balonu, <code>/</code> menüsü, paneller, Dosya menüsü ve okunabilirlik göstergesi.</td>
+</tr>
+</tbody>
+</table>
+<p><code>viveeditor</code> paketi <code>core</code>, <code>ui</code>, <code>ext-basic</code>, <code>ext-code-block</code>, <code>ext-embed</code>, <code>ext-format</code>, <code>ext-image</code>, <code>ext-list</code>, <code>ext-office-paste</code>, <code>ext-search</code>, <code>ext-table</code> ve <code>ext-task-list</code> paketlerini yeniden dışa aktarır. CDN sürümünde de aynı özellikler vardır.</p>
+<h2 id="düzenleme-özellikleri">Düzenleme özellikleri</h2>
+<table>
+<thead>
+<tr>
+<th>Paket</th>
+<th>Ne yapar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@viveeditor/ext-basic</code></td>
+<td>Kalın, italik, altı çizili, üstü çizili, satır içi kod, bağlantılar, başlıklar, alıntılar, yatay çizgiler, satır sonları</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-list</code></td>
+<td>Madde işaretli ve numaralı listeler</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-format</code></td>
+<td>Metin hizalama, yazı rengi ve vurgu</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-task-list</code></td>
+<td>Yapılacaklar listeleri</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-code-block</code></td>
+<td>Dil seçicili kod blokları ve isteğe bağlı sözdizimi renklendirmesi</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-table</code></td>
+<td>Birleştirilmiş hücreler, başlık satırları ve sütun genişlikleriyle tablolar</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-search</code></td>
+<td>Türkçe büyük harfleri doğru eşleştiren bul ve değiştir</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-character-count</code></td>
+<td>Karakter sayacı ve sınırı</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-image</code></td>
+<td>Adresleri denetlenen görseller, güvenli yükleme ve alternatif metin hatırlatmaları</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-embed</code></td>
+<td>Denetlenmiş bağlantılardan yeniden kurulan YouTube, Vimeo ve Spotify oynatıcıları</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-office-paste</code></td>
+<td>Word, Google Dokümanlar ve LibreOffice’ten gerçek listelerle temiz yapıştırma</td>
+</tr>
+</tbody>
+</table>
+<h2 id="ekstralar-yalnızca-npm">Ekstralar (yalnızca npm)</h2>
+<p>Bunlar CDN betiğinde yoktur. Menüleri ve panelleri <code>@viveeditor/ui/extras</code> sağlar.</p>
+<table>
+<thead>
+<tr>
+<th>Paket</th>
+<th>Ne yapar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@viveeditor/ext-mention</code></td>
+<td>Kimlikleri denetlenen <code>@</code> bahsetmeleri</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-math</code></td>
+<td>Kendi KaTeX kopyanızla çizilen LaTeX formülleri</td>
+</tr>
+<tr>
+<td><code>@viveeditor/ext-footnote</code></td>
+<td>Yerinde düzenlenen, yayımlanan sayfada numaralanan dipnotlar</td>
+</tr>
+<tr>
+<td><code>@viveeditor/emoji-data</code></td>
+<td>Emoji menüsü için sıkıştırılmış emoji listesi</td>
+</tr>
+</tbody>
+</table>
+<p>Şablonlar ve yapay zekâ asistanı için ayrı bir eklenti paketi gerekmez; ikisi de <code>@viveeditor/ui/extras</code> içindeki arayüz eklentileridir.</p>
+<h2 id="dosya-dönüştürücüleri">Dosya dönüştürücüleri</h2>
+<table>
+<thead>
+<tr>
+<th>Paket</th>
+<th>Ne yapar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@viveeditor/markdown</code></td>
+<td>Markdown içe ve dışa aktarma, Markdown’ı tanıyan yapıştırma</td>
+</tr>
+<tr>
+<td><code>@viveeditor/docx</code></td>
+<td>Güvenilmeyen dosyalar için sınırlarla Word (<code>.docx</code>) içe ve dışa aktarma</td>
+</tr>
+</tbody>
+</table>
+<p>Dosya menüsü bunları yükleyici fonksiyon olarak alır; yalnızca kullanıldıklarında indirilirler.</p>
+<h2 id="çerçeve-bileşenleri">Çerçeve bileşenleri</h2>
+<table>
+<thead>
+<tr>
+<th>Paket</th>
+<th>Ne yapar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@viveeditor/react</code></td>
+<td>React bileşeni ve <code>useViveEditor</code> kancası</td>
+</tr>
+<tr>
+<td><code>@viveeditor/vue</code></td>
+<td><code>v-model</code> destekli Vue bileşeni ve <code>useViveEditor</code> birleşimi</td>
+</tr>
+<tr>
+<td><code>@viveeditor/svelte</code></td>
+<td><code>bind:value</code> destekli Svelte bileşeni ve <code>use:viveEditor</code> eylemi</td>
+</tr>
+<tr>
+<td><code>@viveeditor/angular</code></td>
+<td><code>ngModel</code> ve reaktif formlar için Angular bileşeni</td>
+</tr>
+<tr>
+<td><code>@viveeditor/element</code></td>
+<td>Her sayfada çalışan <code>&lt;vive-editor&gt;</code> form alanı</td>
+</tr>
+</tbody>
+</table>
+<p>Bkz. <a href="/dokumantasyon/cerceveler/">Çerçeveler</a>.</p>
+<h2 id="sunucu-paketleri">Sunucu paketleri</h2>
+<table>
+<thead>
+<tr>
+<th>Paket</th>
+<th>Ne yapar</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@viveeditor/sanitize</code></td>
+<td>Editör çıktısıyla birebir uyumlu, Node için sunucu tarafı HTML temizleme</td>
+</tr>
+<tr>
+<td><code>viveeditor/sanitizer</code> (PHP)</td>
+<td>Aynı temizleyicinin bağımlılıksız PHP 8.4+ sürümü</td>
+</tr>
+<tr>
+<td><code>viveeditor/laravel</code> (PHP)</td>
+<td>Laravel 12+ için Blade bileşeni, yerel editör dosyaları ve <code>@viveHtml</code></td>
+</tr>
+</tbody>
+</table>
+<p>PHP paketleri Composer ile kurulur ve ayrı sürümlenir. Bkz. <a href="/dokumantasyon/sunucuda-temizleme/">Sunucuda temizleme</a> ve <a href="/dokumantasyon/laravel/">Laravel</a>.</p>
+<h2 id="ek-giriş-noktaları">Ek giriş noktaları</h2>
+<p>Bazı paketlerin birden fazla girişi vardır; böylece ağır kod ya da yalnızca yayın sayfasında gereken kod editör paketinin dışında kalır:</p>
+<ul>
+<li><code>@viveeditor/ui/extras</code>: <code>mentionMenu</code>, <code>emojiMenu</code>, <code>templateMenu</code>, <code>mathTools</code>, <code>footnoteTools</code>, <code>aiAssistant</code> ve <code>suggestionMenu</code>.</li>
+<li><code>@viveeditor/ui/panels</code>: panel kiti; ilk açılışta yüklenmesi yerine paketinize dahil etmek isterseniz.</li>
+<li><code>@viveeditor/ext-code-block/highlight</code>: <code>CodeHighlight</code> ve <code>shikiHighlighter</code>.</li>
+<li><code>@viveeditor/ext-embed/activate</code>: yayın sayfaları için <code>activateEmbeds()</code>.</li>
+<li><code>@viveeditor/ext-math/render</code>: yayın sayfaları için <code>renderMath()</code>.</li>
+<li><code>@viveeditor/ext-footnote/render</code>: yayın sayfaları için <code>renderFootnotes()</code>.</li>
+<li><code>@viveeditor/markdown/paste</code>: <code>MarkdownPaste</code>.</li>
+<li><code>@viveeditor/element/define</code>: <code>&lt;vive-editor&gt;</code> öğesini kaydeder.</li>
+<li><code>@viveeditor/emoji-data/en</code>: İngilizce emoji listesi.</li>
+</ul>
+<p>Yerleşim kuralı gereken paketler bir <code>style.css</code> dosyası da sunar; liste <a href="/dokumantasyon/kurulum/">Kurulum</a> sayfasında.</p>
+<h2 id="api-raporları">API raporları</h2>
+<p>Her npm paketinin <a href="https://github.com/mtvrkan/viveeditor/tree/main/api"><code>api/</code></a> altında bir klasörü vardır; örneğin <a href="https://github.com/mtvrkan/viveeditor/tree/main/api/core"><code>api/core</code></a> ya da <a href="https://github.com/mtvrkan/viveeditor/tree/main/api/ui"><code>api/ui</code></a>. Bu klasörlerde yayımlanan <code>.d.ts</code> tür bildirimleri durur. Genel API değiştiğinde değişiklik inceleme sırasında bu dosyalarda görünür; bir paketin belirli bir sürümde tam olarak neyi dışa aktardığını buradan okuyabilirsiniz.</p></div></article><footer class="doc-foot"><p class="mini-label">Son güncelleme: <time datetime="2026-11-01">1 Kasım 2026</time></p></footer><nav class="pager" aria-label="Önceki / Sonraki"><a class="pager-link prev" href="/dokumantasyon/laravel/" rel="prev"><span class="mini-label">Önceki</span><b>Laravel</b></a><a class="pager-link next" href="/dokumantasyon/guvenlik-ve-csp/" rel="next"><span class="mini-label">Sonraki</span><b>Güvenlik ve CSP</b></a></nav></main><aside class="docs-toc" aria-labelledby="tocTitle"><p class="side-label" id="tocTitle">Bu sayfada</p><ul><li class="d2"><a href="#nereden-başlamalı" data-toc="nereden-başlamalı">Nereden başlamalı</a></li><li class="d2"><a href="#düzenleme-özellikleri" data-toc="düzenleme-özellikleri">Düzenleme özellikleri</a></li><li class="d2"><a href="#ekstralar-yalnızca-npm" data-toc="ekstralar-yalnızca-npm">Ekstralar (yalnızca npm)</a></li><li class="d2"><a href="#dosya-dönüştürücüleri" data-toc="dosya-dönüştürücüleri">Dosya dönüştürücüleri</a></li><li class="d2"><a href="#çerçeve-bileşenleri" data-toc="çerçeve-bileşenleri">Çerçeve bileşenleri</a></li><li class="d2"><a href="#sunucu-paketleri" data-toc="sunucu-paketleri">Sunucu paketleri</a></li><li class="d2"><a href="#ek-giriş-noktaları" data-toc="ek-giriş-noktaları">Ek giriş noktaları</a></li><li class="d2"><a href="#api-raporları" data-toc="api-raporları">API raporları</a></li></ul></aside></div><footer class="foot"><div class="wrap"><div class="foot-grid"><div class="foot-brand"><a class="brand" href="/tr/" aria-label="viveEditor ana sayfa"><svg aria-hidden="true"><use href="#logo"></use></svg><span>viveEditor</span></a><p>Her siteye takılan ücretsiz, açık kaynak metin editörü. Bir betik ve bir metin alanı yeter.</p></div><div><h2>Ürün</h2><ul><li><a class="ul" href="/tr/#dene">Canlı deneme</a></li><li><a class="ul" href="/tr/#ozellikler">Özellikler</a></li><li><a class="ul" href="/tr/#kurulum">Kurulum</a></li><li><a class="ul" href="/tr/#guvenlik">Güvenlik</a></li></ul></div><div><h2>Kaynak</h2><ul><li><a class="ul" href="https://github.com/mtvrkan/viveeditor">GitHub</a></li><li><a class="ul" href="https://www.npmjs.com/package/viveeditor">npm paketi</a></li><li><a class="ul" href="https://github.com/mtvrkan/viveeditor/blob/main/CHANGELOG.md">Değişiklikler</a></li><li><a class="ul" href="https://github.com/mtvrkan/viveeditor/blob/main/LICENSE">Lisans: MIT</a></li></ul></div><div><h2>Yardım</h2><ul><li><a class="ul" href="/dokumantasyon/">Belgeler</a></li><li><a class="ul" href="https://github.com/mtvrkan/viveeditor/issues">Hata bildir</a></li><li><a class="ul" href="https://github.com/mtvrkan/viveeditor/security/policy">Güvenlik açığı bildir</a></li><li><a class="ul" href="https://vivepdf.com">vivePDF ailesinden</a></li></ul></div></div></div><p class="wordmark" aria-hidden="true">viveEditor</p><div class="wrap foot-bottom"><span>© 2026 viveEditor · Açık kaynak, herkes için</span><ul class="foot-tags" aria-label="İlkeler"><li><span class="dot-ok"></span>MIT</li><li>Ücretli katman yok</li><li>Editör yazı tipi indirmez</li><li>İzleme yok</li></ul></div></footer><div class="ds" id="docsSearch" role="dialog" aria-modal="true" aria-labelledby="dsTitle" hidden data-unavailable="Arama yalnızca yayımlanan sitede çalışır." data-one="# sonuç" data-other="# sonuç"><div class="ds-scrim" data-ds-close></div><div class="ds-panel glass"><h2 class="sr" id="dsTitle">Belgelerde ara</h2><div class="ds-top"><svg class="ic" aria-hidden="true"><use href="#i-search"></use></svg><label class="sr" for="dsInput">Belgelerde ara</label><input id="dsInput" type="search" role="combobox" aria-expanded="false" aria-controls="dsList" aria-autocomplete="list" placeholder="Ara: yükleme, tablo, Laravel" autocomplete="off" spellcheck="false"><button type="button" class="kbd ds-esc" data-ds-close aria-label="Kapat">Esc</button></div><ul class="ds-list" id="dsList" role="listbox" aria-label="Belgelerde ara"></ul><div class="ds-empty" id="dsEmpty" hidden><p class="ds-empty-title">Bu aramaya uyan sayfa yok</p><p>Daha kısa bir kelime deneyin ya da sorunuzu GitHub’da sorun.</p></div><p class="sr" id="dsStatus" role="status"></p></div></div><script type="module" src="/_astro/Base.astro_astro_type_script_index_0_lang.ClsipK6F.js"></script></body></html><script type="module" src="/_astro/Docs.astro_astro_type_script_index_0_lang.BfgfN1uE.js"></script>

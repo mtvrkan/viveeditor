@@ -1,0 +1,78 @@
+# Character limit
+
+> Count characters and set a limit; typing stops at the limit, pasted text is trimmed and the toolbar shows how much is left.
+
+URL: https://editor.vivepdf.com/en/docs/character-limit/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-character-count` counts the characters in the document and can set a limit. At the limit typing stops, pasted text is trimmed to fit the space left, and deleting always works. The count in the toolbar shows the characters used and allowed. This page covers setup, what counts and how the interface shows the limit.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CharacterCount } from '@viveeditor/ext-character-count'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [CharacterCount.configure({ limit: 280 })],
+})
+```
+
+The extension's only option is `limit`. The default `null` sets no limit and only counts. The limit must be a positive whole number; any other value means no limit.
+
+The character count is not in the one-script build. To keep the ready-made extension list, add it to the list in the framework components or with `mountEditor`:
+
+```ts
+import { CharacterCount } from '@viveeditor/ext-character-count'
+import { classicPreset, mountEditor } from 'viveeditor'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  extensions: [...classicPreset('en'), CharacterCount.configure({ limit: 280 })],
+  locale: 'en',
+})
+```
+
+## How the limit works
+
+- Typing stops at the limit.
+- Pasted or dropped text is trimmed to fit the space left.
+- Deleting always works. Any change that does not add characters is accepted.
+- Content you load yourself with `content` or `setContent` is not cut. If it is over the limit, the writer can make changes that add characters only after getting below the limit.
+
+The limit in the browser helps the writer, but it is not a security measure. Check the length on your server too.
+
+## What counts
+
+- Every character in the text, spaces included.
+- Turkish letters and most emoji count as one character each. Counting is by Unicode code point, so an emoji built from several parts (such as skin tone or family emoji) counts once per part.
+- Images, videos, line breaks and paragraph breaks do not count.
+
+## The count in the toolbar
+
+With a limit, the count at the end of the toolbar shows the characters used and allowed, such as `120/280 characters`, instead of the word count. Numbers are formatted for the interface language.
+
+- At 90 percent of the limit, the count turns to the warning colour.
+- At the limit, it turns to the danger colour and screen readers announce "Character limit reached".
+
+Clicking the count opens the text statistics panel: readability, words, sentences and reading time. See [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/).
+
+## Read the count in code
+
+```ts
+const used = editor.query.characterCount()
+const limit = editor.query.characterLimit()
+```
+
+`characterLimit()` returns `null` when there is no limit. The package also exports `countCharacters(node)`, which counts the characters in a ProseMirror node with the same rules.
+
+## Does the one-script build have a character limit?
+
+No. The character count extension is not part of the one-script build; add it with the npm package.
+
+## What happens if I load text that is over the limit?
+
+Content you load yourself is not cut. The writer can delete and edit, but changes that add characters are refused until the text is below the limit.
+
+## Do spaces count?
+
+Yes. Every character in the text counts, spaces included. Images, videos and line breaks do not.

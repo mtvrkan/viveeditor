@@ -1,0 +1,98 @@
+# Tablolar
+
+> Tablo eklentisiyle birleştirilmiş hücreler, başlık satırları, sürüklenebilir sütun genişlikleri ve araç çubuğundaki tablo araçları.
+
+URL: https://editor.vivepdf.com/dokumantasyon/tablolar/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-table` editöre tablo ekler: hücreleri birleştirme, başlık satırları, sürükleyerek sütun genişliği ayarlama ve hücreler arasında `Tab` ile gezinme. Kaydedilen HTML sütun genişliklerini taşır, böylece tablo her sitede aynı görünür. Bu sayfa eklentiyi kurmayı, tablo araçlarını ve klavye kullanımını anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Table } from '@viveeditor/ext-table'
+import '@viveeditor/ext-table/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Table],
+})
+
+editor.commands.insertTable({ rows: 3, cols: 3, headerRow: true })
+```
+
+Tek betikli kurulumda tablo eklentisi zaten yüklüdür.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `resizable` | `true` | Sütun kenarını sürükleyerek genişlik ayarlamayı açar. |
+| `cellMinWidth` | `48` | Bir sütunun piksel olarak en küçük genişliği. |
+| `maxSize` | `20` | `insertTable` ile eklenebilecek en fazla satır ve sütun sayısı. |
+
+## Tablo eklemek
+
+- Araç çubuğundaki tablo düğmesi 6×6'lık bir ızgara açar. Fareyle ya da ok tuşlarıyla boyutu seçip tıklayın veya `Enter` tuşuna basın. Tablo başlık satırıyla eklenir.
+- `/` menüsünde "Tablo" girişi başlık satırlı 3×3 bir tablo ekler (`/tablo`).
+- Kodla eklemek için `insertTable({ rows, cols, headerRow })` kullanın. Değer verilmezse tablo 3×3 olur ve başlık satırıyla başlar.
+
+Boş bir paragrafta eklenen tablo o paragrafın yerini alır. Tablonun içine ikinci bir tablo eklenemez.
+
+## Tablo araçları
+
+İmleç bir tablonun içindeyken araç çubuğundaki tablo düğmesi ızgara yerine tablo araçlarını açar:
+
+| Grup | Araçlar |
+| --- | --- |
+| Ekle | Üste satır ekle, Alta satır ekle, Sola sütun ekle, Sağa sütun ekle |
+| Düzen | Hücreleri birleştir, Hücreyi böl, Başlık satırı, Sütunu genişlet, Sütunu daralt |
+| Sil | Satırı sil, Sütunu sil, Tabloyu sil |
+
+O an uygulanamayan araçlar devre dışı görünür. Örneğin tek bir hücre seçiliyken "Hücreleri birleştir" kullanılamaz. Panel `Esc` ile kapanır.
+
+## Birleştirilmiş hücreler
+
+Fareyle sürükleyerek birden fazla hücre seçin ve "Hücreleri birleştir" seçeneğine basın. Birleşik bir hücreyi eski haline getirmek için içine tıklayıp "Hücreyi böl" seçeneğini kullanın. Birleştirilmiş hücreler Word dosyasına kaydedilirken de korunur.
+
+## Başlık satırı ve sütunu
+
+"Başlık satırı" ilk satırı başlık hücrelerine çevirir ya da geri alır. Başlık hücreleri HTML'de `th` olarak yazılır, ekran okuyucular bu sayede sütun başlıklarını duyurur. İlk sütunu başlık yapmak için arayüzde düğme yoktur; `editor.commands.toggleHeaderColumn()` komutunu kullanın.
+
+## Sütun genişlikleri
+
+`resizable` açıkken bir sütunun sağ kenarını sürükleyerek genişliğini değiştirin. Klavyeyle çalışıyorsanız tablo araçlarındaki "Sütunu genişlet" ve "Sütunu daralt" imlecin bulunduğu sütunu 40 piksel değiştirir. Sütun `cellMinWidth` değerinden daha dar olamaz.
+
+Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başına `width` stili taşır. Tablonun kendisine de toplam genişlik yazılır; bazı sütunların genişliği yoksa bu değer en küçük genişlik olarak kullanılır. Hiç genişlik verilmemiş tablolar stil taşımaz.
+
+## Klavye
+
+- `Tab` sonraki hücreye geçer. Son hücrede yeni bir satır ekler.
+- `Shift+Tab` önceki hücreye döner.
+- `Esc` ve ardından `Tab` odağı tablodan ve editörden çıkarır.
+
+## Komutlar
+
+| Komut | Ne yapar |
+| --- | --- |
+| `insertTable(options)` | Tablo ekler. |
+| `addRowBefore()`, `addRowAfter()` | Satır ekler. |
+| `addColumnBefore()`, `addColumnAfter()` | Sütun ekler. |
+| `deleteRow()`, `deleteColumn()`, `deleteTable()` | Satırı, sütunu ya da tabloyu siler. |
+| `mergeCells()`, `splitCell()` | Hücreleri birleştirir ya da böler. |
+| `toggleHeaderRow()`, `toggleHeaderColumn()` | Başlık satırını ya da sütununu açıp kapatır. |
+| `resizeColumn(delta)` | İmlecin bulunduğu sütunu piksel olarak genişletir ya da daraltır. |
+
+`editor.query.inTable()` imleç bir tablonun içindeyse `true` döner. Komutları önce denemek için `editor.can.mergeCells()` gibi `can` biçimini kullanın.
+
+Tablolar Markdown ve Word dosyalarına da kaydedilir; ayrıntılar [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.
+
+## Sütun genişlikleri yayın sayfasında korunur mu?
+
+Evet. Genişlikler kaydedilen HTML'e colgroup ve stil olarak yazılır, bu yüzden içerik hangi sitede gösterilirse gösterilsin aynı kalır. Sunucu temizleyicisi tablo genişliklerini korur.
+
+## Tablonun içine tablo eklenebilir mi?
+
+Hayır. İmleç bir tablonun içindeyken tablo ekleme komutu çalışmaz; araç çubuğundaki tablo düğmesi o sırada tablo araçlarını açar.
+
+## Klavyeyle tablodan nasıl çıkarım?
+
+Önce Esc, sonra Tab tuşuna basın. Tab tek başına hücreler arasında gezdiği için bu sıra odağı editörden sonraki öğeye taşır.

@@ -1,0 +1,70 @@
+# Emoji
+
+> Add an emoji picker that opens on a colon, with a compact English emoji list that loads only on first use.
+
+URL: https://editor.vivepdf.com/en/docs/emoji/
+Last updated: 2026-11-01
+
+The emoji menu lets a writer type `:` and two letters, then pick an emoji by name or keyword. The emoji goes into the text as an ordinary character, so the stored HTML needs no extra element and the menu needs no editor extension.
+
+The emoji menu ships as an npm package only. The one-script build does not include it.
+
+## Set it up
+
+1. Install the UI and the data: `npm install @viveeditor/ui @viveeditor/emoji-data`.
+2. Add `emojiMenu` from `@viveeditor/ui/extras` to the `plugins` of `createUI`.
+3. Pass a `load` function that imports the list, so it downloads only when needed.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { emojiMenu } from '@viveeditor/ui/extras'
+
+createUI(editor, {
+  plugins: [emojiMenu({ load: () => import('@viveeditor/emoji-data/en') })],
+})
+```
+
+## How the menu behaves
+
+- The menu opens when the writer types `:` at the start of a line or after a space, followed by at least two letters or digits.
+- It searches names and keywords. An exact name comes first, then names that start with the typed text, then keyword matches.
+- It shows at most 8 results. `Enter` or `Tab` inserts the emoji and `Esc` closes the menu.
+- The list loads once, on first use. If loading fails, the next attempt tries again.
+
+## The data package
+
+`@viveeditor/emoji-data/en` is a compact English list of about 39 KB. It is generated from [emojibase-data](https://www.npmjs.com/package/emojibase-data) 18.0.0 and only English names are available.
+
+Each row has three parts: the emoji, its name and its keywords. The menu checks the list when it loads. It refuses a list with more than 5,000 rows, or a row in another shape, and an emoji longer than 16 code points.
+
+## Your own list
+
+`load` can return any list in the same shape, as an array or as a module with a `default` export. Use this for a shorter list or for names in another language.
+
+```ts
+import { type EmojiRow, emojiMenu } from '@viveeditor/ui/extras'
+
+const rows: EmojiRow[] = [
+  ['👍', 'thumbs up', ['yes', 'agree']],
+  ['🎉', 'party popper', ['celebrate']],
+]
+
+emojiMenu({ load: async () => rows })
+```
+
+## Licence
+
+The package itself is MIT licensed. The emoji names and keywords come from Emojibase, which is under the MIT License, and Emojibase derives them from the Unicode CLDR and the Unicode emoji data files, under the Unicode License v3. The `NOTICE` file in the package holds both notices. Keep it when you redistribute the data.
+
+## Related pages
+
+- [Packages](https://editor.vivepdf.com/en/docs/packages/)
+- [Mentions](https://editor.vivepdf.com/en/docs/mentions/)
+
+## Does the emoji list load with the editor?
+
+No. The list loads the first time a writer types a colon and two letters, so pages that never use it do not download it.
+
+## Can I use my own emoji list?
+
+Yes. The load function can return any list of rows in the form emoji, name, keywords, up to 5,000 rows.

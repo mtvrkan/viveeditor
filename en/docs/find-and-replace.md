@@ -1,0 +1,95 @@
+# Find and replace
+
+> Find and replace that matches Turkish capitals correctly, with match case, whole word and replace all options.
+
+URL: https://editor.vivepdf.com/en/docs/find-and-replace/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-search` adds find and replace to the editor. It matches Turkish capitals correctly: a search for `istanbul` also finds `İstanbul` and `ISTANBUL`. The panel comes from `@viveeditor/ui` and opens with `Ctrl+F` (`⌘+F` on a Mac). This page covers the panel, the matching rules and the commands.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Search } from '@viveeditor/ext-search'
+import '@viveeditor/ext-search/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Search],
+})
+```
+
+The one-script build already includes the search extension. Its only option is `maxQueryLength` (default 200): longer search text is cut to that length.
+
+## The find and replace panel
+
+`Ctrl+F` or the "Find and replace" button in the toolbar opens the panel. If text is selected and fits on one line, it fills the search field. Matches are highlighted in the document.
+
+| Item | What it does |
+| --- | --- |
+| Find | The text to search for. Results update as you type. |
+| Previous match, Next match | Move between matches. |
+| Match case | When on, letters must match exactly. |
+| Whole word only | When on, matches inside a longer word do not count. |
+| Counter | Shows which match you are on, such as `3 of 12`. With no matches it says "No results". |
+| Replace with | The new text. Leave it empty to delete the matches. |
+| Replace | Replaces the selected match and moves to the next. |
+| Replace all | Replaces every match in one step. |
+
+Keyboard:
+
+- In the search field, `Enter` goes to the next match and `Shift+Enter` to the previous one.
+- In the "Replace with" field, `Enter` replaces the next match.
+- `Esc` closes the panel, removes the highlights and takes you back to the text.
+
+## Turkish capitals
+
+With match case off, every letter is matched with both the general and the Turkish case rules:
+
+| Letter searched | Letters matched |
+| --- | --- |
+| `i` | i, I, İ |
+| `ı` | ı, I |
+| `İ` | İ, i |
+| `I` | I, i, ı |
+
+For example, `istanbul` finds `İstanbul`, `Istanbul` and `ISTANBUL`, and `ılık` finds `ILIK`. Only case is ignored: `s` and `ş`, `c` and `ç`, `o` and `ö` are different letters.
+
+With "Match case" on, these rules are off and the text is searched exactly as typed.
+
+## Replacing
+
+"Replace" first selects a match; when a match is selected, pressing it again replaces that match and selects the next one. "Replace all" replaces every match in the document in a single step, so one undo brings them all back.
+
+## Commands
+
+You can do the same in code, without the panel:
+
+```ts
+editor.commands.setSearch({ query: 'istanbul', replace: 'İstanbul', wholeWord: true })
+const { total } = editor.query.searchStatus()
+if (total > 0) editor.commands.replaceAll()
+editor.commands.clearSearch()
+```
+
+| Command | What it does |
+| --- | --- |
+| `setSearch(terms)` | Starts or updates the search: `query`, `replace`, `caseSensitive`, `wholeWord`. |
+| `findNext()`, `findPrevious()` | Selects the next or previous match. |
+| `replaceNext()` | Replaces the selected match. |
+| `replaceAll()` | Replaces every match. |
+| `clearSearch()` | Removes the search and the highlights. |
+
+`editor.query.searchStatus()` returns `{ total, current }`: the number of matches and the position of the selected match (`0` when none is selected). To reuse the same Turkish-aware matching elsewhere, the package exports `caseInsensitivePattern(text)`, which returns a regular expression pattern.
+
+## Why does a search for "istanbul" find "İstanbul"?
+
+With match case off, search uses both the general and the Turkish case rules. So i matches İ and I, and ı matches I.
+
+## Can I undo Replace all?
+
+Yes. All replacements happen in one step, so one undo brings everything back.
+
+## Does search treat ş and s as the same letter?
+
+No. Only the difference between capital and small letters is ignored; different letters such as ş and s or ç and c stay apart.

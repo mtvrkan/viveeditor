@@ -1,0 +1,2898 @@
+# viveEditor · Belgeler
+
+> viveEditor belgeleri: kurulum, çerçeveler, araç çubuğu, görseller, video, tablolar, Word ve Markdown, sunucuda temizleme, Laravel ve ekler.
+
+URL: https://editor.vivepdf.com/dokumantasyon/
+
+---
+
+# Kurulum
+
+> viveEditor'ü tek bir CDN betiğiyle ya da npm'den kurun, ihtiyacınız olan paketleri seçin ve doğru stil dosyalarını yükleyin.
+
+URL: https://editor.vivepdf.com/dokumantasyon/kurulum/
+Son güncelleme: 2026-11-01
+
+viveEditor'ü bir sayfaya CDN'den tek bir betikle ekleyebilir ya da npm'den kurup kendi paketleyicinizle derleyebilirsiniz. Bu sayfa iki yolu, hangi paketleri seçmeniz gerektiğini ve hangi stil dosyalarını yüklemeniz gerektiğini anlatıyor.
+
+## CDN betiğiyle
+
+Derleme adımı gerekmez. Stil dosyasını ve betiği yükleyin, sonra bir textarea'ya `data-editor` ekleyin:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.css" />
+<script src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"></script>
+
+<form method="post">
+  <label for="body">Makale</label>
+  <textarea id="body" name="body" data-editor required></textarea>
+</form>
+```
+
+`x.y.z` yerine kullandığınız sürümü tam olarak yazın. Sayfa hazır olduğunda betik her `textarea[data-editor]` öğesini araç çubuklu bir editöre çevirir ve `window.ViveEditor` nesnesini sunar. Form, textarea'nın adıyla temiz HTML gönderir. Bu HTML'i sunucuda her zaman yeniden temizleyin.
+
+Betikte temel biçimlendirme, listeler, hizalama ve renkler, yapılacaklar listeleri, kod blokları (sözdizimi renklendirmesi olmadan), tablolar, bul ve değiştir, görseller (adresle, yükleyici olmadan), video gömme ve Office'ten temiz yapıştırma vardır. Bahsetme, emoji, formül, dipnot, şablonlar ve yapay zekâ asistanı yalnızca npm'de bulunur; `<vive-editor>` öğesi de öyle.
+
+> **Sürümü tam yazın, dosya adlarını değiştirmeyin**
+>
+> Word ve Markdown dönüştürücüleri ile paneller ana betiğin yanındaki ek dosyalardadır: `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` ve `viveeditor.panels.iife.js`. İlk kullanımda aynı klasörden yüklenir ve o sürümün içine gömülü `sha384` parmak izleriyle denetlenirler. `cdn.jsdelivr.net/npm/viveeditor` gibi kısa adresler ya da adı değiştirilmiş veya birleştirilmiş betikler bu dosyaları bulamaz.
+
+Sitenizde İçerik Güvenliği Politikası (CSP) varsa yayına almadan önce [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/) sayfasını okuyun.
+
+## npm ile
+
+### Her şey tek pakette
+
+`viveeditor` paketi CDN betiğindeki editörün aynısını içerir:
+
+```sh
+npm install viveeditor
+```
+
+```ts
+import { upgradeAll } from 'viveeditor'
+import 'viveeditor/style.css'
+
+upgradeAll()
+```
+
+Paketleyiciyle çalışırken CDN ek dosyaları yoktur. Dosya menüsünde Word ve Markdown'ı görmek için dönüştürücüleri yükleyici fonksiyon olarak verin; ayrıntılar [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.
+
+### Çerçeve bileşeni
+
+React, Vue, Svelte ve Angular için ayrı bileşen paketleri var; bunları `viveeditor` ile birlikte kurarsınız:
+
+```sh
+npm install @viveeditor/react viveeditor
+```
+
+`@viveeditor/vue`, `@viveeditor/svelte` ve `@viveeditor/angular` da aynı şekilde kurulur. Herhangi bir sayfa için `<vive-editor>` form alanını sunan `@viveeditor/element` paketi de var. Ayrıntılar [Çerçeveler](https://editor.vivepdf.com/dokumantasyon/cerceveler/) sayfasında.
+
+### Yalnızca gereken parçalar
+
+Her özellik ayrı bir pakettir. `@viveeditor/core` motorun kendisidir ve araç çubuğu içermez; araç çubuğu için `@viveeditor/ui` ekleyin:
+
+```sh
+npm install @viveeditor/core @viveeditor/ext-basic @viveeditor/ext-list @viveeditor/ui
+```
+
+Tam liste [Paketler](https://editor.vivepdf.com/dokumantasyon/paketler/) sayfasında.
+
+## Stil dosyaları
+
+- CDN: betikle aynı sürüm klasöründeki `viveeditor.css`.
+- `viveeditor` ve çerçeve bileşenleri: bir kez `import 'viveeditor/style.css'`.
+- Angular: `node_modules/viveeditor/dist/viveeditor.css` dosyasını `angular.json` içindeki `styles` listesine ekleyin.
+- Paketleri kendiniz seçtiyseniz: `@viveeditor/core/style.css`, araç çubuğunu kullanıyorsanız `@viveeditor/ui/style.css` ve stil dosyası olan her eklentinin `style.css` dosyası: `ext-code-block`, `ext-embed`, `ext-footnote`, `ext-image`, `ext-math`, `ext-mention`, `ext-search`, `ext-table` ve `ext-task-list`.
+
+```ts
+import '@viveeditor/core/style.css'
+import '@viveeditor/ui/style.css'
+import '@viveeditor/ext-table/style.css'
+```
+
+Formüller için KaTeX'in kendi stil dosyası `katex/dist/katex.min.css` de gerekir.
+
+## Gereksinimler
+
+- Derleme araçlarınız için Node.js 20.19 veya üstü. npm paketleri bunu `engines` alanında belirtir.
+- Bileşen paketleri için React 18 ya da 19, Vue 3.5, Svelte 5 veya Angular 21 ya da 22.
+- Formül kullanıyorsanız KaTeX 0.18.2 veya üstü. Daha eski sürümler reddedilir.
+- `viveeditor/sanitizer` için PHP 8.4 veya üstü, `viveeditor/laravel` için Laravel 12 veya üstü.
+
+## Sürümü sabitleyin
+
+Tüm npm paketleri aynı sürüm numarasıyla birlikte yayımlanır; bu yüzden viveEditor paketlerinin hepsini aynı sürümde kurun. CDN betiğinde sürümü her zaman tam yazın (`viveeditor@x.y.z`); ek dosyalar o sürüme gömülü parmak izleriyle denetlenir. 1.0'dan önce bir ara sürüm uyumu bozan değişiklik içerebilir; bkz. [Sürüm politikası](https://editor.vivepdf.com/dokumantasyon/surum-politikasi/).
+
+## Sonraki adımlar
+
+- [İlk editör](https://editor.vivepdf.com/dokumantasyon/ilk-editor/): textarea, `mountEditor` ya da `Editor.create`.
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/): gönderilen HTML'i kaydetmeden önce temizleyin.
+
+---
+
+# İlk editör
+
+> Bir textarea'yı editöre çevirin, editörü herhangi bir öğeye yerleştirin ya da Editor.create ve createUI ile kendiniz kurun.
+
+URL: https://editor.vivepdf.com/dokumantasyon/ilk-editor/
+Son güncelleme: 2026-11-01
+
+Bir editörü başlatmanın üç yolu var: formdaki bir textarea'yı editöre çevirmek, `mountEditor` ile herhangi bir öğeye editör yerleştirmek ya da `Editor.create` ve `createUI` ile editörü kendiniz kurmak. Bu sayfa üçünü de gösteriyor; ardından içeriği okumayı, değişiklikleri dinlemeyi, etiketi ve dili ayarlamayı anlatıyor.
+
+## Textarea'yı editöre çevirin
+
+En kısa yol budur; CDN betiğiyle de npm ile de çalışır.
+
+1. `viveeditor.css` ve `viveeditor.classic.iife.js` dosyalarını [Kurulum](https://editor.vivepdf.com/dokumantasyon/kurulum/) sayfasındaki gibi tam sürümle yükleyin.
+2. Textarea'ya `data-editor` ekleyin. `name` özniteliğini ve ona bağlı bir `<label for>` öğesini koruyun.
+3. Sunucuda alanı her zamanki gibi okuyun ve HTML'i kaydetmeden önce temizleyin; bkz. [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/).
+
+```html
+<form method="post">
+  <label for="body">Makale</label>
+  <textarea id="body" name="body" data-editor required></textarea>
+  <button>Yayımla</button>
+</form>
+```
+
+Textarea gizlenir ama formda kalır ve her zaman en güncel HTML'i tutar (belge boşsa `''`). Her değişiklikte `input` olayı tetiklenir. `required` varsa boş editör gönderimi durdurur, kendini `aria-invalid="true"` olarak işaretler, textarea üzerinde `vive:invalid` olayını tetikler ve odağı alır. Görseller hâlâ yükleniyorsa gönderim bekler ve yüklemeler bitince yapılır. Bir textarea'nın Dosya menüsünü gizlemek için ona `data-files="false"` ekleyin.
+
+### Kendi kodunuzdan
+
+npm ile her `textarea[data-editor]` öğesini çevirmek için `upgradeAll()`, tek bir alan için `upgradeTextarea()` çağırın:
+
+```ts
+import { upgradeTextarea } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const field = await upgradeTextarea(document.querySelector('#body'), {
+  label: 'Makale metni',
+  ui: { locale: 'tr' },
+})
+
+console.log(field.editor.getHTML())
+```
+
+`upgradeAll(root, options)` aramayı `root` içiyle sınırlar. `upgradeTextarea` aynı anda iki kez çağrılırsa aynı promise döner. `field.destroy()` textarea'yı geri getirir ve son HTML'i içinde bırakır. Araç çubuğunu istemiyorsanız `ui: false` verin.
+
+## Herhangi bir öğeye yerleştirin
+
+`mountEditor`, tüm eklentileri ve araç çubuğuyla editörün tamamını istediğiniz öğeye yerleştirir. Çerçeve bileşenleri de bunun üzerine kuruludur.
+
+```ts
+import { mountEditor } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  value: '<p>Merhaba</p>',
+  locale: 'tr',
+  label: 'Makale metni',
+  onChange: (html) => console.log(html),
+})
+
+const editor = await mount.ready
+```
+
+- Değer HTML'dir; boş belge `''` olur.
+- `getValue()`, `setValue(html)`, `setEditable(editable)` ve `destroy()` ile yönetilir. `setValue` ile verilen yeni değer `onChange` çağırmaz ve geri alma geçmişine girmez.
+- `extensions` varsayılan eklenti listesinin yerini alır; `ui: false` araç çubuğunu kaldırır.
+- Editör hazır olmadan `destroy()` çağırırsanız `ready`, `MountDestroyedError` ile reddedilir.
+- Dosya menüsü dönüştürücüleri varsayılan olarak yüklenmez; onları `ui.files` içinde verin.
+
+## Kendiniz kurun
+
+`Editor.create` yalnızca listelediğiniz eklentilerle motoru verir. `createUI` araç çubuğunu, seçim balonunu, `/` menüsünü ve panelleri ekler.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import '@viveeditor/core/style.css'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { listExtensions } from '@viveeditor/ext-list'
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, ...listExtensions],
+  content: '<p>Merhaba <strong>dünya</strong></p>',
+  label: 'Makale metni',
+})
+
+const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
+```
+
+`createUI` yazma alanının yanına yerleşir ve editör kapatılınca kaldırılır. Yalnızca komutları kayıtlı araçları gösterir; yani bir araç, eklentisini eklediğinizde görünür. Daha önce kaldırmak için `ui.destroy()` çağırın. Seçenekler [Araç çubuğu ve kısayollar](https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
+
+## İçeriği okuyun
+
+- `editor.getHTML()` belgeyi HTML olarak verir.
+- `editor.getJSON()` asıl saklama biçimi olan ProseMirror JSON'unu verir.
+- `editor.getText()` her blok bir satır olacak şekilde düz metin verir.
+- `editor.isEmpty` belgenin boş olup olmadığını söyler.
+- `editor.setContent(content)` HTML ya da JSON yükler. Geri alma geçmişine girmez.
+
+HTML ya da JSON saklayabilirsiniz. İkisi de sonraki 0.x sürümlerinde okunabilir kalır; bkz. [Sürüm politikası](https://editor.vivepdf.com/dokumantasyon/surum-politikasi/).
+
+## Değişiklikleri dinleyin
+
+```ts
+const stop = editor.on('change', ({ editor }) => {
+  console.log(editor.getHTML())
+})
+
+editor.on('error', ({ error }) => console.error(error))
+```
+
+- `change`, belge değişince tetiklenir.
+- `update`, seçimin değişmesi gibi her durum değişikliğinde tetiklenir.
+- `focus`, `blur`, `destroy` ve `error` olayları da var.
+- `on` dinleyiciyi kaldıran bir fonksiyon döndürür; `off` da aynı işi yapar.
+
+Bir dinleyicinin içinde oluşan hata diğerlerini durdurmaz; `error` olayıyla bildirilir.
+
+## Etiket ve dil
+
+Her editöre `label: 'Makale metni'` gibi bir `label` verin. Ekran okuyucular bunu yazma alanının adı olarak okur. Textarea kullanıyorsanız görünür bir `<label for>` bırakın; `label` vermezseniz editör adını oradan alır.
+
+Arayüz Türkçe ve İngilizce konuşur. Dili `locale` ile seçin. Verilmezse editör önce `<html lang="...">` değerine, sonra tarayıcı diline bakar: `tr` ile başlayan her değer Türkçe, geri kalan her şey İngilizce olur. Tek tek metinleri değiştirmek için `createUI` içine `messages` verin; örneğin `createUI(editor, { messages: { toolbar: 'Biçim' } })`.
+
+## Sonraki adımlar
+
+- [Çerçeveler](https://editor.vivepdf.com/dokumantasyon/cerceveler/): aynı editör React, Vue, Svelte ve Angular'da.
+- [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/): yükleme adresinizi bağlayın.
+
+---
+
+# Çerçeveler
+
+> viveEditor'ü React, Vue, Svelte ve Angular'da ya da <vive-editor> form alanı olarak kullanın; sunucu tarafı işleme notlarıyla.
+
+URL: https://editor.vivepdf.com/dokumantasyon/cerceveler/
+Son güncelleme: 2026-11-01
+
+viveEditor'ün React, Vue, Svelte ve Angular için küçük birer bileşen paketi, herhangi bir sayfa için de `<vive-editor>` özel öğesi var. Hepsi tek betikli sürümdeki editörün aynısını, tüm eklentiler ve araç çubuğuyla birlikte verir; kendilerine ait editör mantığı taşımazlar.
+
+## Bütün bileşenlerde ortak olanlar
+
+- Değer HTML'dir; boş belge `''` olur.
+- Kendi eklenti listeniz için `extensions`, araç çubuğunu kaldırmak için `ui: false` verin. `ui`, `{ theme: 'dark' }` gibi araç çubuğu seçeneklerini de alır.
+- `locale` Türkçe ya da İngilizceyi seçer; `label` yazma alanına ekran okuyucuların okuyacağı adı verir.
+- Dışarıdan gelen yeni değer, değişiklik olayı tetiklenmeden ve geri alma geçmişine girmeden uygulanır. Aynı değeri yeniden vermek hiçbir şey yapmaz.
+- Dosya menüsü dönüştürücüleri varsayılan olarak yüklenmez. Onları `ui.files` içinde verin; bkz. [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/).
+- Stilleri bir kez `import 'viveeditor/style.css'` ile yükleyin.
+
+Bileşeni `viveeditor` ile birlikte kurun:
+
+```sh
+npm install @viveeditor/react viveeditor
+```
+
+## React
+
+React 18 ve 19.
+
+```tsx
+import { useState } from 'react'
+import { ViveEditor } from '@viveeditor/react'
+import 'viveeditor/style.css'
+
+export function ArticleForm() {
+  const [html, setHtml] = useState('')
+  return <ViveEditor value={html} onChange={setHtml} locale="tr" label="Makale metni" />
+}
+```
+
+- `value` ile `onChange` birlikte ya da tek başına `defaultValue` kullanın.
+- `onReady`, `onFocus`, `onBlur` ve `onError` editörü ya da hatayı alır. `editable`, `id`, `className` ve `style` de kabul edilir.
+- Bileşene verilen `ref` size `Editor` nesnesini verir.
+- `useViveEditor(options)` kendi işaretlemeniz için `{ ref, editor }` döndürür; `ref` değerini bir `div` öğesine bağlayın.
+- Bileşen, StrictMode'da olduğu gibi editör hazır olmadan kaldırılırsa editör oluşur oluşmaz kapatılır ve `onReady` hiç çağrılmaz.
+
+## Vue
+
+Vue 3.5.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import { ViveEditor } from '@viveeditor/vue'
+import 'viveeditor/style.css'
+
+const html = ref('')
+</script>
+
+<template>
+  <ViveEditor v-model="html" locale="tr" label="Makale metni" />
+</template>
+```
+
+- Özellikler: `v-model`, `extensions`, `ui`, `locale`, `label`, `editable`.
+- Olaylar: `ready`, `focus`, `blur` ve `error`. Bileşen `editor` değerini dışarı açar.
+- `useViveEditor(() => options)` kendi işaretlemeniz için `{ el, editor }` döndürür.
+
+## Svelte
+
+Svelte 5.
+
+```svelte
+<script>
+  import { ViveEditor } from '@viveeditor/svelte'
+  import 'viveeditor/style.css'
+  let html = $state('')
+</script>
+
+<ViveEditor bind:value={html} locale="tr" label="Makale metni" />
+```
+
+- `bind:value` ve `bind:editor` HTML'i ve editörü durumunuzda tutar.
+- Geri çağırmalar: `onchange`, `onready`, `onfocus`, `onblur` ve `onerror`.
+- `use:viveEditor` eylemi editörü herhangi bir öğeye yerleştirir ve aynı seçenekleri alır.
+
+## Angular
+
+Angular 21 ve 22; `ngModel` ya da reaktif formlarla.
+
+```ts
+import { Component } from '@angular/core'
+import { FormControl, ReactiveFormsModule } from '@angular/forms'
+import { ViveEditorComponent } from '@viveeditor/angular'
+
+@Component({
+  selector: 'app-article-form',
+  imports: [ViveEditorComponent, ReactiveFormsModule],
+  template: `<vive-ng-editor [formControl]="body" locale="tr" label="Makale metni" />`,
+})
+export class ArticleForm {
+  body = new FormControl('')
+}
+```
+
+- Seçici `vive-ng-editor`'dür. `vive-editor` aşağıda anlatılan özel öğedir.
+- Girdiler: `extensions`, `ui`, `locale`, `label`, `readonly`.
+- Çıktılar: `ready`, `editorFocus` ve `editorBlur`. Bileşenin `editor` özelliği editörü verir.
+- `node_modules/viveeditor/dist/viveeditor.css` dosyasını `angular.json` içindeki `styles` listesine ekleyin.
+
+## `<vive-editor>` öğesi
+
+`@viveeditor/element` her sayfada ve her çerçevede form alanı olarak çalışır.
+
+```html
+<script type="module">
+  import '@viveeditor/element/define'
+</script>
+
+<form>
+  <vive-editor name="body" required locale="tr" label="Makale metni"></vive-editor>
+</form>
+```
+
+- HTML'ini formla birlikte gönderir, form sıfırlanınca ilk değerine döner ve `required` iken boşsa gönderimi engeller.
+- Öznitelikler: `value` (ilk değer), `name`, `locale`, `label`, `readonly`, `disabled`, `required` ve `toolbar="false"`.
+- Her değişiklikte `input`, değer değiştiyse odak çıkınca `change` olayını tetikler.
+- Shadow DOM kullanmaz; sayfanızın stilleri ona ulaşır. Sayfada yeri değişse de değerini korur.
+- `defineViveEditor('my-editor')` öğeyi başka bir etiket adıyla kaydeder.
+
+Öğe bir npm paketidir; CDN betiğinde yer almaz.
+
+## Sunucu tarafı işleme
+
+Next.js, Nuxt, SvelteKit ya da Angular SSR ile sunucu boş bir öğe üretir ve editör tarayıcıda başlar. Her paket editörü yalnızca orada kurar: React `useEffect` içinde, Vue `onMounted` içinde, Svelte eylemiyle, Angular `afterNextRender` içinde, özel öğe de `connectedCallback` içinde. React paketi `'use client'` olarak işaretlidir.
+
+Kayıtlı HTML'i bir sayfada gösterirken önce sunucu temizleyicisinden geçirin; bkz. [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/).
+
+---
+
+# Araç çubuğu ve kısayollar
+
+> Yüzen araç çubuğu, seçim balonu, / menüsü, blok menüsü, kelime sayacı, okunabilirlik ölçümü ve tüm klavye kısayolları.
+
+URL: https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar/
+Son güncelleme: 2026-11-01
+
+viveEditor'ün arayüzü `@viveeditor/ui` paketinden gelir: metnin altında duran yüzen bir araç çubuğu, metin seçince açılan küçük bir balon, `/` ile açılan blok menüsü ve kelime sayacı. Bu sayfa her parçanın ne yaptığını, nasıl kapatılacağını ve klavye kısayollarını anlatır. Tek betikli kurulumda ve çerçeve bileşenlerinde araç çubuğu zaten açıktır; npm paketleriyle kendiniz kuruyorsanız `createUI` çağırırsınız.
+
+## Arayüzü kurmak
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
+```
+
+`createUI` editörün bulunduğu kapsayıcıya yerleşir ve editör kapatılınca kendini kaldırır. Yalnızca komutu kayıtlı araçları gösterir: tablo eklentisi yoksa tablo düğmesi de yoktur. Arayüz editörle yalnızca komutlar ve sorgular üzerinden konuşur.
+
+| Seçenek | Ne yapar |
+| --- | --- |
+| `locale` | `'tr'` ya da `'en'`. Verilmezse sayfanın `lang` değerine bakar; `tr` ile başlıyorsa Türkçe, değilse İngilizce olur. |
+| `messages` | Etiketlerin bir kısmını kendi metinlerinizle değiştirir. |
+| `theme` | `'light'` (varsayılan), `'dark'` ya da `'auto'`. Marka renginiz için `--ve-accent` CSS değişkenini kullanın. |
+| `readability` | `'atesman'`, `'flesch'` ya da `false`. Varsayılan dile göre seçilir. |
+| `bubble` | `false` seçim balonunu kapatır. |
+| `slash` | `false` `/` menüsünü kapatır. |
+| `source` | `false` HTML kaynağı düğmesini kaldırır. |
+| `files` | Dosya menüsü; `false` gizler. Ayrıntılar [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında. |
+| `plugins` | Bahsetme, emoji, şablon gibi ek menüler `@viveeditor/ui/extras` paketinden buraya takılır. |
+| `onError` | Arayüzde oluşan hataları alır. |
+
+## Yüzen araç çubuğu
+
+Araç çubuğu yazı alanının altında durur ve uzun bir yazıda aşağı kaydırırken ekranın altında kalır. Telefonda ekran klavyesi açılınca onun üstüne çıkar.
+
+Soldan sağa şunlar vardır: blok türü düğmesi; kalın, italik, altı çizili, üstü çizili ve satır içi kod; yazı rengi ve vurgu; madde işaretli liste, numaralı liste, görev listesi, alıntı, tablo, görsel ve video; hizalama; bağlantı ile bul ve değiştir; geri al, yinele, Dosya ve HTML kaynağı. En sonda kelime sayacı durur.
+
+Alan 560 pikselden darsa yalnızca kalın, italik ve bağlantı yerinde kalır, diğer araçlar "Diğer araçlar" menüsüne geçer. Daha geniş alanlarda sığmayan araçlar belirli bir sırayla bu menüye taşınır; menü yalnızca taşınan araçları gösterir.
+
+HTML kaynağı düğmesi belgenin HTML'ini düzenlenebilir bir metin alanında açar. Kaynak açıkken diğer araçlar devre dışıdır; kapattığınızda değişiklikler editöre uygulanır.
+
+## Seçim balonu
+
+Metin seçince seçimin hemen üstünde küçük bir araç çubuğu açılır. Dokunmatik ekranlarda, parmağınızın altında kalmaması için seçimin altında açılır. İçinde kalın, italik, bağlantı ve satır içi kod düğmeleri bulunur; [yapay zeka asistanı](https://editor.vivepdf.com/dokumantasyon/yapay-zeka/) gibi eklentiler kendi düğmelerini buraya ekler. Bir görsel seçiliyken balon açılmaz. `Esc` balonu kapatır, `bubble: false` tamamen kaldırır.
+
+## / menüsü
+
+Bir paragrafın başında `/` yazınca blok ekleme menüsü açılır. Ardından yazdığınız harfler listeyi süzer. Arama Türkçe harfleri sadeleştirir, bu yüzden `/baslik` da "Başlık" girişini bulur; İngilizce anahtar kelimeler de çalışır (`/table`, `/video`).
+
+Menüdeki girişler: Başlık 1, 2 ve 3, madde işaretli liste, numaralı liste, görev listesi, alıntı, kod bloğu, tablo (başlık satırlı 3×3), görsel, video ve yatay çizgi. Görsel ve video doğrudan eklenmez, ilgili paneli açar.
+
+`↑` ve `↓` ile gezinin, `Enter` ya da `Tab` ile seçin, `Esc` ile kapatın. Odak hep metinde kalır, ekran okuyucu etkin girişi duyurur. Bahsetme, emoji, formül, dipnot ve şablon eklentileri bu menüye kendi girişlerini ekler.
+
+## Blok menüsü
+
+Araç çubuğunun başındaki düğme imlecin bulunduğu bloğun türünü gösterir: Paragraf, Başlık 2, Alıntı gibi. Açınca paragraf, Başlık 1–3, listeler, alıntı ve kod bloğu arasında geçiş yaparsınız. Paragraf seçmek bloğu sarmalayan listeyi ya da alıntıyı da kaldırır.
+
+## Kelime sayacı ve okunabilirlik
+
+Araç çubuğunun sonundaki sayaç belgedeki kelime sayısını gösterir. [Karakter sınırı](https://editor.vivepdf.com/dokumantasyon/karakter-siniri/) tanımladıysanız onun yerine kullanılan ve kalan karakteri gösterir. Sayaç yazmaya kısa bir ara verdiğinizde güncellenir.
+
+Sayaca tıklayınca "Metin ölçümü" paneli açılır:
+
+- okunabilirlik puanı (0–100) ve zorluk derecesi,
+- kelime ve cümle sayısı,
+- ortalama cümle uzunluğu,
+- okuma süresi (dakikada 200 kelime üzerinden).
+
+Türkçe arayüz Ateşman formülünü, İngilizce arayüz Flesch formülünü kullanır. Başka bir formül için `readability` verin; `false` puanı gizler, istatistikler kalır. Puan en az 10 kelimeden sonra hesaplanır.
+
+| Derece | Ateşman | Flesch |
+| --- | --- | --- |
+| Çok kolay | 90 ve üstü | 80 ve üstü |
+| Kolay | 70–89 | 60–79 |
+| Orta | 50–69 | 50–59 |
+| Zor | 30–49 | 30–49 |
+| Çok zor | 30'un altı | 30'un altı |
+
+Aynı ölçümü kendi kodunuzda kullanmak için `@viveeditor/ui` paketinden `measureText(text, 'atesman')` çağırabilirsiniz.
+
+## Klavye kısayolları
+
+Mac'te `Ctrl` yerine `⌘`, `Alt` yerine `⌥` kullanılır. Araç çubuğundaki ipuçları da kısayolu işletim sisteminize göre gösterir. Bir kısayol, ilgili eklenti yüklüyse çalışır.
+
+| İşlem | Windows ve Linux | Mac |
+| --- | --- | --- |
+| Kalın | `Ctrl+B` | `⌘+B` |
+| İtalik | `Ctrl+I` | `⌘+I` |
+| Altı çizili | `Ctrl+U` | `⌘+U` |
+| Üstü çizili | `Ctrl+Shift+S` | `⌘+⇧+S` |
+| Satır içi kod | `Ctrl+E` | `⌘+E` |
+| Vurgu | `Ctrl+Shift+H` | `⌘+⇧+H` |
+| Başlık 1–6 | `Ctrl+Alt+1` … `6` | `⌘+⌥+1` … `6` |
+| Madde işaretli liste | `Ctrl+Shift+8` | `⌘+⇧+8` |
+| Numaralı liste | `Ctrl+Shift+7` | `⌘+⇧+7` |
+| Görev listesi | `Ctrl+Shift+9` | `⌘+⇧+9` |
+| Alıntı | `Ctrl+Shift+B` | `⌘+⇧+B` |
+| Kod bloğu | `Ctrl+Alt+C` | `⌘+⌥+C` |
+| Sola hizala | `Ctrl+Shift+L` | `⌘+⇧+L` |
+| Ortala | `Ctrl+Shift+E` | `⌘+⇧+E` |
+| Sağa hizala | `Ctrl+Shift+R` | `⌘+⇧+R` |
+| İki yana yasla | `Ctrl+Shift+J` | `⌘+⇧+J` |
+| Bağlantı | `Ctrl+K` | `⌘+K` |
+| Bul ve değiştir | `Ctrl+F` | `⌘+F` |
+| Geri al | `Ctrl+Z` | `⌘+Z` |
+| Yinele | `Ctrl+Shift+Z` ya da `Ctrl+Y` | `⌘+⇧+Z` ya da `⌘+Y` |
+| Aynı paragrafta yeni satır | `Shift+Enter` | `⇧+Enter` |
+| Araç çubuğuna geç | `Alt+F10` | `⌥+F10` |
+| Yapay zeka asistanı | `Ctrl+J` | `⌘+J` |
+
+Yapay zeka kısayolu yalnızca [yapay zeka asistanı](https://editor.vivepdf.com/dokumantasyon/yapay-zeka/) eklentisi takılıysa çalışır.
+
+### Gezinme
+
+- Araç çubuğunda `←` ve `→` düğmeler arasında, `Home` ve `End` başa ve sona gider. `Esc` sizi metne geri götürür.
+- Listede `Tab` maddeyi içeri alır, `Shift+Tab` dışarı çıkarır.
+- Tabloda `Tab` sonraki hücreye geçer, son hücrede yeni satır açar; `Shift+Tab` önceki hücreye döner.
+- Kod bloğunda `Tab` girinti ekler, `Shift+Tab` geri alır.
+- Tablodan ya da kod bloğundan klavyeyle çıkmak için önce `Esc`, sonra `Tab` tuşuna basın; odak editörden sonraki öğeye geçer.
+- Paneller ve menüler `Esc` ile kapanır, odak açıldıkları düğmeye ya da metne döner.
+
+### Yazarken dönüşenler
+
+Satır başında yazdığınız bazı işaretler bloğa dönüşür:
+
+| Yazın | Sonuç |
+| --- | --- |
+| `#` ile `######` arası ve boşluk | Başlık 1–6 |
+| `-`, `*` ya da `+` ve boşluk | Madde işaretli liste |
+| `1.` ve boşluk | Numaralı liste (başka bir sayı o sayıdan başlatır) |
+| `[ ]` ve boşluk | Görev listesi (`[x]` işaretli başlar) |
+| `>` ve boşluk | Alıntı |
+| `` ``` `` ve boşluk | Kod bloğu (dil adıyla da yazılabilir) |
+| `---` | Yatay çizgi |
+
+Metin içinde `**kalın**` ya da `__kalın__`, `*italik*` ya da `_italik_`, `~~üstü çizili~~` ve ters tırnak içinde satır içi kod da yazarken biçimlenir.
+
+## Araç çubuğunu tamamen kapatabilir miyim?
+
+Evet. Çerçeve bileşenlerinde ve mountEditor ile ui false verin; npm ile kendiniz kuruyorsanız createUI çağırmayın. Klavye kısayolları eklentilerden geldiği için araç çubuğu olmadan da çalışır.
+
+## Okunabilirlik puanı neden çizgi olarak görünüyor?
+
+Puan en az 10 kelimeden sonra hesaplanır. Daha kısa metinlerde panel "Puan için en az 10 kelime yazın." der; kelime, cümle ve okuma süresi yine gösterilir.
+
+## Bir aracı neden göremiyorum?
+
+Araç çubuğu yalnızca komutu kayıtlı araçları gösterir. Örneğin tablo eklentisi yüklü değilse tablo düğmesi de çıkmaz. Dar alanlarda bazı araçlar Diğer araçlar menüsüne taşınır.
+
+---
+
+# Görseller ve yükleme
+
+> Görsel eklentisini kurun, yükleme fonksiyonunu yazın, ilerleme ve iptali yönetin, sunucuyu güvene alın ve alternatif metni takip edin.
+
+URL: https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-image` görsel eklemeyi, dosya yüklemeyi ve görsel boyutlarını yönetir. Her görsel adresi ve her dosya belgeye girmeden önce denetlenir; dosyaları sunucunuza sizin yazdığınız bir yükleme fonksiyonu gönderir. Bu sayfa eklentiyi kurmayı, yükleme fonksiyonunun sözleşmesini, sunucu tarafında yapmanız gerekenleri ve alternatif metin uyarılarını anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Image } from '@viveeditor/ext-image'
+import '@viveeditor/ext-image/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    Image.configure({
+      upload,
+      labels: { uploading: 'Yükleniyor', failed: 'Görsel eklenemedi', missingAlt: 'Alt metin yok' },
+      onError: ({ code, fileName }) => console.warn(code, fileName),
+    }),
+  ],
+})
+```
+
+Tek betikli kurulumda görsel eklentisi yükleyicisiz gelir: görseller yalnızca adresle eklenir. Dosya yüklemek için eklentiyi npm üzerinden kendi `upload` fonksiyonunuzla kurun.
+
+## Seçenekler
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `upload` | `null` | Dosyaları sunucunuza gönderen fonksiyon. |
+| `rehost` | `null` | Başka sitedeki bir görseli kendi sunucunuza taşıyan fonksiyon. |
+| `remoteImages` | `'allow'` | Başka sitelerden yapıştırılan görseller: `'allow'`, `'drop'` ya da `'rehost'`. |
+| `allowBase64` | `false` | Görselin data adresiyle belgeye gömülmesine izin verir. |
+| `maxBase64Length` | `1500000` | Bir data adresinin en fazla karakter sayısı. |
+| `insecure` | `'upgrade'` | `http:` adresleri `https:` yapar; `'block'` reddeder. |
+| `allowRelative` | `false` | Göreli görsel adreslerine izin verir. |
+| `mimeTypes` | png, jpeg, gif, webp, avif | Kabul edilen dosya türleri. |
+| `maxSize` | 10 MB | Bir dosyanın en büyük boyutu. |
+| `maxFiles` | `10` | Tek seferde eklenebilecek dosya sayısı. |
+| `concurrency` | `3` | Aynı anda kaç dosyanın yükleneceği. |
+| `timeout` | 60 sn | Bir yüklemenin en uzun süresi. |
+| `maxPreviewPixels` | 25 milyon | Bu piksel sayısının üstündeki dosyalar için önizleme gösterilmez. |
+| `requireAlt` | `'warn'` | Alternatif metni eksik görsellerde uyarı rozeti; `'off'` kapatır. |
+| `labels` | İngilizce | Yükleme, hata ve eksik alternatif metin etiketleri. |
+| `onError` | `null` | Başarısız bir dosya için `{ code, fileName }` alır. |
+
+## Yükleme fonksiyonu
+
+Yükleme fonksiyonu bir dosya ve bir bağlam alır, görselin adresini döndürür:
+
+```ts
+import type { ImageUploader } from '@viveeditor/ext-image'
+
+const upload: ImageUploader = async (file, { signal, onProgress }) => {
+  const body = new FormData()
+  body.append('file', file)
+  const response = await fetch('/uploads', { method: 'POST', body, signal })
+  if (!response.ok) throw new Error('Upload failed')
+  const { url, width, height } = await response.json()
+  return { src: url, width, height }
+}
+```
+
+- Dönüş değeri bir adres dizesi ya da `{ src, width, height }` nesnesidir. `width` ve `height` isteğe bağlıdır, ama gerçek boyutları sunucunun ölçüp döndürmesi en iyisidir.
+- Döndürülen adres de aynı denetimden geçer: `blob:` hiçbir zaman, `data:` yalnızca `allowBase64` açıkken kabul edilir. Geçmezse görsel eklenmez.
+- Fonksiyon bir hata fırlatırsa görselin yerinde "Görsel eklenemedi" yazan bir kutu kalır ve `onError` çağrılır.
+- Dosya fonksiyona gelmeden önce türü, boyutu ve ilk baytları denetlenir. Bu denetim kullanıcıya erken haber vermek içindir; güvenlik sınırı sunucunuzdur.
+
+Yükleme sürerken görselin yerinde bir yer tutucu ve ilerleme çubuğu görünür. Yer tutucu belgeye yazılmaz; `getHTML()` onu hiçbir zaman içermez.
+
+### İlerleme
+
+`onProgress` 0 ile 1 arasında bir değer bekler; aralık dışı değerler sınıra çekilir. `fetch` yükleme ilerlemesini bildirmez. İlerleme çubuğu istiyorsanız `XMLHttpRequest` kullanabilirsiniz:
+
+```ts
+import type { ImageUploader } from '@viveeditor/ext-image'
+
+const upload: ImageUploader = (file, { signal, onProgress }) =>
+  new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', '/uploads')
+    request.responseType = 'json'
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total)
+    }
+    request.onload = () => {
+      if (request.status !== 200) return reject(new Error('Upload failed'))
+      const { url, width, height } = request.response
+      resolve({ src: url, width, height })
+    }
+    request.onerror = () => reject(new Error('Upload failed'))
+    request.onabort = () => reject(signal.reason)
+    signal.addEventListener('abort', () => request.abort())
+    const body = new FormData()
+    body.append('file', file)
+    request.send(body)
+  })
+```
+
+### İptal
+
+Her yüklemenin kendi `AbortSignal` değeri vardır. Sinyal şu durumlarda iptal edilir:
+
+- yazar yer tutucuyu siler ya da geri alır,
+- içerik `setContent` ile değiştirilir,
+- editör kapatılır,
+- `timeout` süresi dolar.
+
+Sinyali `fetch` ya da `XMLHttpRequest` isteğine bağlayın ki sunucuya giden istek de dursun. İptal edilen bir yüklemenin sonucu belgeye eklenmez.
+
+### Hata kodları
+
+`onError` yalnızca bir kod ve dosya adı alır; sunucu yanıtı ya da dosya içeriği hiçbir zaman iletilmez.
+
+| Kod | Anlamı |
+| --- | --- |
+| `TYPE` | Dosya türü izin verilenler arasında değil ya da içeriği türüyle uyuşmuyor. |
+| `SIZE` | Dosya `maxSize` değerinden büyük. |
+| `COUNT` | Tek seferde `maxFiles` değerinden fazla dosya eklendi. |
+| `TIMEOUT` | Yükleme `timeout` süresinde bitmedi. |
+| `UPLOAD` | Yükleme fonksiyonu hata verdi. |
+| `SOURCE` | Fonksiyonun döndürdüğü adres denetimden geçmedi. |
+
+### Bekleyen yüklemeler
+
+`editor.query.isUploading()` yükleme sürüyorsa `true` döner. `editor.query.pendingUploads()` süren ve başarısız olan yüklemeleri `{ uploading, failed }` olarak sayar. Formu kendiniz gönderiyorsanız bu sorgularla bekleyin; tek betikli kurulum bunu sizin yerinize yapar.
+
+## Sunucu kontrol listesi
+
+Editör her adresi ve dosyayı denetler, ama tarayıcı bir güvenlik sınırı değildir. Sunucunuz da şunları yapmalı:
+
+- Gönderilen HTML'i yeniden temizleyin ve yalnızca beklediğiniz `https` görsel adreslerine izin verin. Bkz. [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/).
+- Her yüklemeyi yeniden doğrulayın ve yeniden kodlayın. Bu, EXIF ve GPS verisini ve çok biçimli (polyglot) dosyaları temizler. Gerçek genişlik ve yüksekliği döndürün.
+- Yüklenen dosyaları çerez taşımayan ayrı bir alan adından, sunucunun belirlediği `Content-Type` ve `X-Content-Type-Options: nosniff` ile sunun.
+- Yükleme adresinde oturum, CSRF belirteci ve istek sınırı zorunlu olsun.
+- İçerik Güvenliği Politikanızda `img-src` yönergesini daraltın. Bkz. [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/).
+- Sunucunuz uzak görselleri indiriyorsa (`remoteImages: 'rehost'`) SSRF saldırılarına karşı önlem alın.
+
+## Başka sitelerden yapıştırılan görseller
+
+Başka bir sayfadan kopyalanan içerik, o sitedeki görsellerin adreslerini de getirir. Okuyucunun tarayıcısı bu görselleri gösterirken o siteye kimin, ne zaman okuduğunu bildirir. `remoteImages` bu görsellere ne olacağını belirler:
+
+| Değer | Sonuç |
+| --- | --- |
+| `'allow'` | Varsayılan. Görsel özgün adresinde kalır. |
+| `'drop'` | Yapıştırılan `https` görselleri atılır. |
+| `'rehost'` | Görsel, `rehost` fonksiyonunuzla kendi sunucunuza taşınır. Fonksiyon verilmemişse görsel atılır. |
+
+`rehost` fonksiyonu dosya yerine adres alır, aynı bağlamı (`signal`, `onProgress`) kullanır ve yükleme fonksiyonu gibi bir adres döndürür. Sıkılaştırılmış bir kurulum için `'drop'` ya da `'rehost'` seçin.
+
+## Alternatif metin
+
+Görsel panelinde alternatif metin alanı ve "Süs amaçlı, açıklama gerekmez" kutusu vardır. Alternatif metni hiç girilmemiş görsellerde editör içinde "Alt metin yok" rozeti görünür; bu rozet kaydedilen HTML'e girmez. `requireAlt: 'off'` rozeti kapatır.
+
+Kaydedilen değerde iki durum birbirinden ayrılır: boş bırakılmış alternatif metin eksik sayılır, süs amaçlı işaretlenen görsel ise boş `alt=""` ile kaydedilir. Yayınlamadan önce `editor.query.imagesWithoutAlt()` ile eksik olanları sayıp yazarı uyarabilirsiniz.
+
+## Genişlik ve yükseklik
+
+Kaydedilen her görsel `width` ve `height` taşır, böylece sayfa yüklenirken yerleşim kaymaz. Değerler şu sırayla belirlenir:
+
+- yükleme fonksiyonunun döndürdüğü boyut her zaman önceliklidir,
+- döndürülmezse PNG, GIF ve WebP dosyalarının boyutu dosyadan okunur.
+
+Editörde görselin köşesindeki tutamakla genişliği sürükleyerek değiştirebilirsiniz; yükseklik orana göre ayarlanır. Görsel panelindeki %25, %50, %75 ve %100 düğmeleri görseli içerik genişliğine göre ölçekler.
+
+Kaydedilen görsel `loading="lazy"`, `decoding="async"` ve `referrerpolicy="no-referrer"` ile yazılır. İçeriği gösteren sayfalara şu kuralı ekleyin:
+
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+## Görsel paneli
+
+Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni ve boyutu değiştirmenizi sağlar.
+
+## Yükleme fonksiyonu vermezsem ne olur?
+
+Görseller yalnızca https adresiyle eklenebilir. Görsel panelindeki "Bilgisayardan seç" düğmesi görünmez; sürüklenen ya da yapıştırılan dosyalar yüklenmez.
+
+## Görseller belgeye base64 olarak gömülebilir mi?
+
+Varsayılan olarak hayır. allowBase64 true verirseniz png, jpeg, gif, webp ve avif türündeki data adresleri kabul edilir; uzunluk maxBase64Length ile sınırlanır. SVG hiçbir zaman kabul edilmez.
+
+## Yükleme sürerken form gönderilirse ne olur?
+
+Tek betikli kurulumda form, yüklemeler bitene kadar bekletilir ve sonra kendiliğinden gönderilir. Bekleme sırasında bir yükleme başarısız olursa gönderim iptal edilir ve bir hata mesajı görünür.
+
+---
+
+# Video ve ses ekleme
+
+> YouTube, Vimeo ve Spotify bağlantılarını güvenli oynatıcılara çevirin; ön yüz kartı, activateEmbeds, sunucu kontrolü ve CSP ayarları.
+
+URL: https://editor.vivepdf.com/dokumantasyon/video/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-embed` YouTube, Vimeo ve Spotify bağlantılarını oynatıcıya çevirir. Kaydedilen HTML size verilen adresi saklamaz; yalnızca sağlayıcıyı ve video kimliğini tutar, oynatıcı adresi her seferinde bu ikisinden yeniden kurulur. Bu sayfa eklentiyi kurmayı, yayın sayfasında oynatıcıları açmayı ve sunucu ile İçerik Güvenliği Politikası ayarlarını anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Embed } from '@viveeditor/ext-embed'
+import '@viveeditor/ext-embed/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    Embed.configure({
+      providers: ['youtube', 'vimeo'],
+      facade: true,
+      labels: { play: 'Oynat', invalid: 'Bu içerik desteklenmiyor' },
+    }),
+  ],
+})
+```
+
+Tek betikli kurulumda eklenti üç sağlayıcıyla birlikte zaten yüklüdür.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `providers` | `['youtube', 'vimeo', 'spotify']` | Açık olan sağlayıcılar. |
+| `facade` | `false` | `true` olursa kaydedilen HTML oynatıcı yerine bağlantı tutar. |
+| `pasteToEmbed` | `true` | Boş satıra yapıştırılan bağlantıyı oynatıcıya çevirir. |
+| `maxEmbeds` | `50` | Bir belgedeki en fazla oynatıcı sayısı. |
+| `labels` | İngilizce | Oynat düğmesinin ve desteklenmeyen içeriğin etiketleri. |
+
+## Video eklemek
+
+- Boş bir satıra yalnızca bağlantıyı yapıştırın. Bağlantı oynatıcıya dönüşür; bir kez geri almak onu yeniden bağlantı yapar.
+- Araç çubuğundaki video düğmesine ya da `/` menüsündeki "Video" girişine basın. Panelde bağlantıyı ve bir başlık girin; ekran okuyucular bu başlığı okur.
+- Kodla eklemek için `editor.commands.insertEmbed(url)`, başlığı değiştirmek için `editor.commands.setEmbedTitle(title)` kullanın.
+
+Editör içinde oynatıcının yerinde sağlayıcı adını, başlığı ve bir oynat düğmesini gösteren bir kart durur. Oynat'a basılana kadar sağlayıcıdan hiçbir şey yüklenmez.
+
+## Desteklenen bağlantılar
+
+| Sağlayıcı | Kabul edilen bağlantılar | Oynatıcı adresi |
+| --- | --- | --- |
+| YouTube | `youtube.com/watch?v=…`, `youtu.be/…`, `/shorts/`, `/live/` ve `/embed/` adresleri; `t` ya da `start` başlangıç zamanı | `www.youtube-nocookie.com` |
+| Vimeo | `vimeo.com/…`, liste dışı videolar için gizli anahtarlı adresler, `player.vimeo.com/video/…`; `#t=` başlangıç zamanı | `player.vimeo.com`, `dnt=1` ile |
+| Spotify | `open.spotify.com` üzerindeki şarkı, albüm, çalma listesi, bölüm, program ve sanatçı adresleri | `open.spotify.com/embed` |
+
+Bağlantılar adres olarak ayrıştırılır ve alan adı birebir karşılaştırılır. Kısaltılmış adresler ve yönlendirmeler izlenmez, sağlayıcıya hiçbir sorgu gönderilmez.
+
+## Kaydedilen HTML
+
+Oynatıcı her zaman sağlayıcı ve kimlikten yeniden kurulur; `sandbox`, `allow` ve `referrerpolicy` değerleri sabittir ve içerikten okunmaz. Kaydedilen HTML `div[data-embed]` sarmalayıcısını ve iki biçimden birini taşır:
+
+- `facade: false` (varsayılan): sarmalayıcının içinde oynatıcı `iframe` bulunur. Sayfa açılınca oynatıcı sağlayıcıdan yüklenir.
+- `facade: true`: sarmalayıcının içinde videonun sağlayıcıdaki sayfasına giden bir bağlantı bulunur. Oynatıcı, okuyucu tıklayınca yüklenir.
+
+Word ve Markdown dosyalarına kaydederken oynatıcılar bağlantı olarak yazılır.
+
+### Ön yüzlü çıktıyı yayınlamak
+
+`facade: true` ile kaydedilen içeriği gösteren sayfada `activateEmbeds()` çağırın. Bağlantıya tıklanınca yerine oynatıcı gelir ve oynatma başlar:
+
+```ts
+import { activateEmbeds } from '@viveeditor/ext-embed/activate'
+
+activateEmbeds(document.querySelector('article'), { providers: ['youtube', 'vimeo'] })
+```
+
+İlk değer aranacak kök öğedir (verilmezse tüm belge), `providers` ise izin verilen sağlayıcılardır. Oynatıcı adresi bağlantının `href` değerinden değil, sarmalayıcıdaki sağlayıcı ve kimlikten kurulur. `activateEmbeds` çağrılmazsa bağlantı videoyu sağlayıcının sitesinde açar.
+
+## Sunucuda
+
+- HTML'i sunucuda da temizleyin, ama hiçbir zaman tüm `iframe` öğelerine izin vermeyin. `@viveeditor/sanitize` ile `embeds: true` verin; oynatıcılar sağlayıcı ve kimlikten yeniden kurulur. Bkz. [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/).
+- Kendi temizleyicinizi kullanıyorsanız oynatıcıları `div[data-embed]` öğesinden yeniden kurun ya da yalnızca `isAllowedEmbedSrc()` için `true` dönen adresleri kabul edin.
+
+```ts
+import { isAllowedEmbedSrc } from '@viveeditor/ext-embed'
+
+const allowed = isAllowedEmbedSrc(src, ['youtube', 'vimeo'])
+```
+
+`isAllowedEmbedSrc` adresin editörün kurduğu oynatıcı adresiyle birebir aynı olup olmadığına bakar. Aynı paketteki `matchEmbedUrl(url)` bir bağlantıdan sağlayıcıyı ve kimliği çıkarır, `buildEmbedSrc(attrs)` oynatıcı adresini kurar. Üçü de tarayıcı DOM'una ihtiyaç duymaz.
+
+## İçerik Güvenliği Politikası ve gizlilik
+
+- CSP `frame-src` yönergesinde yalnızca açtığınız sağlayıcıları listeleyin. Üçü açıksa: `frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com`.
+- Oynatıcı, sağlayıcıdan içerik ve çerez yükler. Onay kurallarınız gerektiriyorsa okuyuculara bunu söyleyin; ön yüzlü çıktı oynatıcıyı yalnızca tıklamadan sonra yükler.
+
+> **Referrer-Policy**
+>
+> Sayfa genelinde `Referrer-Policy: no-referrer` kullanırsanız YouTube oynatıcıları çalışmaz. Oynatıcılar bu yüzden `strict-origin-when-cross-origin` ile kurulur.
+
+Diğer CSP ayarları için [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/) sayfasına bakın.
+
+## Editörde video neden hemen yüklenmiyor?
+
+Editör içinde oynatıcının yerinde bir kart durur. Oynat düğmesine basılana kadar sağlayıcıdan hiçbir şey yüklenmez; bu, yazarın gizliliğini korur ve sayfayı hafif tutar.
+
+## Başka sitelerin video bağlantılarını ekleyebilir miyim?
+
+Hayır. Yalnızca YouTube, Vimeo ve Spotify desteklenir. Diğer bağlantılar oynatıcıya çevrilmez, panel desteklenen sağlayıcıları listeler.
+
+## Sayfamda Referrer-Policy no-referrer var, YouTube neden çalışmıyor?
+
+YouTube, Referer bilgisi olmayan gömülü oynatıcıları reddeder. Sayfa genelinde no-referrer kullanılırsa YouTube oynatıcıları çalışmaz.
+
+---
+
+# Tablolar
+
+> Tablo eklentisiyle birleştirilmiş hücreler, başlık satırları, sürüklenebilir sütun genişlikleri ve araç çubuğundaki tablo araçları.
+
+URL: https://editor.vivepdf.com/dokumantasyon/tablolar/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-table` editöre tablo ekler: hücreleri birleştirme, başlık satırları, sürükleyerek sütun genişliği ayarlama ve hücreler arasında `Tab` ile gezinme. Kaydedilen HTML sütun genişliklerini taşır, böylece tablo her sitede aynı görünür. Bu sayfa eklentiyi kurmayı, tablo araçlarını ve klavye kullanımını anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Table } from '@viveeditor/ext-table'
+import '@viveeditor/ext-table/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Table],
+})
+
+editor.commands.insertTable({ rows: 3, cols: 3, headerRow: true })
+```
+
+Tek betikli kurulumda tablo eklentisi zaten yüklüdür.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `resizable` | `true` | Sütun kenarını sürükleyerek genişlik ayarlamayı açar. |
+| `cellMinWidth` | `48` | Bir sütunun piksel olarak en küçük genişliği. |
+| `maxSize` | `20` | `insertTable` ile eklenebilecek en fazla satır ve sütun sayısı. |
+
+## Tablo eklemek
+
+- Araç çubuğundaki tablo düğmesi 6×6'lık bir ızgara açar. Fareyle ya da ok tuşlarıyla boyutu seçip tıklayın veya `Enter` tuşuna basın. Tablo başlık satırıyla eklenir.
+- `/` menüsünde "Tablo" girişi başlık satırlı 3×3 bir tablo ekler (`/tablo`).
+- Kodla eklemek için `insertTable({ rows, cols, headerRow })` kullanın. Değer verilmezse tablo 3×3 olur ve başlık satırıyla başlar.
+
+Boş bir paragrafta eklenen tablo o paragrafın yerini alır. Tablonun içine ikinci bir tablo eklenemez.
+
+## Tablo araçları
+
+İmleç bir tablonun içindeyken araç çubuğundaki tablo düğmesi ızgara yerine tablo araçlarını açar:
+
+| Grup | Araçlar |
+| --- | --- |
+| Ekle | Üste satır ekle, Alta satır ekle, Sola sütun ekle, Sağa sütun ekle |
+| Düzen | Hücreleri birleştir, Hücreyi böl, Başlık satırı, Sütunu genişlet, Sütunu daralt |
+| Sil | Satırı sil, Sütunu sil, Tabloyu sil |
+
+O an uygulanamayan araçlar devre dışı görünür. Örneğin tek bir hücre seçiliyken "Hücreleri birleştir" kullanılamaz. Panel `Esc` ile kapanır.
+
+## Birleştirilmiş hücreler
+
+Fareyle sürükleyerek birden fazla hücre seçin ve "Hücreleri birleştir" seçeneğine basın. Birleşik bir hücreyi eski haline getirmek için içine tıklayıp "Hücreyi böl" seçeneğini kullanın. Birleştirilmiş hücreler Word dosyasına kaydedilirken de korunur.
+
+## Başlık satırı ve sütunu
+
+"Başlık satırı" ilk satırı başlık hücrelerine çevirir ya da geri alır. Başlık hücreleri HTML'de `th` olarak yazılır, ekran okuyucular bu sayede sütun başlıklarını duyurur. İlk sütunu başlık yapmak için arayüzde düğme yoktur; `editor.commands.toggleHeaderColumn()` komutunu kullanın.
+
+## Sütun genişlikleri
+
+`resizable` açıkken bir sütunun sağ kenarını sürükleyerek genişliğini değiştirin. Klavyeyle çalışıyorsanız tablo araçlarındaki "Sütunu genişlet" ve "Sütunu daralt" imlecin bulunduğu sütunu 40 piksel değiştirir. Sütun `cellMinWidth` değerinden daha dar olamaz.
+
+Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başına `width` stili taşır. Tablonun kendisine de toplam genişlik yazılır; bazı sütunların genişliği yoksa bu değer en küçük genişlik olarak kullanılır. Hiç genişlik verilmemiş tablolar stil taşımaz.
+
+## Klavye
+
+- `Tab` sonraki hücreye geçer. Son hücrede yeni bir satır ekler.
+- `Shift+Tab` önceki hücreye döner.
+- `Esc` ve ardından `Tab` odağı tablodan ve editörden çıkarır.
+
+## Komutlar
+
+| Komut | Ne yapar |
+| --- | --- |
+| `insertTable(options)` | Tablo ekler. |
+| `addRowBefore()`, `addRowAfter()` | Satır ekler. |
+| `addColumnBefore()`, `addColumnAfter()` | Sütun ekler. |
+| `deleteRow()`, `deleteColumn()`, `deleteTable()` | Satırı, sütunu ya da tabloyu siler. |
+| `mergeCells()`, `splitCell()` | Hücreleri birleştirir ya da böler. |
+| `toggleHeaderRow()`, `toggleHeaderColumn()` | Başlık satırını ya da sütununu açıp kapatır. |
+| `resizeColumn(delta)` | İmlecin bulunduğu sütunu piksel olarak genişletir ya da daraltır. |
+
+`editor.query.inTable()` imleç bir tablonun içindeyse `true` döner. Komutları önce denemek için `editor.can.mergeCells()` gibi `can` biçimini kullanın.
+
+Tablolar Markdown ve Word dosyalarına da kaydedilir; ayrıntılar [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.
+
+## Sütun genişlikleri yayın sayfasında korunur mu?
+
+Evet. Genişlikler kaydedilen HTML'e colgroup ve stil olarak yazılır, bu yüzden içerik hangi sitede gösterilirse gösterilsin aynı kalır. Sunucu temizleyicisi tablo genişliklerini korur.
+
+## Tablonun içine tablo eklenebilir mi?
+
+Hayır. İmleç bir tablonun içindeyken tablo ekleme komutu çalışmaz; araç çubuğundaki tablo düğmesi o sırada tablo araçlarını açar.
+
+## Klavyeyle tablodan nasıl çıkarım?
+
+Önce Esc, sonra Tab tuşuna basın. Tab tek başına hücreler arasında gezdiği için bu sıra odağı editörden sonraki öğeye taşır.
+
+---
+
+# Kod blokları
+
+> Dil seçicili kod blokları, varsayılan dil listesi ve Shiki ile isteğe bağlı sözdizimi renklendirme; CSP için WebAssembly'siz kurulum.
+
+URL: https://editor.vivepdf.com/dokumantasyon/kod-bloklari/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-code-block` dil seçicili kod blokları ekler. Sözdizimi renklendirme isteğe bağlıdır: `CodeHighlight` sizin verdiğiniz renklendiriciyi yalnızca sayfada kod olduğunda yükler ve renkler kaydedilen HTML'e hiç girmez. Bu sayfa kod bloğunu, dil listesini ve Shiki ile renklendirmeyi anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CodeBlock } from '@viveeditor/ext-code-block'
+import { CodeHighlight, shikiHighlighter } from '@viveeditor/ext-code-block/highlight'
+import '@viveeditor/ext-code-block/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    CodeBlock.configure({ languageLabel: 'Dil', plainTextLabel: 'Düz metin' }),
+    CodeHighlight.configure({ highlighter: shikiHighlighter(() => import('shiki')) }),
+  ],
+})
+```
+
+Tek betikli kurulumda kod bloğu renklendiricisiz olarak zaten yüklüdür.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `languages` | `DEFAULT_LANGUAGES` | Dil seçicideki diller. |
+| `languageLabel` | `'Language'` | Dil seçicinin erişilebilir adı. |
+| `plainTextLabel` | `'Plain text'` | Dilsiz blok için seçenek adı. |
+| `tabSize` | `2` | `Tab` tuşunun eklediği boşluk sayısı. |
+
+## Kod bloğu eklemek
+
+- Satır başında üç ters tırnak ve boşluk yazın. Dili hemen belirtmek için ters tırnakların ardından dil adını yazın, örneğin `ts`, sonra boşluk.
+- `Ctrl+Alt+C` (Mac'te `⌘+⌥+C`) bloğu açıp kapatır.
+- Blok menüsünden ya da `/` menüsünden "Kod bloğu" seçin.
+
+Birden fazla paragraf seçiliyken kod bloğu açarsanız satırlar tek bir blokta birleşir. Kod bloğunu kapatınca her satır ayrı bir paragraf olur.
+
+## Dil seçici
+
+Her bloğun üst köşesinde bir dil seçici vardır. İlk seçenek "Düz metin", ardından `languages` listesi gelir. Listede olmayan geçerli bir dil adı (örneğin yapıştırılan içerikten gelen) korunur ve seçicide kendi adıyla görünür.
+
+Dil adı harf, rakam ve `+ # . -` karakterlerinden oluşur, en fazla 32 karakterdir ve küçük harfe çevrilir. Kaydedilen HTML dili iki yerde taşır:
+
+```html
+<pre data-language="typescript"><code class="language-typescript">const a = 1</code></pre>
+```
+
+İçerik yüklenirken dil `data-language` özniteliğinden ya da `language-` veya `lang-` ile başlayan sınıftan okunur.
+
+### Varsayılan diller
+
+`DEFAULT_LANGUAGES` şu 19 dili içerir: JavaScript, TypeScript, HTML, CSS, JSON, Python, PHP, Java, Kotlin, Swift, C#, C++, Go, Rust, Ruby, SQL, Bash, YAML ve Markdown. Değerleri `javascript`, `typescript`, `html`, `css`, `json`, `python`, `php`, `java`, `kotlin`, `swift`, `csharp`, `cpp`, `go`, `rust`, `ruby`, `sql`, `bash`, `yaml` ve `markdown` şeklindedir.
+
+Listeye dil eklemek için:
+
+```ts
+import { CodeBlock, DEFAULT_LANGUAGES } from '@viveeditor/ext-code-block'
+
+const codeBlock = CodeBlock.configure({
+  languages: [...DEFAULT_LANGUAGES, { value: 'dart', label: 'Dart' }],
+})
+```
+
+## Kod bloğunda klavye
+
+- `Tab` imlecin bulunduğu yere `tabSize` kadar boşluk ekler. Birden fazla satır seçiliyse her satırı içeri alır.
+- `Shift+Tab` satır başındaki boşlukları geri alır.
+- `Enter` blok içinde yeni satır açar. Bloğun sonunda art arda üç kez `Enter` tuşuna basarsanız sondaki boş satırlar silinir ve yeni bir paragrafa geçersiniz.
+- Boş bir blokta `Backspace` bloğu paragrafa çevirir.
+- `Esc` ve ardından `Tab` odağı editörden çıkarır.
+
+Komutlar: `toggleCodeBlock(language)`, `setCodeBlockLanguage(language)`. `editor.query.codeBlockLanguage()` imlecin bulunduğu bloğun dilini döndürür.
+
+## Sözdizimi renklendirme
+
+`CodeHighlight` yalnızca dili seçilmiş blokları renklendirir. Renklendiriciyi ilk kez sayfada böyle bir blok olduğunda yükler, sonuçları önbellekte tutar ve renkleri kaydedilen HTML'e değil yalnızca editörün görünümüne uygular.
+
+| Seçenek | Varsayılan | Açıklama |
+| --- | --- | --- |
+| `highlighter` | `null` | Renklendirici fonksiyon. Verilmezse renklendirme yapılmaz. |
+| `delay` | `120` | Yazmaya ara verdikten kaç milisaniye sonra renklendirileceği. |
+| `cacheSize` | `200` | Önbellekte tutulan blok sayısı. |
+
+`shikiHighlighter(load, options)` [Shiki](https://shiki.style) için hazır bir köprüdür. Varsayılan temalar `github-light-default` ve `github-dark-default` olur; başka temalar için `{ themes: { light, dark } }` verin. Renkler arayüzün açık ve koyu temasını izler. Shiki bir dili tanımazsa ya da hata verirse o blok renksiz kalır.
+
+Kendi renklendiricinizi de yazabilirsiniz: `(code, language)` alan ve `{ from, to, style }` parçaları döndüren bir fonksiyon yeterlidir.
+
+### CSP WebAssembly'e izin vermiyorsa
+
+Shiki'nin varsayılan düzenli ifade motoru WebAssembly kullanır. Sayfanızın İçerik Güvenliği Politikası WebAssembly çalıştırmaya izin vermiyorsa Shiki'yi JavaScript düzenli ifade motoruyla kurun ve `shikiHighlighter` fonksiyonuna verin. `shikiHighlighter` yüklenen nesneden yalnızca `codeToTokens` yöntemini bekler:
+
+```ts
+import { CodeHighlight, shikiHighlighter } from '@viveeditor/ext-code-block/highlight'
+
+const loadShiki = async () => {
+  const { createHighlighterCore } = await import('shiki/core')
+  const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript')
+  return createHighlighterCore({
+    themes: [
+      import('shiki/themes/github-light-default.mjs'),
+      import('shiki/themes/github-dark-default.mjs'),
+    ],
+    langs: [import('shiki/langs/javascript.mjs'), import('shiki/langs/typescript.mjs')],
+    engine: createJavaScriptRegexEngine(),
+  })
+}
+
+const highlight = CodeHighlight.configure({ highlighter: shikiHighlighter(loadShiki) })
+```
+
+Bu kurulumda yalnızca `langs` içinde yüklediğiniz diller renklenir; diğerleri renksiz kalır. Temalar `shikiHighlighter` varsayılanlarıyla aynı olmalı ya da `themes` seçeneğiyle eşleşmelidir.
+
+## Dosyalarda kod blokları
+
+Markdown'a kaydederken kod blokları dil adıyla birlikte çitli blok olarak yazılır ve okunur. Word dosyasında kod korunur, dil bilgisi korunmaz. Ayrıntılar [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.
+
+Yayın sayfasında kodu renkli göstermek istiyorsanız orada ayrıca bir renklendirici çalıştırın; dil bilgisi `class` özniteliğinde durur.
+
+## Renkler kaydedilen HTML'e girer mi?
+
+Hayır. Renklendirme yalnızca editör içinde gösterilir. Kaydedilen HTML dil bilgisini taşır, renkleri taşımaz.
+
+## Listede olmayan bir dil ne olur?
+
+Yapıştırılan ya da yüklenen içerikteki geçerli bir dil adı korunur ve dil seçicide kendi adıyla görünür. Listeyi languages seçeneğiyle de değiştirebilirsiniz.
+
+## Renklendirme olmadan kod bloğu kullanabilir miyim?
+
+Evet. CodeHighlight isteğe bağlıdır. Tek betikli kurulumdaki kod bloğu da renklendiricisiz gelir.
+
+---
+
+# Bul ve değiştir
+
+> Türkçe büyük harfleri doğru eşleştiren bul ve değiştir; büyük/küçük harf duyarlılığı, tam kelime ve tümünü değiştir seçenekleri.
+
+URL: https://editor.vivepdf.com/dokumantasyon/bul-ve-degistir/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-search` editöre bul ve değiştir ekler. Türkçe büyük harfleri doğru eşleştirir: `istanbul` araması `İstanbul` ve `ISTANBUL` sonuçlarını da bulur. Paneli `@viveeditor/ui` sağlar ve `Ctrl+F` (Mac'te `⌘+F`) ile açılır. Bu sayfa paneli, eşleştirme kurallarını ve komutları anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Search } from '@viveeditor/ext-search'
+import '@viveeditor/ext-search/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Search],
+})
+```
+
+Tek betikli kurulumda arama eklentisi zaten yüklüdür. Tek seçeneği `maxQueryLength` (varsayılan 200): daha uzun arama metinleri bu uzunlukta kesilir.
+
+## Bul ve değiştir paneli
+
+Paneli `Ctrl+F` ya da araç çubuğundaki "Bul ve değiştir" düğmesi açar. Metin seçiliyse ve tek satırsa arama alanına o metin yazılır. Eşleşmeler belgede işaretlenir.
+
+| Öğe | Ne yapar |
+| --- | --- |
+| Bul | Aranacak metin. Yazdıkça sonuçlar güncellenir. |
+| Önceki sonuç, Sonraki sonuç | Eşleşmeler arasında gezer. |
+| Büyük/küçük harfe duyarlı | Açıkken harfler birebir eşleşir. |
+| Yalnız tam kelime | Açıkken kelimenin bir parçası olan eşleşmeler sayılmaz. |
+| Sayaç | Kaçıncı sonuçta olduğunuzu gösterir, örneğin `3 / 12`. Sonuç yoksa "Sonuç yok" yazar. |
+| Yerine yaz | Yeni metin. Boş bırakılırsa eşleşmeler silinir. |
+| Değiştir | Seçili eşleşmeyi değiştirir ve sonrakine geçer. |
+| Tümünü değiştir | Tüm eşleşmeleri tek adımda değiştirir. |
+
+Klavye:
+
+- Arama alanında `Enter` sonraki, `Shift+Enter` önceki sonuca gider.
+- "Yerine yaz" alanında `Enter` sıradaki eşleşmeyi değiştirir.
+- `Esc` paneli kapatır, işaretleri kaldırır ve sizi metne döndürür.
+
+## Türkçe büyük harfler
+
+Büyük/küçük harf duyarlılığı kapalıyken her harf hem genel hem Türkçe büyük-küçük harf kurallarıyla eşleştirilir:
+
+| Aranan harf | Eşleşen harfler |
+| --- | --- |
+| `i` | i, I, İ |
+| `ı` | ı, I |
+| `İ` | İ, i |
+| `I` | I, i, ı |
+
+Örneğin `istanbul` araması `İstanbul`, `Istanbul` ve `ISTANBUL` sonuçlarını, `ılık` araması `ILIK` sonucunu bulur. Yalnızca büyük-küçük harf farkı yok sayılır: `s` ile `ş`, `c` ile `ç`, `o` ile `ö` ayrı harflerdir.
+
+"Büyük/küçük harfe duyarlı" açıkken bu kurallar devre dışı kalır ve metin yazıldığı gibi aranır.
+
+## Değiştirmek
+
+"Değiştir" önce bir eşleşmeyi seçer; seçili bir eşleşme varken yeniden basınca onu değiştirir ve sonrakini seçer. "Tümünü değiştir" belgedeki tüm eşleşmeleri tek bir işlemde değiştirir, bu yüzden tek bir geri al hepsini geri getirir.
+
+## Komutlar
+
+Paneli kullanmadan aynı işlemleri kodla yapabilirsiniz:
+
+```ts
+editor.commands.setSearch({ query: 'istanbul', replace: 'İstanbul', wholeWord: true })
+const { total } = editor.query.searchStatus()
+if (total > 0) editor.commands.replaceAll()
+editor.commands.clearSearch()
+```
+
+| Komut | Ne yapar |
+| --- | --- |
+| `setSearch(terms)` | Aramayı başlatır ya da günceller: `query`, `replace`, `caseSensitive`, `wholeWord`. |
+| `findNext()`, `findPrevious()` | Sonraki ya da önceki eşleşmeyi seçer. |
+| `replaceNext()` | Seçili eşleşmeyi değiştirir. |
+| `replaceAll()` | Tüm eşleşmeleri değiştirir. |
+| `clearSearch()` | Aramayı ve işaretleri kaldırır. |
+
+`editor.query.searchStatus()` `{ total, current }` döndürür: toplam eşleşme sayısı ve seçili eşleşmenin sırası (seçili eşleşme yoksa `0`). Aynı Türkçe eşleştirmeyi başka yerde kullanmak için paketten `caseInsensitivePattern(text)` alınabilir; bir düzenli ifade deseni döndürür.
+
+## Neden "istanbul" araması "İstanbul" sonucunu buluyor?
+
+Büyük/küçük harf duyarlılığı kapalıyken arama hem genel hem Türkçe büyük-küçük harf kurallarını kullanır. Bu yüzden i harfi İ ve I ile, ı harfi I ile eşleşir.
+
+## Tümünü değiştir geri alınabilir mi?
+
+Evet. Tüm değişiklikler tek adımda yapılır, tek bir geri al hepsini geri getirir.
+
+## Arama ş ile s harfini aynı sayar mı?
+
+Hayır. Yalnızca büyük ve küçük harf farkı yok sayılır; ş ile s, ç ile c gibi farklı harfler ayrı kalır.
+
+---
+
+# Karakter sınırı
+
+> Karakter sayısını izleyin ve bir sınır koyun; yazma sınırda durur, yapıştırılan metin kısaltılır, araç çubuğu kalan alanı gösterir.
+
+URL: https://editor.vivepdf.com/dokumantasyon/karakter-siniri/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-character-count` belgedeki karakterleri sayar ve isteğe bağlı bir sınır koyar. Sınıra gelince yazma durur, yapıştırılan metin kalan alana sığacak kadar kısaltılır ve silmek her zaman çalışır. Araç çubuğundaki sayaç kullanılan ve izin verilen karakteri gösterir. Bu sayfa eklentiyi kurmayı, nelerin sayıldığını ve arayüzün sınırı nasıl gösterdiğini anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CharacterCount } from '@viveeditor/ext-character-count'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [CharacterCount.configure({ limit: 280 })],
+})
+```
+
+Eklentinin tek seçeneği `limit`. Varsayılan `null` değeri sınır koymaz, yalnızca sayar. Sınır pozitif bir tam sayı olmalıdır; başka bir değer sınır yok sayılır.
+
+Karakter sayacı tek betikli kurulumda yoktur. Hazır eklenti listesini korumak için çerçeve bileşenlerinde ya da `mountEditor` ile listeye ekleyin:
+
+```ts
+import { CharacterCount } from '@viveeditor/ext-character-count'
+import { classicPreset, mountEditor } from 'viveeditor'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  extensions: [...classicPreset('tr'), CharacterCount.configure({ limit: 280 })],
+  locale: 'tr',
+})
+```
+
+## Sınır nasıl çalışır
+
+- Yazma sınırda durur.
+- Yapıştırılan ya da sürüklenip bırakılan metin kalan alana sığacak kadar kısaltılır.
+- Silmek her zaman çalışır. Karakter sayısını artırmayan her değişiklik kabul edilir.
+- `content` ya da `setContent` ile sizin yüklediğiniz içerik kesilmez. Bu içerik sınırı aşıyorsa yazar sayıyı artıran değişiklikleri ancak sınırın altına indikten sonra yapabilir.
+
+Tarayıcıdaki sınır yazara yardım eder, ama bir güvenlik önlemi değildir. Uzunluğu sunucuda da denetleyin.
+
+## Neler sayılır
+
+- Metindeki her karakter, boşluklar dahil.
+- Türkçe harfler ve çoğu emoji birer karakter sayılır. Sayım Unicode kod noktasına göre yapıldığı için birkaç parçadan oluşan emoji (ten rengi ya da aile emojileri gibi) parça sayısı kadar sayılır.
+- Görseller, videolar, satır sonları ve paragraf geçişleri sayılmaz.
+
+## Araç çubuğundaki sayaç
+
+Sınır tanımlıysa araç çubuğunun sonundaki sayaç kelime sayısı yerine `120/280 karakter` biçiminde kullanılan ve izin verilen karakteri gösterir. Sayılar arayüz diline göre biçimlenir.
+
+- Sınırın yüzde 90'ına gelince sayaç uyarı rengine döner.
+- Sınıra ulaşınca tehlike rengine döner ve ekran okuyucular "Karakter sınırına ulaşıldı" duyurusunu okur.
+
+Sayaca tıklamak metin ölçümü panelini açar: okunabilirlik, kelime ve cümle sayısı, okuma süresi. Ayrıntılar [Araç çubuğu ve kısayollar](https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
+
+## Sayıyı kodla okumak
+
+```ts
+const used = editor.query.characterCount()
+const limit = editor.query.characterLimit()
+```
+
+`characterLimit()` sınır yoksa `null` döner. Paket, bir ProseMirror düğümündeki karakterleri aynı kurallarla sayan `countCharacters(node)` fonksiyonunu da dışa aktarır.
+
+## Tek betikli kurulumda karakter sınırı var mı?
+
+Hayır. Karakter sayacı eklentisi tek betikli kuruluma dahil değildir; npm paketiyle eklenir.
+
+## Sınırı aşan bir metni yüklersem ne olur?
+
+Sizin yüklediğiniz içerik kesilmez. Yazar metni silebilir ve düzenleyebilir, ama karakter sayısını artıran değişiklikler sınırın altına inene kadar kabul edilmez.
+
+## Boşluklar sayılır mı?
+
+Evet. Metindeki her karakter, boşluklar dahil, sayılır. Görseller, videolar ve satır sonları sayılmaz.
+
+---
+
+# Dosya aç, kaydet, yazdır
+
+> Dosya menüsüyle Word, Markdown, HTML ve metin dosyalarını açın, belgeyi Word, Markdown ya da HTML olarak kaydedin ve yazdırın.
+
+URL: https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/
+Son güncelleme: 2026-11-01
+
+Araç çubuğunda bir Dosya menüsü vardır. `.docx`, `.md`, `.html` ve `.txt` dosyalarını açar, metni Word, Markdown ya da HTML olarak kaydeder ve yazdırır (PDF için yazdırma penceresinde "PDF olarak kaydet" seçin). Bu sayfa menüyü açıp kapatmayı, dönüştürücüleri yüklemeyi ve Word ile Markdown dosyalarında nelerin korunup nelerin düştüğünü anlatır.
+
+## Dosya menüsü
+
+Menüde şu öğeler bulunur: "Dosya aç…", "Word olarak kaydet (.docx)", "Markdown olarak kaydet (.md)", "HTML olarak kaydet (.html)" ve "Yazdır veya PDF".
+
+- Açılan dosya boş bir belgenin yerini alır. Belgede metin varsa dosya imlecin olduğu yere eklenir. Tek bir geri al işlemi bunu geri alır.
+- Metin dosyalarında boş satırlar paragrafları ayırır, tek satır sonları satır sonu olarak kalır.
+- Açılan her dosya, yapıştırılan içerikle aynı belge kurallarından geçer; bilinmeyen biçimlendirme çıktıya hiçbir zaman ulaşmaz. Kaydedilen HTML'i sunucuda da temizleyin.
+- Kaydedilen dosyanın adı `fileName` seçeneğinden gelir (verilmezse "belge"). Dosya adlarında kullanılamayan karakterler değiştirilir, ad en fazla 100 karakter olur.
+- Hatalar görünür bir bildirimle gösterilir. "Dosya açılıyor…" gibi ilerleme mesajları ekran okuyuculara duyurulur.
+
+## Tek betikli kurulumda
+
+Menü varsayılan olarak açıktır ve Word ile Markdown dönüştürücülerini içerir. Dönüştürücüler ana betiğin yanındaki iki ek dosyadadır ve ilk kullanıldıklarında yüklenir. Menüyü bir metin alanında gizlemek için `data-files="false"` ekleyin:
+
+```html
+<textarea name="body" data-editor data-files="false"></textarea>
+```
+
+Ek dosyaların adresi, parmak izi denetimi ve İçerik Güvenliği Politikası ayarları için [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/) sayfasına bakın.
+
+## npm ile
+
+Dönüştürücüleri yükleyici fonksiyonlar olarak verin; yalnızca kullanıldıklarında indirilirler:
+
+```ts
+import { createUI } from '@viveeditor/ui'
+
+createUI(editor, {
+  files: {
+    docx: () => import('@viveeditor/docx'),
+    markdown: () => import('@viveeditor/markdown'),
+    upload,
+    fileName: 'Rapor',
+  },
+})
+```
+
+Çerçeve bileşenlerinde aynı nesneyi `ui: { files: { … } }` içinde verin; bileşenler varsayılan olarak yükleyici eklemez.
+
+| Seçenek | Açıklama |
+| --- | --- |
+| `docx` | `@viveeditor/docx` modülünü döndüren yükleyici. Word açma ve kaydetmeyi açar. |
+| `markdown` | `@viveeditor/markdown` modülünü döndüren yükleyici. Markdown açma ve kaydetmeyi açar. |
+| `html` | `false` HTML olarak kaydetmeyi kaldırır. |
+| `print` | `false` yazdırmayı kaldırır. |
+| `fileName` | Kaydedilen dosyaların adı. |
+| `upload` | Word dosyasındaki görselleri sunucunuza yükleyen fonksiyon. Sözleşmesi [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/) sayfasındaki yükleme fonksiyonuyla aynıdır. |
+| `allowBase64` | Word dosyasındaki görselleri yükleme yerine belgeye gömer. |
+
+Yükleyici verilmezse menü HTML ve metin dosyalarını açar, HTML olarak kaydeder ve yazdırır. `files: false` menüyü tamamen gizler.
+
+## Sınırlar
+
+- Word dosyaları en fazla 20 MB, HTML, Markdown ve metin dosyaları en fazla 5 MB olabilir. Markdown dönüştürücüsü ise en fazla 1 MB metin işler.
+- Parola korumalı dosyalar ve açıldığında çok büyüyen ya da çok derin iç içe geçen dosyalar bir mesajla reddedilir.
+- `.doc`, `.odt` ve `.rtf` desteklenmez.
+- Word dosyasındaki bazı görseller eklenemezse menü kaç tanesinin eklenemediğini söyler. Desteklenmeyen başka içerik atlandıysa bunu da bildirir.
+
+## Yazdırma
+
+"Yazdır veya PDF" tarayıcının yazdırma penceresini açar. Belge, betik çalıştırmayan ve yalnızca görselleri ve stilleri yükleyen gizli bir çerçevede hazırlanır. Video oynatıcıları baskıda bağlantı olarak görünür.
+
+Kendi düğmeniz için `@viveeditor/ui` paketinden `printDocument(editor, { title, css })` çağırabilirsiniz.
+
+## Markdown
+
+Başlıklar, kalın, italik, üstü çizili, satır içi kod, bağlantılar, görseller, madde işaretli, numaralı ve iç içe listeler, görev listeleri, alıntılar, yatay çizgiler, dil bilgisiyle çitli kod blokları ve tablolar okunur ve yazılır.
+
+Markdown'da yazı rengi, vurgu, altı çizili ve hizalama için bir karşılık yoktur, bu yüzden kaydederken atlanır. Video oynatıcıları bağlantı olarak kaydedilir. Markdown içindeki ham HTML hiçbir zaman geçirilmez.
+
+## Word (.docx)
+
+| Açarken ve kaydederken korunur | Atlanır |
+| --- | --- |
+| Başlıklar (Word'deki konu başlığı 1. düzey başlık olarak açılır), kalın, italik, altı çizili, üstü çizili, yazı rengi, vurgu, hizalama | Yorumlar, dipnotlar, üst ve alt bilgiler, metin kutuları, denklemler |
+| Madde işaretli, numaralı ve iç içe listeler | Silinmiş izlenen değişiklikler (eklemeler korunur), gizli metin |
+| Web ve e-posta adreslerine giden bağlantılar | Diğer bağlantılar düz metne dönüşür; alan kodlarından yalnızca görünen metin kalır |
+| Birleştirilmiş hücreli ve başlık satırlı tablolar, alıntılar, kod | Kod bloğunun dili |
+| Görseller (açarken yükleme fonksiyonunuz ya da `allowBase64` gerekir) | Bunlar yoksa görseller atlanır ve menü kaç tane olduğunu söyler |
+
+Görev listeleri ☐ ve ☑ karakterleriyle, video oynatıcıları bağlantı olarak kaydedilir. Kaydedilen dosya A4 boyutundadır ve içinde yazar bilgisi bulunmaz.
+
+> **Word'e kaydedilen görseller**
+>
+> Data adresli görseller dosyaya gömülür. Web adresindeki görseller yalnızca `exportDocx` fonksiyonunu `fetchImages: true` ile kendiniz çağırırsanız indirilip gömülür; Dosya menüsü bunu yapmaz ve bu görselleri bağlantı olarak yazar.
+
+## Dönüştürücüleri doğrudan kullanmak
+
+Menü olmadan da dönüştürebilirsiniz:
+
+```ts
+import { exportDocx, importDocx } from '@viveeditor/docx'
+import { markdownToHtml, toMarkdown } from '@viveeditor/markdown'
+
+const { html, warnings } = await importDocx(file, { upload })
+editor.commands.replaceContent(html)
+
+const blob = await exportDocx(editor, { title: 'Rapor' })
+
+editor.commands.replaceContent(markdownToHtml('# Başlık\n\nBiraz **kalın** metin'))
+const markdown = toMarkdown(editor)
+```
+
+`importDocx` reddettiği dosyalar için `TOO_LARGE`, `NOT_DOCX`, `ENCRYPTED`, `UNSUPPORTED`, `DAMAGED`, `TOO_COMPLEX` ya da `ABORTED` kodlu bir `DocxError` fırlatır. `warnings` atlanan içeriği `{ code, count }` olarak listeler.
+
+Yapıştırılan Markdown metnini biçimlendirmek için [Word'den yapıştırma](https://editor.vivepdf.com/dokumantasyon/word-den-yapistirma/) sayfasındaki `MarkdownPaste` eklentisine bakın.
+
+## PDF olarak nasıl kaydederim?
+
+Dosya menüsünden "Yazdır veya PDF" seçin ve tarayıcının yazdırma penceresinde "PDF olarak kaydet" seçeneğini kullanın.
+
+## .doc, .odt ya da .rtf dosyalarını açabilir miyim?
+
+Hayır. Yalnızca .docx, .md, .html, .htm ve .txt dosyaları açılır. Eski biçimdeki dosyaları önce Word ya da LibreOffice ile .docx olarak kaydedin.
+
+## Açılan dosya mevcut metnin üzerine mi yazılır?
+
+Belge boşsa dosya onun yerini alır. Belgede metin varsa dosya imlecin olduğu yere eklenir. Her iki durumda da tek bir geri al işlemi geri getirir.
+
+---
+
+# Word'den yapıştırma
+
+> Word, Google Docs ve LibreOffice'ten temiz yapıştırma; sahte madde işaretleri gerçek listelere dönüşür, Markdown metni biçimlenir.
+
+URL: https://editor.vivepdf.com/dokumantasyon/word-den-yapistirma/
+Son güncelleme: 2026-11-01
+
+`@viveeditor/ext-office-paste` Word, Google Docs ve LibreOffice'ten yapıştırılan içeriği temizler. Word'ün sahte madde işaretlerini ve numaralarını gerçek, iç içe listelere çevirir, Word'ün konu başlığı ve alıntı stillerini korur ve Google Docs'un yanlış iç içe koyduğu listeleri düzeltir. Bu sayfa ayrıca düz metin olarak yapıştırılan Markdown'ı biçimli içeriğe çeviren `MarkdownPaste` eklentisini anlatır.
+
+## Kurulum
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { OfficePaste } from '@viveeditor/ext-office-paste'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    OfficePaste.configure({
+      onDropped: ({ images }) => console.warn(`${images} görsel yapıştırılamadı`),
+    }),
+  ],
+})
+```
+
+Tek betikli kurulumda eklenti zaten yüklüdür. Tek seçeneği `onDropped`'dur.
+
+## Neler düzeltilir
+
+Word'den gelen içerikte:
+
+- Word'ün listeleri gerçek liste değil, işaretli paragraflardır. Bu paragraflar gerçek, iç içe madde işaretli ve numaralı listelere çevrilir. Liste türü ve başlangıç numarası Word'ün liste tanımından, yoksa işaretin kendisinden alınır.
+- İşaret karakterleri her yerden kaldırılır.
+- Word'ün "Konu Başlığı" stili 1. düzey başlık, "Alıntı" stili alıntı olur.
+
+Tüm kaynaklarda:
+
+- Bir listenin içinde doğrudan duran alt liste, üstündeki maddenin içine taşınır. Google Docs listeleri bu biçimde kopyalar.
+- Hem altı çizili hem üstü çizili metin iki biçimi birden korur.
+- Kopyalayan bilgisayardaki dosyalara (`file:` ve `blob:` adresleri) giden görseller atlanır ve sayılır.
+
+Word, Google Docs ya da LibreOffice'ten gelmeyen HTML bu eklentide hiç değiştirilmez. Her yapıştırma, kaynağı ne olursa olsun, ardından belgenin kurallarından geçer; bilinmeyen biçimlendirme çıktıya ulaşmaz.
+
+## Atlanan görseller
+
+Kopyalayan bilgisayardaki dosyalara giden görseller yapıştırılamaz. Atlanan görsel olduğunda `onDropped` şu bilgiyle çağrılır:
+
+| Alan | Değer |
+| --- | --- |
+| `source` | `'word'`, `'docs'` ya da `'libreoffice'` |
+| `images` | Atlanan görsel sayısı |
+
+Yazara görseli ayrıca yüklemesini söyleyen bir mesaj göstermek için bu çağrıyı kullanın. Görsel yükleme için [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/) sayfasına bakın.
+
+## Yardımcı fonksiyonlar
+
+Aynı temizliği yapıştırma dışında kullanmak için paket üç fonksiyon dışa aktarır:
+
+| Fonksiyon | Döndürdüğü |
+| --- | --- |
+| `detectOffice(html)` | `'word'`, `'docs'`, `'libreoffice'` ya da `null` |
+| `cleanOffice(html)` | `{ html, source, droppedImages }` |
+| `cleanOfficeHtml(html)` | Yalnızca temizlenmiş HTML |
+
+## Markdown yapıştırma
+
+`@viveeditor/markdown/paste` paketindeki `MarkdownPaste`, düz metin olarak yapıştırılan Markdown'ı biçimli içeriğe çevirir. Dönüştürücü yalnızca gerektiğinde yüklenir:
+
+```ts
+import { MarkdownPaste } from '@viveeditor/markdown/paste'
+
+const markdownPaste = MarkdownPaste.configure({ load: () => import('@viveeditor/markdown') })
+```
+
+Dönüştürme yalnızca şu koşullarda yapılır:
+
+- panoda HTML yoktur, yalnızca düz metin vardır,
+- metin Markdown'a benzer: başlık, çitli kod, alıntı, tablo, kalın yazı, bağlantı, görev maddesi ya da en az iki liste satırı içerir,
+- imleç bir kod bloğunda değildir.
+
+Dönüştürücü yüklenemezse metin düz metin olarak yapıştırılır. 1 milyon karakterden uzun metinler dönüştürülmez. Markdown içindeki ham HTML hiçbir zaman geçirilmez. Bir metnin dönüştürülüp dönüştürülmeyeceğini önceden görmek için aynı paketteki `looksLikeMarkdown(text)` fonksiyonunu kullanabilirsiniz.
+
+Tek betikli CDN sürümünde Markdown yapıştırma açıktır; dönüştürücü ilk kullanımda ek dosyadan yüklenir. Markdown dosyalarını açıp kaydetmek için [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasına bakın.
+
+## Word'den yapıştırdığım görseller neden gelmiyor?
+
+Word bazı görselleri kopyalayan bilgisayardaki dosyalara giden adreslerle panoya koyar. Bu görseller tarayıcıdan okunamaz ve atlanır; onDropped kaç tanesinin atlandığını bildirir.
+
+## Tek betikli kurulumda Word'den yapıştırma açık mı?
+
+Evet. Office yapıştırma eklentisi tek betikli kurulumda varsayılan olarak yüklüdür; Markdown yapıştırma da CDN sürümünde açıktır.
+
+## Markdown yapıştırma hangi durumda devreye girer?
+
+Yalnızca panoda HTML yoksa ve düz metin Markdown'a benziyorsa. Kod bloğunun içine yapıştırılan metin hiçbir zaman dönüştürülmez.
+
+---
+
+# Bahsetme (@)
+
+> Mention eklentisi ve mentionMenu ile @ bahsetme ekleyin, denetlenen kimlikleri saklayın ve her bahsetmeyi sunucuda yeniden doğrulayın.
+
+URL: https://editor.vivepdf.com/dokumantasyon/bahsetme/
+Son güncelleme: 2026-11-01
+
+Bahsetme, yazarın `@` yazıp sizin verdiğiniz listeden bir kişi, ekip ya da başka bir kayıt seçmesini sağlar. Editör yalnızca anlamsız bir kimlik ve düz metin bir etiket saklar. Kimliğin gerçekte kime ait olduğuna, kimden bahsedilebileceğine ve kime bildirim gideceğine sunucunuz karar verir.
+
+Bahsetme yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+1. Eklentiyi ve arayüzü kurun: `npm install @viveeditor/ext-mention @viveeditor/ui @viveeditor/core`.
+2. `Mention` eklentisini editörün eklenti listesine ekleyin.
+3. `@viveeditor/ui/extras` içindeki `mentionMenu`'yü `createUI`'nin `plugins` listesine ekleyin ve eşleşen kayıtları döndüren bir `items` işlevi verin.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { Mention } from '@viveeditor/ext-mention'
+import { createUI } from '@viveeditor/ui'
+import { mentionMenu } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-mention/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, Mention],
+})
+
+createUI(editor, {
+  plugins: [
+    mentionMenu({
+      items: async (query, signal) => {
+        const response = await fetch(`/mentions?q=${encodeURIComponent(query)}`, { signal })
+        if (!response.ok) return []
+        return response.json()
+      },
+    }),
+  ],
+})
+```
+
+`/mentions` sizin kendi arama adresinizin yerini tutar. Döndürdüğünüz her kayıtta `id`, `label` ve isteğe bağlı `description` bulunur.
+
+## Menü nasıl çalışır
+
+- Menü, satır başında ya da bir boşluktan sonra `@` yazılınca açılır. Arama metni en çok 32 harf, rakam, `_`, `.` ya da `-` olabilir.
+- `items` işleviniz son tuşa basıştan 150 ms sonra çalışır. Yazar yazmayı sürdürür ya da menüyü kapatırsa `signal` iptal edilir; bu yüzden onu `fetch`'e verin.
+- Menü en çok 8 kayıt gösterir ve bunları düz metin olarak yazar. Etiketleriniz hiçbir zaman HTML olarak okunmaz.
+- `Enter` ya da `Tab` kaydı seçer, `Esc` menüyü kapatır.
+
+Koddan bahsetme eklemek için `editor.commands.insertMention({ id: 'u_42', label: 'Editör' })` kullanabilirsiniz.
+
+## Ne saklanır
+
+Bir bahsetme tek bir span olarak kaydedilir:
+
+```html
+<span class="vive-mention" data-mention="u_42">@Editör</span>
+```
+
+Kimlik `^[A-Za-z0-9_][A-Za-z0-9_.:@-]{0,127}$` kalıbına uymalı ve içinde `..` bulunmamalıdır. Kalıp `MENTION_ID_PATTERN` adıyla dışa açılır; `isMentionId()` bir değeri bu kalıba göre sınar. Editör kimliği HTML okurken, JSON okurken ve HTML yazarken denetler. Kimliği denetimden geçmeyen bir span bahsetme olarak okunmaz.
+
+Etiketten denetim, yön (bidi) ve sıfır genişlikli karakterler atılır, uzunluğu 100 karakterle sınırlanır. Bu sınırı `Mention` eklentisinin `maxLabelLength` seçeneği değiştirir. Kimlik hiçbir zaman bağlantı adresine dönüşmez.
+
+## Sunucuda denetim
+
+Tarayıcı bir güvenlik sınırı değildir; herkes istediği kimlik ve etiketle bir span gönderebilir. İçeriği kaydederken:
+
+- HTML'i [sunucu temizleyicisinden](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) geçirin. Temizleyici bahsetmeleri tam olarak yukarıdaki biçimde tutar; kimliği hatalı olanı, bir bağlantının ya da dipnotun içine konanı düz metne indirir;
+- her kimliği kendi rehberinizde arayın, bulunmayanları atın;
+- yazarın o kişiden ya da gruptan bahsetmeye yetkisi olup olmadığını denetleyin;
+- gösterilecek adı saklanan etiketten değil, kendi verinizden üretin;
+- kimlikleri anlamsız tutun; e-posta adresi ya da başka kişisel veri kullanmayın.
+
+`items` arkasındaki arama adresi kimlik doğrulama, istek sınırı ve kiracı (tenant) ayrımı ister; yazar yalnızca görmeye yetkili olduğu kişileri bulabilmelidir.
+
+## Bildirimler
+
+viveEditor kendisi bildirim göndermez. Bahsedilen kişilere bildirim gönderiyorsanız:
+
+- düzenleme öncesi ve sonrası kimlikleri karşılaştırın, yalnızca yeni bahsetmeler için bildirim gönderin;
+- tekrarları birleştirin; beş kez bahsedilen kişiye tek bildirim gitsin;
+- yazar başına gönderilen bildirim sayısını sınırlayın.
+
+## İlgili sayfalar
+
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/)
+- [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/)
+- [Paketler](https://editor.vivepdf.com/dokumantasyon/paketler/)
+
+## Kişi listesi nereden geliyor?
+
+Sizin yazdığınız items işlevinden. viveEditor'ün kendi kullanıcı rehberi yoktur; işlevinizi yazılan metin ve bir AbortSignal ile çağırır, döndürdüğünüz listeyi gösterir.
+
+## Bahsetmede saklanan ada güvenebilir miyim?
+
+Hayır. Etiket, yazarın tarayıcısının gönderdiği metindir. Kimliği kendi rehberinizde arayın ve gösterilecek adı kendi verinizden üretin.
+
+---
+
+# Emoji
+
+> İki nokta yazınca açılan bir emoji menüsü ekleyin; küçük İngilizce emoji listesi yalnızca ilk kullanımda yüklenir.
+
+URL: https://editor.vivepdf.com/dokumantasyon/emoji/
+Son güncelleme: 2026-11-01
+
+Emoji menüsü, yazarın `:` ve iki harf yazıp adına ya da anahtar sözcüğüne göre bir emoji seçmesini sağlar. Emoji metne sıradan bir karakter olarak girer; saklanan HTML'de ek bir öğe olmaz, menü de bir editör eklentisine ihtiyaç duymaz.
+
+Emoji menüsü yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+1. Arayüzü ve veriyi kurun: `npm install @viveeditor/ui @viveeditor/emoji-data`.
+2. `@viveeditor/ui/extras` içindeki `emojiMenu`'yü `createUI`'nin `plugins` listesine ekleyin.
+3. Listeyi içe aktaran bir `load` işlevi verin; böylece liste yalnızca gerektiğinde iner.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { emojiMenu } from '@viveeditor/ui/extras'
+
+createUI(editor, {
+  plugins: [emojiMenu({ load: () => import('@viveeditor/emoji-data/en') })],
+})
+```
+
+## Menü nasıl çalışır
+
+- Menü, satır başında ya da bir boşluktan sonra `:` ve ardından en az iki harf ya da rakam yazılınca açılır.
+- Adlarda ve anahtar sözcüklerde arar. Önce adı tam eşleşen, sonra adı yazılan metinle başlayan, en son anahtar sözcüğü eşleşen emojiler gelir.
+- En çok 8 sonuç gösterir. `Enter` ya da `Tab` emojiyi ekler, `Esc` menüyü kapatır.
+- Liste ilk kullanımda bir kez yüklenir. Yükleme başarısız olursa sonraki denemede yeniden istenir.
+
+## Veri paketi
+
+`@viveeditor/emoji-data/en` yaklaşık 39 KB'lık küçük bir İngilizce listedir. [emojibase-data](https://www.npmjs.com/package/emojibase-data) 18.0.0 sürümünden üretilir ve yalnızca İngilizce adlar vardır. Türkçe arama için kendi listenizi verebilirsiniz.
+
+Her satırın üç parçası vardır: emoji, adı ve anahtar sözcükleri. Menü listeyi yüklerken denetler; 5.000 satırdan uzun bir listeyi, başka biçimde bir satırı ya da 16 kod noktasından uzun bir emojiyi kabul etmez.
+
+## Kendi listeniz
+
+`load` aynı biçimde herhangi bir liste döndürebilir: doğrudan dizi ya da `default` dışa aktarımı olan bir modül. Daha kısa bir liste ya da Türkçe adlar için bunu kullanın.
+
+```ts
+import { type EmojiRow, emojiMenu } from '@viveeditor/ui/extras'
+
+const rows: EmojiRow[] = [
+  ['👍', 'onay', ['evet', 'tamam']],
+  ['🎉', 'kutlama', ['tebrik', 'parti']],
+]
+
+emojiMenu({ load: async () => rows })
+```
+
+## Lisans
+
+Paketin kendisi MIT lisanslıdır. Emoji adları ve anahtar sözcükleri MIT lisanslı Emojibase'den gelir; Emojibase de bunları Unicode Lisansı v3 altındaki Unicode CLDR ve Unicode emoji veri dosyalarından türetir. İki bildirim de paketteki `NOTICE` dosyasındadır. Veriyi yeniden dağıtırken bu dosyayı koruyun.
+
+## İlgili sayfalar
+
+- [Paketler](https://editor.vivepdf.com/dokumantasyon/paketler/)
+- [Bahsetme](https://editor.vivepdf.com/dokumantasyon/bahsetme/)
+
+## Emoji listesi editörle birlikte mi yüklenir?
+
+Hayır. Liste, yazar ilk kez iki nokta ve iki harf yazdığında yüklenir; menüyü hiç kullanmayan sayfalar onu indirmez.
+
+## Kendi emoji listemi kullanabilir miyim?
+
+Evet. load işlevi emoji, ad ve anahtar sözcüklerden oluşan en çok 5.000 satırlık herhangi bir liste döndürebilir.
+
+---
+
+# Formüller (LaTeX)
+
+> MathExtension ve kendi KaTeX 0.18.2 ya da yeni sürümünüzle LaTeX formül yazın, yayındaki sayfada renderMath ile çizin.
+
+URL: https://editor.vivepdf.com/dokumantasyon/formul/
+Son güncelleme: 2026-11-01
+
+Formül eklentisi, yazarın LaTeX yazmasını ve düzenlerken bunu [KaTeX](https://katex.org) ile çizilmiş olarak görmesini sağlar. Editör çizimi değil, yalnızca LaTeX kaynağını saklar; kaydedilen HTML küçük ve temiz kalır. Yayındaki sayfada formülleri `renderMath` ile yeniden çizersiniz.
+
+Formüller yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+1. Eklentiyi, arayüzü ve KaTeX'i kurun: `npm install @viveeditor/ext-math @viveeditor/ui @viveeditor/core katex`.
+2. `MathExtension`'ı KaTeX'i içe aktaran bir `load` işleviyle ekleyin. KaTeX böylece yalnızca bir formül gösterileceği zaman iner.
+3. KaTeX'in ve eklentinin stil dosyalarını içe aktarın.
+4. `/` menüsündeki girişler için `mathTools()`'u `createUI`'nin `plugins` listesine ekleyin.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { MathExtension } from '@viveeditor/ext-math'
+import { createUI } from '@viveeditor/ui'
+import { mathTools } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-math/style.css'
+import 'katex/dist/katex.min.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    ...basicExtensions,
+    MathExtension.configure({
+      load: () => import('katex'),
+      onError: (error) => console.warn(error.code, error.version),
+    }),
+  ],
+})
+
+createUI(editor, { plugins: [mathTools()] })
+```
+
+## KaTeX sürümü
+
+KaTeX **0.18.2 ya da daha yeni** olmalıdır (`MIN_KATEX_VERSION`). Bu alt sınır KaTeX güvenlik bildirimi GHSA-238p-pmpm-9mq7'den gelir. Daha eski bir sürüm reddedilir; formülün yerinde çizim yerine kaynağı görünür.
+
+`onError` iki koddan birini taşıyan bir hata alır:
+
+| Kod | Anlamı |
+| --- | --- |
+| `KATEX_OUTDATED` | Yüklenen KaTeX 0.18.2'den eski; `version` sürümünü taşır. |
+| `KATEX_LOAD` | `load` işlevi başarısız oldu. |
+
+Editör KaTeX'e `trust: false` dahil sabit seçenekler verir; bu yüzden bir formül bağlantı ya da başka HTML ekleyemez.
+
+## Formül yazma
+
+- **Satır içi:** `$x^2$` yazın. Kapanış `$` işaretini yazdığınızda iki dolar arasındaki metin formüle dönüşür. Metin boşlukla başlayıp bitmemelidir.
+- **Blok:** boş bir satıra `$$` yazıp `Enter`'a basın.
+- **Menü:** `/` menüsünden "Formül" ya da "Blok formül"ü seçin. Bu girişler `mathTools()`'tan gelir.
+- **Düzenleme:** kaynağı canlı önizlemeyle düzenlemek için formüle tıklayın ya da onu seçip `Enter`'a basın. Satır içi formülü `Enter`, blok formülü `Ctrl+Enter` (Mac'te `⌘+Enter`) bitirir; `Esc` değişiklik yapmadan çıkar.
+
+Koddan `editor.commands.insertMath({ display: true, latex: 'E = mc^2' })` bir blok formül ekler. Satır içi formül için `display`'i vermeyin.
+
+Bir formül en çok 2.000 karakter (`MAX_LATEX_LENGTH`) ve en çok 64 düzey iç içe süslü parantez içerebilir.
+
+## Ne saklanır
+
+```html
+<p>Alan: <span data-math="inline">\pi r^2</span></p>
+<div data-math="block">\int_0^1 x\,dx</div>
+```
+
+[Sunucu temizleyicisi](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) formülleri tam olarak bu biçimde tutar. Denetimden geçmeyen ya da bir bağlantının veya dipnotun içine konan formül düz metne indirilir.
+
+Metin Markdown olarak kaydedildiğinde formüller `$…$` ve `$$` blokları olarak yazılır. Word olarak kaydedildiğinde LaTeX kaynağı kod yazı tipiyle yazılır.
+
+## Yayındaki sayfalar
+
+İçeriği taşıyan öğe üzerinde `renderMath`'i çağırın. KaTeX'i aynı yolla yükler ve çizdiği formül sayısını döndürür. Sayfada KaTeX'in stil dosyası da gerekir.
+
+```ts
+import { renderMath } from '@viveeditor/ext-math/render'
+import 'katex/dist/katex.min.css'
+
+const article = document.querySelector('article')
+if (article) await renderMath(article, { load: () => import('katex') })
+```
+
+- Bir çağrıda en çok 1.000 formülü parça parça çizer; uzun sayfalar donmaz.
+- Önceden çizilmiş formülleri atlar; yeniden çağırmak güvenlidir.
+- Çizilen her formül, LaTeX kaynağını `aria-label` olarak alır.
+
+## İlgili sayfalar
+
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/)
+- [Dipnotlar](https://editor.vivepdf.com/dokumantasyon/dipnot/)
+- [Dosya açma, kaydetme ve yazdırma](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/)
+
+## viveEditor KaTeX'i içinde getiriyor mu?
+
+Hayır. KaTeX sizin bağımlılığınızdır. Bir load işlevi verirsiniz; editör 0.18.2'den eski sürümleri reddeder.
+
+## Çizilmiş formül kaydediliyor mu?
+
+Hayır. Yalnızca LaTeX kaynağı saklanır. Yayındaki sayfa onu renderMath ile yeniden çizer.
+
+---
+
+# Dipnotlar
+
+> Yazarın yerinde düzenlediği dipnotlar ekleyin; yayındaki sayfada renderFootnotes ile numaralayıp sayfa sonunda listeleyin.
+
+URL: https://editor.vivepdf.com/dokumantasyon/dipnot/
+Son güncelleme: 2026-11-01
+
+Dipnot eklentisi, yazarın metnin herhangi bir yerine not eklemesini ve sayfa sonuna gitmeden notu orada yazmasını sağlar. Not, cümledeki yerinde saklanır. Yayındaki sayfada `renderFootnotes` notları numaralar ve sayfa sonunda listeler.
+
+Dipnotlar yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+1. Eklentiyi ve arayüzü kurun: `npm install @viveeditor/ext-footnote @viveeditor/ui @viveeditor/core`.
+2. `Footnote` eklentisini editörün eklenti listesine ekleyin ve stil dosyasını içe aktarın.
+3. `/` menüsündeki giriş için `footnoteTools()`'u `createUI`'nin `plugins` listesine ekleyin.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { Footnote } from '@viveeditor/ext-footnote'
+import { createUI } from '@viveeditor/ui'
+import { footnoteTools } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-footnote/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, Footnote],
+})
+
+createUI(editor, { plugins: [footnoteTools()] })
+```
+
+## Dipnot yazma
+
+- `/` menüsünden "Dipnot"u seçin. İmlecin olduğu yerde numaralı bir işaret belirir ve altında küçük bir kutu açılır.
+- Notu kutuya yazın. `Enter` ya da `Esc` ana metne döner.
+- Notu düzenlemek için işareti yeniden seçin.
+
+Koddan `editor.commands.insertFootnote()` imlecin olduğu yere boş bir not ekler.
+
+Notlarda yalnızca kalın, italik ve bağlantı kalır. Diğer biçimler kaldırılır ve bir not bağlantının içinde duramaz. Bir not en çok 5.000 karakter (`MAX_FOOTNOTE_LENGTH`) tutar. Editörde işaretler siz yazdıkça sırayla numaralanır.
+
+## Ne saklanır
+
+```html
+<p>Çalışma iki yıl sürdü.<sup data-footnote="">Sonuçlar <em>2025</em> yılında yayımlandı.</sup></p>
+```
+
+[Sunucu temizleyicisi](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) dipnotları tam olarak bu biçimde tutar. Dipnotun içinde yalnızca metin, kalın, italik ve bağlantı kalır. Duramayacağı bir yere konmuş dipnot, bahsetme ya da formül düz metne indirilir.
+
+## Yayındaki sayfalar
+
+İçeriği taşıyan öğe üzerinde `renderFootnotes`'u çağırın:
+
+```ts
+import { renderFootnotes } from '@viveeditor/ext-footnote/render'
+
+const article = document.querySelector('article')
+if (article) renderFootnotes(article, { backLabel: 'Metne dön' })
+```
+
+- Metindeki her not, listedeki karşılığına bağlanan bir numaraya dönüşür.
+- Notlar, o öğenin sonuna eklenen bir `<ol class="vive-footnotes">` içinde listelenir.
+- Her girişe, metindeki yerine dönen bir ↩ bağlantısı eklenir. `backLabel` bu bağlantının erişilebilir adıdır; varsayılanı İngilizce "Back to text"tir, Türkçe sayfalarda kendiniz verin.
+- Bir bağlantının içindeki not, kendi bağlantısı olmadan düz bir numaraya dönüşür.
+- Önceden işlenmiş notlar atlanır; yeniden çağırmak güvenlidir. İşlev, işlediği not sayısını döndürür.
+
+## Yazdırma ve kaydetme
+
+Yazar Dosya menüsünden yazdırdığında notlar aynı şekilde numaralanır ve yazdırılan sayfanın sonunda listelenir.
+
+Markdown olarak kaydederken dipnotlar `[^n]` biçiminde, tanımları sonda olacak şekilde yazılır. Word olarak kaydederken üst simge numaralar ve sonda notlar yazılır. Bir Word dosyası açıldığında içindeki dipnotlar alınmaz.
+
+## İlgili sayfalar
+
+- [Dosya açma, kaydetme ve yazdırma](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/)
+- [Formüller](https://editor.vivepdf.com/dokumantasyon/formul/)
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/)
+
+## Dipnot numaraları HTML'de saklanıyor mu?
+
+Hayır. Not metni cümledeki yerinde saklanır. Numaraları yayındaki sayfada renderFootnotes, yazdırırken de yazdırma işlemi ekler.
+
+## Bir dipnot hangi biçimleri taşıyabilir?
+
+Yalnızca kalın, italik ve bağlantı. Diğer biçimler kaldırılır.
+
+---
+
+# Şablonlar
+
+> templateMenu ile / menüsünde hazır içerik blokları sunun; her şablon eklenmeden önce editör şemasından geçer.
+
+URL: https://editor.vivepdf.com/dokumantasyon/sablonlar/
+Son güncelleme: 2026-11-01
+
+Şablonlar yazara hızlı bir başlangıç sunar: bir yazışma düzeni, toplantı notu ya da ürün sayfası iskeleti. `templateMenu`, her şablon için `/` menüsüne bir giriş ekler; seçilen şablonun içeriği imlecin olduğu yere eklenir.
+
+Şablonlar yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+1. Arayüzü kurun: `npm install @viveeditor/ui @viveeditor/core`.
+2. Şablonlarınızı bir giriş listesi olarak yazın.
+3. Listeyi `templateMenu`'ye verin ve `createUI`'nin `plugins` listesine ekleyin.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { type Template, templateMenu } from '@viveeditor/ui/extras'
+
+const templates: Template[] = [
+  {
+    id: 'memo',
+    label: 'Yazışma',
+    description: 'Konu, özet ve sonraki adımlar',
+    content: '<h2>Konu</h2><p></p><h3>Sonraki adımlar</h3><ul><li><p></p></li></ul>',
+  },
+  {
+    id: 'meeting',
+    label: 'Toplantı notu',
+    content: '<h2>Toplantı notu</h2><p><strong>Katılanlar:</strong> </p><p></p>',
+  },
+]
+
+createUI(editor, { plugins: [templateMenu(templates)] })
+```
+
+## Şablon girişleri
+
+| Alan | Anlamı |
+| --- | --- |
+| `id` | Giriş için benzersiz bir ad. |
+| `label` | `/` menüsünde "Şablon:" sözcüğünden sonra görünen metin. |
+| `description` | İsteğe bağlı. Menü aramasının eşleştirdiği ek sözcükler. |
+| `content` | Eklenecek içerik; HTML metni ya da editör JSON'u. |
+
+Menü araması etiketi ve "template", "sablon" sözcüklerini de eşleştirir. `templateMenu`'nün ikinci bağımsız değişkeni menü etiketlerini değiştirir, örneğin `templateMenu(templates, { template: 'Düzen' })`.
+
+Editör salt okunur olduğunda şablon seçmek bir şey eklemez.
+
+## Şema süzgeci
+
+Şablon içeriği, yapıştırılan içerik gibi editör şemasından geçer. Şemanın tanımadığı her şey atılır: betikler, olay işleyicileri, bilinmeyen öğeler ve öznitelikler. Şablon yalnızca editörde eklentisi yüklü blokları ve biçimleri kullanabilir. Şablonda tablo varsa ama tablo eklentisi yüklü değilse, tablo olarak korunmaz.
+
+## Boyut sınırı
+
+HTML'i 2 MB'ı aşan şablon atlanır ve menüde görünmez.
+
+## Güven
+
+Şema güvensiz işaretlemeyi kaldırır, ama şablondaki sözcükleri ve bağlantıları değerlendiremez. Yalnızca kendi yazdığınız ya da güvendiğiniz şablonları sunun. Yazarlar birbirleri için şablon oluşturabiliyorsa, şablonları [sunucu temizleyicisinden](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) geçirerek saklayın ve kimin kime şablon yayımlayabileceğini denetleyin.
+
+## İlgili sayfalar
+
+- [Araç çubuğu ve kısayollar](https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar/)
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/)
+
+## Bir şablon betik ya da özel işaretleme taşıyabilir mi?
+
+Hayır. Şablon içeriği yapıştırılan içerik gibi editör şemasından geçer; betikler ve bilinmeyen işaretlemeler atılır.
+
+## Boyut sınırı var mı?
+
+Evet. 2 MB'tan büyük şablonlar atlanır ve menüde görünmez.
+
+---
+
+# Yapay zekâ yardımı
+
+> Yapay zekâ yardımını bir sağlayıcı işleviyle kendi sunucunuza bağlayın; yanıtlar düz metin olarak gösterilir ve eklenir.
+
+URL: https://editor.vivepdf.com/dokumantasyon/yapay-zeka/
+Son güncelleme: 2026-11-01
+
+Yapay zekâ yardımı, seçili metin üzerinde "Daha iyi yaz" ya da "Özetle" gibi işlemler sunar. viveEditor paneli ve yanıtların nasıl gösterilip ekleneceğine dair kuralları sağlar. Kendisi hiçbir yere bir şey göndermez: siz kendi sunucunuzu çağıran bir sağlayıcı işlevi verirsiniz, yapay zekâ hizmetiyle sunucunuz konuşur.
+
+Yapay zekâ yardımı yalnızca npm paketi olarak gelir; tek betikli sürümde yoktur.
+
+## Kurulum
+
+1. Arayüzü kurun: `npm install @viveeditor/ui @viveeditor/core`.
+2. İsteği kendi adresinize gönderen bir `generate` işlevi yazın.
+3. `aiAssistant`'ı `createUI`'nin `plugins` listesine ekleyin.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { type AiRequest, aiAssistant } from '@viveeditor/ui/extras'
+
+async function generate(request: AiRequest): Promise<string> {
+  const response = await fetch('/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify({
+      action: request.action,
+      instruction: request.instruction,
+      text: request.text,
+      context: request.context,
+      locale: request.locale,
+    }),
+    signal: request.signal,
+  })
+  if (!response.ok) throw new Error('AI request failed')
+  const { text } = await response.json()
+  return text
+}
+
+createUI(editor, { plugins: [aiAssistant({ provider: { generate } })] })
+```
+
+`/ai` kendi adresinizin yerini tutar; `csrfToken` sitenizin zaten kullandığı belirteçtir. Yanıtın biçimini siz belirlersiniz.
+
+## Yardımı açma
+
+- Metni seçip seçim balonundaki AI düğmesine basın.
+- `Ctrl+J`'ye basın (Mac'te `⌘+J`).
+- `/ai` yazıp `/` menüsünden "Yapay zekâ"yı seçin.
+
+Panelde işlemler, kendi isteğinizi yazacağınız bir alan ve yanıt geldiğinde "Seçimin yerine koy", "Altına ekle", "Yeniden dene" ve "Vazgeç" düğmeleri bulunur. "Durdur" süren isteği bitirir, `Esc` paneli kapatır.
+
+## Sağlayıcı sözleşmesi
+
+`provider.generate(request)` ya bir metin döndüren bir promise ya da metin parçaları veren bir async iterable döndürür. Yanıtı geldikçe akıtmak için async iterable döndürün.
+
+| Alan | Anlamı |
+| --- | --- |
+| `action` | `improve`, `fix`, `shorten`, `expand`, `tone`, `translate`, `summarize`, `continue` ya da yazılan istek için `custom`. |
+| `instruction` | Yazarın kendi isteği; yalnızca `custom` için. |
+| `text` | Seçili metin. |
+| `context` | `before` ve `after`: seçimin her iki yanındaki en çok 2.000 karakterlik metin. |
+| `locale` | Editörün dili, `tr` ya da `en`. |
+| `signal` | Bir `AbortSignal`. Onu `fetch`'e verin; yazar durdurduğunda, paneli kapattığında ya da süre dolduğunda tetiklenir. |
+
+`actions` seçeneği panelde hangi işlemlerin hangi sırayla görüneceğini belirler, örneğin `actions: ['fix', 'shorten', 'summarize']`. "Devam ettir" ve yazılan istek seçim olmadan da çalışır; diğer işlemler seçili metin ister.
+
+Akış yapan bir sağlayıcı yanıt gövdesini parça parça okuyabilir:
+
+```ts
+import type { AiRequest } from '@viveeditor/ui/extras'
+
+async function* stream(request: AiRequest): AsyncIterable<string> {
+  const response = await fetch('/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify({ action: request.action, text: request.text }),
+    signal: request.signal,
+  })
+  if (!response.ok || !response.body) throw new Error('AI request failed')
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) return
+    yield value
+  }
+}
+```
+
+## Sınırlar
+
+| Sınır | Değer |
+| --- | --- |
+| Seçili metin | 20.000 karakter; daha uzun seçim gönderilmez, panel daha kısa bir bölüm seçmenizi ister |
+| Bağlam | Her iki yanda 2.000 karakter |
+| Yazılan istek | 1.000 karakter |
+| Yanıt | 20.000 karakter; fazlası kesilir |
+| Süre | İstek başına 2 dakika; sonra durdurulur |
+
+Aynı anda tek istek çalışır. Yenisini başlatmak öncekini iptal eder; geç gelen parçalar atılır.
+
+## Yanıtlar nasıl eklenir
+
+Yapay zekâ yanıtı güvenilmeyen metindir. Panelde düz metin olarak gösterilir ve HTML olarak değil, düz paragraflar olarak eklenir. Yazar "Seçimin yerine koy" ya da "Altına ekle"yi seçmeden belgede hiçbir şey değişmez; tek geri alma yanıtı kaldırır. Yanıt yazılırken seçili metin değiştiyse "Seçimin yerine koy" kapanır, yanıt yalnızca altına eklenebilir.
+
+Yanıttaki başlık ve listeleri korumak isterseniz `markdown` seçeneğine bir Markdown çeviricisi yükleyen işlev verebilirsiniz. Çeviricinin ürettiği HTML'den görseller, medya ve betikler, `links: true` vermediğiniz sürece bağlantılar da atılır; kalan içerik editör şemasından geçer:
+
+```ts
+import { aiAssistant } from '@viveeditor/ui/extras'
+
+aiAssistant({
+  provider: { generate },
+  markdown: async () => (await import('@viveeditor/markdown')).markdownToHtml,
+})
+```
+
+## Yapay zekâ sunucusu için denetim listesi
+
+Sağlayıcı her zaman kendi adresinizi çağırmalı; tarayıcıdan doğrudan bir yapay zekâ sağlayıcısına gidilmemelidir.
+
+- API anahtarını sunucuda tutun. Oturum açmış kullanıcı ve CSRF belirteci isteyin.
+- Sistem istemini, modeli ve `max_tokens` değerini sunucuda sabitleyin. Yalnızca izin verdiğiniz işlemleri kabul edin ve girdi boyutunu sunucuda yeniden sınırlayın.
+- Kullanıcı başına kota ve istek sınırı koyun; yapay zekâ sağlayıcısında harcama tavanı belirleyin.
+- Belge metnini günlüklere yazmayın ya da maskeleyin. Yazarlara metinlerinin üçüncü bir tarafa gönderildiğini, KVKK ve GDPR gibi gizlilik kurallarınızın gerektirdiği biçimde bildirin.
+- İleride modele araç ya da bilgi getirme (retrieval) yeteneği verirseniz, belgeden gelen istem enjeksiyonu ciddi bir risk olur; o tasarımı ayrıca gözden geçirin.
+
+## İlgili sayfalar
+
+- [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/)
+- [Araç çubuğu ve kısayollar](https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar/)
+
+## viveEditor hangi yapay zekâ hizmetini kullanıyor?
+
+Hiçbirini. viveEditor kendisi hiçbir yere bir şey göndermez. İsteğin nereye gideceğine sağlayıcı işleviniz karar verir; istek kendi sunucunuza gitmelidir.
+
+## Yapay zekâ yanıtı yazar istemeden belgeyi değiştirebilir mi?
+
+Hayır. Yanıt önce gösterilir; yazar "Seçimin yerine koy" ya da "Altına ekle"yi seçmeden hiçbir şey uygulanmaz. Tek geri alma yanıtı kaldırır.
+
+---
+
+# Sunucuda temizleme
+
+> Gönderilen HTML'i Node için @viveeditor/sanitize, PHP 8.4+ için viveeditor/sanitizer ile kaydederken ve gösterirken temizleyin.
+
+URL: https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/
+Son güncelleme: 2026-11-01
+
+Editör yalnızca bilinen bir HTML kümesi üretir, ama herkes sunucunuza istediği HTML'i gönderebilir. Bu yüzden içeriği saklamadan ya da göstermeden önce sunucuda temizleyin. Node için `@viveeditor/sanitize` ve PHP 8.4+ için `viveeditor/sanitizer`, editörün ürettiğini olduğu gibi tutar ve geri kalan her şeyi atar. İkisi tek bir izin listesini ve tek bir test derlemini paylaşır, aynı çıktıyı verir.
+
+## Kurulum
+
+Node.js 20.19 ya da daha yeni sürüm için:
+
+```sh
+npm install @viveeditor/sanitize
+```
+
+PHP 8.4 ya da daha yeni sürüm için; `dom` ve `mbstring` eklentileri dışında bağımlılığı yoktur:
+
+```sh
+composer require viveeditor/sanitizer
+```
+
+Laravel kullanıyorsanız PHP temizleyicisini de getiren [viveeditor/laravel](https://editor.vivepdf.com/dokumantasyon/laravel/) paketini kullanın.
+
+## HTML'i temizleme
+
+```ts
+import { sanitizeHtml } from '@viveeditor/sanitize'
+
+const clean = sanitizeHtml(request.body.html, { embeds: true })
+```
+
+```php
+use Viveeditor\Sanitizer\Sanitizer;
+
+$clean = Sanitizer::sanitize($html, ['embeds' => true]);
+```
+
+Her öğe ve öznitelik tam bir HTML5 ayrıştırıcısıyla (Node'da `parse5`, PHP'de `Dom\HTMLDocument`) yeniden kurulur; böylece çıktı her tarayıcıda aynı okunur. İki kez temizlemek aynı sonucu verir.
+
+## Seçenekler
+
+| Seçenek | Varsayılan | Etkisi |
+| --- | --- | --- |
+| `embeds` | `false` | Video ve ses yerleştirmelerini tutar. Oynatıcılar kopyalanmaz, sağlayıcı ve kimlikten yeniden kurulur. |
+| `allowBase64` | `false` | `data:` adresi olarak saklanan görsellere (PNG, JPEG, GIF, WebP, AVIF) izin verir. |
+| `allowRelativeImages` | `false` | Göreli görsel adreslerine izin verir. |
+| `maxBytes` | 2 MB | Bundan büyük HTML `TOO_LARGE` hatası fırlatır. |
+
+`allowRelativeImages`'ı yalnızca gerçekten gerekiyorsa açın: göreli bir görsel adresi, her okurun tarayıcısının kendi sitenize bir GET isteği göndermesine yol açar; bir yazar bunu bir şeyi değiştiren bir adrese yöneltebilir.
+
+## Hatalar
+
+Temizleyici HTML'i hiçbir zaman yarıda kesmez. Girdiyi temizleyemediğinde hata fırlatır:
+
+| Kod | Ne zaman |
+| --- | --- |
+| `TOO_LARGE` | HTML, `maxBytes` değerinden büyük. |
+| `TOO_COMPLEX` | Yapı, ayrıştırıcıyı yavaşlatacak ya da çok bellek harcatacak türden: bir etikette 64'ten fazla öznitelik, 512 düzeyden derin iç içe geçme ya da girdideki etiket sayısından çok daha fazla öğe. Editör böyle HTML yazmaz. |
+
+Node'da hata, `code` alanı taşıyan bir `SanitizeError`'dır:
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+export function cleanArticle(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+PHP'de ise `reason` değeri `SanitizeException::TOO_LARGE` ya da `SanitizeException::TOO_COMPLEX` olan bir `SanitizeException`'dır:
+
+```php
+use Viveeditor\Sanitizer\SanitizeException;
+use Viveeditor\Sanitizer\Sanitizer;
+
+try {
+    $clean = Sanitizer::sanitize($html);
+} catch (SanitizeException $error) {
+    $clean = null;
+    $reason = $error->reason;
+}
+```
+
+## Neler korunur
+
+- **Bağlantılar** `http`, `https`, `mailto`, `tel` ve göreli adresleri tutar ve her zaman `rel="noopener noreferrer nofollow"` alır.
+- **Görseller** `https` adresi ister. `allowBase64` ve `allowRelativeImages` bunu genişletir.
+- **Yerleştirmeler** `embeds: true` verilmedikçe kaldırılır.
+- **`style`** yalnızca metin hizalamasını, metin ve vurgu rengini ve tablo genişliklerini tutar.
+- **`id`, `name`, `form` ve olay işleyicileri** hiçbir zaman geçmez.
+- **Betikler, stiller, çerçeveler, SVG ve benzeri öğeler** içerikleriyle birlikte kaldırılır.
+- **Bahsetmeler, formüller ve dipnotlar** tam olarak editörün yazdığı biçimde tutulur. Kimliği ya da formülü denetimden geçmeyen, veya bir bağlantının ya da dipnotun içine konmuş bahsetme ve formüller düz metne indirilir. Dipnotlar yalnızca kalın, italik ve bağlantı tutar.
+
+## PHP bellek notu
+
+PHP'de ayrıştırıcı içeriden durdurulamaz; bu yüzden bazı kısa ve kötü niyetli girdiler (birkaç on KB kapatılmamış biçim etiketi) denetim çalışmadan önce PHP'nin `memory_limit` sınırına ulaşabilir. PHP o isteği ölümcül bir hatayla bitirir; bu güvenlidir ama temiz bir istisna değildir.
+
+Temizleme yapan uç noktalarda `memory_limit` ve `max_execution_time` değerlerini olağan düzeyde tutun ve istek gövdesinin boyutunu orada sınırlayın.
+
+## Ne zaman temizlenmeli
+
+1. **Kaydederken.** Gönderilen HTML'i saklamadan önce temizleyin.
+2. **Gösterirken.** Saklanan HTML'i de bir temizleme yardımcısıyla gösterin (Laravel'de `@viveHtml`). Böylece temizlemeyi eklemeden önce ya da formlarınızın dışında yazılmış kayıtlar da güvende kalır.
+
+> **Ham HTML basmayın**
+>
+> Saklanan HTML'i, kaydederken bir kez temizlenmiş olsa bile, temizlemeden ve kaçışsız olarak sayfaya basmayın.
+
+## İlgili sayfalar
+
+- [Laravel](https://editor.vivepdf.com/dokumantasyon/laravel/)
+- [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/)
+- [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/)
+- [Video](https://editor.vivepdf.com/dokumantasyon/video/)
+
+## Editör zaten temiz HTML üretiyor; sunucuda neden yeniden temizlemeliyim?
+
+Çünkü herkes editörü kullanmadan sunucunuza istediği HTML'i gönderebilir. Tarayıcı bir güvenlik sınırı değildir.
+
+## Node ve PHP temizleyicileri aynı sonucu verir mi?
+
+Evet. Tek bir izin listesini ve tek bir test derlemini paylaşırlar, aynı çıktıyı verirler.
+
+## HTML çok büyük olursa ne olur?
+
+Temizleyici HTML'i kesmek yerine TOO_LARGE hatası fırlatır. Varsayılan sınır 2 MB'tır.
+
+---
+
+# Laravel
+
+> viveEditor'ü Laravel'e Blade bileşeni, yerel editör dosyaları, @viveHtml yönergesi ve temiz HTML için ViveHtml cast ile ekleyin.
+
+URL: https://editor.vivepdf.com/dokumantasyon/laravel/
+Son güncelleme: 2026-11-01
+
+`viveeditor/laravel`, viveEditor'ü PHP 8.4 ve üzerindeki Laravel 12 ve üzeri sürümlere getirir. Editör için bir Blade bileşeni ekler, editör dosyalarını kendi sitenizden sunar ve HTML'i kaydederken de gösterirken de [PHP temizleyicisiyle](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) temizler.
+
+## Kurulum
+
+1. Paketi ekleyin: `composer require viveeditor/laravel`. Laravel hizmet sağlayıcısını ve `ViveEditor` facade'ını kendisi bulur.
+2. Editör dosyalarını `public/vendor/viveeditor` klasörüne yayımlayın: `php artisan vendor:publish --tag=viveeditor-assets`.
+3. İsterseniz ayar dosyasını da yayımlayın: `php artisan vendor:publish --tag=viveeditor-config`.
+
+```sh
+composer require viveeditor/laravel
+php artisan vendor:publish --tag=viveeditor-assets
+```
+
+Editör dosyaları kopya olarak yayımlanır. Paketi güncelledikten sonra yeni sürümle eşleşmeleri için onları `--force` ile yeniden yayımlayın. Dosyalar `laravel-assets` etiketiyle de yayımlanır.
+
+## Editörü gösterme
+
+Sayfanın `<head>` bölümüne `@viveeditorScripts` koyun. Bu yönerge stil dosyasını ve editör betiğini kendi `public/vendor/viveeditor` klasörünüzden basar. Ardından bileşeni formunuzun içinde kullanın:
+
+```blade
+<head>
+  @viveeditorScripts
+</head>
+
+<form method="post">
+  @csrf
+  <label for="body">Makale</label>
+  <x-viveeditor::editor name="body" id="body" :value="old('body', $post->body)" required />
+  <button type="submit">Kaydet</button>
+</form>
+```
+
+Bileşen, editörün devraldığı bir `<textarea>` üretir. Form, HTML'i alanın `name` değeriyle gönderir.
+
+| Öznitelik | Anlamı |
+| --- | --- |
+| `name` | Zorunlu. Form alanının adı. |
+| `value` | Başlangıç HTML'i. Sizin için kaçışlanır. |
+| `label` | İsteğe bağlı. Görünür bir `<label>` yoksa alanın `aria-label` değeri olur. |
+
+`id`, `required` ya da Dosya menüsünü gizleyen `data-files="false"` gibi diğer öznitelikler textarea'ya aktarılır.
+
+Bileşen tek betikli sürümü kullanır; bu yüzden yalnızca npm ile gelen ekler (bahsetme, emoji, formül, dipnot, şablonlar ve yapay zekâ yardımı) onda yoktur.
+
+## Saklanan HTML'i gösterme
+
+Saklanan HTML'i `@viveHtml(...)` ile basın. Basarken temizler; böylece temizlemeyi eklemeden önce yazılmış ya da formlarınızın dışında yazılmış kayıtlar da güvende kalır.
+
+```blade
+<article>@viveHtml($post->body)</article>
+```
+
+> **Kaçışsız çıktı kullanmayın**
+>
+> Editör HTML'ini hiçbir zaman `{!! !!}` ile basmayın; bu yol temizlemeyi atlar.
+
+## Kaydederken temizleme
+
+`ViveHtml` cast'ı kaydederken temizler, okurken yeniden temizler. Böylece cast'tan önce ya da ham sorgularla yazılmış kayıtlar da temiz gelir.
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Viveeditor\Laravel\Casts\ViveHtml;
+
+class Post extends Model
+{
+    protected function casts(): array
+    {
+        return ['body' => ViveHtml::class];
+    }
+}
+```
+
+Cast'ın okurken temizleyemediği bir kayıt (çok büyük ya da çok karmaşık) boş metin olarak okunur ve hata, istisna işleyicinize gider. Kaydederken ise hata fırlatılır.
+
+Başka bir yerde temizlemek için facade'ı kullanın. İkinci bağımsız değişken, o çağrı için ayar dosyasındaki seçenekleri ezer:
+
+```php
+use Viveeditor\Laravel\Facades\ViveEditor;
+
+$clean = ViveEditor::sanitize($request->input('body'));
+$withEmbeds = ViveEditor::sanitize($html, ['embeds' => true]);
+```
+
+`ViveEditor::sanitize()` ve `@viveHtml`, çok büyük ya da çok karmaşık HTML için `Viveeditor\Sanitizer\SanitizeException` fırlatır. Sınırlar için [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) sayfasına bakın.
+
+## Ayarlar
+
+`config/viveeditor.php`, dosya klasörünü ve `@viveHtml`, cast ve facade'ın kullandığı temizleyici seçeneklerini tutar:
+
+```php
+return [
+
+    'asset_path' => env('VIVEEDITOR_ASSET_PATH', 'vendor/viveeditor'),
+
+    'sanitize' => [
+        'embeds' => false,
+        'allowBase64' => false,
+        'allowRelativeImages' => false,
+    ],
+
+];
+```
+
+Editörde video yerleştirmeyi açtıysanız burada `embeds` değerini `true` yapın; yoksa HTML temizlenirken yerleştirmeler kaldırılır.
+
+## İçerik Güvenliği Politikası (CSP)
+
+`Vite::useCspNonce()` kullandığınızda `@viveeditorScripts`'in bastığı etiketler nonce alır. Editör bu nonce'ı ilk kullanımda yüklediği ek betiklere (Word ve Markdown çeviricileri ile paneller) de aktarır; bu betikler aynı klasördedir. `script-src` yönergeniz bu klasöre izin vermelidir. Nonce'ı ayarlamak için [Laravel'in Vite belgelerine](https://laravel.com/docs/vite), politikanın geri kalanı için [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/) sayfasına bakın.
+
+## Dil
+
+Editör dilini `<html lang="...">` değerinden alır. Bunu düzen dosyanızda uygulamanın diline göre ayarlayın:
+
+```blade
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+```
+
+## İlgili sayfalar
+
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/)
+- [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/)
+- [Kurulum](https://editor.vivepdf.com/dokumantasyon/kurulum/)
+
+## Laravel paketi bir CDN'den bir şey yüklüyor mu?
+
+Hayır. Editör dosyaları kendi public/vendor/viveeditor klasörünüze yayımlanır ve oradan sunulur.
+
+## Saklanan HTML'i kaçışsız Blade çıktısıyla basabilir miyim?
+
+Hayır. Saklanan HTML'i, basarken temizleyen @viveHtml ile gösterin; böylece eski kayıtlar ve formlarınızın dışında yazılmış kayıtlar da güvende kalır.
+
+---
+
+# Paketler
+
+> viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri.
+
+URL: https://editor.vivepdf.com/dokumantasyon/paketler/
+Son güncelleme: 2026-11-01
+
+viveEditor küçük paketlere bölünmüştür; yalnızca kullandığınızı yüklersiniz. Bu sayfada her paketi, ne yaptığını ve ek giriş noktalarını bulacaksınız. Her npm paketinin genel API'si deponun [`api/` klasöründe](https://github.com/mtvrkan/viveeditor/tree/main/api) kayıtlıdır.
+
+## Nereden başlamalı
+
+| Paket | Ne yapar |
+| --- | --- |
+| `viveeditor` | Textarea'ları araç çubuklu editöre çeviren tek betik. `mountEditor`, `upgradeTextarea`, `upgradeAll` ve içerdiği paketlerin dışa aktardığı her şey de buradan alınabilir. |
+| `@viveeditor/core` | ProseMirror üzerine kurulu editör motoru ve eklenti sistemi: şema, komutlar, HTML ve JSON, yapıştırma temizliği. Araç çubuğu yoktur. |
+| `@viveeditor/ui` | Yüzen araç çubuğu, seçim balonu, `/` menüsü, paneller, Dosya menüsü ve okunabilirlik göstergesi. |
+
+`viveeditor` paketi `core`, `ui`, `ext-basic`, `ext-code-block`, `ext-embed`, `ext-format`, `ext-image`, `ext-list`, `ext-office-paste`, `ext-search`, `ext-table` ve `ext-task-list` paketlerini yeniden dışa aktarır. CDN sürümünde de aynı özellikler vardır.
+
+## Düzenleme özellikleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/ext-basic` | Kalın, italik, altı çizili, üstü çizili, satır içi kod, bağlantılar, başlıklar, alıntılar, yatay çizgiler, satır sonları |
+| `@viveeditor/ext-list` | Madde işaretli ve numaralı listeler |
+| `@viveeditor/ext-format` | Metin hizalama, yazı rengi ve vurgu |
+| `@viveeditor/ext-task-list` | Yapılacaklar listeleri |
+| `@viveeditor/ext-code-block` | Dil seçicili kod blokları ve isteğe bağlı sözdizimi renklendirmesi |
+| `@viveeditor/ext-table` | Birleştirilmiş hücreler, başlık satırları ve sütun genişlikleriyle tablolar |
+| `@viveeditor/ext-search` | Türkçe büyük harfleri doğru eşleştiren bul ve değiştir |
+| `@viveeditor/ext-character-count` | Karakter sayacı ve sınırı |
+| `@viveeditor/ext-image` | Adresleri denetlenen görseller, güvenli yükleme ve alternatif metin hatırlatmaları |
+| `@viveeditor/ext-embed` | Denetlenmiş bağlantılardan yeniden kurulan YouTube, Vimeo ve Spotify oynatıcıları |
+| `@viveeditor/ext-office-paste` | Word, Google Dokümanlar ve LibreOffice'ten gerçek listelerle temiz yapıştırma |
+
+## Ekstralar (yalnızca npm)
+
+Bunlar CDN betiğinde yoktur. Menüleri ve panelleri `@viveeditor/ui/extras` sağlar.
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/ext-mention` | Kimlikleri denetlenen `@` bahsetmeleri |
+| `@viveeditor/ext-math` | Kendi KaTeX kopyanızla çizilen LaTeX formülleri |
+| `@viveeditor/ext-footnote` | Yerinde düzenlenen, yayımlanan sayfada numaralanan dipnotlar |
+| `@viveeditor/emoji-data` | Emoji menüsü için sıkıştırılmış emoji listesi |
+
+Şablonlar ve yapay zekâ asistanı için ayrı bir eklenti paketi gerekmez; ikisi de `@viveeditor/ui/extras` içindeki arayüz eklentileridir.
+
+## Dosya dönüştürücüleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/markdown` | Markdown içe ve dışa aktarma, Markdown'ı tanıyan yapıştırma |
+| `@viveeditor/docx` | Güvenilmeyen dosyalar için sınırlarla Word (`.docx`) içe ve dışa aktarma |
+
+Dosya menüsü bunları yükleyici fonksiyon olarak alır; yalnızca kullanıldıklarında indirilirler.
+
+## Çerçeve bileşenleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/react` | React bileşeni ve `useViveEditor` kancası |
+| `@viveeditor/vue` | `v-model` destekli Vue bileşeni ve `useViveEditor` birleşimi |
+| `@viveeditor/svelte` | `bind:value` destekli Svelte bileşeni ve `use:viveEditor` eylemi |
+| `@viveeditor/angular` | `ngModel` ve reaktif formlar için Angular bileşeni |
+| `@viveeditor/element` | Her sayfada çalışan `<vive-editor>` form alanı |
+
+Bkz. [Çerçeveler](https://editor.vivepdf.com/dokumantasyon/cerceveler/).
+
+## Sunucu paketleri
+
+| Paket | Ne yapar |
+| --- | --- |
+| `@viveeditor/sanitize` | Editör çıktısıyla birebir uyumlu, Node için sunucu tarafı HTML temizleme |
+| `viveeditor/sanitizer` (PHP) | Aynı temizleyicinin bağımlılıksız PHP 8.4+ sürümü |
+| `viveeditor/laravel` (PHP) | Laravel 12+ için Blade bileşeni, yerel editör dosyaları ve `@viveHtml` |
+
+PHP paketleri Composer ile kurulur ve ayrı sürümlenir. Bkz. [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) ve [Laravel](https://editor.vivepdf.com/dokumantasyon/laravel/).
+
+## Ek giriş noktaları
+
+Bazı paketlerin birden fazla girişi vardır; böylece ağır kod ya da yalnızca yayın sayfasında gereken kod editör paketinin dışında kalır:
+
+- `@viveeditor/ui/extras`: `mentionMenu`, `emojiMenu`, `templateMenu`, `mathTools`, `footnoteTools`, `aiAssistant` ve `suggestionMenu`.
+- `@viveeditor/ui/panels`: panel kiti; ilk açılışta yüklenmesi yerine paketinize dahil etmek isterseniz.
+- `@viveeditor/ext-code-block/highlight`: `CodeHighlight` ve `shikiHighlighter`.
+- `@viveeditor/ext-embed/activate`: yayın sayfaları için `activateEmbeds()`.
+- `@viveeditor/ext-math/render`: yayın sayfaları için `renderMath()`.
+- `@viveeditor/ext-footnote/render`: yayın sayfaları için `renderFootnotes()`.
+- `@viveeditor/markdown/paste`: `MarkdownPaste`.
+- `@viveeditor/element/define`: `<vive-editor>` öğesini kaydeder.
+- `@viveeditor/emoji-data/en`: İngilizce emoji listesi.
+
+Yerleşim kuralı gereken paketler bir `style.css` dosyası da sunar; liste [Kurulum](https://editor.vivepdf.com/dokumantasyon/kurulum/) sayfasında.
+
+## API raporları
+
+Her npm paketinin [`api/`](https://github.com/mtvrkan/viveeditor/tree/main/api) altında bir klasörü vardır; örneğin [`api/core`](https://github.com/mtvrkan/viveeditor/tree/main/api/core) ya da [`api/ui`](https://github.com/mtvrkan/viveeditor/tree/main/api/ui). Bu klasörlerde yayımlanan `.d.ts` tür bildirimleri durur. Genel API değiştiğinde değişiklik inceleme sırasında bu dosyalarda görünür; bir paketin belirli bir sürümde tam olarak neyi dışa aktardığını buradan okuyabilirsiniz.
+
+---
+
+# Güvenlik ve CSP
+
+> viveEditor güvensiz işaretlemeyi nasıl dışarıda tutar, sunucuda neden yeniden temizlersiniz ve CDN betiği hangi CSP ayarlarını ister.
+
+URL: https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/
+Son güncelleme: 2026-11-01
+
+viveEditor sizi iki katmanda korur: editör yalnızca bilinen bir HTML kümesi üretir, sunucunuz da gönderilen her belgeyi yeniden temizler. Bu sayfa iki katmanı, CDN betiğinin ve ek dosyalarının istediği İçerik Güvenliği Politikası (CSP) ayarlarını ve bir güvenlik açığını nasıl bildireceğinizi anlatıyor.
+
+## Editörün denetledikleri
+
+Belge şeması bir izin listesidir. Tanımadığı işaretleme çıktıya hiç ulaşmaz. Yazılan metin, yapıştırılan HTML, açılan dosyalar ve şablonlar aynı kurallardan geçer.
+
+- Bağlantılar yalnızca izinli protokolleri kabul eder: `http`, `https`, `mailto` ve `tel`.
+- Her adres içerik yüklenirken ve çıktıya yazılırken yeniden denetlenir; çünkü JSON içerik HTML ayrıştırıcısından geçmez.
+- `style` özniteliği yalnızca editörün yazdığı değerleri taşır; denetlenmiş bir renk ya da hizalama gibi.
+- Görseller `https` adresi ister. `data:` adresleri yalnızca `allowBase64` ile çalışır, SVG hiçbir zaman. `javascript:`, `vbscript:`, `file:`, `blob:` ve `filesystem:` her zaman reddedilir.
+- Video oynatıcıları verilen adresi saklamaz. Editör sağlayıcıyı ve video kimliğini saklar, oynatıcı adresini sabit `sandbox`, `allow` ve `referrerpolicy` değerleriyle yeniden kurar.
+- Yapay zekâ yanıtları ve bahsedilen kişilerin adları HTML olarak değil, düz metin olarak gösterilir ve eklenir. Bahsetme kimliği hiçbir zaman bağlantıya dönüşmez.
+
+## Sunucuda yeniden temizleyin
+
+Tarayıcı bir güvenlik sınırı değildir. Herkes sunucunuza istediği HTML'i gönderebilir; bu yüzden HTML'i saklamadan ya da göstermeden önce sunucuda temizleyin. Node için `@viveeditor/sanitize`, PHP için `viveeditor/sanitizer` editörün ürettiğini olduğu gibi bırakır, geri kalan her şeyi siler.
+
+```ts
+import { sanitizeHtml } from '@viveeditor/sanitize'
+
+const clean = sanitizeHtml(request.body.html, { embeds: true })
+```
+
+Kaydederken temizleyin; kayıtlı HTML'i sayfaya basarken de bir temizleme yardımcısından geçirin. Böylece temizlemeyi eklemeden önce yazılmış kayıtlar da güvende kalır. Seçenekler, sınırlar ve hatalar [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) sayfasında.
+
+## İçerik Güvenliği Politikası
+
+### CDN betiği ve ek dosyaları
+
+CDN betiği üç ek dosyayı ilk kullanımda kendi klasöründen yükler: `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` ve `viveeditor.panels.iife.js`. Her biri ana betiğe gömülü bir `sha384` parmak iziyle denetlenir.
+
+- `script-src`, betiklerin bulunduğu klasöre izin vermelidir; örneğin tam sürümünüzle `https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/`.
+- `nonce` kullanıyorsanız onu ana betiğe koyun. Ek dosyalara da aynısı kopyalanır.
+- Trusted Types zorunluysa `trusted-types` yönergesine `viveeditor` ilke adını ekleyin. Bu ilke yalnızca ek dosyaların adreslerine izin verir.
+- Dosyaları kendiniz barındırıyorsanız adlarını değiştirmeyin ve parmak izi denetimi çalışabilsin diye `Access-Control-Allow-Origin` başlığıyla sunun.
+- Klasör, ana betiğin kendi adresinden alınır; bu dosyanın adı `viveeditor.classic.iife.js` olmalı ve `http` ya da `https` üzerinden sunulmalıdır.
+
+```html
+<script
+  nonce="r4nd0m"
+  src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"
+></script>
+```
+
+`x.y.z` yerine kullandığınız sürümü tam olarak, nonce yerine de sunucunuzun her yanıt için ürettiği değeri yazın. npm ve paketleyiciyle ek dosya yoktur; dönüştürücüler ve paneller kendi derlemenizden yüklenir. Laravel paketi editör dosyalarını kendi `public/vendor/viveeditor` klasörünüzden sunar; `Vite::useCspNonce()` kullandığınızda etiketler nonce değerini alır.
+
+### Görseller: `img-src`
+
+`img-src` yönergesini yüklemelerinizi sunan sunucularla ve kabul ettiğiniz görsel sunucularıyla sınırlayın. Varsayılan olarak başka sitelerden yapıştırılan görseller özgün adreslerinde kalır (`remoteImages: 'allow'`); bu görselleri göstermek, o siteye sayfayı kimin ne zaman okuduğunu söyler. Daha sıkı bir kurulum için `'drop'` ya da `'rehost'` kullanın; bkz. [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/).
+
+### Video gömme: `frame-src`
+
+Yalnızca etkinleştirdiğiniz sağlayıcıları listeleyin:
+
+- YouTube: `https://www.youtube-nocookie.com`
+- Vimeo: `https://player.vimeo.com`
+- Spotify: `https://open.spotify.com`
+
+Sayfa genelindeki `Referrer-Policy: no-referrer` ayarı YouTube oynatıcılarını çalışmaz hâle getirir. Sunucuda hiçbir zaman her `iframe` öğesine izin vermeyin; oynatıcıları `div[data-embed]` üzerinden yeniden kurun ya da yalnızca `isAllowedEmbedSrc()` işlevinin onayladığı adresleri kabul edin. Ayrıntılar [Video](https://editor.vivepdf.com/dokumantasyon/video/) sayfasında.
+
+### Biçimler: `style-src`
+
+Yazı rengi, vurgu, hizalama ve tablo sütun genişlikleri hem editörde hem kaydedilen HTML'de `style` özniteliği olarak yazılır. `'unsafe-inline'` içermeyen bir `style-src` tarayıcının bu öznitelikleri yok saymasına yol açar; renkler ve genişlikler kaybolur. İçeriği gösteren ya da düzenleyen sayfalarda `style-src` için `'unsafe-inline'` izni verin, `script-src`'yi ise sıkı tutun.
+
+### Yazdırma
+
+Yazdırma, betik çalıştırmayan ve yalnızca görselleri ve stilleri yükleyen gizli bir çerçeve kullanır. Bu çerçeve `allow-scripts` olmadan korumalı alanda çalışır ve kendi CSP'sini taşır.
+
+## Yüklemeler
+
+Editör her görsel adresini ve dosyayı belgeye girmeden önce denetler; yine de yükleme adresiniz şunları yapmalıdır:
+
+- her yüklemeyi yeniden doğrulamalı ve yeniden kodlamalı (bu, EXIF ve GPS verilerini ve çok biçimli dosyaları temizler), gerçek genişliği ve yüksekliği döndürmeli;
+- yüklemeleri çerezsiz bir alan adından, sunucunun belirlediği `Content-Type` ve `X-Content-Type-Options: nosniff` ile sunmalı;
+- kimlik doğrulama, CSRF belirteci ve istek sınırı istemeli;
+- uzak görselleri kendisi indiriyorsa SSRF'ye karşı korunmalı.
+
+## Güvenlik açığı bildirin
+
+Açıkları deponun [Security sekmesindeki](https://github.com/mtvrkan/viveeditor/security) GitHub "Report a vulnerability" düğmesiyle gizli olarak bildirin. Herkese açık bir issue açmayın.
+
+1. Etkilenen paketi ve sürümü yazın.
+2. Sorunu gösteren en küçük örneği ekleyin.
+3. Gözlemlediğiniz etkiyi anlatın.
+
+Bildiriminizin alındığı size iletilir ve düzeltme, açık duyurulmadan önce sizinle birlikte planlanır. 1.0'a kadar yalnızca yayımlanmış en son ara sürüm güvenlik düzeltmesi alır. Tüm paketler aynı sürüm numarasını paylaştığı için düzeltme, her paketin yama sürümü olarak çıkar.
+
+Özellikle editör çıktısına betik çalıştırma, olay işleyicileri, `javascript:` adresleri ya da temizlenmemiş işaretleme sokmanın her yolu önemlidir. Sunucu temizleyicileri de kapsamdadır. Politikanın tamamı [SECURITY.md](https://github.com/mtvrkan/viveeditor/blob/main/SECURITY.md) dosyasında.
+
+---
+
+# Erişilebilirlik
+
+> viveEditor WCAG 2.2 AA'yı nasıl karşılar, hangi tuşlarla yönetilir, ekran okuyucular ne duyar ve sizin eklemeniz gerekenler.
+
+URL: https://editor.vivepdf.com/dokumantasyon/erisilebilirlik/
+Son güncelleme: 2026-11-01
+
+viveEditor WCAG 2.2 AA düzeyini hedefler: her araç klavyeyle çalışır, durum değişiklikleri ekran okuyuculara bildirilir ve editör yazarların görsellerini açıklamasına yardım eder. Bu sayfa editörün neler yaptığını ve etiket gibi sizin sağlamanız gereken birkaç şeyi anlatıyor.
+
+## Nasıl test ediliyor
+
+Her test sayfası, her panel ve iki tema da axe ile WCAG 2.2 AA'ya göre denetlenir; bir hata derlemeyi durdurur. `/` menüsü ve öneri listeleri, seçenek seçerken odağı metinde tutar (combobox kalıbı); bir klavye testi her seçeneğe ulaşılabildiğini kanıtlar.
+
+## Editöre bir ad verin
+
+Ekran okuyucuların yazma alanı için bir ada ihtiyacı var. Editörü oluşturduğunuz her yerde `label` verin:
+
+```ts
+import { mountEditor } from 'viveeditor'
+
+mountEditor(document.querySelector('#editor'), { label: 'Makale metni' })
+```
+
+Bileşenler aynı `label` özelliğini, `<vive-editor>` de `label` özniteliğini alır. Textarea kullanıyorsanız ona bağlı görünür bir `<label for>` bırakın; `label` vermezseniz editör bu metni kullanır.
+
+`locale` değerini de verin ya da `<html lang="...">` değerini doğru ayarlayın; böylece araç adları ve mesajlar sayfanın dilinde okunur. Arayüzün Türkçe ve İngilizce metinleri var.
+
+## Klavye
+
+| Tuşlar | Ne yapar |
+| --- | --- |
+| `Alt+F10` | Odağı metinden araç çubuğuna taşır |
+| `Ctrl+K` | Bağlantı panelini açar |
+| `Ctrl+F` | Bul ve değiştiri açar |
+| `/` | Blok menüsünü açar |
+| `Esc` | Seçim balonunu ya da yüklenmekte olan paneli kapatır |
+| `Tab` / `Shift+Tab` | Liste maddesinin düzeyini değiştirir |
+| `Tab` | Tabloda sonraki hücreye geçer |
+| `Ctrl+Enter` | Yapılacaklar maddesini işaretler |
+| `Ctrl+Shift+L`, `E`, `R`, `J` | Sola, ortaya, sağa hizalar ya da iki yana yaslar |
+| `Ctrl+J` | Eklediyseniz yapay zekâ asistanını açar |
+
+Mac'te tabloda `Ctrl` yazan yerlerde `⌘` kullanın. Yazarken Markdown kısayolları da çalışır: başlık için `## `, liste için `- `, yapılacaklar listesi için `[ ]` gibi. Tam liste [Araç çubuğu ve kısayollar](https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
+
+## Ekran okuyucular ne duyar
+
+- Dosya menüsündeki ilerleme `role="status"` bölgesiyle bildirilir; hatalar görünür bir `role="alert"` uyarısında çıkar.
+- Bir panel yüklenirken yerinde `role="status"` taşıyan bir yer tutucu durur. Yükleme başarısız olursa yerine Tekrar dene düğmeli bir mesaj gelir.
+- Form yüklemeleri beklerken `role="status"` taşıyan bir uyarı formun gönderileceğini söyler ve editör `aria-busy` olarak işaretlenir.
+- Zorunlu bir editör gönderimde boşsa editör `aria-invalid="true"` olarak işaretlenir, odağı alır ve kendi mesajınızı göstermek için kullanabileceğiniz `vive:invalid` olayını tetikler.
+
+## Görseller ve alternatif metin
+
+Görsel paneli "Görmeyenler için görseli kısaca anlatın" ipucuyla alternatif metin ister. Yazar bir görseli süs amaçlı olarak da işaretleyebilir.
+
+- Kayıtlı belgede `alt: null` açıklamanın eksik olduğunu, `alt: ''` görselin süs amaçlı olduğunu gösterir.
+- `Image` eklentisinin `requireAlt` seçeneği (`'off'`, `'warn'` ya da `'block'`) alternatif metin hatırlatmasının nasıl davranacağını belirler.
+- `imagesWithoutAlt` sorgusu, örneğin yayımlamadan önce, hâlâ açıklama bekleyen görselleri listeler.
+
+## Renkler ve yerleşim
+
+- Açık, koyu ve otomatik temalar var. Koyu temada yazarın seçtiği yazı renkleri okunur kalsın diye ekranda açılır; kayıtlı HTML saklanan rengi korur.
+- 560 pikselden dar ekranlarda araçların çoğu "Diğer araçlar" menüsüne geçer.
+- İçeriği gösteren sayfalar, görseller küçük ekranlara sığsın diye `img { max-width: 100%; height: auto; }` kuralını eklemelidir.
+
+## Okunabilirlik göstergesi
+
+Arayüzde kelime, cümle, ortalama cümle uzunluğu, okuma süresi ve okunabilirlik puanını gösteren bir gösterge var. Puan Ateşman ya da Flesch formülüyle hesaplanır; `createUI` içinde `readability: 'atesman'` ya da `readability: 'flesch'` ile seçin, göstergeyi gizlemek için `readability: false` verin.
+
+---
+
+# Sürüm politikası
+
+> viveEditor paketlerini 1.0 öncesinde nasıl sürümler, neler uyumlu kalır ve CDN betiği neden tam sürüm numarası ister.
+
+URL: https://editor.vivepdf.com/dokumantasyon/surum-politikasi/
+Son güncelleme: 2026-11-01
+
+viveEditor, alışılmış 0.x kuralıyla anlamsal sürümlemeyi izler ve tüm npm paketleri tek bir sürüm numarasını paylaşır. Bu sayfa sürümler arasında nelerin değişebileceğini, nelerin hiç bozulmayacağını ve bir sürümü nasıl güvenle sabitleyeceğinizi anlatıyor.
+
+## 0.x kuralı
+
+viveEditor şu anda ilk kararlı sürümünden önceki 0.x aşamasında.
+
+- Uyumu bozan bir değişiklik, 0.1'den 0.2'ye geçiş gibi bir ara sürümde gelebilir ve o sürümün notlarında anlatılır.
+- 0.1.0'dan 0.1.1'e geçiş gibi yama sürümleri hiçbir şeyi bozmaz.
+
+Yeni bir ara sürüme geçmeden önce sürüm notlarını okuyun. Her sürüm etiketlenir ve bir [GitHub sürümü](https://github.com/mtvrkan/viveeditor/releases) olarak yayımlanır.
+
+## Her paket için tek sürüm
+
+`viveeditor` ve tüm `@viveeditor/*` paketleri, yani bütün npm paketleri aynı sürüm numarasıyla birlikte yayımlanır. Editör, eklentileri ve çerçeve bileşeniniz her zaman uyuşsun diye hepsini aynı sürümde kurun.
+
+PHP paketleri `viveeditor/sanitizer` ve `viveeditor/laravel` ise Composer üzerinden ayrı sürümlenir.
+
+## Kayıtlı içerik okunabilir kalır
+
+Herhangi bir 0.x sürümüyle kaydedilen HTML ve JSON, sonraki her 0.x sürümünde okunabilir kalır. Güncelleme yaptığınızda kayıtlı içerik için hiçbir zaman taşıma gerekmez.
+
+Asıl saklama biçimi ProseMirror JSON'udur (`editor.getJSON()`); HTML (`editor.getHTML()`) bir gösterim biçimidir. İkisinden birini saklayabilirsiniz.
+
+## Genel API kayıt altında
+
+Her paketin genel API'si deponun [`api/` klasöründe](https://github.com/mtvrkan/viveeditor/tree/main/api) `.d.ts` dosyaları olarak kayıtlıdır. API bu dosyalar güncellenmeden değişirse derleme başarısız olur; böylece genel API'deki her değişiklik incelemede görünür. İki sürüm arasında neyin değiştiğini görmek için `api/` klasörünü iki sürümün etiketinde karşılaştırın.
+
+## CDN sürümünü sabitleyin
+
+CDN betiğini her zaman tam sürümle yükleyin:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"></script>
+```
+
+`x.y.z` yerine kullandığınız sürümü tam olarak yazın. Betik ek dosyalarını aynı klasörden yükler ve onları o sürüme gömülü parmak izleriyle denetler; bir ek dosya yalnızca sürümü birebir tutuyorsa kabul edilir. `cdn.jsdelivr.net/npm/viveeditor` gibi kısa bir adres bu dosyaları bulamaz. `viveeditor.css` dosyasını da aynı sürüm klasöründen yükleyin.
+
+## Güvenlik düzeltmeleri
+
+1.0'a kadar yalnızca yayımlanmış en son ara sürüm güvenlik düzeltmesi alır. Tüm paketler aynı sürüm numarasını paylaştığı için düzeltme, her paketin yama sürümü olarak çıkar. Bu düzeltmeleri almanın yolu en son ara sürümde kalmaktır. Bkz. [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/).
+
+---
+
+# Sık sorulan sorular
+
+> viveEditor'ün lisansı, kurulumu, çerçeveleri, güvenliği, Word desteği, dilleri, ekstraları ve sürümleri hakkında kısa yanıtlar.
+
+URL: https://editor.vivepdf.com/dokumantasyon/sss/
+Son güncelleme: 2026-11-01
+
+Bunlar, viveEditor'ü bir siteye eklemeden önce en sık sorulan sorular. Yanıtlar kısa; ayrıntılar bağlantı verilen sayfalarda.
+
+## Daha fazlası için
+
+- Kurulum: [Kurulum](https://editor.vivepdf.com/dokumantasyon/kurulum/) ve [İlk editör](https://editor.vivepdf.com/dokumantasyon/ilk-editor/).
+- Çerçeveler ve sunucu tarafı işleme: [Çerçeveler](https://editor.vivepdf.com/dokumantasyon/cerceveler/).
+- Güvenli saklama: [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme/) ve [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/).
+- Görseller: [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/).
+- Word: [Word'den yapıştırma](https://editor.vivepdf.com/dokumantasyon/word-den-yapistirma/) ve [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/).
+- Ekstralar: [Bahsetme](https://editor.vivepdf.com/dokumantasyon/bahsetme/), [Formül](https://editor.vivepdf.com/dokumantasyon/formul/) ve [Yapay zekâ](https://editor.vivepdf.com/dokumantasyon/yapay-zeka/).
+- Klavye ve ekran okuyucular: [Erişilebilirlik](https://editor.vivepdf.com/dokumantasyon/erisilebilirlik/).
+- Güncellemeler: [Sürüm politikası](https://editor.vivepdf.com/dokumantasyon/surum-politikasi/).
+- Bir şey çalışmıyorsa: [Sorun giderme](https://editor.vivepdf.com/dokumantasyon/sorun-giderme/).
+
+Sorunuz burada yoksa [GitHub'daki issue'lara](https://github.com/mtvrkan/viveeditor/issues) bakın ya da yeni bir tane açın. Güvenlik sorunlarını [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/) sayfasında anlatıldığı gibi gizli olarak bildirin.
+
+## viveEditor ücretsiz mi?
+
+Evet. viveEditor MIT lisanslı açık kaynak bir projedir. Görsel yükleme, tablolar, video gömme ve Word içe ve dışa aktarma dahil her şey ücretsizdir; ücretli bir sürüm yoktur.
+
+## Derleme adımı gerekiyor mu?
+
+Hayır. Bir stil dosyası, bir betik ve data-editor özniteliği taşıyan bir textarea yeterli. Paketleyici kullanıyorsanız bunun yerine npm'den viveeditor paketini kurun.
+
+## Hangi çerçeveler destekleniyor?
+
+React 18 ve 19, Vue 3.5, Svelte 5 ve Angular 21 ve 22 için bileşenler var. Diğer sayfalarda vive-editor özel öğesi form alanı olarak çalışır.
+
+## Editörün gönderdiği HTML'i olduğu gibi saklayabilir miyim?
+
+Hayır. Editör yalnızca bilinen bir HTML kümesi üretir, ama herkes sunucunuza istediği HTML'i gönderebilir. Saklamadan ya da göstermeden önce HTML'i sunucuda Node için @viveeditor/sanitize, PHP için viveeditor/sanitizer ile temizleyin.
+
+## Yazarlar görsel yükleyebilir mi?
+
+Evet, Image eklentisine kendi yükleme fonksiyonunuzu verdiğinizde. Editör her dosyayı ve adresi denetler, ama sunucunuz da her yüklemeyi yeniden doğrulamalı ve yeniden kodlamalıdır.
+
+## Word ile çalışıyor mu?
+
+Evet. Word, Google Dokümanlar ve LibreOffice'ten yapıştırma gerçek iç içe listeleri korur; Dosya menüsü .docx dosyalarını açar ve kaydeder. Eski .doc, .odt ve .rtf biçimleri desteklenmez.
+
+## Arayüz hangi dilleri konuşuyor?
+
+Türkçe ve İngilizce. Birini locale seçeneğiyle seçin; seçenek verilmezse editör sayfanın lang özniteliğine, sonra tarayıcı diline bakar.
+
+## Bahsetme, emoji, formül ve yapay zekâ asistanı CDN betiğinde var mı?
+
+Hayır. Bahsetme, emoji, formül, dipnot, şablonlar ve yapay zekâ asistanı yalnızca npm paketi olarak gelir ve @viveeditor/ui/extras üzerinden araç çubuğuna eklenir.
+
+## viveEditor metnimi bir yapay zekâ hizmetine gönderiyor mu?
+
+Hayır. viveEditor kendiliğinden hiçbir yere bir şey göndermez. Yapay zekâ asistanı yalnızca sizin yazdığınız sağlayıcı fonksiyonunu çağırır; bu fonksiyon da kendi sunucunuzu çağırmalıdır.
+
+## Erişilebilir mi?
+
+viveEditor tam klavye kontrolü ve ekran okuyucu bildirimleriyle WCAG 2.2 AA düzeyini hedefler. Yine de her editöre sizin bir etiket vermeniz gerekir.
+
+## Bir güncelleme kayıtlı içeriğimi bozar mı?
+
+Hayır. Herhangi bir 0.x sürümüyle kaydedilen HTML ve JSON, sonraki her 0.x sürümünde okunabilir kalır. API'nin kendisi ise 1.0'dan önce bir ara sürümde değişebilir.
+
+## Laravel paketi var mı?
+
+Evet. viveeditor/laravel, Laravel 12 ve üstüyle, PHP 8.4 ve üstüyle çalışır. Bir Blade bileşeni ekler, editör dosyalarını kendi sitenizden sunar ve PHP temizleyicisini içerir.
+
+---
+
+# Sorun giderme
+
+> Yüklenmeyen CDN ek dosyalarından reddedilen dosyalara, çalışmayan oynatıcılardan temizleyici hatalarına sık görülen sorunlar ve çözümleri.
+
+URL: https://editor.vivepdf.com/dokumantasyon/sorun-giderme/
+Son güncelleme: 2026-11-01
+
+Bu sayfa viveEditor'le en sık karşılaşılan sorunları ve nedenlerini listeliyor. Yaşadığınız belirtiyi bulun, nedenleri sırayla kontrol edin; kurulumun tamamı gerekiyorsa bağlantıyı izleyin.
+
+## CDN betiği ve ek dosyalar
+
+### Word, Markdown ya da bir panel yüklenmiyor
+
+CDN betiği `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` ve `viveeditor.panels.iife.js` dosyalarını ilk kullanımda kendi klasöründen yükler. Yüklenemezlerse Dosya menüsü "Dönüştürücü yüklenemedi" der ya da panel "Bu panel yüklenemedi" mesajını Tekrar dene düğmesiyle gösterir. Şu nedenlere bakın:
+
+- Betik adresinde tam sürüm yok; örneğin `cdn.jsdelivr.net/npm/viveeditor`. Tam sürümünüzle `viveeditor@x.y.z` yazın.
+- Dosyaların adı değiştirilmiş ya da dosyalar birleştirilmiş. Ana betiğin adı `viveeditor.classic.iife.js` olarak kalmalı, ek dosyalar da kendi adlarıyla onun yanında durmalı.
+- Dosyaları `Access-Control-Allow-Origin` olmadan kendiniz barındırıyorsunuz; bu yüzden parmak izi denetimi çalışamıyor.
+- İçerik Güvenliği Politikanız `script-src` içinde klasörü engelliyor ya da Trusted Types zorunlu ama `trusted-types` yönergesinde `viveeditor` ilke adı yok.
+
+Başarısız olan ek dosya kaldırılır; bir sonraki kullanımda yeniden denenir. Yükleme 30 saniye sonra bırakılır. Bkz. [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/).
+
+### Bütünlük denetimi başarısız oluyor
+
+Her ek dosya, ana betiğin o tam sürümüne gömülü bir `sha384` parmak iziyle denetlenir ve yalnızca sürümü birebir tutuyorsa kabul edilir. Tüm dosyaları aynı sürüm klasöründen yükleyin ve derlemeden sonra dosyaları değiştirmeyin.
+
+### İkinci kopya uyarısı
+
+Ana betik iki kez yüklenmiş. İkinci kopya bir uyarı verir ve kendisine ait olmayan ek dosyaları ilk kopyaya devreder. Fazla `<script>` etiketini kaldırın.
+
+### npm ile Word ve Markdown görünmüyor
+
+Paketleyiciyle CDN ek dosyaları yoktur. Yükleyiciler verilmezse Dosya menüsü yalnızca HTML ve metin dosyalarını açar. Dönüştürücüleri `files` içinde verin; bkz. [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/).
+
+## Dosyalar ve yapıştırılan içerik
+
+### Bir dosya reddediliyor
+
+- 20 MB'tan büyük Word dosyaları ve 5 MB'tan büyük metin dosyaları reddedilir.
+- Parola korumalı dosyalar açılamaz. Parolayı kaldırıp tekrar deneyin.
+- Açıldığında çok büyüyen ya da çok derin iç içe geçen Word dosyaları "Dosya çok büyük ya da çok karmaşık." mesajıyla reddedilir.
+- `.doc`, `.odt` ve `.rtf` desteklenmez. Dosyayı önce `.docx` olarak kaydedin.
+
+### Word dosyası açılınca görseller kayboluyor
+
+Word dosyasındaki görselleri açmak için Dosya menüsü seçeneklerinde `upload` fonksiyonunuz ya da `allowBase64` gerekir. İkisi de yoksa görseller atlanır ve menü kaç tane atlandığını söyler.
+
+### Word'den yapıştırınca görseller eksik
+
+Kopyalayan bilgisayardaki dosyalara işaret eden görseller yapıştırılamaz. `OfficePaste` eklentisinin `onDropped` geri çağırması kaç görselin atlandığını söyler. Bu görselleri görsel paneliyle ekleyin.
+
+### Görsel ya da bağlantı adresi reddediliyor
+
+- Görseller `https` adresi ister. `data:` adresleri yalnızca `allowBase64` ile çalışır, SVG görseller hiçbir zaman.
+- Bağlantılar yalnızca `http`, `https`, `mailto` ve `tel` kabul eder.
+
+## Video gömme
+
+### Bağlantı oynatıcıya dönüşmüyor
+
+- Sağlayıcı `providers` listenizde yok. Yerleşik sağlayıcılar YouTube, Vimeo ve Spotify'dır.
+- Bağlantı bir kısaltma hizmetinden geliyor. Editör yönlendirmeleri ve kısa bağlantıları hiçbir zaman izlemez.
+- Yapıştırırken panoda yalnızca bağlantı olmalı ve boş bir satıra yapıştırılmalı. Aksi hâlde araç çubuğundaki video düğmesini kullanın.
+- Belgede izin verilen en fazla oynatıcı sayısına ulaşılmış (`maxEmbeds`, varsayılan 50).
+
+### Yayımlanan sayfada oynatıcılar çalışmıyor
+
+- Sayfa genelindeki `Referrer-Policy: no-referrer` ayarı YouTube oynatıcılarını durdurur.
+- `frame-src` yönergeniz sağlayıcıyı listelemiyor.
+- `facade: true` kullanıyorsunuz ama sayfada `@viveeditor/ext-embed/activate` içinden `activateEmbeds()` çağırmıyorsunuz.
+- `embeds: true` verilmediği için sunucu temizleyiciniz oynatıcıları sildi.
+
+Bkz. [Video](https://editor.vivepdf.com/dokumantasyon/video/).
+
+## Ekstralar
+
+### Formüller LaTeX kaynağıyla görünüyor
+
+0.18.2'den eski KaTeX `KATEX_OUTDATED` hata koduyla reddedilir ve yerine kaynak gösterilir. KaTeX'i güncelleyin. KaTeX yüklenemezse kod `KATEX_LOAD` olur. Yayımlanan sayfalarda `@viveeditor/ext-math/render` içinden `renderMath(root, { load: () => import('katex') })` çağırın ve `katex/dist/katex.min.css` dosyasını yükleyin.
+
+### Dipnotlar yayımlanan sayfada numaralanmıyor
+
+İçeriği gösteren sayfada `@viveeditor/ext-footnote/render` içinden `renderFootnotes(root)` çağırın.
+
+## Sunucuda temizleme
+
+### `TOO_LARGE` ya da `TOO_COMPLEX`
+
+`sanitizeHtml`, kesilmiş ya da yarım bir çıktı döndürmek yerine `SanitizeError` fırlatır:
+
+- `TOO_LARGE`: HTML, `maxBytes` değerinden (varsayılan 2 MB) büyük.
+- `TOO_COMPLEX`: yapı, ayrıştırıcıyı yavaşlatacak ya da çok bellek harcatacak türden; örneğin bir etikette 64'ten fazla öznitelik ya da 512 düzeyden derin iç içe geçme. Editör böyle HTML yazmaz.
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+function cleanOrNull(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+`null` aldığınızda isteği reddedin.
+
+### PHP isteği ölümcül hatayla bitiyor
+
+Bazı kısa ve kötü niyetli girdiler, denetim çalışmadan PHP'nin `memory_limit` sınırına ulaşabilir. Bu güvenlidir ama temiz bir istisna değildir. Temizleme yapan uç noktalarda `memory_limit` ve `max_execution_time` değerlerini olağan düzeyde tutun ve oradaki istek gövdesi boyutunu sınırlayın.
+
+### Laravel'de bir alan boş metin olarak okunuyor
+
+`ViveHtml` dönüştürücüsü o kaydı çok büyük ya da çok karmaşık olduğu için temizleyemedi. Hata, istisna işleyicinize gider. Bkz. [Laravel](https://editor.vivepdf.com/dokumantasyon/laravel/).
+
+## Formlar ve kurulum
+
+### Form gönderilmiyor
+
+- `required` olan editör boş. Textarea, `detail.reason` değeri `'required'` olan bir `vive:invalid` olayı tetikler.
+- Görseller hâlâ yükleniyor. Form, yüklemeler bitince gönderilir. Beklerken bir yükleme başarısız olursa gönderim iptal edilir ve `detail.reason` değeri `'upload'` olan `vive:invalid` olayı tetiklenir.
+
+```ts
+document.querySelector('#body').addEventListener('vive:invalid', (event) => {
+  console.log((event as CustomEvent).detail.reason)
+})
+```
+
+### Araç çubuğunda bir düğme yok
+
+Araç çubuğu yalnızca komutları kayıtlı araçları gösterir. Kendi `extensions` listenizi veriyorsanız eksik aracın eklentisini ekleyin. Dosya menüsü, textarea üzerindeki `data-files="false"` ya da `createUI` içindeki `files: false` ile gizlenir.
+
+### `Editor.create` bir `ViveEditorError` fırlatıyor
+
+- `DUPLICATE_EXTENSION`: aynı eklenti listede iki kez var.
+- `INVALID_SCHEMA`: bir bağımlılık eksik; örneğin liste için liste maddesi.
+- `SCHEMA_CONFLICT`: iki eklenti aynı şeyi tanımlıyor.
+- `DESTROYED`: editörü `destroy()` sonrasında kullandınız.
+- `UNKNOWN_COMMAND`: komutun eklentisi yüklü değil.
+
+### Arayüz yanlış dilde
+
+`locale` verin. Verilmezse editör önce `<html lang="...">` değerine, sonra tarayıcı diline bakar.
+
+### Yayımlanan sayfada görseller çok geniş
+
+Kayıtlı görseller `width` ve `height` değerlerini taşır. İçeriği gösteren sayfalara `img { max-width: 100%; height: auto; }` kuralını ekleyin.

@@ -1,0 +1,95 @@
+# viveEditor
+
+> viveEditor is a free, open-source (MIT) rich text editor that drops into any website. One script tag turns a textarea into an editor, and typed npm packages cover React, Vue, Svelte, Angular and a custom element.
+
+Key facts:
+
+- Price: free. Image uploads, tables, video embeds and Word import and export are included; there is no paid tier.
+- Engine: built on ProseMirror. The document schema is an allowlist, so unknown markup never reaches the output.
+- Server side: `@viveeditor/sanitize` (Node) and `viveeditor/sanitizer` (PHP 8.4+) keep exactly the HTML the editor produces; a Laravel package adds a Blade component.
+- Accessibility: tested against WCAG 2.2 AA in light and dark themes, with full keyboard control.
+- Interface languages: Turkish and English.
+- Status: 0.x, before the first stable release; breaking changes ship only in minor versions.
+- Source code: https://github.com/mtvrkan/viveeditor · npm: https://www.npmjs.com/package/viveeditor
+- Website: English at https://editor.vivepdf.com/ (default) and Turkish at https://editor.vivepdf.com/tr/. Every documentation page below is also available as plain Markdown.
+
+## Getting started
+
+- [Installation](https://editor.vivepdf.com/en/docs/installation.md): Add viveEditor with one CDN script or from npm, pick the packages you need and load the right stylesheets.
+- [Your first editor](https://editor.vivepdf.com/en/docs/first-editor.md): Turn a textarea into an editor, mount one into any element, or build it from Editor.create and createUI, then read its HTML.
+- [Frameworks](https://editor.vivepdf.com/en/docs/frameworks.md): Use viveEditor in React, Vue, Svelte and Angular, or as a <vive-editor> form field, with notes for server rendering.
+
+## Features
+
+- [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts.md): The floating toolbar, selection bubble, / menu, block menu, word count, readability score and every keyboard shortcut.
+- [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads.md): Set up the image extension, write the upload function, handle progress and abort, secure your server and track alt text.
+- [Video and audio embeds](https://editor.vivepdf.com/en/docs/video-embeds.md): Turn YouTube, Vimeo and Spotify links into safe players, with the preview card, activateEmbeds, server checks and CSP settings.
+- [Tables](https://editor.vivepdf.com/en/docs/tables.md): Tables with merged cells, header rows, column widths you can drag, and the table tools in the toolbar.
+- [Code blocks](https://editor.vivepdf.com/en/docs/code-blocks.md): Code blocks with a language picker, the default language list and optional Shiki syntax colouring, including a setup without WebAssembly.
+- [Find and replace](https://editor.vivepdf.com/en/docs/find-and-replace.md): Find and replace that matches Turkish capitals correctly, with match case, whole word and replace all options.
+- [Character limit](https://editor.vivepdf.com/en/docs/character-limit.md): Count characters and set a limit; typing stops at the limit, pasted text is trimmed and the toolbar shows how much is left.
+- [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print.md): Use the File menu to open Word, Markdown, HTML and text files, save as Word, Markdown or HTML, and print the document.
+- [Paste from Office](https://editor.vivepdf.com/en/docs/paste-from-office.md): Clean paste from Word, Google Docs and LibreOffice; fake bullets become real lists, and pasted Markdown text becomes formatted content.
+
+## Extras
+
+- [Mentions](https://editor.vivepdf.com/en/docs/mentions.md): Add @mentions with the Mention extension and mentionMenu, store checked ids, and verify every mention again on your server.
+- [Emoji](https://editor.vivepdf.com/en/docs/emoji.md): Add an emoji picker that opens on a colon, with a compact English emoji list that loads only on first use.
+- [Formulas (LaTeX)](https://editor.vivepdf.com/en/docs/formulas.md): Write LaTeX formulas with MathExtension and your own KaTeX 0.18.2 or newer, then draw them on published pages with renderMath.
+- [Footnotes](https://editor.vivepdf.com/en/docs/footnotes.md): Add footnotes that writers edit in place, then number them and list them at the end of published pages with renderFootnotes.
+- [Templates](https://editor.vivepdf.com/en/docs/templates.md): Offer ready-made content blocks in the slash menu with templateMenu; every template goes through the editor schema before it lands.
+- [AI assistant](https://editor.vivepdf.com/en/docs/ai-assistant.md): Connect the AI assistant to your own server through a provider function; answers are shown and inserted as plain text.
+
+## Server
+
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing.md): Clean posted HTML on your server with @viveeditor/sanitize for Node or viveeditor/sanitizer for PHP 8.4+, on save and on print.
+- [Laravel](https://editor.vivepdf.com/en/docs/laravel.md): Add viveEditor to Laravel with a Blade component, local editor files, the @viveHtml directive and the ViveHtml cast for clean HTML.
+
+## Reference
+
+- [Packages](https://editor.vivepdf.com/en/docs/packages.md): Every viveEditor package, what it does, which entry points it has and where its public API report lives.
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp.md): How viveEditor keeps unsafe markup out, why you sanitize again on the server, and the CSP settings the CDN script needs.
+- [Accessibility](https://editor.vivepdf.com/en/docs/accessibility.md): How viveEditor meets WCAG 2.2 AA, which keys control it, what screen readers hear, and what you still need to provide.
+- [Versioning](https://editor.vivepdf.com/en/docs/versioning.md): How viveEditor versions its packages before 1.0, what stays compatible, and why the CDN script needs an exact version.
+- [Frequently asked questions](https://editor.vivepdf.com/en/docs/faq.md): Short answers about viveEditor's licence, setup, frameworks, safety, Word support, languages, extras and versions.
+- [Troubleshooting](https://editor.vivepdf.com/en/docs/troubleshooting.md): Fixes for common viveEditor problems, from CDN add-ons that fail to load to refused files, blocked players and sanitizer errors.
+
+## Türkçe belgeler
+
+- [Kurulum](https://editor.vivepdf.com/dokumantasyon/kurulum.md): viveEditor'ü tek bir CDN betiğiyle ya da npm'den kurun, ihtiyacınız olan paketleri seçin ve doğru stil dosyalarını yükleyin.
+- [İlk editör](https://editor.vivepdf.com/dokumantasyon/ilk-editor.md): Bir textarea'yı editöre çevirin, editörü herhangi bir öğeye yerleştirin ya da Editor.create ve createUI ile kendiniz kurun.
+- [Çerçeveler](https://editor.vivepdf.com/dokumantasyon/cerceveler.md): viveEditor'ü React, Vue, Svelte ve Angular'da ya da <vive-editor> form alanı olarak kullanın; sunucu tarafı işleme notlarıyla.
+- [Araç çubuğu ve kısayollar](https://editor.vivepdf.com/dokumantasyon/arac-cubugu-ve-kisayollar.md): Yüzen araç çubuğu, seçim balonu, / menüsü, blok menüsü, kelime sayacı, okunabilirlik ölçümü ve tüm klavye kısayolları.
+- [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme.md): Görsel eklentisini kurun, yükleme fonksiyonunu yazın, ilerleme ve iptali yönetin, sunucuyu güvene alın ve alternatif metni takip edin.
+- [Video ve ses ekleme](https://editor.vivepdf.com/dokumantasyon/video.md): YouTube, Vimeo ve Spotify bağlantılarını güvenli oynatıcılara çevirin; ön yüz kartı, activateEmbeds, sunucu kontrolü ve CSP ayarları.
+- [Tablolar](https://editor.vivepdf.com/dokumantasyon/tablolar.md): Tablo eklentisiyle birleştirilmiş hücreler, başlık satırları, sürüklenebilir sütun genişlikleri ve araç çubuğundaki tablo araçları.
+- [Kod blokları](https://editor.vivepdf.com/dokumantasyon/kod-bloklari.md): Dil seçicili kod blokları, varsayılan dil listesi ve Shiki ile isteğe bağlı sözdizimi renklendirme; CSP için WebAssembly'siz kurulum.
+- [Bul ve değiştir](https://editor.vivepdf.com/dokumantasyon/bul-ve-degistir.md): Türkçe büyük harfleri doğru eşleştiren bul ve değiştir; büyük/küçük harf duyarlılığı, tam kelime ve tümünü değiştir seçenekleri.
+- [Karakter sınırı](https://editor.vivepdf.com/dokumantasyon/karakter-siniri.md): Karakter sayısını izleyin ve bir sınır koyun; yazma sınırda durur, yapıştırılan metin kısaltılır, araç çubuğu kalan alanı gösterir.
+- [Dosya aç, kaydet, yazdır](https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir.md): Dosya menüsüyle Word, Markdown, HTML ve metin dosyalarını açın, belgeyi Word, Markdown ya da HTML olarak kaydedin ve yazdırın.
+- [Word'den yapıştırma](https://editor.vivepdf.com/dokumantasyon/word-den-yapistirma.md): Word, Google Docs ve LibreOffice'ten temiz yapıştırma; sahte madde işaretleri gerçek listelere dönüşür, Markdown metni biçimlenir.
+- [Bahsetme (@)](https://editor.vivepdf.com/dokumantasyon/bahsetme.md): Mention eklentisi ve mentionMenu ile @ bahsetme ekleyin, denetlenen kimlikleri saklayın ve her bahsetmeyi sunucuda yeniden doğrulayın.
+- [Emoji](https://editor.vivepdf.com/dokumantasyon/emoji.md): İki nokta yazınca açılan bir emoji menüsü ekleyin; küçük İngilizce emoji listesi yalnızca ilk kullanımda yüklenir.
+- [Formüller (LaTeX)](https://editor.vivepdf.com/dokumantasyon/formul.md): MathExtension ve kendi KaTeX 0.18.2 ya da yeni sürümünüzle LaTeX formül yazın, yayındaki sayfada renderMath ile çizin.
+- [Dipnotlar](https://editor.vivepdf.com/dokumantasyon/dipnot.md): Yazarın yerinde düzenlediği dipnotlar ekleyin; yayındaki sayfada renderFootnotes ile numaralayıp sayfa sonunda listeleyin.
+- [Şablonlar](https://editor.vivepdf.com/dokumantasyon/sablonlar.md): templateMenu ile / menüsünde hazır içerik blokları sunun; her şablon eklenmeden önce editör şemasından geçer.
+- [Yapay zekâ yardımı](https://editor.vivepdf.com/dokumantasyon/yapay-zeka.md): Yapay zekâ yardımını bir sağlayıcı işleviyle kendi sunucunuza bağlayın; yanıtlar düz metin olarak gösterilir ve eklenir.
+- [Sunucuda temizleme](https://editor.vivepdf.com/dokumantasyon/sunucuda-temizleme.md): Gönderilen HTML'i Node için @viveeditor/sanitize, PHP 8.4+ için viveeditor/sanitizer ile kaydederken ve gösterirken temizleyin.
+- [Laravel](https://editor.vivepdf.com/dokumantasyon/laravel.md): viveEditor'ü Laravel'e Blade bileşeni, yerel editör dosyaları, @viveHtml yönergesi ve temiz HTML için ViveHtml cast ile ekleyin.
+- [Paketler](https://editor.vivepdf.com/dokumantasyon/paketler.md): viveEditor'ün tüm paketleri, ne işe yaradıkları, hangi giriş noktalarını sundukları ve genel API raporlarının yeri.
+- [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp.md): viveEditor güvensiz işaretlemeyi nasıl dışarıda tutar, sunucuda neden yeniden temizlersiniz ve CDN betiği hangi CSP ayarlarını ister.
+- [Erişilebilirlik](https://editor.vivepdf.com/dokumantasyon/erisilebilirlik.md): viveEditor WCAG 2.2 AA'yı nasıl karşılar, hangi tuşlarla yönetilir, ekran okuyucular ne duyar ve sizin eklemeniz gerekenler.
+- [Sürüm politikası](https://editor.vivepdf.com/dokumantasyon/surum-politikasi.md): viveEditor paketlerini 1.0 öncesinde nasıl sürümler, neler uyumlu kalır ve CDN betiği neden tam sürüm numarası ister.
+- [Sık sorulan sorular](https://editor.vivepdf.com/dokumantasyon/sss.md): viveEditor'ün lisansı, kurulumu, çerçeveleri, güvenliği, Word desteği, dilleri, ekstraları ve sürümleri hakkında kısa yanıtlar.
+- [Sorun giderme](https://editor.vivepdf.com/dokumantasyon/sorun-giderme.md): Yüklenmeyen CDN ek dosyalarından reddedilen dosyalara, çalışmayan oynatıcılardan temizleyici hatalarına sık görülen sorunlar ve çözümleri.
+
+## Source and help
+
+- [Source code on GitHub](https://github.com/mtvrkan/viveeditor): every package and this website, under MIT
+- [Report a bug or ask a question](https://github.com/mtvrkan/viveeditor/issues)
+
+## Optional
+
+- [Full English documentation in one file](https://editor.vivepdf.com/llms-full.txt)
+- [Full Turkish documentation in one file](https://editor.vivepdf.com/llms-full-tr.txt)
+- [Sitemap](https://editor.vivepdf.com/sitemap.xml)

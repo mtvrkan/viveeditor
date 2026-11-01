@@ -1,0 +1,98 @@
+# Mentions
+
+> Add @mentions with the Mention extension and mentionMenu, store checked ids, and verify every mention again on your server.
+
+URL: https://editor.vivepdf.com/en/docs/mentions/
+Last updated: 2026-11-01
+
+Mentions let a writer type `@` and pick a person, a team or any other entry from a list you supply. The editor stores an opaque id and a plain-text label. Your server decides who the id really is, who may be mentioned and who gets notified.
+
+Mentions ship as npm packages only. The one-script build does not include them.
+
+## Set it up
+
+1. Install the extension and the UI: `npm install @viveeditor/ext-mention @viveeditor/ui @viveeditor/core`.
+2. Add `Mention` to the editor's extensions.
+3. Add `mentionMenu` from `@viveeditor/ui/extras` to the `plugins` of `createUI`, with an `items` function that returns matching entries.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { Mention } from '@viveeditor/ext-mention'
+import { createUI } from '@viveeditor/ui'
+import { mentionMenu } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-mention/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, Mention],
+})
+
+createUI(editor, {
+  plugins: [
+    mentionMenu({
+      items: async (query, signal) => {
+        const response = await fetch(`/mentions?q=${encodeURIComponent(query)}`, { signal })
+        if (!response.ok) return []
+        return response.json()
+      },
+    }),
+  ],
+})
+```
+
+`/mentions` stands for your own search endpoint. Each entry you return has an `id`, a `label` and an optional `description`.
+
+## How the menu behaves
+
+- The menu opens when the writer types `@` at the start of a line or after a space. The query is up to 32 letters, digits, `_`, `.` or `-`.
+- Your `items` function runs 150 ms after the last keystroke. When the writer keeps typing or closes the menu, the `signal` is aborted, so pass it to `fetch`.
+- The menu shows at most 8 entries, as plain text. Your labels are never read as HTML.
+- `Enter` or `Tab` picks an entry and `Esc` closes the menu.
+
+You can also insert a mention from code with `editor.commands.insertMention({ id: 'u_42', label: 'Editor' })`.
+
+## What is stored
+
+A mention is saved as one span:
+
+```html
+<span class="vive-mention" data-mention="u_42">@Editor</span>
+```
+
+The id must match `^[A-Za-z0-9_][A-Za-z0-9_.:@-]{0,127}$` and must not contain `..`. The pattern is exported as `MENTION_ID_PATTERN`, and `isMentionId()` tests a value against it. The editor checks the id when it reads HTML, when it reads JSON and when it writes HTML. A span whose id fails the check is not read as a mention.
+
+The label loses control, bidi and zero-width characters and is capped at 100 characters. The `maxLabelLength` option of `Mention` changes the cap. An id never becomes a link address.
+
+## Check mentions on the server
+
+The browser is not a security boundary. Anyone can post a span with any id and any label. When you save the content:
+
+- clean the HTML with [the server sanitizer](https://editor.vivepdf.com/en/docs/server-sanitizing/). It keeps mentions in exactly the form above and reduces a mention with a bad id, or one placed inside a link or a footnote, to its text;
+- look every id up in your own directory and drop the ones that do not exist;
+- check that the writer may mention that person or group;
+- build the displayed name from your own data, not from the stored label;
+- keep ids opaque. Do not use e-mail addresses or other personal data as ids.
+
+The search endpoint behind `items` needs authentication, a rate limit and tenant scoping, so a writer only finds people they are allowed to see.
+
+## Notifications
+
+viveEditor sends no notifications. If you notify people who were mentioned:
+
+- compare the ids before and after an edit and notify only new mentions;
+- deduplicate, so one person mentioned five times gets one notice;
+- rate-limit the notices you send per writer.
+
+## Related pages
+
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/)
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/)
+- [Packages](https://editor.vivepdf.com/en/docs/packages/)
+
+## Where does the list of people come from?
+
+From your own items function. viveEditor has no user directory; it calls your function with the typed text and an AbortSignal and shows what you return.
+
+## Can I trust the name stored in a mention?
+
+No. The label is whatever the writer's browser sent. Look the id up in your own directory and build the displayed name from your data.

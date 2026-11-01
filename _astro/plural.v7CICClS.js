@@ -1,0 +1,1 @@
+function e(e,t,n){return(new Intl.PluralRules(e).select(n)===`one`?t.one:t.other).replace(`#`,new Intl.NumberFormat(e).format(n))}export{e as t};

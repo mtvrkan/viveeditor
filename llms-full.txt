@@ -1,0 +1,2889 @@
+# viveEditor · Documentation
+
+> viveEditor documentation: installing, frameworks, the toolbar, images, video, tables, Word and Markdown, server-side cleaning, Laravel and extras.
+
+URL: https://editor.vivepdf.com/en/docs/
+
+---
+
+# Installation
+
+> Add viveEditor with one CDN script or from npm, pick the packages you need and load the right stylesheets.
+
+URL: https://editor.vivepdf.com/en/docs/installation/
+Last updated: 2026-11-01
+
+You can add viveEditor to a page with one script from a CDN, or install it from npm and build it with your bundler. This page shows both ways, which packages to choose and which stylesheets to load.
+
+## With a CDN script
+
+This needs no build step. Load the stylesheet and the script, then mark a textarea with `data-editor`:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.css" />
+<script src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"></script>
+
+<form method="post">
+  <label for="body">Article</label>
+  <textarea id="body" name="body" data-editor required></textarea>
+</form>
+```
+
+Replace `x.y.z` with the exact version you use. When the page is ready, the script turns every `textarea[data-editor]` into an editor with the toolbar and exposes `window.ViveEditor`. The form posts clean HTML under the textarea's name. Always sanitize it again on the server.
+
+The script carries basic formatting, lists, alignment and colours, checklists, code blocks (without syntax colouring), tables, find and replace, images (by address, no uploader), video embeds and clean paste from Office. Mentions, emoji, formulas, footnotes, templates and the AI assistant are npm only, and so is the `<vive-editor>` element.
+
+> **Keep the exact version and the file names**
+>
+> The Word and Markdown converters and the panels live in extra files next to the main script: `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` and `viveeditor.panels.iife.js`. They load on first use from the same folder and are checked against `sha384` fingerprints built into that exact version. Short addresses such as `cdn.jsdelivr.net/npm/viveeditor`, or renamed and combined scripts, cannot find them.
+
+If your site has a Content Security Policy, read [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/) before you go live.
+
+## With npm
+
+### Everything in one package
+
+The `viveeditor` package holds the same editor as the CDN script:
+
+```sh
+npm install viveeditor
+```
+
+```ts
+import { upgradeAll } from 'viveeditor'
+import 'viveeditor/style.css'
+
+upgradeAll()
+```
+
+With a bundler there are no CDN add-ons. To get Word and Markdown in the File menu, pass the converters as loaders; see [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+
+### A framework component
+
+React, Vue, Svelte and Angular each have a component package that you install next to `viveeditor`:
+
+```sh
+npm install @viveeditor/react viveeditor
+```
+
+Use `@viveeditor/vue`, `@viveeditor/svelte` or `@viveeditor/angular` in the same way. For any page there is also `@viveeditor/element`, a `<vive-editor>` form field. Details are on [Frameworks](https://editor.vivepdf.com/en/docs/frameworks/).
+
+### Only the parts you need
+
+Every feature is a separate package. `@viveeditor/core` is the engine and has no toolbar; add `@viveeditor/ui` for one:
+
+```sh
+npm install @viveeditor/core @viveeditor/ext-basic @viveeditor/ext-list @viveeditor/ui
+```
+
+The full list is on [Packages](https://editor.vivepdf.com/en/docs/packages/).
+
+## Stylesheets
+
+- CDN: `viveeditor.css` from the same version folder as the script.
+- `viveeditor` and the framework components: `import 'viveeditor/style.css'` once.
+- Angular: add `node_modules/viveeditor/dist/viveeditor.css` to `styles` in `angular.json`.
+- Your own selection of packages: `@viveeditor/core/style.css`, `@viveeditor/ui/style.css` if you use the toolbar, and the `style.css` of each extension that has one: `ext-code-block`, `ext-embed`, `ext-footnote`, `ext-image`, `ext-math`, `ext-mention`, `ext-search`, `ext-table` and `ext-task-list`.
+
+```ts
+import '@viveeditor/core/style.css'
+import '@viveeditor/ui/style.css'
+import '@viveeditor/ext-table/style.css'
+```
+
+Formulas also need KaTeX's own stylesheet, `katex/dist/katex.min.css`.
+
+## Requirements
+
+- Node.js 20.19 or newer for your build tools. The npm packages declare it in `engines`.
+- React 18 or 19, Vue 3.5, Svelte 5, or Angular 21 or 22 for the component packages.
+- KaTeX 0.18.2 or newer if you use formulas. Older versions are refused.
+- PHP 8.4 or newer for `viveeditor/sanitizer`, and Laravel 12 or newer for `viveeditor/laravel`.
+
+## Pin the version
+
+All npm packages are released together with the same version number, so install every viveEditor package at the same version. For the CDN script, always write the exact version (`viveeditor@x.y.z`); its add-ons are checked against fingerprints built into that version. Before 1.0 a minor version can contain breaking changes; see [Versioning](https://editor.vivepdf.com/en/docs/versioning/).
+
+## Next steps
+
+- [Your first editor](https://editor.vivepdf.com/en/docs/first-editor/): textarea, `mountEditor` or `Editor.create`.
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/): clean the posted HTML before you store it.
+
+---
+
+# Your first editor
+
+> Turn a textarea into an editor, mount one into any element, or build it from Editor.create and createUI, then read its HTML.
+
+URL: https://editor.vivepdf.com/en/docs/first-editor/
+Last updated: 2026-11-01
+
+There are three ways to start an editor: upgrade a textarea in a form, mount an editor into any element with `mountEditor`, or build one yourself from `Editor.create` and `createUI`. This page shows each, then how to read the content, listen for changes, and set the label and the language.
+
+## Upgrade a textarea
+
+This is the shortest way, and it works with the CDN script or with npm.
+
+1. Load `viveeditor.css` and `viveeditor.classic.iife.js` with your exact version, as shown on [Installation](https://editor.vivepdf.com/en/docs/installation/).
+2. Add `data-editor` to the textarea. Keep its `name`, and a `<label for>` that points at it.
+3. On the server, read the field as usual and sanitize the HTML before you store it; see [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/).
+
+```html
+<form method="post">
+  <label for="body">Article</label>
+  <textarea id="body" name="body" data-editor required></textarea>
+  <button>Publish</button>
+</form>
+```
+
+The textarea stays in the form, hidden, and always holds the latest HTML (`''` when the document is empty). It fires `input` on every change. With `required`, an empty editor cancels the submit, marks itself `aria-invalid="true"`, fires a `vive:invalid` event on the textarea and takes the focus. While images are still uploading, the submit waits and goes out once they are done. Add `data-files="false"` to a textarea to hide its File menu.
+
+### From your own code
+
+With npm, call `upgradeAll()` to upgrade every `textarea[data-editor]`, or `upgradeTextarea()` for one:
+
+```ts
+import { upgradeTextarea } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const field = await upgradeTextarea(document.querySelector('#body'), {
+  label: 'Article body',
+  ui: { locale: 'en' },
+})
+
+console.log(field.editor.getHTML())
+```
+
+`upgradeAll(root, options)` limits the search to `root`. Calling `upgradeTextarea` twice at the same time returns the same promise. `field.destroy()` brings the textarea back and leaves the final HTML in it. Pass `ui: false` to leave out the toolbar.
+
+## Mount into any element
+
+`mountEditor` puts the full editor, with every extension and the toolbar, into any element. The framework components are built on it.
+
+```ts
+import { mountEditor } from 'viveeditor'
+import 'viveeditor/style.css'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  value: '<p>Hello</p>',
+  locale: 'en',
+  label: 'Article body',
+  onChange: (html) => console.log(html),
+})
+
+const editor = await mount.ready
+```
+
+- The value is HTML, and an empty document is `''`.
+- `getValue()`, `setValue(html)`, `setEditable(editable)` and `destroy()` control it. `setValue` with a new value does not call `onChange` and does not go into the undo history.
+- `extensions` replaces the default set; `ui: false` drops the toolbar.
+- If you call `destroy()` before the editor is ready, `ready` rejects with `MountDestroyedError`.
+- No File menu converters are loaded by default; pass them in `ui.files`.
+
+## Build it yourself
+
+`Editor.create` gives you the engine with only the extensions you list. `createUI` adds the toolbar, the selection bubble, the `/` menu and the panels.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import '@viveeditor/core/style.css'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { listExtensions } from '@viveeditor/ext-list'
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, ...listExtensions],
+  content: '<p>Hello <strong>world</strong></p>',
+  label: 'Article body',
+})
+
+const ui = createUI(editor, { locale: 'en', theme: 'auto' })
+```
+
+`createUI` mounts next to the editing area and is removed when the editor is destroyed. It shows only the tools whose commands are registered, so a tool appears once you add its extension. `ui.destroy()` removes it earlier. The options are covered on [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/).
+
+## Read the content
+
+- `editor.getHTML()` returns the document as HTML.
+- `editor.getJSON()` returns ProseMirror JSON, the canonical storage format.
+- `editor.getText()` returns plain text, one line per block.
+- `editor.isEmpty` tells you whether the document is empty.
+- `editor.setContent(content)` loads HTML or JSON. It does not go into the undo history.
+
+Store either HTML or JSON. Both stay readable by later 0.x versions; see [Versioning](https://editor.vivepdf.com/en/docs/versioning/).
+
+## Listen for changes
+
+```ts
+const stop = editor.on('change', ({ editor }) => {
+  console.log(editor.getHTML())
+})
+
+editor.on('error', ({ error }) => console.error(error))
+```
+
+- `change` fires when the document changes.
+- `update` fires on any state change, such as a new selection.
+- `focus`, `blur`, `destroy` and `error` are also available.
+- `on` returns a function that removes the listener; `off` does the same.
+
+An error thrown inside one listener does not stop the others. It is reported through the `error` event.
+
+## Label and language
+
+Give every editor a `label`, such as `label: 'Article body'`. Screen readers announce it as the name of the editing area. With a textarea, keep a visible `<label for>`; the editor takes its name from it when you pass no `label`.
+
+The interface speaks Turkish and English. Pass `locale` to choose. Without it, the editor follows `<html lang="...">`, then the browser language: anything starting with `tr` gives Turkish, everything else English. To change single strings, pass `messages` to `createUI`, for example `createUI(editor, { messages: { toolbar: 'Formatting' } })`.
+
+## Next steps
+
+- [Frameworks](https://editor.vivepdf.com/en/docs/frameworks/): the same editor in React, Vue, Svelte and Angular.
+- [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/): connect your upload endpoint.
+
+---
+
+# Frameworks
+
+> Use viveEditor in React, Vue, Svelte and Angular, or as a <vive-editor> form field, with notes for server rendering.
+
+URL: https://editor.vivepdf.com/en/docs/frameworks/
+Last updated: 2026-11-01
+
+viveEditor has a small component package for React, Vue, Svelte and Angular, and a `<vive-editor>` custom element for any page. Each one gives you the same editor as the one-script build, with every extension and the toolbar, and keeps no editor logic of its own.
+
+## What every component shares
+
+- The value is HTML, and an empty document is `''`.
+- Pass `extensions` to choose your own list, or `ui: false` to leave out the toolbar. `ui` also takes the toolbar options, such as `{ theme: 'dark' }`.
+- `locale` picks Turkish or English, and `label` names the editing area for screen readers.
+- A new value from outside is applied without firing a change event and without entering the undo history. Setting the current value again does nothing.
+- File menu converters are not loaded by default. Pass them in `ui.files`; see [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+- Load the styles once with `import 'viveeditor/style.css'`.
+
+Install the component next to `viveeditor`:
+
+```sh
+npm install @viveeditor/react viveeditor
+```
+
+## React
+
+React 18 and 19.
+
+```tsx
+import { useState } from 'react'
+import { ViveEditor } from '@viveeditor/react'
+import 'viveeditor/style.css'
+
+export function ArticleForm() {
+  const [html, setHtml] = useState('')
+  return <ViveEditor value={html} onChange={setHtml} locale="en" label="Article body" />
+}
+```
+
+- Use `value` with `onChange`, or `defaultValue` alone.
+- `onReady`, `onFocus`, `onBlur` and `onError` receive the editor or the error. `editable`, `id`, `className` and `style` are also accepted.
+- A `ref` on the component gives you the `Editor`.
+- `useViveEditor(options)` returns `{ ref, editor }` for your own markup: put `ref` on a `div`.
+- If the component unmounts before the editor is ready, as in StrictMode, the editor is destroyed as soon as it exists and `onReady` is never called.
+
+## Vue
+
+Vue 3.5.
+
+```vue
+<script setup>
+import { ref } from 'vue'
+import { ViveEditor } from '@viveeditor/vue'
+import 'viveeditor/style.css'
+
+const html = ref('')
+</script>
+
+<template>
+  <ViveEditor v-model="html" locale="en" label="Article body" />
+</template>
+```
+
+- Props: `v-model`, `extensions`, `ui`, `locale`, `label`, `editable`.
+- Events: `ready`, `focus`, `blur` and `error`. The component exposes `editor`.
+- `useViveEditor(() => options)` returns `{ el, editor }` for your own markup.
+
+## Svelte
+
+Svelte 5.
+
+```svelte
+<script>
+  import { ViveEditor } from '@viveeditor/svelte'
+  import 'viveeditor/style.css'
+  let html = $state('')
+</script>
+
+<ViveEditor bind:value={html} locale="en" label="Article body" />
+```
+
+- `bind:value` and `bind:editor` keep the HTML and the editor in your state.
+- Callbacks: `onchange`, `onready`, `onfocus`, `onblur` and `onerror`.
+- The `use:viveEditor` action puts the editor on any element and takes the same options.
+
+## Angular
+
+Angular 21 and 22, with `ngModel` or reactive forms.
+
+```ts
+import { Component } from '@angular/core'
+import { FormControl, ReactiveFormsModule } from '@angular/forms'
+import { ViveEditorComponent } from '@viveeditor/angular'
+
+@Component({
+  selector: 'app-article-form',
+  imports: [ViveEditorComponent, ReactiveFormsModule],
+  template: `<vive-ng-editor [formControl]="body" locale="en" label="Article body" />`,
+})
+export class ArticleForm {
+  body = new FormControl('')
+}
+```
+
+- The selector is `vive-ng-editor`. `vive-editor` is the custom element below.
+- Inputs: `extensions`, `ui`, `locale`, `label`, `readonly`.
+- Outputs: `ready`, `editorFocus` and `editorBlur`. The component's `editor` property gives the editor.
+- Add `node_modules/viveeditor/dist/viveeditor.css` to `styles` in `angular.json`.
+
+## The `<vive-editor>` element
+
+`@viveeditor/element` works as a form field on any page and in any framework.
+
+```html
+<script type="module">
+  import '@viveeditor/element/define'
+</script>
+
+<form>
+  <vive-editor name="body" required locale="en" label="Article body"></vive-editor>
+</form>
+```
+
+- It sends its HTML with the form, returns to its first value when the form resets, and blocks submit while `required` and empty.
+- Attributes: `value` (the first value), `name`, `locale`, `label`, `readonly`, `disabled`, `required` and `toolbar="false"`.
+- It fires `input` on every change and `change` on blur when the value changed.
+- It uses no shadow DOM, so your page styles reach it. Moving it in the page keeps its value.
+- `defineViveEditor('my-editor')` registers it under another tag name.
+
+The element is an npm package; the CDN script does not include it.
+
+## Server rendering
+
+With Next.js, Nuxt, SvelteKit or Angular SSR, the server renders an empty element and the editor starts in the browser. Each package mounts only there: React in `useEffect`, Vue in `onMounted`, Svelte through its action, Angular in `afterNextRender`, and the element in `connectedCallback`. The React package is marked `'use client'`.
+
+When you print stored HTML on a page, pass it through the server sanitizer first; see [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/).
+
+---
+
+# Toolbar and shortcuts
+
+> The floating toolbar, selection bubble, / menu, block menu, word count, readability score and every keyboard shortcut.
+
+URL: https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/
+Last updated: 2026-11-01
+
+The viveEditor interface comes from `@viveeditor/ui`: a floating toolbar below the text, a small bubble when you select text, a block menu that opens with `/`, and a word count. This page explains what each part does, how to turn it off and which keyboard shortcuts exist. The one-script build and the framework components show the toolbar already; with the npm packages you call `createUI` yourself.
+
+## Set up the interface
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import '@viveeditor/ui/style.css'
+
+const ui = createUI(editor, { locale: 'en', theme: 'auto' })
+```
+
+`createUI` mounts into the element that holds the editor and removes itself when the editor is destroyed. It only shows tools whose commands are registered: without the table extension there is no table button. The interface talks to the editor only through commands and queries.
+
+| Option | What it does |
+| --- | --- |
+| `locale` | `'tr'` or `'en'`. Without it, the page's `lang` decides: Turkish if it starts with `tr`, English otherwise. |
+| `messages` | Replaces some of the labels with your own text. |
+| `theme` | `'light'` (default), `'dark'` or `'auto'`. Use the `--ve-accent` CSS variable for your brand colour. |
+| `readability` | `'atesman'`, `'flesch'` or `false`. The default follows the language. |
+| `bubble` | `false` turns off the selection bubble. |
+| `slash` | `false` turns off the `/` menu. |
+| `source` | `false` removes the HTML source button. |
+| `files` | The File menu; `false` hides it. See [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/). |
+| `plugins` | Extra menus such as mentions, emoji and templates plug in here from `@viveeditor/ui/extras`. |
+| `onError` | Receives errors raised in the interface. |
+
+## Floating toolbar
+
+The toolbar sits below the text and stays at the bottom of the screen while you scroll a long article. On phones it moves above the on-screen keyboard.
+
+From left to right: the block type button; bold, italic, underline, strikethrough and inline code; text colour and highlight; bulleted list, numbered list, task list, quote, table, image and video; alignment; link and find and replace; undo, redo, File and HTML source. The word count sits at the end.
+
+Below 560 pixels only bold, italic and link stay in place, and the other tools move to the "More tools" menu. In wider spaces, tools that do not fit move into that menu in a fixed order; the menu shows only the tools that moved.
+
+The HTML source button opens the document's HTML in an editable text area. While it is open the other tools are disabled; when you close it, your changes are applied to the editor.
+
+## Selection bubble
+
+When you select text, a small toolbar opens just above the selection. On touch screens it opens below the selection, so your finger does not cover it. It holds bold, italic, link and inline code; plugins such as the [AI assistant](https://editor.vivepdf.com/en/docs/ai-assistant/) add their own buttons. The bubble does not open while an image is selected. `Esc` closes it, and `bubble: false` removes it.
+
+## The / menu
+
+Type `/` at the start of a paragraph to open the block menu. The letters you type next filter the list. Search ignores Turkish letter marks, and English keywords also work (`/table`, `/video`).
+
+The entries are: Heading 1, 2 and 3, bulleted list, numbered list, task list, quote, code block, table (3×3 with a header row), image, video and divider. Image and video do not insert anything directly; they open their panel.
+
+Move with `↑` and `↓`, choose with `Enter` or `Tab`, and close with `Esc`. Focus stays in the text, and screen readers announce the active entry. The mention, emoji, formula, footnote and template plugins add their own entries.
+
+## Block menu
+
+The button at the start of the toolbar shows the type of the block at the cursor, such as Paragraph, Heading 2 or Quote. Open it to switch between paragraph, Heading 1–3, the lists, quote and code block. Choosing Paragraph also removes a list or quote around the block.
+
+## Word count and readability
+
+The count at the end of the toolbar shows how many words the document has. If you set a [character limit](https://editor.vivepdf.com/en/docs/character-limit/), it shows the characters used and the limit instead. The count updates when you pause typing.
+
+Click the count to open the "Text statistics" panel:
+
+- the readability score (0–100) and its band,
+- the number of words and sentences,
+- the average sentence length,
+- the reading time (based on 200 words per minute).
+
+The Turkish interface uses the Ateşman formula and the English interface uses Flesch. Pass `readability` to choose another formula; `false` hides the score and keeps the statistics. The score needs at least 10 words.
+
+| Band | Ateşman | Flesch |
+| --- | --- | --- |
+| Very easy | 90 and above | 80 and above |
+| Easy | 70–89 | 60–79 |
+| Fair | 50–69 | 50–59 |
+| Hard | 30–49 | 30–49 |
+| Very hard | below 30 | below 30 |
+
+To use the same measure in your own code, call `measureText(text, 'flesch')` from `@viveeditor/ui`.
+
+## Keyboard shortcuts
+
+On a Mac, use `⌘` instead of `Ctrl` and `⌥` instead of `Alt`. The toolbar hints show each shortcut for your operating system. A shortcut works when its extension is loaded.
+
+| Action | Windows and Linux | Mac |
+| --- | --- | --- |
+| Bold | `Ctrl+B` | `⌘+B` |
+| Italic | `Ctrl+I` | `⌘+I` |
+| Underline | `Ctrl+U` | `⌘+U` |
+| Strikethrough | `Ctrl+Shift+S` | `⌘+⇧+S` |
+| Inline code | `Ctrl+E` | `⌘+E` |
+| Highlight | `Ctrl+Shift+H` | `⌘+⇧+H` |
+| Heading 1–6 | `Ctrl+Alt+1` … `6` | `⌘+⌥+1` … `6` |
+| Bulleted list | `Ctrl+Shift+8` | `⌘+⇧+8` |
+| Numbered list | `Ctrl+Shift+7` | `⌘+⇧+7` |
+| Task list | `Ctrl+Shift+9` | `⌘+⇧+9` |
+| Quote | `Ctrl+Shift+B` | `⌘+⇧+B` |
+| Code block | `Ctrl+Alt+C` | `⌘+⌥+C` |
+| Align left | `Ctrl+Shift+L` | `⌘+⇧+L` |
+| Align center | `Ctrl+Shift+E` | `⌘+⇧+E` |
+| Align right | `Ctrl+Shift+R` | `⌘+⇧+R` |
+| Justify | `Ctrl+Shift+J` | `⌘+⇧+J` |
+| Link | `Ctrl+K` | `⌘+K` |
+| Find and replace | `Ctrl+F` | `⌘+F` |
+| Undo | `Ctrl+Z` | `⌘+Z` |
+| Redo | `Ctrl+Shift+Z` or `Ctrl+Y` | `⌘+⇧+Z` or `⌘+Y` |
+| New line in the same paragraph | `Shift+Enter` | `⇧+Enter` |
+| Move to the toolbar | `Alt+F10` | `⌥+F10` |
+| AI assistant | `Ctrl+J` | `⌘+J` |
+
+The AI shortcut works only when the [AI assistant](https://editor.vivepdf.com/en/docs/ai-assistant/) plugin is added.
+
+### Moving around
+
+- In the toolbar, `←` and `→` move between buttons, and `Home` and `End` jump to the first and last. `Esc` takes you back to the text.
+- In a list, `Tab` indents the item and `Shift+Tab` outdents it.
+- In a table, `Tab` moves to the next cell and adds a row in the last cell; `Shift+Tab` goes back.
+- In a code block, `Tab` indents and `Shift+Tab` outdents.
+- To leave a table or code block with the keyboard, press `Esc` and then `Tab`; focus moves to the next element after the editor.
+- Panels and menus close with `Esc`, and focus returns to their button or to the text.
+
+### Typing shortcuts
+
+Some marks typed at the start of a line turn into blocks:
+
+| Type | Result |
+| --- | --- |
+| `#` to `######` and a space | Heading 1–6 |
+| `-`, `*` or `+` and a space | Bulleted list |
+| `1.` and a space | Numbered list (another number starts from that number) |
+| `[ ]` and a space | Task list (`[x]` starts checked) |
+| `>` and a space | Quote |
+| `` ``` `` and a space | Code block (you can add a language name) |
+| `---` | Divider |
+
+Inside text, `**bold**` or `__bold__`, `*italic*` or `_italic_`, `~~strikethrough~~` and backticks for inline code are formatted as you type.
+
+## Can I turn the toolbar off completely?
+
+Yes. Pass ui false to the framework components or mountEditor; with the npm packages, do not call createUI. Keyboard shortcuts come from the extensions, so they still work without the toolbar.
+
+## Why does the readability score show a dash?
+
+The score needs at least 10 words. For shorter text the panel says "Write at least 10 words for a score." Words, sentences and reading time are still shown.
+
+## Why is a tool missing?
+
+The toolbar only shows tools whose commands are registered. Without the table extension there is no table button, for example. In narrow spaces some tools move to the More tools menu.
+
+---
+
+# Images and uploads
+
+> Set up the image extension, write the upload function, handle progress and abort, secure your server and track alt text.
+
+URL: https://editor.vivepdf.com/en/docs/images-and-uploads/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-image` handles inserting images, uploading files and image sizes. Every image address and every file is checked before it reaches the document; an upload function that you write sends files to your server. This page covers setup, the upload function contract, what your server must do and the alt text reminders.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Image } from '@viveeditor/ext-image'
+import '@viveeditor/ext-image/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    Image.configure({
+      upload,
+      onError: ({ code, fileName }) => console.warn(code, fileName),
+    }),
+  ],
+})
+```
+
+In the one-script build the image extension comes without an uploader: images can only be added by address. To upload files, set up the extension from npm with your own `upload` function.
+
+## Options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `upload` | `null` | The function that sends files to your server. |
+| `rehost` | `null` | The function that moves an image from another site to your server. |
+| `remoteImages` | `'allow'` | Images pasted from other sites: `'allow'`, `'drop'` or `'rehost'`. |
+| `allowBase64` | `false` | Allows images embedded as data addresses. |
+| `maxBase64Length` | `1500000` | The maximum number of characters in one data address. |
+| `insecure` | `'upgrade'` | Turns `http:` addresses into `https:`; `'block'` rejects them. |
+| `allowRelative` | `false` | Allows relative image addresses. |
+| `mimeTypes` | png, jpeg, gif, webp, avif | Accepted file types. |
+| `maxSize` | 10 MB | The largest size of one file. |
+| `maxFiles` | `10` | How many files can be added at once. |
+| `concurrency` | `3` | How many files upload at the same time. |
+| `timeout` | 60 s | The longest time one upload may take. |
+| `maxPreviewPixels` | 25 million | Files above this pixel count get no preview. |
+| `requireAlt` | `'warn'` | Shows a badge on images without alt text; `'off'` turns it off. |
+| `labels` | English | Labels for uploading, failure and missing alt text. |
+| `onError` | `null` | Receives `{ code, fileName }` for a failed file. |
+
+## The upload function
+
+The upload function receives a file and a context, and returns the image address:
+
+```ts
+import type { ImageUploader } from '@viveeditor/ext-image'
+
+const upload: ImageUploader = async (file, { signal, onProgress }) => {
+  const body = new FormData()
+  body.append('file', file)
+  const response = await fetch('/uploads', { method: 'POST', body, signal })
+  if (!response.ok) throw new Error('Upload failed')
+  const { url, width, height } = await response.json()
+  return { src: url, width, height }
+}
+```
+
+- Return an address string or a `{ src, width, height }` object. `width` and `height` are optional, but it is best when your server measures and returns the real size.
+- The returned address goes through the same check: `blob:` never passes, and `data:` passes only with `allowBase64`. If it fails, the image is not inserted.
+- If the function throws, a box saying "Image could not be added" stays in place of the image and `onError` is called.
+- Before a file reaches your function, its type, size and first bytes are checked. This check gives the writer early feedback; your server is the security boundary.
+
+During an upload, a placeholder with a progress bar stands where the image will go. The placeholder is never written to the document, and `getHTML()` never contains it.
+
+### Progress
+
+`onProgress` expects a value between 0 and 1; values outside that range are clamped. `fetch` does not report upload progress. If you want a progress bar, you can use `XMLHttpRequest`:
+
+```ts
+import type { ImageUploader } from '@viveeditor/ext-image'
+
+const upload: ImageUploader = (file, { signal, onProgress }) =>
+  new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest()
+    request.open('POST', '/uploads')
+    request.responseType = 'json'
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded / event.total)
+    }
+    request.onload = () => {
+      if (request.status !== 200) return reject(new Error('Upload failed'))
+      const { url, width, height } = request.response
+      resolve({ src: url, width, height })
+    }
+    request.onerror = () => reject(new Error('Upload failed'))
+    request.onabort = () => reject(signal.reason)
+    signal.addEventListener('abort', () => request.abort())
+    const body = new FormData()
+    body.append('file', file)
+    request.send(body)
+  })
+```
+
+### Abort
+
+Every upload has its own `AbortSignal`. The signal is aborted when:
+
+- the writer deletes the placeholder or undoes the insert,
+- the content is replaced with `setContent`,
+- the editor is destroyed,
+- the `timeout` runs out.
+
+Pass the signal to `fetch` or `XMLHttpRequest` so the request to your server stops too. The result of an aborted upload is never inserted.
+
+### Error codes
+
+`onError` receives only a code and the file name; server responses and file contents are never passed on.
+
+| Code | Meaning |
+| --- | --- |
+| `TYPE` | The file type is not allowed, or its content does not match its type. |
+| `SIZE` | The file is larger than `maxSize`. |
+| `COUNT` | More than `maxFiles` files were added at once. |
+| `TIMEOUT` | The upload did not finish within `timeout`. |
+| `UPLOAD` | The upload function threw an error. |
+| `SOURCE` | The address the function returned failed the check. |
+
+### Pending uploads
+
+`editor.query.isUploading()` returns `true` while an upload is running. `editor.query.pendingUploads()` counts running and failed uploads as `{ uploading, failed }`. If you submit the form yourself, wait with these queries; the one-script build does it for you.
+
+## Server checklist
+
+The editor checks every address and file, but the browser is not a security boundary. Your server must also:
+
+- Sanitize the posted HTML again and allow only the `https` image addresses you expect. See [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/).
+- Re-validate and re-encode every upload. This strips EXIF and GPS data and polyglot files. Return the real width and height.
+- Serve uploads from a cookieless domain, with a server-set `Content-Type` and `X-Content-Type-Options: nosniff`.
+- Require authentication, a CSRF token and a rate limit on the upload endpoint.
+- Restrict `img-src` in your Content Security Policy. See [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+- Guard against SSRF if your server fetches remote images (for `remoteImages: 'rehost'`).
+
+## Images pasted from other sites
+
+Content copied from another page brings the addresses of that site's images. When a reader's browser shows them, it tells that site who read the page and when. `remoteImages` decides what happens to these images:
+
+| Value | Result |
+| --- | --- |
+| `'allow'` | Default. The image keeps its original address. |
+| `'drop'` | Pasted `https` images are removed. |
+| `'rehost'` | Your `rehost` function moves the image to your server. Without that function, the image is removed. |
+
+The `rehost` function receives an address instead of a file, gets the same context (`signal`, `onProgress`) and returns an address like the upload function. For a hardened setup, choose `'drop'` or `'rehost'`.
+
+## Alt text
+
+The image panel has an alt text field and a "Decorative, no description needed" checkbox. Images that never got alt text show a "No alt text" badge inside the editor; the badge never enters the saved HTML. `requireAlt: 'off'` turns the badge off.
+
+The saved value keeps two cases apart: alt text left empty counts as missing, while an image marked decorative is saved with an empty `alt=""`. Before publishing, `editor.query.imagesWithoutAlt()` counts the missing ones so you can remind the writer.
+
+## Width and height
+
+Every saved image carries `width` and `height`, so the layout does not jump while the page loads. The values come from:
+
+- the size your upload function returns, which always wins,
+- otherwise, for PNG, GIF and WebP files, the size read from the file.
+
+In the editor, drag the handle at the image corner to change its width; the height follows the ratio. The 25%, 50%, 75% and 100% buttons in the image panel scale the image to the content width.
+
+Saved images are written with `loading="lazy"`, `decoding="async"` and `referrerpolicy="no-referrer"`. Add this rule to the pages that show the content:
+
+```css
+img {
+  max-width: 100%;
+  height: auto;
+}
+```
+
+## Image panel
+
+The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text and size.
+
+## What happens if I do not pass an upload function?
+
+Images can only be added by https address. The "Choose from device" button in the image panel is hidden, and dropped or pasted files are not uploaded.
+
+## Can images be embedded in the document as base64?
+
+Not by default. With allowBase64 true, data addresses of type png, jpeg, gif, webp and avif are accepted, limited by maxBase64Length. SVG is never accepted.
+
+## What happens if the form is submitted during an upload?
+
+With the one-script build, the form waits until uploads finish and then submits itself. If an upload fails while it waits, the submit is cancelled and an error message appears.
+
+---
+
+# Video and audio embeds
+
+> Turn YouTube, Vimeo and Spotify links into safe players, with the preview card, activateEmbeds, server checks and CSP settings.
+
+URL: https://editor.vivepdf.com/en/docs/video-embeds/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-embed` turns YouTube, Vimeo and Spotify links into players. The saved HTML never keeps the address it was given; it stores only the provider and the video id, and every player address is rebuilt from them. This page covers setup, loading players on the published page, and the server and Content Security Policy settings.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Embed } from '@viveeditor/ext-embed'
+import '@viveeditor/ext-embed/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Embed.configure({ providers: ['youtube', 'vimeo'], facade: true })],
+})
+```
+
+The one-script build already includes the extension with all three providers.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `providers` | `['youtube', 'vimeo', 'spotify']` | The enabled providers. |
+| `facade` | `false` | With `true`, the saved HTML holds a link instead of a player. |
+| `pasteToEmbed` | `true` | Turns a link pasted on an empty line into a player. |
+| `maxEmbeds` | `50` | The maximum number of players in one document. |
+| `labels` | English | Labels for the play button and for unsupported content. |
+
+## Add a video
+
+- Paste just the link on an empty line. It turns into a player; one undo turns it back into a link.
+- Press the video button in the toolbar or the "Video" entry in the `/` menu. Enter the link and a title in the panel; screen readers announce that title.
+- In code, use `editor.commands.insertEmbed(url)` to insert and `editor.commands.setEmbedTitle(title)` to change the title.
+
+Inside the editor a card stands in for the player, with the provider name, the title and a play button. Nothing loads from the provider until play is pressed.
+
+## Supported links
+
+| Provider | Accepted links | Player address |
+| --- | --- | --- |
+| YouTube | `youtube.com/watch?v=…`, `youtu.be/…`, `/shorts/`, `/live/` and `/embed/` addresses; start time from `t` or `start` | `www.youtube-nocookie.com` |
+| Vimeo | `vimeo.com/…`, addresses with the private key of unlisted videos, `player.vimeo.com/video/…`; start time from `#t=` | `player.vimeo.com`, with `dnt=1` |
+| Spotify | Track, album, playlist, episode, show and artist addresses on `open.spotify.com` | `open.spotify.com/embed` |
+
+Links are parsed as addresses and the host name is compared exactly. Short links and redirects are never followed, and nothing is requested from the provider.
+
+## Saved HTML
+
+The player is always rebuilt from the provider and id; `sandbox`, `allow` and `referrerpolicy` are fixed and never read from the content. The saved HTML holds a `div[data-embed]` wrapper in one of two forms:
+
+- `facade: false` (default): the wrapper holds the player `iframe`. The player loads from the provider when the reader opens the page.
+- `facade: true`: the wrapper holds a link to the video's page at the provider. The player loads when the reader clicks.
+
+When you save as Word or Markdown, players are written as links.
+
+### Publish facade output
+
+On the page that shows content saved with `facade: true`, call `activateEmbeds()`. Clicking the link replaces it with the player and starts playback:
+
+```ts
+import { activateEmbeds } from '@viveeditor/ext-embed/activate'
+
+activateEmbeds(document.querySelector('article'), { providers: ['youtube', 'vimeo'] })
+```
+
+The first argument is the root element to search (the whole document if left out), and `providers` lists the allowed providers. The player address is built from the provider and id on the wrapper, never from the link's `href`. Without `activateEmbeds`, the link opens the video on the provider's site.
+
+## On the server
+
+- Clean the HTML on the server too, but never allow every `iframe`. Pass `embeds: true` to `@viveeditor/sanitize`; players are rebuilt from the provider and id. See [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/).
+- With your own sanitizer, rebuild players from `div[data-embed]`, or accept only addresses for which `isAllowedEmbedSrc()` returns `true`.
+
+```ts
+import { isAllowedEmbedSrc } from '@viveeditor/ext-embed'
+
+const allowed = isAllowedEmbedSrc(src, ['youtube', 'vimeo'])
+```
+
+`isAllowedEmbedSrc` checks that the address is exactly the player address the editor builds. In the same package, `matchEmbedUrl(url)` reads the provider and id from a link, and `buildEmbedSrc(attrs)` builds the player address. None of the three needs a browser DOM.
+
+## Content Security Policy and privacy
+
+- List only the providers you enabled in your CSP `frame-src`. With all three: `frame-src https://www.youtube-nocookie.com https://player.vimeo.com https://open.spotify.com`.
+- A player loads content and cookies from the provider. Tell readers about it where your consent rules require it; facade output loads the player only after a click.
+
+> **Referrer-Policy**
+>
+> A page-wide `Referrer-Policy: no-referrer` stops YouTube players from working. This is why players are built with `strict-origin-when-cross-origin`.
+
+For the other CSP settings, see [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+
+## Why does the video not load right away in the editor?
+
+Inside the editor a card stands in for the player. Nothing loads from the provider until someone presses play, which protects the writer's privacy and keeps the page light.
+
+## Can I embed videos from other sites?
+
+No. Only YouTube, Vimeo and Spotify are supported. Other links are not turned into players, and the panel lists the supported providers.
+
+## My page sends Referrer-Policy no-referrer. Why does YouTube not work?
+
+YouTube rejects embedded players that arrive without a Referer. A page-wide no-referrer policy stops YouTube players from working.
+
+---
+
+# Tables
+
+> Tables with merged cells, header rows, column widths you can drag, and the table tools in the toolbar.
+
+URL: https://editor.vivepdf.com/en/docs/tables/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-table` adds tables to the editor: merged cells, header rows, column widths set by dragging, and `Tab` to move between cells. The saved HTML carries the column widths, so a table looks the same on any site. This page covers setup, the table tools and keyboard use.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Table } from '@viveeditor/ext-table'
+import '@viveeditor/ext-table/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Table],
+})
+
+editor.commands.insertTable({ rows: 3, cols: 3, headerRow: true })
+```
+
+The one-script build already includes the table extension.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `resizable` | `true` | Lets writers drag a column edge to set its width. |
+| `cellMinWidth` | `48` | The smallest column width, in pixels. |
+| `maxSize` | `20` | The most rows and columns `insertTable` can add. |
+
+## Insert a table
+
+- The table button in the toolbar opens a 6×6 grid. Choose the size with the mouse or the arrow keys, then click or press `Enter`. The table gets a header row.
+- The "Table" entry in the `/` menu inserts a 3×3 table with a header row (`/table`).
+- In code, use `insertTable({ rows, cols, headerRow })`. Without values the table is 3×3 and starts with a header row.
+
+A table inserted in an empty paragraph replaces that paragraph. You cannot insert a table inside another table.
+
+## Table tools
+
+While the cursor is inside a table, the table button in the toolbar opens the table tools instead of the grid:
+
+| Group | Tools |
+| --- | --- |
+| Insert | Insert row above, Insert row below, Insert column left, Insert column right |
+| Arrange | Merge cells, Split cell, Header row, Widen column, Narrow column |
+| Delete | Delete row, Delete column, Delete table |
+
+Tools that cannot run at that moment are shown as disabled. For example, "Merge cells" is not available while a single cell is selected. `Esc` closes the panel.
+
+## Merged cells
+
+Drag with the mouse to select several cells, then choose "Merge cells". To undo a merge, click inside the merged cell and choose "Split cell". Merged cells are kept when you save as Word.
+
+## Header row and column
+
+"Header row" turns the first row into header cells, or back. Header cells are written as `th` in the HTML, so screen readers can announce the column headings. The interface has no button for a header column; use the `editor.commands.toggleHeaderColumn()` command.
+
+## Column widths
+
+With `resizable` on, drag the right edge of a column to change its width. From the keyboard, "Widen column" and "Narrow column" in the table tools change the column at the cursor by 40 pixels. A column cannot be narrower than `cellMinWidth`.
+
+A table with set widths carries a `colgroup` and a `width` style per column in the saved HTML. The table itself gets the total width; if some columns have no width, that total is used as a minimum width. Tables without any set width carry no style.
+
+## Keyboard
+
+- `Tab` moves to the next cell. In the last cell it adds a new row.
+- `Shift+Tab` moves to the previous cell.
+- `Esc` and then `Tab` moves focus out of the table and the editor.
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `insertTable(options)` | Inserts a table. |
+| `addRowBefore()`, `addRowAfter()` | Adds a row. |
+| `addColumnBefore()`, `addColumnAfter()` | Adds a column. |
+| `deleteRow()`, `deleteColumn()`, `deleteTable()` | Deletes the row, column or table. |
+| `mergeCells()`, `splitCell()` | Merges or splits cells. |
+| `toggleHeaderRow()`, `toggleHeaderColumn()` | Turns the header row or column on or off. |
+| `resizeColumn(delta)` | Widens or narrows the column at the cursor, in pixels. |
+
+`editor.query.inTable()` returns `true` while the cursor is inside a table. To test a command first, use the `can` form, such as `editor.can.mergeCells()`.
+
+Tables are also saved to Markdown and Word files; see [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+
+## Do column widths survive on the published page?
+
+Yes. Widths are written into the saved HTML as a colgroup and styles, so the table looks the same on any site. The server sanitizer keeps table widths.
+
+## Can I put a table inside a table?
+
+No. While the cursor is inside a table, the insert command does nothing; the toolbar's table button opens the table tools instead.
+
+## How do I leave a table with the keyboard?
+
+Press Esc and then Tab. Tab alone moves between cells, so this order moves focus to the next element after the editor.
+
+---
+
+# Code blocks
+
+> Code blocks with a language picker, the default language list and optional Shiki syntax colouring, including a setup without WebAssembly.
+
+URL: https://editor.vivepdf.com/en/docs/code-blocks/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-code-block` adds code blocks with a language picker. Syntax colouring is optional: `CodeHighlight` loads the highlighter you give it only when the page has code, and colours never enter the saved HTML. This page covers the code block, the language list and colouring with Shiki.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CodeBlock } from '@viveeditor/ext-code-block'
+import { CodeHighlight, shikiHighlighter } from '@viveeditor/ext-code-block/highlight'
+import '@viveeditor/ext-code-block/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    CodeBlock,
+    CodeHighlight.configure({ highlighter: shikiHighlighter(() => import('shiki')) }),
+  ],
+})
+```
+
+The one-script build already includes the code block, without a highlighter.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `languages` | `DEFAULT_LANGUAGES` | The languages in the picker. |
+| `languageLabel` | `'Language'` | The accessible name of the picker. |
+| `plainTextLabel` | `'Plain text'` | The option name for a block without a language. |
+| `tabSize` | `2` | How many spaces `Tab` inserts. |
+
+## Add a code block
+
+- Type three backticks and a space at the start of a line. To set the language at once, type its name right after the backticks, such as `ts`, then a space.
+- `Ctrl+Alt+C` (`⌘+⌥+C` on a Mac) turns the block on and off.
+- Choose "Code block" from the block menu or the `/` menu.
+
+If several paragraphs are selected when you turn on a code block, their lines join into one block. Turning the code block off makes each line a separate paragraph.
+
+## Language picker
+
+Each block has a language picker in its top corner. The first option is "Plain text", followed by the `languages` list. A valid language name that is not in the list (from pasted content, for example) is kept and appears in the picker under its own name.
+
+A language name is made of letters, digits and `+ # . -`, is at most 32 characters long and is lowercased. The saved HTML carries the language in two places:
+
+```html
+<pre data-language="typescript"><code class="language-typescript">const a = 1</code></pre>
+```
+
+When content is loaded, the language is read from the `data-language` attribute or from a class that starts with `language-` or `lang-`.
+
+### Default languages
+
+`DEFAULT_LANGUAGES` holds 19 languages: JavaScript, TypeScript, HTML, CSS, JSON, Python, PHP, Java, Kotlin, Swift, C#, C++, Go, Rust, Ruby, SQL, Bash, YAML and Markdown. Their values are `javascript`, `typescript`, `html`, `css`, `json`, `python`, `php`, `java`, `kotlin`, `swift`, `csharp`, `cpp`, `go`, `rust`, `ruby`, `sql`, `bash`, `yaml` and `markdown`.
+
+To add a language to the list:
+
+```ts
+import { CodeBlock, DEFAULT_LANGUAGES } from '@viveeditor/ext-code-block'
+
+const codeBlock = CodeBlock.configure({
+  languages: [...DEFAULT_LANGUAGES, { value: 'dart', label: 'Dart' }],
+})
+```
+
+## Keyboard in a code block
+
+- `Tab` inserts `tabSize` spaces at the cursor. With several lines selected, it indents each line.
+- `Shift+Tab` removes spaces at the start of the line.
+- `Enter` starts a new line inside the block. Press `Enter` three times in a row at the end of the block to remove the trailing empty lines and continue in a new paragraph.
+- `Backspace` in an empty block turns it into a paragraph.
+- `Esc` and then `Tab` moves focus out of the editor.
+
+Commands: `toggleCodeBlock(language)`, `setCodeBlockLanguage(language)`. `editor.query.codeBlockLanguage()` returns the language of the block at the cursor.
+
+## Syntax colouring
+
+`CodeHighlight` colours only blocks that have a language. It loads the highlighter the first time such a block is on the page, caches the results and applies the colours only to the editor view, never to the saved HTML.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `highlighter` | `null` | The highlighter function. Without it, nothing is coloured. |
+| `delay` | `120` | How many milliseconds after a typing pause colouring runs. |
+| `cacheSize` | `200` | How many blocks the cache keeps. |
+
+`shikiHighlighter(load, options)` is a ready bridge for [Shiki](https://shiki.style). The default themes are `github-light-default` and `github-dark-default`; pass `{ themes: { light, dark } }` for others. Colours follow the light and dark theme of the interface. If Shiki does not know a language or fails, that block stays uncoloured.
+
+You can also write your own highlighter: a function that takes `(code, language)` and returns `{ from, to, style }` pieces is enough.
+
+### When your CSP does not allow WebAssembly
+
+Shiki's default regular expression engine uses WebAssembly. If your page's Content Security Policy does not allow WebAssembly, set up Shiki with its JavaScript regular expression engine and pass it to `shikiHighlighter`. `shikiHighlighter` only needs a `codeToTokens` method on the loaded object:
+
+```ts
+import { CodeHighlight, shikiHighlighter } from '@viveeditor/ext-code-block/highlight'
+
+const loadShiki = async () => {
+  const { createHighlighterCore } = await import('shiki/core')
+  const { createJavaScriptRegexEngine } = await import('shiki/engine/javascript')
+  return createHighlighterCore({
+    themes: [
+      import('shiki/themes/github-light-default.mjs'),
+      import('shiki/themes/github-dark-default.mjs'),
+    ],
+    langs: [import('shiki/langs/javascript.mjs'), import('shiki/langs/typescript.mjs')],
+    engine: createJavaScriptRegexEngine(),
+  })
+}
+
+const highlight = CodeHighlight.configure({ highlighter: shikiHighlighter(loadShiki) })
+```
+
+With this setup only the languages you load in `langs` are coloured; the others stay plain. The themes must be the `shikiHighlighter` defaults or match its `themes` option.
+
+## Code blocks in files
+
+Saving to Markdown writes code blocks as fenced blocks with their language, and opening Markdown reads them back. A Word file keeps the code but not its language. See [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+
+To show colours on the published page, run a highlighter there as well; the language is in the `class` attribute.
+
+## Do the colours end up in the saved HTML?
+
+No. Colouring is shown only inside the editor. The saved HTML carries the language, not the colours.
+
+## What happens to a language that is not in the list?
+
+A valid language name in pasted or loaded content is kept and appears in the picker under its own name. You can also replace the list with the languages option.
+
+## Can I use code blocks without colouring?
+
+Yes. CodeHighlight is optional. The code block in the one-script build also comes without a highlighter.
+
+---
+
+# Find and replace
+
+> Find and replace that matches Turkish capitals correctly, with match case, whole word and replace all options.
+
+URL: https://editor.vivepdf.com/en/docs/find-and-replace/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-search` adds find and replace to the editor. It matches Turkish capitals correctly: a search for `istanbul` also finds `İstanbul` and `ISTANBUL`. The panel comes from `@viveeditor/ui` and opens with `Ctrl+F` (`⌘+F` on a Mac). This page covers the panel, the matching rules and the commands.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { Search } from '@viveeditor/ext-search'
+import '@viveeditor/ext-search/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [Search],
+})
+```
+
+The one-script build already includes the search extension. Its only option is `maxQueryLength` (default 200): longer search text is cut to that length.
+
+## The find and replace panel
+
+`Ctrl+F` or the "Find and replace" button in the toolbar opens the panel. If text is selected and fits on one line, it fills the search field. Matches are highlighted in the document.
+
+| Item | What it does |
+| --- | --- |
+| Find | The text to search for. Results update as you type. |
+| Previous match, Next match | Move between matches. |
+| Match case | When on, letters must match exactly. |
+| Whole word only | When on, matches inside a longer word do not count. |
+| Counter | Shows which match you are on, such as `3 of 12`. With no matches it says "No results". |
+| Replace with | The new text. Leave it empty to delete the matches. |
+| Replace | Replaces the selected match and moves to the next. |
+| Replace all | Replaces every match in one step. |
+
+Keyboard:
+
+- In the search field, `Enter` goes to the next match and `Shift+Enter` to the previous one.
+- In the "Replace with" field, `Enter` replaces the next match.
+- `Esc` closes the panel, removes the highlights and takes you back to the text.
+
+## Turkish capitals
+
+With match case off, every letter is matched with both the general and the Turkish case rules:
+
+| Letter searched | Letters matched |
+| --- | --- |
+| `i` | i, I, İ |
+| `ı` | ı, I |
+| `İ` | İ, i |
+| `I` | I, i, ı |
+
+For example, `istanbul` finds `İstanbul`, `Istanbul` and `ISTANBUL`, and `ılık` finds `ILIK`. Only case is ignored: `s` and `ş`, `c` and `ç`, `o` and `ö` are different letters.
+
+With "Match case" on, these rules are off and the text is searched exactly as typed.
+
+## Replacing
+
+"Replace" first selects a match; when a match is selected, pressing it again replaces that match and selects the next one. "Replace all" replaces every match in the document in a single step, so one undo brings them all back.
+
+## Commands
+
+You can do the same in code, without the panel:
+
+```ts
+editor.commands.setSearch({ query: 'istanbul', replace: 'İstanbul', wholeWord: true })
+const { total } = editor.query.searchStatus()
+if (total > 0) editor.commands.replaceAll()
+editor.commands.clearSearch()
+```
+
+| Command | What it does |
+| --- | --- |
+| `setSearch(terms)` | Starts or updates the search: `query`, `replace`, `caseSensitive`, `wholeWord`. |
+| `findNext()`, `findPrevious()` | Selects the next or previous match. |
+| `replaceNext()` | Replaces the selected match. |
+| `replaceAll()` | Replaces every match. |
+| `clearSearch()` | Removes the search and the highlights. |
+
+`editor.query.searchStatus()` returns `{ total, current }`: the number of matches and the position of the selected match (`0` when none is selected). To reuse the same Turkish-aware matching elsewhere, the package exports `caseInsensitivePattern(text)`, which returns a regular expression pattern.
+
+## Why does a search for "istanbul" find "İstanbul"?
+
+With match case off, search uses both the general and the Turkish case rules. So i matches İ and I, and ı matches I.
+
+## Can I undo Replace all?
+
+Yes. All replacements happen in one step, so one undo brings everything back.
+
+## Does search treat ş and s as the same letter?
+
+No. Only the difference between capital and small letters is ignored; different letters such as ş and s or ç and c stay apart.
+
+---
+
+# Character limit
+
+> Count characters and set a limit; typing stops at the limit, pasted text is trimmed and the toolbar shows how much is left.
+
+URL: https://editor.vivepdf.com/en/docs/character-limit/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-character-count` counts the characters in the document and can set a limit. At the limit typing stops, pasted text is trimmed to fit the space left, and deleting always works. The count in the toolbar shows the characters used and allowed. This page covers setup, what counts and how the interface shows the limit.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { CharacterCount } from '@viveeditor/ext-character-count'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [CharacterCount.configure({ limit: 280 })],
+})
+```
+
+The extension's only option is `limit`. The default `null` sets no limit and only counts. The limit must be a positive whole number; any other value means no limit.
+
+The character count is not in the one-script build. To keep the ready-made extension list, add it to the list in the framework components or with `mountEditor`:
+
+```ts
+import { CharacterCount } from '@viveeditor/ext-character-count'
+import { classicPreset, mountEditor } from 'viveeditor'
+
+const mount = mountEditor(document.querySelector('#editor'), {
+  extensions: [...classicPreset('en'), CharacterCount.configure({ limit: 280 })],
+  locale: 'en',
+})
+```
+
+## How the limit works
+
+- Typing stops at the limit.
+- Pasted or dropped text is trimmed to fit the space left.
+- Deleting always works. Any change that does not add characters is accepted.
+- Content you load yourself with `content` or `setContent` is not cut. If it is over the limit, the writer can make changes that add characters only after getting below the limit.
+
+The limit in the browser helps the writer, but it is not a security measure. Check the length on your server too.
+
+## What counts
+
+- Every character in the text, spaces included.
+- Turkish letters and most emoji count as one character each. Counting is by Unicode code point, so an emoji built from several parts (such as skin tone or family emoji) counts once per part.
+- Images, videos, line breaks and paragraph breaks do not count.
+
+## The count in the toolbar
+
+With a limit, the count at the end of the toolbar shows the characters used and allowed, such as `120/280 characters`, instead of the word count. Numbers are formatted for the interface language.
+
+- At 90 percent of the limit, the count turns to the warning colour.
+- At the limit, it turns to the danger colour and screen readers announce "Character limit reached".
+
+Clicking the count opens the text statistics panel: readability, words, sentences and reading time. See [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/).
+
+## Read the count in code
+
+```ts
+const used = editor.query.characterCount()
+const limit = editor.query.characterLimit()
+```
+
+`characterLimit()` returns `null` when there is no limit. The package also exports `countCharacters(node)`, which counts the characters in a ProseMirror node with the same rules.
+
+## Does the one-script build have a character limit?
+
+No. The character count extension is not part of the one-script build; add it with the npm package.
+
+## What happens if I load text that is over the limit?
+
+Content you load yourself is not cut. The writer can delete and edit, but changes that add characters are refused until the text is below the limit.
+
+## Do spaces count?
+
+Yes. Every character in the text counts, spaces included. Images, videos and line breaks do not.
+
+---
+
+# Open, save and print
+
+> Use the File menu to open Word, Markdown, HTML and text files, save as Word, Markdown or HTML, and print the document.
+
+URL: https://editor.vivepdf.com/en/docs/open-save-print/
+Last updated: 2026-11-01
+
+The toolbar has a File menu. It opens `.docx`, `.md`, `.html` and `.txt` files, saves the text as Word, Markdown or HTML, and prints it (choose "Save as PDF" in the print dialog for a PDF). This page covers turning the menu on and off, loading the converters, and what Word and Markdown files keep and drop.
+
+## The File menu
+
+The menu holds: "Open file…", "Save as Word (.docx)", "Save as Markdown (.md)", "Save as HTML (.html)" and "Print or PDF".
+
+- An opened file replaces an empty document. If there is text, the file goes in at the cursor. One undo takes it back.
+- In text files, blank lines separate paragraphs and single line breaks stay as line breaks.
+- Every opened file goes through the same document rules as pasted content, so unknown markup never reaches the output. Sanitize the saved HTML on the server as well.
+- Saved files are named from the `fileName` option ("document" if not set). Characters that file names cannot hold are replaced, and the name is at most 100 characters.
+- Errors appear in a visible notice. Progress messages such as "Opening file…" are announced to screen readers.
+
+## With the one-script build
+
+The menu is there by default, with the Word and Markdown converters. The converters live in two extra files next to the main script and load on first use. To hide the menu for one textarea, add `data-files="false"`:
+
+```html
+<textarea name="body" data-editor data-files="false"></textarea>
+```
+
+For the add-on addresses, the fingerprint check and Content Security Policy settings, see [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+
+## With npm
+
+Pass the converters as loader functions, so they download only when used:
+
+```ts
+import { createUI } from '@viveeditor/ui'
+
+createUI(editor, {
+  files: {
+    docx: () => import('@viveeditor/docx'),
+    markdown: () => import('@viveeditor/markdown'),
+    upload,
+    fileName: 'Report',
+  },
+})
+```
+
+In the framework components, pass the same object inside `ui: { files: { … } }`; the components add no loaders by default.
+
+| Option | Description |
+| --- | --- |
+| `docx` | A loader that returns the `@viveeditor/docx` module. Turns on opening and saving Word files. |
+| `markdown` | A loader that returns the `@viveeditor/markdown` module. Turns on opening and saving Markdown. |
+| `html` | `false` removes saving as HTML. |
+| `print` | `false` removes printing. |
+| `fileName` | The name of saved files. |
+| `upload` | The function that uploads images from Word files to your server. It follows the same contract as the upload function in [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/). |
+| `allowBase64` | Embeds images from Word files in the document instead of uploading them. |
+
+Without loaders, the menu opens HTML and text files, saves as HTML and prints. `files: false` hides the menu.
+
+## Limits
+
+- Word files can be up to 20 MB; HTML, Markdown and text files up to 5 MB. The Markdown converter handles up to 1 MB of text.
+- Password-protected files and files that unpack too large or too deep are refused with a message.
+- `.doc`, `.odt` and `.rtf` are not supported.
+- If some images in a Word file cannot be added, the menu says how many. If other unsupported content was left out, it says so too.
+
+## Printing
+
+"Print or PDF" opens the browser's print dialog. The document is prepared in a hidden frame that runs no scripts and loads only images and styles. Video players print as links.
+
+For your own button, call `printDocument(editor, { title, css })` from `@viveeditor/ui`.
+
+## Markdown
+
+Headings, bold, italic, strikethrough, inline code, links, images, bullet, numbered and nested lists, checklists, quotes, rules, fenced code with its language and tables are read and written.
+
+Markdown has no form for text colour, highlight, underline and alignment, so they are left out when saving. Video players are saved as links. Raw HTML inside Markdown is never let through.
+
+## Word (.docx)
+
+| Kept when opening and saving | Left out |
+| --- | --- |
+| Headings (a Word title opens as a level 1 heading), bold, italic, underline, strikethrough, text colour, highlight, alignment | Comments, footnotes, headers and footers, text boxes, equations |
+| Bullet, numbered and nested lists | Tracked deletions (insertions are kept), hidden text |
+| Links to web and mail addresses | Other links become plain text; field codes keep only their visible text |
+| Tables with merged cells and header rows, quotes, code | Code block language |
+| Images (opening needs your upload function or `allowBase64`) | Without one, images are dropped and the menu says how many |
+
+Checklists are saved as ☐ and ☑ text and video players as links. The saved file uses A4 pages and carries no author.
+
+> **Images saved to Word**
+>
+> Images stored as data addresses are embedded in the file. Images at web addresses are downloaded and embedded only when you call `exportDocx` yourself with `fetchImages: true`; the File menu does not, and writes those images as links.
+
+## Use the converters directly
+
+You can convert without the menu:
+
+```ts
+import { exportDocx, importDocx } from '@viveeditor/docx'
+import { markdownToHtml, toMarkdown } from '@viveeditor/markdown'
+
+const { html, warnings } = await importDocx(file, { upload })
+editor.commands.replaceContent(html)
+
+const blob = await exportDocx(editor, { title: 'Report' })
+
+editor.commands.replaceContent(markdownToHtml('# Title\n\nSome **bold** text'))
+const markdown = toMarkdown(editor)
+```
+
+For files it refuses, `importDocx` throws a `DocxError` with the code `TOO_LARGE`, `NOT_DOCX`, `ENCRYPTED`, `UNSUPPORTED`, `DAMAGED`, `TOO_COMPLEX` or `ABORTED`. `warnings` lists left-out content as `{ code, count }`.
+
+To format pasted Markdown text, see `MarkdownPaste` on the [Paste from Office](https://editor.vivepdf.com/en/docs/paste-from-office/) page.
+
+## How do I save as PDF?
+
+Choose "Print or PDF" from the File menu, then pick "Save as PDF" in the browser's print dialog.
+
+## Can I open .doc, .odt or .rtf files?
+
+No. Only .docx, .md, .html, .htm and .txt files open. Save older files as .docx in Word or LibreOffice first.
+
+## Does an opened file replace my text?
+
+If the document is empty, the file replaces it. If there is text, the file goes in at the cursor. Either way, one undo takes it back.
+
+---
+
+# Paste from Office
+
+> Clean paste from Word, Google Docs and LibreOffice; fake bullets become real lists, and pasted Markdown text becomes formatted content.
+
+URL: https://editor.vivepdf.com/en/docs/paste-from-office/
+Last updated: 2026-11-01
+
+`@viveeditor/ext-office-paste` cleans content pasted from Word, Google Docs and LibreOffice. It turns Word's fake bullets and numbers into real nested lists, keeps Word's title and quote styles and fixes lists that Google Docs nests the wrong way. This page also covers `MarkdownPaste`, which turns Markdown pasted as plain text into formatted content.
+
+## Setup
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { OfficePaste } from '@viveeditor/ext-office-paste'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    OfficePaste.configure({ onDropped: ({ images }) => console.warn(`${images} images left out`) }),
+  ],
+})
+```
+
+The one-script build already includes the extension. Its only option is `onDropped`.
+
+## What gets fixed
+
+In content from Word:
+
+- Word's lists are not real lists but paragraphs with markers. These paragraphs become real, nested bulleted and numbered lists. The list type and start number come from Word's list definition, or from the marker itself.
+- Marker characters are removed everywhere.
+- Word's Title style becomes a level 1 heading, and its Quote style becomes a quote.
+
+From every source:
+
+- A sub-list sitting directly inside a list moves into the item above it. Google Docs copies lists this way.
+- Text that is both underlined and struck through keeps both.
+- Images that point at files on the copying computer (`file:` and `blob:` addresses) are left out and counted.
+
+HTML that does not come from Word, Google Docs or LibreOffice passes through this extension unchanged. Every paste, whatever its source, then goes through the document rules, so unknown markup never reaches the output.
+
+## Left-out images
+
+Images that point at files on the copying computer cannot be pasted. When images are left out, `onDropped` is called with:
+
+| Field | Value |
+| --- | --- |
+| `source` | `'word'`, `'docs'` or `'libreoffice'` |
+| `images` | The number of images left out |
+
+Use it to show the writer a message asking them to upload those images separately. For image uploads, see [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/).
+
+## Helper functions
+
+To run the same cleaning outside paste, the package exports three functions:
+
+| Function | Returns |
+| --- | --- |
+| `detectOffice(html)` | `'word'`, `'docs'`, `'libreoffice'` or `null` |
+| `cleanOffice(html)` | `{ html, source, droppedImages }` |
+| `cleanOfficeHtml(html)` | Only the cleaned HTML |
+
+## Markdown paste
+
+`MarkdownPaste` from `@viveeditor/markdown/paste` turns Markdown pasted as plain text into formatted content. The converter loads only when needed:
+
+```ts
+import { MarkdownPaste } from '@viveeditor/markdown/paste'
+
+const markdownPaste = MarkdownPaste.configure({ load: () => import('@viveeditor/markdown') })
+```
+
+It converts only when:
+
+- the clipboard holds plain text and no HTML,
+- the text looks like Markdown: it has a heading, fenced code, a quote, a table, bold text, a link, a checklist item or at least two list lines,
+- the cursor is not in a code block.
+
+If the converter fails to load, the text is pasted as plain text. Text longer than one million characters is not converted. Raw HTML inside Markdown is never let through. To check in advance whether text would be converted, use `looksLikeMarkdown(text)` from the same package.
+
+Markdown paste is on in the one-script CDN version; the converter loads from the add-on file on first use. To open and save Markdown files, see [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+
+## Why are images pasted from Word missing?
+
+Word puts some images on the clipboard as addresses of files on the copying computer. The browser cannot read those, so they are left out; onDropped tells you how many.
+
+## Is Office paste on in the one-script build?
+
+Yes. The Office paste extension is loaded by default in the one-script build, and Markdown paste is on in the CDN version.
+
+## When does Markdown paste kick in?
+
+Only when the clipboard has no HTML and the plain text looks like Markdown. Text pasted inside a code block is never converted.
+
+---
+
+# Mentions
+
+> Add @mentions with the Mention extension and mentionMenu, store checked ids, and verify every mention again on your server.
+
+URL: https://editor.vivepdf.com/en/docs/mentions/
+Last updated: 2026-11-01
+
+Mentions let a writer type `@` and pick a person, a team or any other entry from a list you supply. The editor stores an opaque id and a plain-text label. Your server decides who the id really is, who may be mentioned and who gets notified.
+
+Mentions ship as npm packages only. The one-script build does not include them.
+
+## Set it up
+
+1. Install the extension and the UI: `npm install @viveeditor/ext-mention @viveeditor/ui @viveeditor/core`.
+2. Add `Mention` to the editor's extensions.
+3. Add `mentionMenu` from `@viveeditor/ui/extras` to the `plugins` of `createUI`, with an `items` function that returns matching entries.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { Mention } from '@viveeditor/ext-mention'
+import { createUI } from '@viveeditor/ui'
+import { mentionMenu } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-mention/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, Mention],
+})
+
+createUI(editor, {
+  plugins: [
+    mentionMenu({
+      items: async (query, signal) => {
+        const response = await fetch(`/mentions?q=${encodeURIComponent(query)}`, { signal })
+        if (!response.ok) return []
+        return response.json()
+      },
+    }),
+  ],
+})
+```
+
+`/mentions` stands for your own search endpoint. Each entry you return has an `id`, a `label` and an optional `description`.
+
+## How the menu behaves
+
+- The menu opens when the writer types `@` at the start of a line or after a space. The query is up to 32 letters, digits, `_`, `.` or `-`.
+- Your `items` function runs 150 ms after the last keystroke. When the writer keeps typing or closes the menu, the `signal` is aborted, so pass it to `fetch`.
+- The menu shows at most 8 entries, as plain text. Your labels are never read as HTML.
+- `Enter` or `Tab` picks an entry and `Esc` closes the menu.
+
+You can also insert a mention from code with `editor.commands.insertMention({ id: 'u_42', label: 'Editor' })`.
+
+## What is stored
+
+A mention is saved as one span:
+
+```html
+<span class="vive-mention" data-mention="u_42">@Editor</span>
+```
+
+The id must match `^[A-Za-z0-9_][A-Za-z0-9_.:@-]{0,127}$` and must not contain `..`. The pattern is exported as `MENTION_ID_PATTERN`, and `isMentionId()` tests a value against it. The editor checks the id when it reads HTML, when it reads JSON and when it writes HTML. A span whose id fails the check is not read as a mention.
+
+The label loses control, bidi and zero-width characters and is capped at 100 characters. The `maxLabelLength` option of `Mention` changes the cap. An id never becomes a link address.
+
+## Check mentions on the server
+
+The browser is not a security boundary. Anyone can post a span with any id and any label. When you save the content:
+
+- clean the HTML with [the server sanitizer](https://editor.vivepdf.com/en/docs/server-sanitizing/). It keeps mentions in exactly the form above and reduces a mention with a bad id, or one placed inside a link or a footnote, to its text;
+- look every id up in your own directory and drop the ones that do not exist;
+- check that the writer may mention that person or group;
+- build the displayed name from your own data, not from the stored label;
+- keep ids opaque. Do not use e-mail addresses or other personal data as ids.
+
+The search endpoint behind `items` needs authentication, a rate limit and tenant scoping, so a writer only finds people they are allowed to see.
+
+## Notifications
+
+viveEditor sends no notifications. If you notify people who were mentioned:
+
+- compare the ids before and after an edit and notify only new mentions;
+- deduplicate, so one person mentioned five times gets one notice;
+- rate-limit the notices you send per writer.
+
+## Related pages
+
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/)
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/)
+- [Packages](https://editor.vivepdf.com/en/docs/packages/)
+
+## Where does the list of people come from?
+
+From your own items function. viveEditor has no user directory; it calls your function with the typed text and an AbortSignal and shows what you return.
+
+## Can I trust the name stored in a mention?
+
+No. The label is whatever the writer's browser sent. Look the id up in your own directory and build the displayed name from your data.
+
+---
+
+# Emoji
+
+> Add an emoji picker that opens on a colon, with a compact English emoji list that loads only on first use.
+
+URL: https://editor.vivepdf.com/en/docs/emoji/
+Last updated: 2026-11-01
+
+The emoji menu lets a writer type `:` and two letters, then pick an emoji by name or keyword. The emoji goes into the text as an ordinary character, so the stored HTML needs no extra element and the menu needs no editor extension.
+
+The emoji menu ships as an npm package only. The one-script build does not include it.
+
+## Set it up
+
+1. Install the UI and the data: `npm install @viveeditor/ui @viveeditor/emoji-data`.
+2. Add `emojiMenu` from `@viveeditor/ui/extras` to the `plugins` of `createUI`.
+3. Pass a `load` function that imports the list, so it downloads only when needed.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { emojiMenu } from '@viveeditor/ui/extras'
+
+createUI(editor, {
+  plugins: [emojiMenu({ load: () => import('@viveeditor/emoji-data/en') })],
+})
+```
+
+## How the menu behaves
+
+- The menu opens when the writer types `:` at the start of a line or after a space, followed by at least two letters or digits.
+- It searches names and keywords. An exact name comes first, then names that start with the typed text, then keyword matches.
+- It shows at most 8 results. `Enter` or `Tab` inserts the emoji and `Esc` closes the menu.
+- The list loads once, on first use. If loading fails, the next attempt tries again.
+
+## The data package
+
+`@viveeditor/emoji-data/en` is a compact English list of about 39 KB. It is generated from [emojibase-data](https://www.npmjs.com/package/emojibase-data) 18.0.0 and only English names are available.
+
+Each row has three parts: the emoji, its name and its keywords. The menu checks the list when it loads. It refuses a list with more than 5,000 rows, or a row in another shape, and an emoji longer than 16 code points.
+
+## Your own list
+
+`load` can return any list in the same shape, as an array or as a module with a `default` export. Use this for a shorter list or for names in another language.
+
+```ts
+import { type EmojiRow, emojiMenu } from '@viveeditor/ui/extras'
+
+const rows: EmojiRow[] = [
+  ['👍', 'thumbs up', ['yes', 'agree']],
+  ['🎉', 'party popper', ['celebrate']],
+]
+
+emojiMenu({ load: async () => rows })
+```
+
+## Licence
+
+The package itself is MIT licensed. The emoji names and keywords come from Emojibase, which is under the MIT License, and Emojibase derives them from the Unicode CLDR and the Unicode emoji data files, under the Unicode License v3. The `NOTICE` file in the package holds both notices. Keep it when you redistribute the data.
+
+## Related pages
+
+- [Packages](https://editor.vivepdf.com/en/docs/packages/)
+- [Mentions](https://editor.vivepdf.com/en/docs/mentions/)
+
+## Does the emoji list load with the editor?
+
+No. The list loads the first time a writer types a colon and two letters, so pages that never use it do not download it.
+
+## Can I use my own emoji list?
+
+Yes. The load function can return any list of rows in the form emoji, name, keywords, up to 5,000 rows.
+
+---
+
+# Formulas (LaTeX)
+
+> Write LaTeX formulas with MathExtension and your own KaTeX 0.18.2 or newer, then draw them on published pages with renderMath.
+
+URL: https://editor.vivepdf.com/en/docs/formulas/
+Last updated: 2026-11-01
+
+The formula extension lets writers type LaTeX and see it drawn by [KaTeX](https://katex.org) while they edit. The editor stores only the LaTeX source, never the drawing, so the saved HTML stays small and clean. On the published page you draw the formulas again with `renderMath`.
+
+Formulas ship as npm packages only. The one-script build does not include them.
+
+## Set it up
+
+1. Install the extension, the UI and KaTeX: `npm install @viveeditor/ext-math @viveeditor/ui @viveeditor/core katex`.
+2. Add `MathExtension` with a `load` function that imports KaTeX. KaTeX then downloads only when a formula is shown.
+3. Import KaTeX's stylesheet and the extension's stylesheet.
+4. Add `mathTools()` to the `plugins` of `createUI` for the `/` menu entries.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { MathExtension } from '@viveeditor/ext-math'
+import { createUI } from '@viveeditor/ui'
+import { mathTools } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-math/style.css'
+import 'katex/dist/katex.min.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    ...basicExtensions,
+    MathExtension.configure({
+      load: () => import('katex'),
+      onError: (error) => console.warn(error.code, error.version),
+    }),
+  ],
+})
+
+createUI(editor, { plugins: [mathTools()] })
+```
+
+## KaTeX version
+
+KaTeX must be **0.18.2 or newer** (`MIN_KATEX_VERSION`). The floor follows the KaTeX security advisory GHSA-238p-pmpm-9mq7. An older version is refused and the formula's source is shown instead of a drawing.
+
+`onError` receives an error with one of two codes:
+
+| Code | Meaning |
+| --- | --- |
+| `KATEX_OUTDATED` | The loaded KaTeX is older than 0.18.2; `version` holds its version. |
+| `KATEX_LOAD` | The `load` function failed. |
+
+The editor passes fixed options to KaTeX, including `trust: false`, so a formula cannot add links or other HTML.
+
+## Writing formulas
+
+- **Inline:** type `$x^2$`. When you type the closing `$`, the text between the dollars becomes a formula. It must not start or end with a space.
+- **Block:** type `$$` on an empty line and press `Enter`.
+- **Menu:** pick "Formula" or "Block formula" from the `/` menu. These entries come from `mathTools()`.
+- **Edit:** click a formula, or select it and press `Enter`, to edit its source with a live preview. `Enter` finishes an inline formula, `Ctrl+Enter` (`⌘+Enter` on a Mac) finishes a block formula, and `Esc` leaves without changes.
+
+From code, `editor.commands.insertMath({ display: true, latex: 'E = mc^2' })` inserts a block formula. Leave out `display` for an inline one.
+
+A formula holds at most 2,000 characters (`MAX_LATEX_LENGTH`) and at most 64 levels of nested braces.
+
+## What is stored
+
+```html
+<p>Area: <span data-math="inline">\pi r^2</span></p>
+<div data-math="block">\int_0^1 x\,dx</div>
+```
+
+[The server sanitizer](https://editor.vivepdf.com/en/docs/server-sanitizing/) keeps formulas in exactly this form. A formula that fails its check, or one placed inside a link or a footnote, is reduced to its text.
+
+When the text is saved as Markdown, formulas are written as `$…$` and `$$` blocks. When it is saved as Word, the LaTeX source is written in a code font.
+
+## Published pages
+
+Call `renderMath` on the element that holds the content. It loads KaTeX the same way and returns the number of formulas it drew. The page needs KaTeX's stylesheet too.
+
+```ts
+import { renderMath } from '@viveeditor/ext-math/render'
+import 'katex/dist/katex.min.css'
+
+const article = document.querySelector('article')
+if (article) await renderMath(article, { load: () => import('katex') })
+```
+
+- It draws at most 1,000 formulas per call, in batches, so long pages stay responsive.
+- Formulas already drawn are skipped, so calling it again is safe.
+- Each drawn formula gets its LaTeX source as `aria-label`.
+
+## Related pages
+
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/)
+- [Footnotes](https://editor.vivepdf.com/en/docs/footnotes/)
+- [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/)
+
+## Does viveEditor include KaTeX?
+
+No. KaTeX is your own dependency. You pass a load function, and the editor refuses versions older than 0.18.2.
+
+## Is the drawn formula saved?
+
+No. Only the LaTeX source is stored. Published pages draw it again with renderMath.
+
+---
+
+# Footnotes
+
+> Add footnotes that writers edit in place, then number them and list them at the end of published pages with renderFootnotes.
+
+URL: https://editor.vivepdf.com/en/docs/footnotes/
+Last updated: 2026-11-01
+
+The footnote extension lets a writer add a note at any point in the text and type it right there, without jumping to the end of the page. The note is stored where it belongs in the sentence. On the published page `renderFootnotes` numbers the notes and lists them at the end.
+
+Footnotes ship as npm packages only. The one-script build does not include them.
+
+## Set it up
+
+1. Install the extension and the UI: `npm install @viveeditor/ext-footnote @viveeditor/ui @viveeditor/core`.
+2. Add `Footnote` to the editor's extensions and import its stylesheet.
+3. Add `footnoteTools()` to the `plugins` of `createUI` for the `/` menu entry.
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { basicExtensions } from '@viveeditor/ext-basic'
+import { Footnote } from '@viveeditor/ext-footnote'
+import { createUI } from '@viveeditor/ui'
+import { footnoteTools } from '@viveeditor/ui/extras'
+import '@viveeditor/ext-footnote/style.css'
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [...basicExtensions, Footnote],
+})
+
+createUI(editor, { plugins: [footnoteTools()] })
+```
+
+## Writing footnotes
+
+- Pick "Footnote" from the `/` menu. A numbered marker appears at the cursor and a small box opens under it.
+- Type the note in the box. `Enter` or `Esc` returns to the main text.
+- Select the marker again to edit the note.
+
+From code, `editor.commands.insertFootnote()` inserts an empty note at the cursor.
+
+Notes keep bold, italic and links only. Other formatting is removed, and a note cannot sit inside a link. A note holds at most 5,000 characters (`MAX_FOOTNOTE_LENGTH`). Inside the editor the markers are numbered in order as you write.
+
+## What is stored
+
+```html
+<p>The study ran for two years.<sup data-footnote="">Results were published in <em>2025</em>.</sup></p>
+```
+
+[The server sanitizer](https://editor.vivepdf.com/en/docs/server-sanitizing/) keeps footnotes in exactly this form. Inside a footnote only text, bold, italic and links survive. A footnote, mention or formula nested where it cannot live is reduced to its text.
+
+## Published pages
+
+Call `renderFootnotes` on the element that holds the content:
+
+```ts
+import { renderFootnotes } from '@viveeditor/ext-footnote/render'
+
+const article = document.querySelector('article')
+if (article) renderFootnotes(article, { backLabel: 'Back to text' })
+```
+
+- Each note in the text becomes a number that links to its entry.
+- The notes are listed in an `<ol class="vive-footnotes">` appended to the end of that element.
+- Each entry gets a ↩ link back to its place in the text. `backLabel` is its accessible name and defaults to "Back to text".
+- A note that sits inside a link becomes a plain number, without a link of its own.
+- Notes already handled are skipped, so calling it again is safe. It returns the number of notes it handled.
+
+## Printing and saving
+
+When the writer prints from the File menu, the notes are numbered and listed at the end of the printed page in the same way.
+
+Saving as Markdown writes footnotes as `[^n]` with the definitions at the end. Saving as Word writes superscript numbers with the notes at the end. Opening a Word file does not bring its footnotes in.
+
+## Related pages
+
+- [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/)
+- [Formulas](https://editor.vivepdf.com/en/docs/formulas/)
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/)
+
+## Are footnote numbers stored in the HTML?
+
+No. The note text is stored where it belongs in the sentence. Numbers are added by renderFootnotes on the published page and by printing.
+
+## What formatting can a footnote hold?
+
+Bold, italic and links only. Other formatting is removed.
+
+---
+
+# Templates
+
+> Offer ready-made content blocks in the slash menu with templateMenu; every template goes through the editor schema before it lands.
+
+URL: https://editor.vivepdf.com/en/docs/templates/
+Last updated: 2026-11-01
+
+Templates give writers a quick start: a memo layout, a meeting note, a product page skeleton. `templateMenu` adds one entry per template to the `/` menu, and picking it inserts the template's content at the cursor.
+
+Templates ship as an npm package only. The one-script build does not include them.
+
+## Set it up
+
+1. Install the UI: `npm install @viveeditor/ui @viveeditor/core`.
+2. Write your templates as a list of entries.
+3. Pass the list to `templateMenu` and add it to the `plugins` of `createUI`.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { type Template, templateMenu } from '@viveeditor/ui/extras'
+
+const templates: Template[] = [
+  {
+    id: 'memo',
+    label: 'Memo',
+    description: 'Subject, summary and next steps',
+    content: '<h2>Subject</h2><p></p><h3>Next steps</h3><ul><li><p></p></li></ul>',
+  },
+  {
+    id: 'meeting',
+    label: 'Meeting notes',
+    content: '<h2>Meeting notes</h2><p><strong>Attendees:</strong> </p><p></p>',
+  },
+]
+
+createUI(editor, { plugins: [templateMenu(templates)] })
+```
+
+## Template entries
+
+| Field | Meaning |
+| --- | --- |
+| `id` | A unique name for the entry. |
+| `label` | The text shown in the `/` menu, after "Template:". |
+| `description` | Optional. Extra words the menu search matches. |
+| `content` | The content to insert, as an HTML string or as editor JSON. |
+
+The menu search also matches the label and the words "template" and "sablon". The second argument of `templateMenu` overrides menu labels, for example `templateMenu(templates, { template: 'Layout' })`.
+
+When the editor is read-only, picking a template inserts nothing.
+
+## Schema filtering
+
+Template content goes through the editor schema, the same way as pasted content. Anything the schema does not know is dropped: scripts, event handlers, unknown elements and attributes. A template can only use the blocks and formatting the editor has extensions for. If a template has a table but the table extension is not loaded, it is not kept as a table.
+
+## Size limit
+
+A template whose HTML is over 2 MB is skipped and does not appear in the menu.
+
+## Trust
+
+The schema removes unsafe markup, but it cannot judge the words and links in a template. Only offer templates you wrote or trust. If writers can create templates for each other, store them through [the server sanitizer](https://editor.vivepdf.com/en/docs/server-sanitizing/) and check who may publish a template for whom.
+
+## Related pages
+
+- [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/)
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/)
+
+## Can a template carry scripts or custom markup?
+
+No. Template content goes through the editor schema like pasted content, so scripts and unknown markup are dropped.
+
+## Is there a size limit?
+
+Yes. Templates over 2 MB are skipped and do not appear in the menu.
+
+---
+
+# AI assistant
+
+> Connect the AI assistant to your own server through a provider function; answers are shown and inserted as plain text.
+
+URL: https://editor.vivepdf.com/en/docs/ai-assistant/
+Last updated: 2026-11-01
+
+The AI assistant gives writers actions such as "Improve writing" or "Summarize" on selected text. viveEditor provides the panel and the rules for showing and inserting answers. It sends nothing anywhere itself: you pass a provider function that calls your own server, and your server talks to the AI service.
+
+The AI assistant ships as an npm package only. The one-script build does not include it.
+
+## Set it up
+
+1. Install the UI: `npm install @viveeditor/ui @viveeditor/core`.
+2. Write a `generate` function that sends the request to your own endpoint.
+3. Add `aiAssistant` to the `plugins` of `createUI`.
+
+```ts
+import { createUI } from '@viveeditor/ui'
+import { type AiRequest, aiAssistant } from '@viveeditor/ui/extras'
+
+async function generate(request: AiRequest): Promise<string> {
+  const response = await fetch('/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify({
+      action: request.action,
+      instruction: request.instruction,
+      text: request.text,
+      context: request.context,
+      locale: request.locale,
+    }),
+    signal: request.signal,
+  })
+  if (!response.ok) throw new Error('AI request failed')
+  const { text } = await response.json()
+  return text
+}
+
+createUI(editor, { plugins: [aiAssistant({ provider: { generate } })] })
+```
+
+`/ai` is a placeholder for your own endpoint, and `csrfToken` is the token your site already uses. The response shape is up to you.
+
+## Opening the assistant
+
+- Select text and press the AI button in the selection bubble.
+- Press `Ctrl+J` (`⌘+J` on a Mac).
+- Type `/ai` and pick "AI" from the `/` menu.
+
+The panel lists the actions, a field for a custom instruction and, once an answer arrives, the buttons Replace selection, Insert below, Try again and Discard. Stop ends a running request and `Esc` closes the panel.
+
+## The provider contract
+
+`provider.generate(request)` returns either a promise of a string or an async iterable of strings. Return an async iterable to stream the answer as it arrives.
+
+| Field | Meaning |
+| --- | --- |
+| `action` | `improve`, `fix`, `shorten`, `expand`, `tone`, `translate`, `summarize`, `continue`, or `custom` for a typed instruction. |
+| `instruction` | The writer's own instruction, only for `custom`. |
+| `text` | The selected text. |
+| `context` | `before` and `after`: up to 2,000 characters of text on each side of the selection. |
+| `locale` | The editor's language, `tr` or `en`. |
+| `signal` | An `AbortSignal`. Pass it to `fetch`; it fires when the writer stops, closes the panel or the time limit is reached. |
+
+The `actions` option chooses which actions the panel shows and in what order, for example `actions: ['fix', 'shorten', 'summarize']`. "Continue writing" and a custom instruction work without a selection; the other actions need selected text.
+
+A streaming provider can read the response body piece by piece:
+
+```ts
+import type { AiRequest } from '@viveeditor/ui/extras'
+
+async function* stream(request: AiRequest): AsyncIterable<string> {
+  const response = await fetch('/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+    body: JSON.stringify({ action: request.action, text: request.text }),
+    signal: request.signal,
+  })
+  if (!response.ok || !response.body) throw new Error('AI request failed')
+  const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) return
+    yield value
+  }
+}
+```
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Selected text | 20,000 characters; a longer selection is not sent and the panel asks for a shorter one |
+| Context | 2,000 characters on each side |
+| Custom instruction | 1,000 characters |
+| Answer | 20,000 characters; the rest is cut off |
+| Time | 2 minutes per request, then it is stopped |
+
+Only one request runs at a time. Starting a new one cancels the last, and pieces that arrive late are dropped.
+
+## How answers are inserted
+
+The AI answer is untrusted text. It is shown in the panel as plain text and inserted as plain paragraphs, never as HTML. Nothing changes in the document until the writer picks Replace selection or Insert below, and one undo removes it. If the selected text changed while the answer was being written, Replace selection is turned off and the answer can only be inserted below.
+
+If you want headings and lists from the answer, the `markdown` option takes a loader for a Markdown renderer. Its HTML loses images, media and scripts, and also links unless you pass `links: true`, and then goes through the editor schema:
+
+```ts
+import { aiAssistant } from '@viveeditor/ui/extras'
+
+aiAssistant({
+  provider: { generate },
+  markdown: async () => (await import('@viveeditor/markdown')).markdownToHtml,
+})
+```
+
+## AI server checklist
+
+The provider should call your own endpoint, never an AI vendor directly from the browser.
+
+- Keep the API key on the server. Require a signed-in session and a CSRF token.
+- Fix the system prompt, the model and `max_tokens` on the server. Accept only the actions you allow and limit the input size again.
+- Set a quota and rate limit per user, and a spending cap at the AI vendor.
+- Keep document text out of your logs, or mask it. Tell writers that their text is sent to a third party, as your privacy rules (KVKK, GDPR) require.
+- If you later give the model tools or retrieval, prompt injection from the document becomes a serious risk; review that design separately.
+
+## Related pages
+
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/)
+- [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/)
+
+## Which AI service does viveEditor use?
+
+None. viveEditor sends nothing anywhere itself. Your provider function decides where the request goes, and it should go to your own server.
+
+## Can the AI answer change the document without the writer?
+
+No. The answer is shown first, and nothing is applied until the writer chooses Replace selection or Insert below. One undo removes it.
+
+---
+
+# Server sanitizing
+
+> Clean posted HTML on your server with @viveeditor/sanitize for Node or viveeditor/sanitizer for PHP 8.4+, on save and on print.
+
+URL: https://editor.vivepdf.com/en/docs/server-sanitizing/
+Last updated: 2026-11-01
+
+The editor only produces a known set of HTML, but anyone can post any HTML to your server. Clean it there before you store or show it. `@viveeditor/sanitize` for Node and `viveeditor/sanitizer` for PHP 8.4+ keep exactly what the editor produces and remove everything else. They share one allowlist and one test corpus and give the same output.
+
+## Install
+
+For Node.js 20.19 or newer:
+
+```sh
+npm install @viveeditor/sanitize
+```
+
+For PHP 8.4 or newer, with the `dom` and `mbstring` extensions and no other dependencies:
+
+```sh
+composer require viveeditor/sanitizer
+```
+
+On Laravel, use [viveeditor/laravel](https://editor.vivepdf.com/en/docs/laravel/), which brings the PHP sanitizer with it.
+
+## Clean the HTML
+
+```ts
+import { sanitizeHtml } from '@viveeditor/sanitize'
+
+const clean = sanitizeHtml(request.body.html, { embeds: true })
+```
+
+```php
+use Viveeditor\Sanitizer\Sanitizer;
+
+$clean = Sanitizer::sanitize($html, ['embeds' => true]);
+```
+
+Every element and attribute is rebuilt with a full HTML5 parser (`parse5` in Node, `Dom\HTMLDocument` in PHP), so the output reads the same way in every browser. Cleaning twice gives the same result.
+
+## Options
+
+| Option | Default | Effect |
+| --- | --- | --- |
+| `embeds` | `false` | Keeps video and audio embeds. Players are rebuilt from the provider and id, never copied. |
+| `allowBase64` | `false` | Allows images stored as `data:` addresses (PNG, JPEG, GIF, WebP, AVIF). |
+| `allowRelativeImages` | `false` | Allows relative image addresses. |
+| `maxBytes` | 2 MB | HTML larger than this throws `TOO_LARGE`. |
+
+Turn `allowRelativeImages` on only if you need it: a relative image address makes every reader's browser send a GET request to your own site, which a writer could aim at an address that changes something.
+
+## Errors
+
+The sanitizer never cuts HTML short. When it cannot clean the input, it throws:
+
+| Code | When |
+| --- | --- |
+| `TOO_LARGE` | The HTML is larger than `maxBytes`. |
+| `TOO_COMPLEX` | The structure would make the parser slow or memory hungry: more than 64 attributes on one tag, nesting deeper than 512 levels, or far more elements than the input has tags. The editor never writes such HTML. |
+
+In Node the error is a `SanitizeError` with a `code`:
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+export function cleanArticle(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+In PHP it is a `SanitizeException` whose `reason` is `SanitizeException::TOO_LARGE` or `SanitizeException::TOO_COMPLEX`:
+
+```php
+use Viveeditor\Sanitizer\SanitizeException;
+use Viveeditor\Sanitizer\Sanitizer;
+
+try {
+    $clean = Sanitizer::sanitize($html);
+} catch (SanitizeException $error) {
+    $clean = null;
+    $reason = $error->reason;
+}
+```
+
+## What is kept
+
+- **Links** keep `http`, `https`, `mailto`, `tel` and relative addresses, and always get `rel="noopener noreferrer nofollow"`.
+- **Images** need `https` addresses. `allowBase64` and `allowRelativeImages` widen that.
+- **Embeds** are removed unless you pass `embeds: true`.
+- **`style`** keeps only text alignment, text and highlight colour, and table widths.
+- **`id`, `name`, `form` and event handlers** never pass.
+- **Scripts, styles, frames, SVG and similar elements** are removed together with their content.
+- **Mentions, formulas and footnotes** are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text. Footnotes keep only bold, italic and links.
+
+## PHP memory note
+
+In PHP the parser cannot be stopped from inside, so some short hostile inputs (a few tens of KB of unclosed formatting tags) can reach PHP's `memory_limit` before the check runs. PHP then ends that request with a fatal error, which is safe but not a clean exception.
+
+Keep `memory_limit` and `max_execution_time` at their usual values for the endpoints that sanitize, and limit the request body size there.
+
+## When to clean
+
+1. **On save.** Clean the posted HTML before you store it.
+2. **On print.** Show stored HTML through a cleaning helper too (`@viveHtml` in Laravel). Rows written before you added cleaning, or written outside your forms, then stay safe.
+
+> **Never print raw HTML**
+>
+> Do not print stored HTML unescaped without cleaning it, even if it was cleaned once on save.
+
+## Related pages
+
+- [Laravel](https://editor.vivepdf.com/en/docs/laravel/)
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/)
+- [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/)
+- [Video embeds](https://editor.vivepdf.com/en/docs/video-embeds/)
+
+## The editor already produces clean HTML. Why clean it again on the server?
+
+Because anyone can post any HTML to your server without using the editor. The browser is not a security boundary.
+
+## Do the Node and PHP sanitizers give the same result?
+
+Yes. They share one allowlist and one test corpus and give the same output.
+
+## What happens when the HTML is too large?
+
+The sanitizer throws a TOO_LARGE error instead of cutting the HTML. The default limit is 2 MB.
+
+---
+
+# Laravel
+
+> Add viveEditor to Laravel with a Blade component, local editor files, the @viveHtml directive and the ViveHtml cast for clean HTML.
+
+URL: https://editor.vivepdf.com/en/docs/laravel/
+Last updated: 2026-11-01
+
+`viveeditor/laravel` brings viveEditor to Laravel 12 and newer on PHP 8.4 and newer. It adds a Blade component for the editor, serves the editor files from your own site and cleans HTML with [the PHP sanitizer](https://editor.vivepdf.com/en/docs/server-sanitizing/) when you save it and when you show it.
+
+## Install
+
+1. Add the package: `composer require viveeditor/laravel`. Laravel finds the service provider and the `ViveEditor` facade on its own.
+2. Publish the editor files to `public/vendor/viveeditor`: `php artisan vendor:publish --tag=viveeditor-assets`.
+3. Optionally publish the config file: `php artisan vendor:publish --tag=viveeditor-config`.
+
+```sh
+composer require viveeditor/laravel
+php artisan vendor:publish --tag=viveeditor-assets
+```
+
+The editor files are published as copies. After you update the package, publish them again with `--force` so they match the new version. They are also tagged `laravel-assets`.
+
+## Show the editor
+
+Put `@viveeditorScripts` in the page's `<head>`. It prints the stylesheet and the editor script from your own `public/vendor/viveeditor`. Then use the component inside your form:
+
+```blade
+<head>
+  @viveeditorScripts
+</head>
+
+<form method="post">
+  @csrf
+  <label for="body">Article</label>
+  <x-viveeditor::editor name="body" id="body" :value="old('body', $post->body)" required />
+  <button type="submit">Save</button>
+</form>
+```
+
+The component renders a `<textarea>` that the editor takes over. The form posts the HTML under the field's `name`.
+
+| Attribute | Meaning |
+| --- | --- |
+| `name` | Required. The form field name. |
+| `value` | The starting HTML. Escaped for you. |
+| `label` | Optional. Becomes the field's `aria-label` when there is no visible `<label>`. |
+
+Other attributes, such as `id`, `required` or `data-files="false"` to hide the File menu, are passed to the textarea.
+
+The component uses the one-script build, so the npm-only extras (mentions, emoji, formulas, footnotes, templates and the AI assistant) are not part of it.
+
+## Show stored HTML
+
+Print stored HTML with `@viveHtml(...)`. It cleans while printing, so rows written before you added cleaning, and rows written outside your forms, are safe too.
+
+```blade
+<article>@viveHtml($post->body)</article>
+```
+
+> **Never use the unescaped echo**
+>
+> Never print editor HTML with `{!! !!}`. It skips cleaning.
+
+## Clean on save
+
+The `ViveHtml` cast cleans on save and again on read, so rows written before the cast or by raw queries come back clean.
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Viveeditor\Laravel\Casts\ViveHtml;
+
+class Post extends Model
+{
+    protected function casts(): array
+    {
+        return ['body' => ViveHtml::class];
+    }
+}
+```
+
+A row the cast cannot clean on read (too large or too complex) reads as an empty string, and the error goes to your exception handler. On save the error is thrown.
+
+To clean anywhere else, use the facade. The second argument overrides the config options for that call:
+
+```php
+use Viveeditor\Laravel\Facades\ViveEditor;
+
+$clean = ViveEditor::sanitize($request->input('body'));
+$withEmbeds = ViveEditor::sanitize($html, ['embeds' => true]);
+```
+
+`ViveEditor::sanitize()` and `@viveHtml` throw `Viveeditor\Sanitizer\SanitizeException` for HTML that is too large or too complex. See [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/) for the limits.
+
+## Configuration
+
+`config/viveeditor.php` holds the asset folder and the sanitizer options used by `@viveHtml`, the cast and the facade:
+
+```php
+return [
+
+    'asset_path' => env('VIVEEDITOR_ASSET_PATH', 'vendor/viveeditor'),
+
+    'sanitize' => [
+        'embeds' => false,
+        'allowBase64' => false,
+        'allowRelativeImages' => false,
+    ],
+
+];
+```
+
+If you enable video embeds in the editor, set `embeds` to `true` here, or they are removed when the HTML is cleaned.
+
+## Content Security Policy
+
+When you use `Vite::useCspNonce()`, the tags printed by `@viveeditorScripts` get the nonce. The editor copies that nonce to the add-on scripts it loads on first use (the Word and Markdown converters and the panels), which sit in the same folder. Your `script-src` must allow that folder. See [Laravel's Vite documentation](https://laravel.com/docs/vite) for setting the nonce, and [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/) for the rest of the policy.
+
+## Language
+
+The editor follows `<html lang="...">` for its language. Set it from the app locale in your layout:
+
+```blade
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+```
+
+## Related pages
+
+- [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/)
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/)
+- [Installation](https://editor.vivepdf.com/en/docs/installation/)
+
+## Does the Laravel package load anything from a CDN?
+
+No. The editor files are published to your own public/vendor/viveeditor folder and served from there.
+
+## Can I print stored HTML with the unescaped Blade echo?
+
+No. Show stored HTML with @viveHtml, which cleans it while printing, so old rows and rows written outside your forms are safe too.
+
+---
+
+# Packages
+
+> Every viveEditor package, what it does, which entry points it has and where its public API report lives.
+
+URL: https://editor.vivepdf.com/en/docs/packages/
+Last updated: 2026-11-01
+
+viveEditor is split into small packages so you load only what you use. This page lists every package, what it does and its extra entry points. The public API of each npm package is recorded in the [`api/` folder](https://github.com/mtvrkan/viveeditor/tree/main/api) of the repository.
+
+## Where to start
+
+| Package | What it does |
+| --- | --- |
+| `viveeditor` | One script that turns textareas into editors, with the toolbar. Also exports `mountEditor`, `upgradeTextarea`, `upgradeAll` and everything from the packages it bundles. |
+| `@viveeditor/core` | Editor engine and extension system built on ProseMirror: schema, commands, HTML and JSON, paste cleaning. No toolbar. |
+| `@viveeditor/ui` | Floating toolbar, selection bubble, `/` menu, panels, File menu and readability meter. |
+
+The `viveeditor` package re-exports `core`, `ui`, `ext-basic`, `ext-code-block`, `ext-embed`, `ext-format`, `ext-image`, `ext-list`, `ext-office-paste`, `ext-search`, `ext-table` and `ext-task-list`. Its CDN build carries the same features.
+
+## Editing features
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/ext-basic` | Bold, italic, underline, strikethrough, inline code, links, headings, quotes, rules, line breaks |
+| `@viveeditor/ext-list` | Bullet and ordered lists |
+| `@viveeditor/ext-format` | Text alignment, text colour and highlight |
+| `@viveeditor/ext-task-list` | Checklists |
+| `@viveeditor/ext-code-block` | Code blocks with a language picker and optional syntax colouring |
+| `@viveeditor/ext-table` | Tables with merged cells, header rows and column widths |
+| `@viveeditor/ext-search` | Find and replace that handles Turkish capitals |
+| `@viveeditor/ext-character-count` | Character count and limit |
+| `@viveeditor/ext-image` | Images with checked addresses, safe uploads and alt-text reminders |
+| `@viveeditor/ext-embed` | YouTube, Vimeo and Spotify players rebuilt from checked links |
+| `@viveeditor/ext-office-paste` | Clean paste from Word, Google Docs and LibreOffice with real lists |
+
+## Extras (npm only)
+
+These are not in the CDN script. Their menus and panels come from `@viveeditor/ui/extras`.
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/ext-mention` | `@` mentions with checked ids |
+| `@viveeditor/ext-math` | LaTeX formulas drawn by your own KaTeX |
+| `@viveeditor/ext-footnote` | Footnotes edited in place, numbered on published pages |
+| `@viveeditor/emoji-data` | Compact emoji list for the emoji menu |
+
+Templates and the AI assistant need no extension package; they are UI plugins in `@viveeditor/ui/extras`.
+
+## File converters
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/markdown` | Markdown import and export, and Markdown-aware paste |
+| `@viveeditor/docx` | Word (`.docx`) import and export with limits for untrusted files |
+
+The File menu receives them as loader functions, so they download only when used.
+
+## Framework components
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/react` | React component and `useViveEditor` hook |
+| `@viveeditor/vue` | Vue component with `v-model` and `useViveEditor` composable |
+| `@viveeditor/svelte` | Svelte component with `bind:value` and a `use:viveEditor` action |
+| `@viveeditor/angular` | Angular component for `ngModel` and reactive forms |
+| `@viveeditor/element` | `<vive-editor>` form field for any page |
+
+See [Frameworks](https://editor.vivepdf.com/en/docs/frameworks/).
+
+## Server packages
+
+| Package | What it does |
+| --- | --- |
+| `@viveeditor/sanitize` | Server-side HTML cleaning for Node that matches the editor output |
+| `viveeditor/sanitizer` (PHP) | The same sanitizer for PHP 8.4+, without dependencies |
+| `viveeditor/laravel` (PHP) | Blade component, local editor files and `@viveHtml` for Laravel 12+ |
+
+The PHP packages are installed with Composer and versioned separately. See [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/) and [Laravel](https://editor.vivepdf.com/en/docs/laravel/).
+
+## Extra entry points
+
+Some packages have more than one entry, so heavy or page-side code stays out of the editor bundle:
+
+- `@viveeditor/ui/extras`: `mentionMenu`, `emojiMenu`, `templateMenu`, `mathTools`, `footnoteTools`, `aiAssistant` and `suggestionMenu`.
+- `@viveeditor/ui/panels`: the panel kit, if you want it in your bundle instead of loaded on first open.
+- `@viveeditor/ext-code-block/highlight`: `CodeHighlight` and `shikiHighlighter`.
+- `@viveeditor/ext-embed/activate`: `activateEmbeds()` for published pages.
+- `@viveeditor/ext-math/render`: `renderMath()` for published pages.
+- `@viveeditor/ext-footnote/render`: `renderFootnotes()` for published pages.
+- `@viveeditor/markdown/paste`: `MarkdownPaste`.
+- `@viveeditor/element/define`: registers `<vive-editor>`.
+- `@viveeditor/emoji-data/en`: the English emoji list.
+
+Packages that need layout ship a `style.css` export; the list is on [Installation](https://editor.vivepdf.com/en/docs/installation/).
+
+## API reports
+
+Each npm package has a folder under [`api/`](https://github.com/mtvrkan/viveeditor/tree/main/api), for example [`api/core`](https://github.com/mtvrkan/viveeditor/tree/main/api/core) or [`api/ui`](https://github.com/mtvrkan/viveeditor/tree/main/api/ui). It holds the published `.d.ts` type declarations. When the public API changes, the change shows up in these files during review, so you can read them to see exactly what a package exports in a given version.
+
+---
+
+# Security and CSP
+
+> How viveEditor keeps unsafe markup out, why you sanitize again on the server, and the CSP settings the CDN script needs.
+
+URL: https://editor.vivepdf.com/en/docs/security-and-csp/
+Last updated: 2026-11-01
+
+viveEditor protects you in two layers: the editor only produces a known set of HTML, and your server cleans every posted document again. This page explains both layers, the Content Security Policy settings the CDN script and its add-ons need, and how to report a vulnerability.
+
+## What the editor checks
+
+The document schema is an allowlist. Markup it does not know never reaches the output. Typed text, pasted HTML, opened files and templates all go through the same rules.
+
+- Links accept only allowed protocols: `http`, `https`, `mailto` and `tel`.
+- Every address is checked when content is loaded and again when it is written out, because JSON content skips the HTML parser.
+- A `style` attribute only carries values the editor wrote, such as a checked colour or an alignment.
+- Images need `https` addresses. `data:` addresses work only with `allowBase64`, and SVG never does. `javascript:`, `vbscript:`, `file:`, `blob:` and `filesystem:` are always refused.
+- Video players never keep the address they were given. The editor stores the provider and the video id and rebuilds the player address with a fixed `sandbox`, `allow` and `referrerpolicy`.
+- AI answers and mention names are shown and inserted as plain text, never as HTML. A mention id never becomes a link.
+
+## Sanitize again on the server
+
+The browser is not a security boundary. Anyone can post any HTML to your server, so clean it there before you store or show it. `@viveeditor/sanitize` for Node and `viveeditor/sanitizer` for PHP keep exactly what the editor produces and remove everything else.
+
+```ts
+import { sanitizeHtml } from '@viveeditor/sanitize'
+
+const clean = sanitizeHtml(request.body.html, { embeds: true })
+```
+
+Clean when you save, and print stored HTML through a cleaning helper too, so rows written before you added cleaning stay safe. Options, limits and errors are on [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/).
+
+## Content Security Policy
+
+### The CDN script and its add-ons
+
+The CDN script loads three add-ons on first use from its own folder: `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` and `viveeditor.panels.iife.js`. Each one is checked against a `sha384` fingerprint built into the main script.
+
+- `script-src` must allow the folder that holds the scripts, for example `https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/` with your exact version.
+- If you use a `nonce`, put it on the main script. It is copied to the add-ons.
+- With Trusted Types enforced, add the policy name `viveeditor` to the `trusted-types` directive. The policy allows only the add-on addresses.
+- If you host the files yourself, keep the file names and serve them with `Access-Control-Allow-Origin`, so the fingerprint check can run.
+- The folder is taken from the main script's own address, which must be named `viveeditor.classic.iife.js` and served over `http` or `https`.
+
+```html
+<script
+  nonce="r4nd0m"
+  src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"
+></script>
+```
+
+Replace `x.y.z` with your exact version, and the nonce with the value your server generates for each response. With npm and a bundler there are no add-ons; the converters and panels load from your own build. The Laravel package serves the editor files from your own `public/vendor/viveeditor`, and its tags get the nonce when you use `Vite::useCspNonce()`.
+
+### Images: `img-src`
+
+Restrict `img-src` to the hosts that serve your uploads and the image hosts you accept. By default, images pasted from other sites keep their original address (`remoteImages: 'allow'`), and showing them tells that site who read the page and when. For a hardened setup use `'drop'` or `'rehost'`; see [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/).
+
+### Video embeds: `frame-src`
+
+List only the providers you enabled:
+
+- YouTube: `https://www.youtube-nocookie.com`
+- Vimeo: `https://player.vimeo.com`
+- Spotify: `https://open.spotify.com`
+
+A page-wide `Referrer-Policy: no-referrer` stops YouTube players from working. On the server, never allow every `iframe`; rebuild players from `div[data-embed]`, or accept only addresses for which `isAllowedEmbedSrc()` returns true. More on [Video embeds](https://editor.vivepdf.com/en/docs/video-embeds/).
+
+### Styles: `style-src`
+
+Text colour, highlight, alignment and table column widths are written as `style` attributes, both in the editor and in the saved HTML. A `style-src` without `'unsafe-inline'` makes the browser ignore those attributes, so the colours and widths disappear. Allow `'unsafe-inline'` in `style-src` on pages that show or edit content, and keep `script-src` strict.
+
+### Printing
+
+Printing uses a hidden frame without scripts that loads only images and styles. It is sandboxed without `allow-scripts` and carries its own CSP.
+
+## Uploads
+
+The editor checks every image address and file before it reaches the document, but your upload endpoint must still:
+
+- re-validate and re-encode every upload, which strips EXIF and GPS data and polyglot files, and return the real width and height;
+- serve uploads from a cookieless domain with a server-set `Content-Type` and `X-Content-Type-Options: nosniff`;
+- require authentication, a CSRF token and a rate limit;
+- guard against SSRF if it fetches remote images.
+
+## Report a vulnerability
+
+Report vulnerabilities privately through GitHub's "Report a vulnerability" button on the [Security tab](https://github.com/mtvrkan/viveeditor/security) of the repository. Do not open a public issue.
+
+1. Name the affected package and version.
+2. Add a minimal reproduction.
+3. Describe the impact you observed.
+
+You will receive an acknowledgement, and the fix will be coordinated with you before public disclosure. Until 1.0, only the latest published minor version receives security fixes. The fix ships as a patch release of every package, because all packages share one version number.
+
+Of particular interest is any way to get script execution, event handlers, `javascript:` URLs or unsanitized markup into the editor's output. The server sanitizers are in scope too. The full policy is in [SECURITY.md](https://github.com/mtvrkan/viveeditor/blob/main/SECURITY.md).
+
+---
+
+# Accessibility
+
+> How viveEditor meets WCAG 2.2 AA, which keys control it, what screen readers hear, and what you still need to provide.
+
+URL: https://editor.vivepdf.com/en/docs/accessibility/
+Last updated: 2026-11-01
+
+viveEditor targets WCAG 2.2 AA: every tool works from the keyboard, status changes are announced to screen readers, and the editor helps writers describe their images. This page lists what the editor does and the few things you still need to provide, such as a label.
+
+## How it is tested
+
+Every test page, every panel and both themes are checked with axe against WCAG 2.2 AA; a failure blocks the build. The `/` menu and the suggestion lists keep the focus in the text while you pick an option, following the combobox pattern, and a keyboard test proves that every option can be reached.
+
+## Give the editor a name
+
+Screen readers need a name for the editing area. Pass `label` everywhere you create an editor:
+
+```ts
+import { mountEditor } from 'viveeditor'
+
+mountEditor(document.querySelector('#editor'), { label: 'Article body' })
+```
+
+The components take the same `label` prop, and `<vive-editor>` takes a `label` attribute. With a textarea, keep a visible `<label for>` that points at it; the editor uses that text when you pass no `label`.
+
+Set `locale` too, or a correct `<html lang="...">`, so the toolbar names and messages are read in the page's language. The interface has Turkish and English text.
+
+## Keyboard
+
+| Keys | What they do |
+| --- | --- |
+| `Alt+F10` | Move the focus from the text to the toolbar |
+| `Ctrl+K` | Open the link panel |
+| `Ctrl+F` | Open find and replace |
+| `/` | Open the block menu |
+| `Esc` | Close the selection bubble or a loading panel |
+| `Tab` / `Shift+Tab` | Change the level of a list item |
+| `Tab` | In a table, move to the next cell |
+| `Ctrl+Enter` | Tick a checklist item |
+| `Ctrl+Shift+L`, `E`, `R`, `J` | Align left, centre, right or justify |
+| `Ctrl+J` | Open the AI assistant, when you added it |
+
+On a Mac, use `⌘` where the table says `Ctrl`. Markdown shortcuts also work while typing, such as `## ` for a heading, `- ` for a list or `[ ]` for a checklist. The full list is on [Toolbar and shortcuts](https://editor.vivepdf.com/en/docs/toolbar-and-shortcuts/).
+
+## What screen readers hear
+
+- File menu progress is announced through a `role="status"` region, and errors appear in a visible `role="alert"` notice.
+- While a panel loads, a placeholder with `role="status"` sits in its place. If it fails, a message with a Try again button replaces it.
+- When a form waits for uploads, a notice with `role="status"` says it will send, and the editor is marked `aria-busy`.
+- When a required editor is empty on submit, the editor is marked `aria-invalid="true"`, takes the focus and fires a `vive:invalid` event that you can use to show your own message.
+
+## Images and alt text
+
+The image panel asks for alt text, with the hint "Briefly describe the image for people who cannot see it". A writer can also mark an image as decorative.
+
+- In the saved document, `alt: null` means the description is missing and `alt: ''` means the image is decorative.
+- The `requireAlt` option of `Image` (`'off'`, `'warn'` or `'block'`) sets how the alt-text reminder behaves.
+- The `imagesWithoutAlt` query lists the images that still need a description, for example before you publish.
+
+## Colours and layout
+
+- Light, dark and auto themes are available. In the dark theme, text colours chosen by the writer are lifted on screen so they stay readable; the saved HTML keeps the stored colour.
+- On narrow screens, below 560 px, most tools move into the "More tools" menu.
+- Pages that show the content should add `img { max-width: 100%; height: auto; }` so images fit small screens.
+
+## Readability meter
+
+The interface includes a readability meter that shows words, sentences, average sentence length, reading time and a readability score. The score uses the Ateşman or the Flesch formula; set it with `readability: 'atesman'` or `readability: 'flesch'` in `createUI`, or hide the meter with `readability: false`.
+
+---
+
+# Versioning
+
+> How viveEditor versions its packages before 1.0, what stays compatible, and why the CDN script needs an exact version.
+
+URL: https://editor.vivepdf.com/en/docs/versioning/
+Last updated: 2026-11-01
+
+viveEditor follows semantic versioning with the usual 0.x rule, and all npm packages share one version number. This page explains what may change between versions, what never breaks, and how to pin a version safely.
+
+## The 0.x rule
+
+viveEditor is in 0.x, before its first stable release.
+
+- A breaking change can ship in a minor version, such as 0.1 to 0.2. It is described in that release's notes.
+- Patch versions, such as 0.1.0 to 0.1.1, never break.
+
+Read the release notes before you move to a new minor version. Each version is tagged and published as a [GitHub release](https://github.com/mtvrkan/viveeditor/releases).
+
+## One version for every package
+
+All npm packages, `viveeditor` and every `@viveeditor/*` package, are released together with the same version number. Install them at the same version, so the editor, its extensions and your framework component always match.
+
+The PHP packages, `viveeditor/sanitizer` and `viveeditor/laravel`, are versioned separately through Composer.
+
+## Stored content stays readable
+
+HTML and JSON saved by any 0.x version stay readable by every later 0.x version. Stored content never needs a migration when you update.
+
+The canonical storage format is ProseMirror JSON (`editor.getJSON()`); HTML (`editor.getHTML()`) is a rendering format. You can store either.
+
+## The public API is recorded
+
+The public API of each package is recorded as `.d.ts` files in the [`api/` folder](https://github.com/mtvrkan/viveeditor/tree/main/api) of the repository. The build fails when the API changes without an update to these files, so every change to the public API is visible in review. To see what changed between two versions, compare the `api/` folder at their tags.
+
+## Pin the CDN version
+
+Always load the CDN script with an exact version:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/viveeditor@x.y.z/dist/viveeditor.classic.iife.js"></script>
+```
+
+Replace `x.y.z` with the exact version you use. The script loads its add-ons from the same folder and checks them against fingerprints built into that exact version, and an add-on is accepted only when its version matches. A short address such as `cdn.jsdelivr.net/npm/viveeditor` cannot find them. Load `viveeditor.css` from the same version folder.
+
+## Security fixes
+
+Until 1.0, only the latest published minor version receives security fixes. A fix ships as a patch release of every package, because all packages share one version number. Staying on the latest minor is the way to get them. See [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+
+---
+
+# Frequently asked questions
+
+> Short answers about viveEditor's licence, setup, frameworks, safety, Word support, languages, extras and versions.
+
+URL: https://editor.vivepdf.com/en/docs/faq/
+Last updated: 2026-11-01
+
+These are the questions people ask most often before they add viveEditor to a site. Each answer is short; the linked pages have the details.
+
+## Where to read more
+
+- Setup: [Installation](https://editor.vivepdf.com/en/docs/installation/) and [Your first editor](https://editor.vivepdf.com/en/docs/first-editor/).
+- Frameworks and server rendering: [Frameworks](https://editor.vivepdf.com/en/docs/frameworks/).
+- Safe storage: [Server sanitizing](https://editor.vivepdf.com/en/docs/server-sanitizing/) and [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+- Images: [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/).
+- Word: [Paste from Office](https://editor.vivepdf.com/en/docs/paste-from-office/) and [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+- Extras: [Mentions](https://editor.vivepdf.com/en/docs/mentions/), [Formulas](https://editor.vivepdf.com/en/docs/formulas/) and [AI assistant](https://editor.vivepdf.com/en/docs/ai-assistant/).
+- Keyboard and screen readers: [Accessibility](https://editor.vivepdf.com/en/docs/accessibility/).
+- Updates: [Versioning](https://editor.vivepdf.com/en/docs/versioning/).
+- Something not working: [Troubleshooting](https://editor.vivepdf.com/en/docs/troubleshooting/).
+
+If your question is not here, search the [issues on GitHub](https://github.com/mtvrkan/viveeditor/issues) or open a new one. Report security problems privately, as described on [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+
+## Is viveEditor free?
+
+Yes. viveEditor is open source under the MIT licence. Image uploads, tables, embeds and Word import and export are all included; there is no paid tier.
+
+## Do I need a build step?
+
+No. One stylesheet, one script and a textarea with the data-editor attribute are enough. If you use a bundler, install the viveeditor package from npm instead.
+
+## Which frameworks are supported?
+
+There are components for React 18 and 19, Vue 3.5, Svelte 5 and Angular 21 and 22. The vive-editor custom element works as a form field on any other page.
+
+## Can I store the HTML the editor sends as it is?
+
+No. The editor only produces a known set of HTML, but anyone can post any HTML to your server. Clean it there with @viveeditor/sanitize for Node or viveeditor/sanitizer for PHP before you store or show it.
+
+## Can writers upload images?
+
+Yes, once you give the Image extension your own upload function. The editor checks every file and address, but your server must still re-validate and re-encode each upload.
+
+## Does it work with Word?
+
+Yes. Paste from Word, Google Docs and LibreOffice keeps real nested lists, and the File menu opens and saves .docx files. The older .doc, .odt and .rtf formats are not supported.
+
+## Which languages does the interface speak?
+
+Turkish and English. Choose one with the locale option; without it, the editor follows the page's lang attribute and then the browser language.
+
+## Are mentions, emoji, formulas and the AI assistant in the CDN script?
+
+No. Mentions, emoji, formulas, footnotes, templates and the AI assistant ship as npm packages only and plug into the toolbar through @viveeditor/ui/extras.
+
+## Does viveEditor send my text to an AI service?
+
+No. viveEditor sends nothing anywhere itself. The AI assistant calls only the provider function you write, which should call your own server.
+
+## Is it accessible?
+
+viveEditor targets WCAG 2.2 AA, with full keyboard control and screen reader announcements. Every editor still needs a label from you.
+
+## Will an update break my stored content?
+
+No. HTML and JSON saved by any 0.x version stay readable by every later 0.x version. The API itself can still change in a minor version before 1.0.
+
+## Is there a Laravel package?
+
+Yes. viveeditor/laravel works with Laravel 12 or newer and PHP 8.4 or newer. It adds a Blade component, serves the editor files from your own site and includes the PHP sanitizer.
+
+---
+
+# Troubleshooting
+
+> Fixes for common viveEditor problems, from CDN add-ons that fail to load to refused files, blocked players and sanitizer errors.
+
+URL: https://editor.vivepdf.com/en/docs/troubleshooting/
+Last updated: 2026-11-01
+
+This page lists the problems people run into most often with viveEditor and what causes them. Find the symptom, check the causes in order, and follow the link if you need the full setup.
+
+## CDN script and add-ons
+
+### Word, Markdown or a panel does not load
+
+The CDN script loads `viveeditor.docx.iife.js`, `viveeditor.markdown.iife.js` and `viveeditor.panels.iife.js` from its own folder on first use. The File menu then says "The converter could not be loaded", or a panel shows "This panel could not be loaded" with a Try again button. Check these causes:
+
+- The script address has no exact version, such as `cdn.jsdelivr.net/npm/viveeditor`. Use `viveeditor@x.y.z` with your exact version.
+- The files were renamed or combined. The main script must keep the name `viveeditor.classic.iife.js`, and the add-ons must sit next to it with their own names.
+- You host the files yourself without `Access-Control-Allow-Origin`, so the fingerprint check cannot run.
+- Your Content Security Policy blocks the folder in `script-src`, or Trusted Types is enforced without the `viveeditor` policy name in `trusted-types`.
+
+A failed add-on is removed, so the next use tries again. Loading gives up after 30 seconds. See [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/).
+
+### The integrity check fails
+
+Each add-on is checked against a `sha384` fingerprint built into that exact version of the main script, and it is accepted only when its version matches. Load every file from the same version folder, and do not change the files after the build.
+
+### A warning about a second copy
+
+The main script was loaded twice. The second copy warns and passes add-ons it does not own to the first one. Remove the extra `<script>` tag.
+
+### Word and Markdown are missing with npm
+
+With a bundler there are no CDN add-ons. Without loaders, the File menu opens only HTML and text files. Pass the converters in `files`; see [Open, save and print](https://editor.vivepdf.com/en/docs/open-save-print/).
+
+## Files and pasted content
+
+### A file is refused
+
+- Word files over 20 MB and text files over 5 MB are refused.
+- Password-protected files cannot be opened. Remove the password and try again.
+- Word files that unpack too large or too deep are refused with "The file is too large or too complex."
+- `.doc`, `.odt` and `.rtf` are not supported. Save the file as `.docx` first.
+
+### Images disappear when a Word file is opened
+
+Opening images from a Word file needs your `upload` function or `allowBase64` in the File menu options. Without one, images are dropped and the menu says how many.
+
+### Images are missing after a paste from Word
+
+Images that point at files on the copying computer cannot be pasted. The `onDropped` callback of `OfficePaste` tells you how many were left out. Insert those images through the image panel.
+
+### An image or link address is refused
+
+- Images need an `https` address. `data:` addresses work only with `allowBase64`, and SVG images never do.
+- Links accept `http`, `https`, `mailto` and `tel` only.
+
+## Video embeds
+
+### A link does not turn into a player
+
+- The provider is not in your `providers` list. Built-in providers are YouTube, Vimeo and Spotify.
+- The link comes from a link shortener. The editor never follows redirects or short links.
+- When you paste, the clipboard must hold the link alone, on an empty line. Otherwise use the video button in the toolbar.
+- The document already holds the maximum number of players (`maxEmbeds`, 50 by default).
+
+### Players do not work on the published page
+
+- A page-wide `Referrer-Policy: no-referrer` stops YouTube players from working.
+- Your `frame-src` does not list the provider.
+- You use `facade: true` but do not call `activateEmbeds()` from `@viveeditor/ext-embed/activate` on the page.
+- Your server sanitizer removed the players, because `embeds: true` was not passed.
+
+See [Video embeds](https://editor.vivepdf.com/en/docs/video-embeds/).
+
+## Extras
+
+### Formulas show their LaTeX source
+
+KaTeX older than 0.18.2 is refused with the error code `KATEX_OUTDATED`, and the source is shown instead. Update KaTeX. If KaTeX fails to load, the code is `KATEX_LOAD`. On published pages, call `renderMath(root, { load: () => import('katex') })` from `@viveeditor/ext-math/render`, and load `katex/dist/katex.min.css`.
+
+### Footnotes are not numbered on the published page
+
+Call `renderFootnotes(root)` from `@viveeditor/ext-footnote/render` on the page that shows the content.
+
+## Server sanitizing
+
+### `TOO_LARGE` or `TOO_COMPLEX`
+
+`sanitizeHtml` throws a `SanitizeError` instead of returning cut or partial output:
+
+- `TOO_LARGE`: the HTML is larger than `maxBytes`, 2 MB by default.
+- `TOO_COMPLEX`: the structure would make the parser slow or memory hungry, such as more than 64 attributes on one tag or nesting deeper than 512 levels. The editor never writes such HTML.
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+function cleanOrNull(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+Reject the request when you get `null`.
+
+### PHP ends the request with a fatal error
+
+Some short hostile inputs can reach PHP's `memory_limit` before the check runs. That is safe but not a clean exception. Keep `memory_limit` and `max_execution_time` at their usual values for the endpoints that sanitize, and limit the request body size there.
+
+### A Laravel field reads as an empty string
+
+The `ViveHtml` cast could not clean that row because it is too large or too complex. The error goes to your exception handler. See [Laravel](https://editor.vivepdf.com/en/docs/laravel/).
+
+## Forms and setup
+
+### The form does not submit
+
+- A `required` editor is empty. The textarea fires `vive:invalid` with `detail.reason` set to `'required'`.
+- Images are still uploading. The form sends once they finish. If an upload fails while waiting, the send is cancelled and `vive:invalid` fires with `detail.reason` set to `'upload'`.
+
+```ts
+document.querySelector('#body').addEventListener('vive:invalid', (event) => {
+  console.log((event as CustomEvent).detail.reason)
+})
+```
+
+### A toolbar button is missing
+
+The toolbar shows only tools whose commands are registered. If you pass your own `extensions`, add the extension for the tool you miss. The File menu is hidden by `data-files="false"` on a textarea or `files: false` in `createUI`.
+
+### `Editor.create` throws a `ViveEditorError`
+
+- `DUPLICATE_EXTENSION`: the same extension is in the list twice.
+- `INVALID_SCHEMA`: a dependency is missing, such as the list item for a list.
+- `SCHEMA_CONFLICT`: two extensions define the same thing.
+- `DESTROYED`: you used the editor after `destroy()`.
+- `UNKNOWN_COMMAND`: the command's extension is not loaded.
+
+### The interface is in the wrong language
+
+Pass `locale`. Without it, the editor follows `<html lang="...">` and then the browser language.
+
+### Images are too wide on the published page
+
+Saved images carry their `width` and `height`. Add `img { max-width: 100%; height: auto; }` to the pages that show the content.

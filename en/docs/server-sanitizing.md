@@ -1,0 +1,133 @@
+# Server sanitizing
+
+> Clean posted HTML on your server with @viveeditor/sanitize for Node or viveeditor/sanitizer for PHP 8.4+, on save and on print.
+
+URL: https://editor.vivepdf.com/en/docs/server-sanitizing/
+Last updated: 2026-11-01
+
+The editor only produces a known set of HTML, but anyone can post any HTML to your server. Clean it there before you store or show it. `@viveeditor/sanitize` for Node and `viveeditor/sanitizer` for PHP 8.4+ keep exactly what the editor produces and remove everything else. They share one allowlist and one test corpus and give the same output.
+
+## Install
+
+For Node.js 20.19 or newer:
+
+```sh
+npm install @viveeditor/sanitize
+```
+
+For PHP 8.4 or newer, with the `dom` and `mbstring` extensions and no other dependencies:
+
+```sh
+composer require viveeditor/sanitizer
+```
+
+On Laravel, use [viveeditor/laravel](https://editor.vivepdf.com/en/docs/laravel/), which brings the PHP sanitizer with it.
+
+## Clean the HTML
+
+```ts
+import { sanitizeHtml } from '@viveeditor/sanitize'
+
+const clean = sanitizeHtml(request.body.html, { embeds: true })
+```
+
+```php
+use Viveeditor\Sanitizer\Sanitizer;
+
+$clean = Sanitizer::sanitize($html, ['embeds' => true]);
+```
+
+Every element and attribute is rebuilt with a full HTML5 parser (`parse5` in Node, `Dom\HTMLDocument` in PHP), so the output reads the same way in every browser. Cleaning twice gives the same result.
+
+## Options
+
+| Option | Default | Effect |
+| --- | --- | --- |
+| `embeds` | `false` | Keeps video and audio embeds. Players are rebuilt from the provider and id, never copied. |
+| `allowBase64` | `false` | Allows images stored as `data:` addresses (PNG, JPEG, GIF, WebP, AVIF). |
+| `allowRelativeImages` | `false` | Allows relative image addresses. |
+| `maxBytes` | 2 MB | HTML larger than this throws `TOO_LARGE`. |
+
+Turn `allowRelativeImages` on only if you need it: a relative image address makes every reader's browser send a GET request to your own site, which a writer could aim at an address that changes something.
+
+## Errors
+
+The sanitizer never cuts HTML short. When it cannot clean the input, it throws:
+
+| Code | When |
+| --- | --- |
+| `TOO_LARGE` | The HTML is larger than `maxBytes`. |
+| `TOO_COMPLEX` | The structure would make the parser slow or memory hungry: more than 64 attributes on one tag, nesting deeper than 512 levels, or far more elements than the input has tags. The editor never writes such HTML. |
+
+In Node the error is a `SanitizeError` with a `code`:
+
+```ts
+import { SanitizeError, sanitizeHtml } from '@viveeditor/sanitize'
+
+export function cleanArticle(html: string): string | null {
+  try {
+    return sanitizeHtml(html)
+  } catch (error) {
+    if (error instanceof SanitizeError) return null
+    throw error
+  }
+}
+```
+
+In PHP it is a `SanitizeException` whose `reason` is `SanitizeException::TOO_LARGE` or `SanitizeException::TOO_COMPLEX`:
+
+```php
+use Viveeditor\Sanitizer\SanitizeException;
+use Viveeditor\Sanitizer\Sanitizer;
+
+try {
+    $clean = Sanitizer::sanitize($html);
+} catch (SanitizeException $error) {
+    $clean = null;
+    $reason = $error->reason;
+}
+```
+
+## What is kept
+
+- **Links** keep `http`, `https`, `mailto`, `tel` and relative addresses, and always get `rel="noopener noreferrer nofollow"`.
+- **Images** need `https` addresses. `allowBase64` and `allowRelativeImages` widen that.
+- **Embeds** are removed unless you pass `embeds: true`.
+- **`style`** keeps only text alignment, text and highlight colour, and table widths.
+- **`id`, `name`, `form` and event handlers** never pass.
+- **Scripts, styles, frames, SVG and similar elements** are removed together with their content.
+- **Mentions, formulas and footnotes** are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text. Footnotes keep only bold, italic and links.
+
+## PHP memory note
+
+In PHP the parser cannot be stopped from inside, so some short hostile inputs (a few tens of KB of unclosed formatting tags) can reach PHP's `memory_limit` before the check runs. PHP then ends that request with a fatal error, which is safe but not a clean exception.
+
+Keep `memory_limit` and `max_execution_time` at their usual values for the endpoints that sanitize, and limit the request body size there.
+
+## When to clean
+
+1. **On save.** Clean the posted HTML before you store it.
+2. **On print.** Show stored HTML through a cleaning helper too (`@viveHtml` in Laravel). Rows written before you added cleaning, or written outside your forms, then stay safe.
+
+> **Never print raw HTML**
+>
+> Do not print stored HTML unescaped without cleaning it, even if it was cleaned once on save.
+
+## Related pages
+
+- [Laravel](https://editor.vivepdf.com/en/docs/laravel/)
+- [Security and CSP](https://editor.vivepdf.com/en/docs/security-and-csp/)
+- [Images and uploads](https://editor.vivepdf.com/en/docs/images-and-uploads/)
+- [Video embeds](https://editor.vivepdf.com/en/docs/video-embeds/)
+
+## The editor already produces clean HTML. Why clean it again on the server?
+
+Because anyone can post any HTML to your server without using the editor. The browser is not a security boundary.
+
+## Do the Node and PHP sanitizers give the same result?
+
+Yes. They share one allowlist and one test corpus and give the same output.
+
+## What happens when the HTML is too large?
+
+The sanitizer throws a TOO_LARGE error instead of cutting the HTML. The default limit is 2 MB.

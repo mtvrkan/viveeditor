@@ -1,0 +1,127 @@
+# Dosya aç, kaydet, yazdır
+
+> Dosya menüsüyle Word, Markdown, HTML ve metin dosyalarını açın, belgeyi Word, Markdown ya da HTML olarak kaydedin ve yazdırın.
+
+URL: https://editor.vivepdf.com/dokumantasyon/dosya-ac-kaydet-yazdir/
+Son güncelleme: 2026-11-01
+
+Araç çubuğunda bir Dosya menüsü vardır. `.docx`, `.md`, `.html` ve `.txt` dosyalarını açar, metni Word, Markdown ya da HTML olarak kaydeder ve yazdırır (PDF için yazdırma penceresinde "PDF olarak kaydet" seçin). Bu sayfa menüyü açıp kapatmayı, dönüştürücüleri yüklemeyi ve Word ile Markdown dosyalarında nelerin korunup nelerin düştüğünü anlatır.
+
+## Dosya menüsü
+
+Menüde şu öğeler bulunur: "Dosya aç…", "Word olarak kaydet (.docx)", "Markdown olarak kaydet (.md)", "HTML olarak kaydet (.html)" ve "Yazdır veya PDF".
+
+- Açılan dosya boş bir belgenin yerini alır. Belgede metin varsa dosya imlecin olduğu yere eklenir. Tek bir geri al işlemi bunu geri alır.
+- Metin dosyalarında boş satırlar paragrafları ayırır, tek satır sonları satır sonu olarak kalır.
+- Açılan her dosya, yapıştırılan içerikle aynı belge kurallarından geçer; bilinmeyen biçimlendirme çıktıya hiçbir zaman ulaşmaz. Kaydedilen HTML'i sunucuda da temizleyin.
+- Kaydedilen dosyanın adı `fileName` seçeneğinden gelir (verilmezse "belge"). Dosya adlarında kullanılamayan karakterler değiştirilir, ad en fazla 100 karakter olur.
+- Hatalar görünür bir bildirimle gösterilir. "Dosya açılıyor…" gibi ilerleme mesajları ekran okuyuculara duyurulur.
+
+## Tek betikli kurulumda
+
+Menü varsayılan olarak açıktır ve Word ile Markdown dönüştürücülerini içerir. Dönüştürücüler ana betiğin yanındaki iki ek dosyadadır ve ilk kullanıldıklarında yüklenir. Menüyü bir metin alanında gizlemek için `data-files="false"` ekleyin:
+
+```html
+<textarea name="body" data-editor data-files="false"></textarea>
+```
+
+Ek dosyaların adresi, parmak izi denetimi ve İçerik Güvenliği Politikası ayarları için [Güvenlik ve CSP](https://editor.vivepdf.com/dokumantasyon/guvenlik-ve-csp/) sayfasına bakın.
+
+## npm ile
+
+Dönüştürücüleri yükleyici fonksiyonlar olarak verin; yalnızca kullanıldıklarında indirilirler:
+
+```ts
+import { createUI } from '@viveeditor/ui'
+
+createUI(editor, {
+  files: {
+    docx: () => import('@viveeditor/docx'),
+    markdown: () => import('@viveeditor/markdown'),
+    upload,
+    fileName: 'Rapor',
+  },
+})
+```
+
+Çerçeve bileşenlerinde aynı nesneyi `ui: { files: { … } }` içinde verin; bileşenler varsayılan olarak yükleyici eklemez.
+
+| Seçenek | Açıklama |
+| --- | --- |
+| `docx` | `@viveeditor/docx` modülünü döndüren yükleyici. Word açma ve kaydetmeyi açar. |
+| `markdown` | `@viveeditor/markdown` modülünü döndüren yükleyici. Markdown açma ve kaydetmeyi açar. |
+| `html` | `false` HTML olarak kaydetmeyi kaldırır. |
+| `print` | `false` yazdırmayı kaldırır. |
+| `fileName` | Kaydedilen dosyaların adı. |
+| `upload` | Word dosyasındaki görselleri sunucunuza yükleyen fonksiyon. Sözleşmesi [Görseller ve yükleme](https://editor.vivepdf.com/dokumantasyon/gorseller-ve-yukleme/) sayfasındaki yükleme fonksiyonuyla aynıdır. |
+| `allowBase64` | Word dosyasındaki görselleri yükleme yerine belgeye gömer. |
+
+Yükleyici verilmezse menü HTML ve metin dosyalarını açar, HTML olarak kaydeder ve yazdırır. `files: false` menüyü tamamen gizler.
+
+## Sınırlar
+
+- Word dosyaları en fazla 20 MB, HTML, Markdown ve metin dosyaları en fazla 5 MB olabilir. Markdown dönüştürücüsü ise en fazla 1 MB metin işler.
+- Parola korumalı dosyalar ve açıldığında çok büyüyen ya da çok derin iç içe geçen dosyalar bir mesajla reddedilir.
+- `.doc`, `.odt` ve `.rtf` desteklenmez.
+- Word dosyasındaki bazı görseller eklenemezse menü kaç tanesinin eklenemediğini söyler. Desteklenmeyen başka içerik atlandıysa bunu da bildirir.
+
+## Yazdırma
+
+"Yazdır veya PDF" tarayıcının yazdırma penceresini açar. Belge, betik çalıştırmayan ve yalnızca görselleri ve stilleri yükleyen gizli bir çerçevede hazırlanır. Video oynatıcıları baskıda bağlantı olarak görünür.
+
+Kendi düğmeniz için `@viveeditor/ui` paketinden `printDocument(editor, { title, css })` çağırabilirsiniz.
+
+## Markdown
+
+Başlıklar, kalın, italik, üstü çizili, satır içi kod, bağlantılar, görseller, madde işaretli, numaralı ve iç içe listeler, görev listeleri, alıntılar, yatay çizgiler, dil bilgisiyle çitli kod blokları ve tablolar okunur ve yazılır.
+
+Markdown'da yazı rengi, vurgu, altı çizili ve hizalama için bir karşılık yoktur, bu yüzden kaydederken atlanır. Video oynatıcıları bağlantı olarak kaydedilir. Markdown içindeki ham HTML hiçbir zaman geçirilmez.
+
+## Word (.docx)
+
+| Açarken ve kaydederken korunur | Atlanır |
+| --- | --- |
+| Başlıklar (Word'deki konu başlığı 1. düzey başlık olarak açılır), kalın, italik, altı çizili, üstü çizili, yazı rengi, vurgu, hizalama | Yorumlar, dipnotlar, üst ve alt bilgiler, metin kutuları, denklemler |
+| Madde işaretli, numaralı ve iç içe listeler | Silinmiş izlenen değişiklikler (eklemeler korunur), gizli metin |
+| Web ve e-posta adreslerine giden bağlantılar | Diğer bağlantılar düz metne dönüşür; alan kodlarından yalnızca görünen metin kalır |
+| Birleştirilmiş hücreli ve başlık satırlı tablolar, alıntılar, kod | Kod bloğunun dili |
+| Görseller (açarken yükleme fonksiyonunuz ya da `allowBase64` gerekir) | Bunlar yoksa görseller atlanır ve menü kaç tane olduğunu söyler |
+
+Görev listeleri ☐ ve ☑ karakterleriyle, video oynatıcıları bağlantı olarak kaydedilir. Kaydedilen dosya A4 boyutundadır ve içinde yazar bilgisi bulunmaz.
+
+> **Word'e kaydedilen görseller**
+>
+> Data adresli görseller dosyaya gömülür. Web adresindeki görseller yalnızca `exportDocx` fonksiyonunu `fetchImages: true` ile kendiniz çağırırsanız indirilip gömülür; Dosya menüsü bunu yapmaz ve bu görselleri bağlantı olarak yazar.
+
+## Dönüştürücüleri doğrudan kullanmak
+
+Menü olmadan da dönüştürebilirsiniz:
+
+```ts
+import { exportDocx, importDocx } from '@viveeditor/docx'
+import { markdownToHtml, toMarkdown } from '@viveeditor/markdown'
+
+const { html, warnings } = await importDocx(file, { upload })
+editor.commands.replaceContent(html)
+
+const blob = await exportDocx(editor, { title: 'Rapor' })
+
+editor.commands.replaceContent(markdownToHtml('# Başlık\n\nBiraz **kalın** metin'))
+const markdown = toMarkdown(editor)
+```
+
+`importDocx` reddettiği dosyalar için `TOO_LARGE`, `NOT_DOCX`, `ENCRYPTED`, `UNSUPPORTED`, `DAMAGED`, `TOO_COMPLEX` ya da `ABORTED` kodlu bir `DocxError` fırlatır. `warnings` atlanan içeriği `{ code, count }` olarak listeler.
+
+Yapıştırılan Markdown metnini biçimlendirmek için [Word'den yapıştırma](https://editor.vivepdf.com/dokumantasyon/word-den-yapistirma/) sayfasındaki `MarkdownPaste` eklentisine bakın.
+
+## PDF olarak nasıl kaydederim?
+
+Dosya menüsünden "Yazdır veya PDF" seçin ve tarayıcının yazdırma penceresinde "PDF olarak kaydet" seçeneğini kullanın.
+
+## .doc, .odt ya da .rtf dosyalarını açabilir miyim?
+
+Hayır. Yalnızca .docx, .md, .html, .htm ve .txt dosyaları açılır. Eski biçimdeki dosyaları önce Word ya da LibreOffice ile .docx olarak kaydedin.
+
+## Açılan dosya mevcut metnin üzerine mi yazılır?
+
+Belge boşsa dosya onun yerini alır. Belgede metin varsa dosya imlecin olduğu yere eklenir. Her iki durumda da tek bir geri al işlemi geri getirir.
