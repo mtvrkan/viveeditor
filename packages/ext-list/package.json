@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-list",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Bullet and ordered list extensions for viveEditor.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/element",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "<vive-editor> custom element for viveEditor: works in plain HTML forms and any framework.",
   "license": "MIT",
   "keywords": [

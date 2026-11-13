@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/vue",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Vue 3 component for viveEditor with v-model, toolbar and every feature included.",
   "license": "MIT",
   "keywords": [

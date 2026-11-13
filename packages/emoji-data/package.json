@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/emoji-data",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Compact emoji list for the viveEditor emoji menu, generated from Emojibase.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-office-paste",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Clean paste from Word, Google Docs and LibreOffice for viveEditor, with real nested lists.",
   "license": "MIT",
   "keywords": [

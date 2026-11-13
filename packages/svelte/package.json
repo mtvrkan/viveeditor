@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/svelte",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Svelte 5 component and action for viveEditor with bind:value, toolbar and every feature included.",
   "license": "MIT",
   "keywords": [

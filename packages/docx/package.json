@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/docx",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Word (.docx) import and export for viveEditor, with limits for untrusted files.",
   "license": "MIT",
   "keywords": [

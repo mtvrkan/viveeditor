@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-character-count",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Character count and limit extension for viveEditor.",
   "license": "MIT",
   "keywords": [

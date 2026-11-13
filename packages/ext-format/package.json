@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-format",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Text alignment, text colour and highlight extensions for viveEditor.",
   "license": "MIT",
   "keywords": [

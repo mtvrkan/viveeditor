@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/sanitize",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Server-side sanitizer that keeps exactly the HTML viveEditor produces and removes everything else.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-table",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Table extension for viveEditor: merged cells, column widths, keyboard navigation.",
   "license": "MIT",
   "keywords": [
