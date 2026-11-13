@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/angular",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Angular component for viveEditor with ngModel and reactive forms, toolbar and every feature included.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-math",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "LaTeX formulas for viveEditor, rendered with a KaTeX copy the site loads on demand.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Floating toolbar, selection bubble, slash menu, link panel and readability meter for viveEditor.",
   "license": "MIT",
   "keywords": [

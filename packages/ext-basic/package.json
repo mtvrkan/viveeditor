@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-basic",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Basic formatting extensions for viveEditor: marks, headings, quotes, rules, links.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-mention",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "@mentions for viveEditor: an inline node that stores an opaque id and a plain-text label.",
   "license": "MIT",
   "keywords": [

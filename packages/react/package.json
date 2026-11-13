@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React component for viveEditor with value/onChange, toolbar and every feature included.",
   "license": "MIT",
   "keywords": [

@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Core engine of viveEditor, an open-source rich text editor.",
   "license": "MIT",
   "keywords": [

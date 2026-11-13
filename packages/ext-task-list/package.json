@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-task-list",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Task list (checklist) extension for viveEditor.",
   "license": "MIT",
   "keywords": [

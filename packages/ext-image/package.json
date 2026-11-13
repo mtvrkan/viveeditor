@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-image",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Image extension for viveEditor with validated sources, safe uploads and alt-text checks.",
   "license": "MIT",
   "keywords": [

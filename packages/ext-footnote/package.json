@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-footnote",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Footnotes for viveEditor: inline notes edited in place and numbered on the published page.",
   "license": "MIT",
   "keywords": [

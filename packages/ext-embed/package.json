@@ -1,6 +1,6 @@
 {
   "name": "@viveeditor/ext-embed",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Video and audio embeds for viveEditor with a provider allowlist and privacy-first previews.",
   "license": "MIT",
   "keywords": [
