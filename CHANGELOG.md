@@ -84,6 +84,7 @@
 
 ### Changed
 
+- The release pull request is opened with the workflow's own token instead of a GitHub App, and the release workflow runs only when the `RELEASE_ENABLED` repository variable is `true`. [2026-11-14]
 - The repository lives at github.com/mtvrkan/viveeditor; package manifests, READMEs, Composer files and the site link there. [2026-11-01]
 - Every package now requires Node.js 22.12 or newer (Node 20 reached end of life and the build tools need 22); CI tests Node 22 and 24. [2026-11-01]
 - The release workflow is skipped until the release GitHub App is configured, so pushes to main no longer show a failed release run. [2026-11-01]

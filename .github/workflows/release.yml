@@ -18,19 +18,15 @@ env:
 jobs:
   version:
     name: version pull request
-    if: vars.RELEASE_APP_CLIENT_ID != ''
+    if: vars.RELEASE_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
     outputs:
       pending: ${{ steps.changesets.outputs.has-changesets }}
     steps:
-      - id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
-        with:
-          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -43,7 +39,8 @@ jobs:
       - id: changesets
         uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          github-token: ${{ steps.app-token.outputs.token }}
+          github-token: ${{ github.token }}
+          push-with-git-cli: false
           pr-title: "Release packages"
           commit-message: "chore: release packages"
 
@@ -102,7 +99,7 @@ jobs:
   publish:
     name: publish to npm
     needs: build-pack
-    if: needs.build-pack.outputs.publish == 'true'
+    if: vars.RELEASE_ENABLED == 'true' && needs.build-pack.outputs.publish == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: npm
