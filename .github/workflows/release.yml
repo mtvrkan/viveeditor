@@ -131,7 +131,7 @@ jobs:
               echo "Already published: $spec"
               continue
             fi
-            npm publish "packs/$tarball" --provenance --access public
+            npm publish "./packs/$tarball" --provenance --access public
           done < packs/order.txt
 
   github-release:
