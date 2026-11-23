@@ -4,6 +4,7 @@
 
 ### Added
 
+- Docs: the versioning page now states the rules from 1.0 (what counts as a breaking change, deprecation for at least six months and only removed in a major, security fixes for the previous major for six months) and an upgrade guide from 0.x to 1.0. [2026-11-21]
 - Monorepo foundation: pnpm workspaces, Turborepo, strict TypeScript, Biome, Vitest, Playwright (Chromium, Firefox, WebKit, mobile Safari), size budgets and Changesets. [2026-10-30]
 - `@viveeditor/core` first engine slice on ProseMirror: `Editor.create`, HTML and JSON input/output, schema-based sanitization, bold/italic, undo/redo, change/focus/blur/error/destroy events. [2026-10-30]
 - Playground app for manual and end-to-end testing. [2026-10-30]
@@ -81,9 +82,35 @@
 - End-to-end site tests in Chromium, WebKit and mobile Safari: both home pages, the Turkish redirect, the live demo, docs search, no content security policy violations and WCAG 2.2 AA in light and dark themes; Playwright now starts the site preview next to the playground. [2026-11-01]
 - Docs explain that a `style-src` without `'unsafe-inline'` hides text colours, highlights, alignment and column widths. [2026-11-01]
 - `scripts/deploy-site.sh` builds the site with its packages and commits it to the `gh-pages` branch; it refuses uncommitted changes or incomplete output, pushes only with `--push` and never force-pushes. [2026-11-01]
+- Saved JSON now carries a schema version: `editor.getJSON()` writes `schemaVersion`, JSON from 0.x without it still loads, and JSON saved by a newer editor is refused with a clear `SCHEMA_TOO_NEW` error instead of loading with parts missing. A document saved by 0.1.0 is kept in the tests so every release must read it back the same way. [2026-11-21]
+- Clear formatting: Ctrl/⌘+\, a toolbar button and a selection bubble button remove bold, italic, underline, strikethrough, inline code, colour and highlight and reset alignment, keeping links and headings; with only a cursor the next typed text is plain. [2026-11-21]
+- Paste as plain text: Ctrl/⌘+Shift+V (and ⌘+⌥+⇧+V in Safari) drops the clipboard formatting, takes the style around the cursor and skips Markdown and video-embed conversion; where the browser has no built-in shortcut the editor reads the clipboard itself. [2026-11-21]
+- Format painter: a toolbar button copies the formatting at the cursor and applies it to the next text selected with the mouse or with Shift and the arrow keys; Escape or a second click turns it off, and links in the target stay. [2026-11-21]
+- "Tidy up document" in the File menu removes spaces at paragraph edges, repeated spaces, line breaks at the end of paragraphs and extra empty paragraphs in one undoable step, never touching code blocks, and shows how many of each it removed. [2026-11-21]
+- Paste options: after a formatted paste a small button next to the cursor (or Ctrl pressed on its own) offers "Keep formatting", "Keep only headings, lists and links" and "Text only"; switching re-runs the clipboard through the same paste clean-up, and typing or Escape hides the button. [2026-11-21]
+- Superscript and subscript (Ctrl/⌘+. and Ctrl/⌘+,), five relative font sizes (Ctrl/⌘+Shift+. and , step up and down), paragraph and heading indent in eight 2 em steps (Ctrl/⌘+] and [), and letter case change that follows the language of the text, so Turkish `i` becomes `İ` (Shift+F3 cycles the word under the cursor). [2026-11-21]
+- Smart typography while typing: curly quotes, em dash, ellipsis, ©, ®, ™ and arrows; Backspace takes a replacement back and code is never touched. [2026-11-21]
+- Toolbar: a "Text style" menu for size, superscript, subscript and case, indent items in the alignment menu, and a special characters panel (punctuation, currency with ₺, math, arrows, accented and Greek letters, symbols) that works with the arrow keys. [2026-11-21]
+- `textInputRule(pattern, replacement)` in `@viveeditor/core` for extensions that replace typed text. [2026-11-21]
+- Word import and export keep superscript and subscript. [2026-11-21]
+- Image caption and position: the image panel adds a plain-text caption and places an image on its own line, left or right with text flowing beside it, or centered; the image is saved as `<figure data-align>` with a `<figcaption>`, while an image with neither stays a plain `<img>`. Word export writes the caption as a Caption paragraph and Markdown as an italic line under the image. [2026-11-21]
+- Document tools in the toolbar: an outline that jumps to any heading, an accessibility check (empty or skipped headings, missing alt text, untitled videos, tables without a header row, vague link text, low text contrast) that selects each problem, a keyboard shortcut list on Alt+0, and full screen; `exclude` leaves any tool out. [2026-11-21]
+- Drafts and autosave: `autosave: { key }` on `createUI`, or `data-autosave="key"` on a textarea, keeps a draft in the browser, offers it back as one undoable step after a reload or crash, and removes it once the form is sent; an optional `save` function writes to your server one request at a time. [2026-11-21]
+- `editor.query.findNodes(names)` and `findMarks(names)` in `@viveeditor/core` list nodes and marks with their text and position. [2026-11-21]
+- Table cell colour and vertical alignment: the table panel gives the selected cells one of seven light background colours and top, middle or bottom alignment (`setCellBackground`, `setCellVerticalAlign`, `query.cellStyle`); cell shading and vertical alignment travel to and from Word, and pasted Word and Google Docs cell colours are kept except plain white. [2026-11-21]
 
 ### Changed
 
+- End-to-end tests run on Playwright 1.65.1, whose Firefox build starts on macOS 27. [2026-11-21]
+- `MountDestroyedError` is now a `ViveEditorError` with the code `DESTROYED`, like the other editor errors; `instanceof MountDestroyedError` still works. [2026-11-21]
+- The API report leaves out source map comments, so a source change no longer shows hash-only differences in `api/`. [2026-11-21]
+- Clear formatting also resets paragraph indent. [2026-11-21]
+- The server sanitizers (Node and PHP) now keep `figure` with `data-align` (left, center, right), `figcaption`, and `background-color` and `vertical-align` (middle, bottom) on table cells. [2026-11-21]
+- `normalizeColor` moved to `@viveeditor/core` so the table extension can check cell colours; `@viveeditor/ext-format` still exports it. [2026-11-21]
+- The server sanitizers (Node and PHP) now keep `<sub>`, plain `<sup>`, the five editor font sizes on `span` and indent on paragraphs and headings; a font size inside a font size and a superscript or subscript inside another are dropped. [2026-11-21]
+- Releases with a pre-release version (such as `1.0.0-rc.0`) are published to npm under the `next` tag, so `latest` keeps the last stable version, and their GitHub release is marked as a pre-release; the repository is in Changesets pre-release mode for the 1.0 release candidate. [2026-11-23]
+- The site home page lists the 1.0 tools (formatting tools, outline and accessibility check, drafts) and table cell colours in its feature grid; on two-column screens the last card spans the row. [2026-11-23]
+- Size budgets: the format extension may use 6.5 KB (was 4.5 KB), the interface 22.5 KB (was 20 KB), its lazy panels 9.5 KB (was 5.5 KB), the table extension 12.5 KB (was 12 KB), the Word converter 17 KB (was 16.5 KB), the one-script build 119 KB (was 116 KB) and its panels add-on 9.5 KB (was 5.5 KB). [2026-11-21]
 - The release pull request is opened with the workflow's own token instead of a GitHub App, and the release workflow runs only when the `RELEASE_ENABLED` repository variable is `true`. [2026-11-14]
 - The repository lives at github.com/mtvrkan/viveeditor; package manifests, READMEs, Composer files and the site link there. [2026-11-01]
 - Every package now requires Node.js 22.12 or newer (Node 20 reached end of life and the build tools need 22); CI tests Node 22 and 24. [2026-11-01]
@@ -102,9 +129,17 @@
 - The toolbar code is split into smaller modules (keyboard, panels, menus, layout, word count, plugins); behaviour is unchanged. [2026-10-31]
 - The `vive:invalid` event now says why in `detail.reason` (`required` or `upload`). [2026-10-31]
 - Syntax colouring uses Shiki's `github-light-default` and `github-dark-default` themes by default, and code blocks have a lighter background, so every highlighted word is readable. [2026-11-01]
+- Size budgets for 1.0: the one-script build may use 116 KB (was 110 KB), the core 61 KB (was 60 KB), the stylesheet 7 KB (was 6 KB) and the format extension 2.5 KB (was 2 KB). [2026-11-21]
 
 ### Fixed
 
+- Markdown export keeps the Vimeo private link part and the YouTube or Vimeo start time in video links, so exported unlisted videos play. [2026-11-21]
+- Spaces at the start or end of a footnote and repeated spaces inside it survive saving and reloading. [2026-11-21]
+- Changes typed in the HTML source view are sent when a script submits the form while the source view is still focused. [2026-11-21]
+- Screen readers no longer read the letter shown before bold, italic and underline in the More menu as part of the item name. [2026-11-21]
+- Panels opened from the toolbar stay inside the window when the toolbar sits at the right edge of a narrow page. [2026-11-21]
+- The special characters panel now opens in the one-script build; its add-on had left it out. [2026-11-21]
+- A table cell background no longer turns into a highlight on the text inside the cell when the document is loaded again. [2026-11-21]
 - The release workflow publishes the packed tarballs by local path; npm had read `packs/<file>.tgz` as a GitHub repository and the first publish stopped before anything reached npm. [2026-11-14]
 - After "Replace all" the find field takes focus again, so Escape still closes the search panel in Firefox. [2026-11-01]
 - End-to-end paste tests now work in Firefox, timing tests for Office cleanup and Markdown output check how the time grows instead of a fixed wall-clock limit, every fuzz test allows for slower machines, and site tests run in light mode on Linux WebKit, so CI runners give stable results. [2026-11-01]
@@ -134,9 +169,15 @@
 - Text fields in panels and the code language picker use 16px text on touch screens, so iPhone and iPad no longer zoom the page when they get focus. [2026-11-01]
 - The Laravel package now ships the panels add-on, so toolbar panels open on Laravel sites. [2026-11-01]
 - The emoji data package carries the full Emojibase MIT licence text in its NOTICE file. [2026-11-01]
+- `pnpm format` no longer rewrites release notes in `.changeset/`; the formatter turned their package list into a heading, which silently dropped the version bump. [2026-11-21]
 
 ### Security
 
+- The `main` branch can no longer be deleted or force-pushed, needs the six CI checks (only the repository admin may push past them), and Dependabot alerts and private vulnerability reporting are on. [2026-11-23]
+- The PHP sanitizer checks the structure of the HTML before it parses it. Short inputs that made the parser rebuild formatting tags again and again (17 KB used 213 MB) and very deep nesting (600 KB crashed the PHP process and took seconds to parse) are now refused with `TOO_COMPLEX` in well under a second, without building the document. [2026-11-21]
+- The Node and PHP sanitizers refuse HTML with more than `maxTags` opening tags (100 000 by default, a new option) and any HTML that contains a `<template>` tag, whose content the PHP checks cannot see. [2026-11-21]
+
+- The Node and PHP sanitizers drop fully transparent `hsl()` and `hsla()` colours, which could hide text, just as they already dropped transparent `rgba()` and hex colours. [2026-11-21]
 - The Node and PHP sanitizers refuse input whose structure would make the HTML parser slow or memory hungry (more than 64 attributes on a tag, nesting deeper than 512, or far more elements than tags) with the new `TOO_COMPLEX` error, in milliseconds instead of minutes. [2026-10-31]
 - Markdown paste detection and the Word list reader no longer slow down quadratically on long lines of brackets, blank lines or unclosed style rules, and text longer than the Markdown limit is pasted as plain text. [2026-10-31]
 - The AI panel cuts each streamed chunk before cleaning it and gives up on a provider that ignores the stop signal after the time limit. [2026-10-31]

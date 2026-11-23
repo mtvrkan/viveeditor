@@ -125,13 +125,16 @@ jobs:
       - name: Publish tarballs in dependency order
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          VERSION: ${{ needs.build-pack.outputs.version }}
         run: |
+          dist_tag=latest
+          case "$VERSION" in *-*) dist_tag=next ;; esac
           while IFS="$(printf '\t')" read -r tarball spec; do
             if npm view "$spec" version > /dev/null 2>&1; then
               echo "Already published: $spec"
               continue
             fi
-            npm publish "./packs/$tarball" --provenance --access public
+            npm publish "./packs/$tarball" --provenance --access public --tag "$dist_tag"
           done < packs/order.txt
 
   github-release:
@@ -157,7 +160,10 @@ jobs:
             echo "Release v$VERSION already exists."
             exit 0
           fi
+          channel=(--latest)
+          case "$VERSION" in *-*) channel=(--prerelease --latest=false) ;; esac
           gh release create "v$VERSION" packs/viveeditor-sbom.cdx.json \
+            "${channel[@]}" \
             --target "$TARGET" \
             --title "viveEditor $VERSION" \
             --notes "Packages published to npm with provenance. Changes are listed in each package's CHANGELOG.md. The attached SBOM covers the whole workspace, development tools included."
