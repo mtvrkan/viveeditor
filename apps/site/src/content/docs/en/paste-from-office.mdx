@@ -2,7 +2,7 @@
 key: officePaste
 title: Paste from Office
 description: Clean paste from Word, Google Docs and LibreOffice; fake bullets become real lists, and pasted Markdown text becomes formatted content.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: Why are images pasted from Word missing?
     a: Word puts some images on the clipboard as addresses of files on the copying computer. The browser cannot read those, so they are left out; onDropped tells you how many.
@@ -66,6 +66,16 @@ To run the same cleaning outside paste, the package exports three functions:
 | `cleanOffice(html)` | `{ html, source, droppedImages }` |
 | `cleanOfficeHtml(html)` | Only the cleaned HTML |
 
+## Paste options
+
+After a formatted paste, a small clipboard button appears next to the cursor. It offers three ways to paste the same clipboard again:
+
+- **Keep formatting**: the paste as it came in (after the clean-up above).
+- **Keep only headings, lists and links**: headings, lists, tables and links stay; bold, italic, colours and other character formatting go.
+- **Text only**: plain text, one paragraph per line, in the style of the text around the cursor.
+
+<kbd>Ctrl</kbd> pressed and released on its own opens the menu from the keyboard, on Mac as well; <kbd>Esc</kbd> hides the button, and typing anything removes it. Switching runs the clipboard through the same clean-up again, so nothing reaches the document that a normal paste would not let through. The button comes from `PasteOptions` in `@viveeditor/ext-format` (part of `formatExtensions`); in code, `editor.query.lastPaste()` tells whether there is a paste to switch and `editor.commands.pasteAs('keep' | 'clean' | 'plain')` switches it.
+
 ## Markdown paste
 
 `MarkdownPaste` from `@viveeditor/markdown/paste` turns Markdown pasted as plain text into formatted content. The converter loads only when needed:
@@ -80,7 +90,8 @@ It converts only when:
 
 - the clipboard holds plain text and no HTML,
 - the text looks like Markdown: it has a heading, fenced code, a quote, a table, bold text, a link, a checklist item or at least two list lines,
-- the cursor is not in a code block.
+- the cursor is not in a code block,
+- the paste is not a plain-text paste (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>), which always keeps the text as typed.
 
 If the converter fails to load, the text is pasted as plain text. Text longer than one million characters is not converted. Raw HTML inside Markdown is never let through. To check in advance whether text would be converted, use `looksLikeMarkdown(text)` from the same package.
 

@@ -1,8 +1,8 @@
 ---
 key: versioning
 title: Versioning
-description: How viveEditor versions its packages before 1.0, what stays compatible, and why the CDN script needs an exact version.
-updated: 2026-11-01
+description: How viveEditor versions its packages, what counts as a breaking change from 1.0, how deprecation works and how to upgrade from 0.x.
+updated: 2026-11-21
 ---
 
 viveEditor follows semantic versioning with the usual 0.x rule, and all npm packages share one version number. This page explains what may change between versions, what never breaks, and how to pin a version safely.
@@ -16,6 +16,41 @@ viveEditor is in 0.x, before its first stable release.
 
 Read the release notes before you move to a new minor version. Each version is tagged and published as a [GitHub release](https://github.com/mtvrkan/viveeditor/releases).
 
+## From 1.0
+
+From 1.0.0 the usual semantic versioning rules apply:
+
+- **Major** (1.x to 2.0): the only place for a breaking change. Its release notes list every change and what to do about it.
+- **Minor** (1.1 to 1.2): new features and new options. Code written for an earlier 1.x keeps working.
+- **Patch** (1.1.0 to 1.1.1): bug and security fixes only.
+
+### What counts as a breaking change
+
+These are the public interface, and only a major version changes them in a way that breaks existing code:
+
+- Everything in the `api/` report: exported functions, classes, types, extension options, command and query names and their arguments.
+- Reading stored content: HTML and JSON saved by any earlier version, 0.x included, load as the same document.
+- The HTML the editor writes for content that already existed: tags, attributes and `data-*` attributes. A new feature may add new markup.
+- The CDN file names in `dist/` and the `data-*` attributes of the one-script build, such as `data-autosave` and `data-required-message`.
+- Documented CSS variables, such as `--ve-accent`, and the `vive-*` classes in saved content.
+
+These can change in a minor version:
+
+- The look of the toolbar and panels, the order of tools, and the internal `ve-*` class names and DOM structure of the interface.
+- Interface texts and the default list of tools. A new tool can appear in the toolbar; use the `exclude` option to keep it out.
+- Bundle sizes, as long as they stay within the published budgets.
+- Chunk file names that end in a hash, which only the build loads.
+
+### Deprecation
+
+A feature is never removed without warning:
+
+1. A minor version marks it as deprecated in the release notes and in these docs, and names the replacement.
+2. The deprecated feature keeps working for the rest of that major version, and for at least six months.
+3. It is removed only in the next major version, which lists it under its breaking changes.
+
+There are no console warnings at run time, so a deprecation never shows up in your users' browser consoles. Read the release notes when you update.
+
 ## One version for every package
 
 All npm packages, `viveeditor` and every `@viveeditor/*` package, are released together with the same version number. Install them at the same version, so the editor, its extensions and your framework component always match.
@@ -27,6 +62,10 @@ The PHP packages, `viveeditor/sanitizer` and `viveeditor/laravel`, are versioned
 HTML and JSON saved by any 0.x version stay readable by every later 0.x version. Stored content never needs a migration when you update.
 
 The canonical storage format is ProseMirror JSON (`editor.getJSON()`); HTML (`editor.getHTML()`) is a rendering format. You can store either.
+
+From 1.0, `editor.getJSON()` writes a `schemaVersion` number at the root of the document. JSON without it is read as content saved by 0.x and loads as before. JSON saved with a newer schema than the editor knows is refused with a `ViveEditorError` whose code is `SCHEMA_TOO_NEW`, instead of loading with parts missing; `commands.replaceContent` and `commands.insertContent` return `false` for it. Update the editor before you open content saved by a newer version.
+
+The test suite keeps a document saved by 0.1.0, as HTML, JSON and Markdown, and checks that every release reads the HTML and JSON back as the same document.
 
 ## The public API is recorded
 
@@ -45,3 +84,19 @@ Replace `x.y.z` with the exact version you use. The script loads its add-ons fro
 ## Security fixes
 
 Until 1.0, only the latest published minor version receives security fixes. A fix ships as a patch release of every package, because all packages share one version number. Staying on the latest minor is the way to get them. See [Security and CSP](/en/docs/security-and-csp/).
+
+From 1.0, the latest minor of the current major version gets security fixes. When a new major version comes out, the last minor of the previous major keeps getting security fixes for six more months.
+
+## Upgrade from 0.x to 1.0
+
+Stored HTML and JSON need no change. Check these points when you update:
+
+1. **Update every package together**, to the same version: `viveeditor`, all `@viveeditor/*` packages and your framework component.
+2. **Update the server sanitizer at the same time.** 1.0 adds font sizes, superscript and subscript, paragraph indent, image captions and alignment, and table cell colours. An older `@viveeditor/sanitize` or `viveeditor/sanitizer` removes them when the content is saved.
+3. **New tools in the toolbar.** The toolbar now offers clear formatting, format painter, font size, superscript and subscript, indent, special characters, outline, accessibility check, keyboard shortcuts and full screen. Leave out any of them with the `exclude` option, see [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/).
+4. **Alt+0 opens the shortcut list.** On a Mac, Option+0 types `º` on many keyboard layouts. If your users need that character, add `'shortcuts'` to `exclude`.
+5. **JSON carries `schemaVersion`.** `editor.getJSON()` now writes `schemaVersion: 1` at the root. If you validate stored JSON against your own strict schema, allow this field.
+6. **Markdown links to videos are complete.** Markdown export now keeps a Vimeo private link part and a YouTube or Vimeo start time, for example `https://vimeo.com/76979871/abcdef12`. Earlier exports pointed to the bare video.
+7. **CDN users**: load the new version's script and `viveeditor.css` from the same exact-version folder. If you host the files yourself, copy every file in `dist/`, the add-ons included.
+8. **`MountDestroyedError`** is now a `ViveEditorError` with the code `DESTROYED`. `instanceof MountDestroyedError` still works.
+

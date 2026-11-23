@@ -2,7 +2,7 @@
 key: files
 title: Open, save and print
 description: Use the File menu to open Word, Markdown, HTML and text files, save as Word, Markdown or HTML, and print the document.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: How do I save as PDF?
     a: Choose "Print or PDF" from the File menu, then pick "Save as PDF" in the browser's print dialog.
@@ -16,13 +16,23 @@ The toolbar has a File menu. It opens `.docx`, `.md`, `.html` and `.txt` files, 
 
 ## The File menu
 
-The menu holds: "Open file…", "Save as Word (.docx)", "Save as Markdown (.md)", "Save as HTML (.html)" and "Print or PDF".
+The menu holds: "Open file…", "Save as Word (.docx)", "Save as Markdown (.md)", "Save as HTML (.html)", "Print or PDF" and "Tidy up document".
 
 - An opened file replaces an empty document. If there is text, the file goes in at the cursor. One undo takes it back.
 - In text files, blank lines separate paragraphs and single line breaks stay as line breaks.
 - Every opened file goes through the same document rules as pasted content, so unknown markup never reaches the output. Sanitize the saved HTML on the server as well.
 - Saved files are named from the `fileName` option ("document" if not set). Characters that file names cannot hold are replaced, and the name is at most 100 characters.
 - Errors appear in a visible notice. Progress messages such as "Opening file…" are announced to screen readers.
+
+## Tidy up document
+
+"Tidy up document" cleans the whole document in one step that a single undo takes back:
+
+- spaces at the start and end of paragraphs and repeated spaces between words are removed; non-breaking spaces typed on purpose stay,
+- line breaks at the end of a paragraph are removed,
+- empty paragraphs at the start and end of the document are removed, and a run of empty paragraphs becomes one; after a table, rule or other block at the very end one empty paragraph stays so you can type below it.
+
+Code blocks are never changed. A notice lists how many spaces, line breaks and empty paragraphs were removed. The item comes from `CleanDocument` in `@viveeditor/ext-format` (part of `formatExtensions`); in code, `editor.query.documentCleanup()` returns the counts without changing anything and `editor.commands.cleanDocument()` applies them.
 
 ## With the one-script build
 

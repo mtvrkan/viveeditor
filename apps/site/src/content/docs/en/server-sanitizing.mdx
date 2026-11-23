@@ -2,7 +2,7 @@
 key: sanitize
 title: Server sanitizing
 description: Clean posted HTML on your server with @viveeditor/sanitize for Node or viveeditor/sanitizer for PHP 8.4+, on save and on print.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: The editor already produces clean HTML. Why clean it again on the server?
     a: Because anyone can post any HTML to your server without using the editor. The browser is not a security boundary.
@@ -54,6 +54,7 @@ Every element and attribute is rebuilt with a full HTML5 parser (`parse5` in Nod
 | `allowBase64` | `false` | Allows images stored as `data:` addresses (PNG, JPEG, GIF, WebP, AVIF). |
 | `allowRelativeImages` | `false` | Allows relative image addresses. |
 | `maxBytes` | 2 MB | HTML larger than this throws `TOO_LARGE`. |
+| `maxTags` | 100 000 | HTML with more opening tags than this throws `TOO_COMPLEX`. 2 MB of normal content has about 20 000 to 40 000. |
 
 Turn `allowRelativeImages` on only if you need it: a relative image address makes every reader's browser send a GET request to your own site, which a writer could aim at an address that changes something.
 
@@ -64,7 +65,7 @@ The sanitizer never cuts HTML short. When it cannot clean the input, it throws:
 | Code | When |
 | --- | --- |
 | `TOO_LARGE` | The HTML is larger than `maxBytes`. |
-| `TOO_COMPLEX` | The structure would make the parser slow or memory hungry: more than 64 attributes on one tag, nesting deeper than 512 levels, or far more elements than the input has tags. The editor never writes such HTML. |
+| `TOO_COMPLEX` | The structure would make the parser slow or memory hungry: more than `maxTags` opening tags, more than 64 attributes on one tag, nesting deeper than 512 levels, far more elements than the input has tags, or a `<template>` tag. The editor never writes such HTML. |
 
 In Node the error is a `SanitizeError` with a `code`:
 
@@ -100,16 +101,19 @@ try {
 - **Links** keep `http`, `https`, `mailto`, `tel` and relative addresses, and always get `rel="noopener noreferrer nofollow"`.
 - **Images** need `https` addresses. `allowBase64` and `allowRelativeImages` widen that.
 - **Embeds** are removed unless you pass `embeds: true`.
-- **`style`** keeps only text alignment, text and highlight colour, and table widths.
+- **Figures** keep `figure` and `figcaption`; `data-align` survives only as `left`, `center` or `right`.
+- **`style`** keeps only text alignment, paragraph indent (2 em steps up to 16 em, on paragraphs and headings), the five editor font sizes (on `span`), text and highlight colour, table widths, and the background colour and vertical alignment (middle or bottom) of table cells. A font size inside another font size, and superscript or subscript inside another, are dropped so nesting cannot blow text up or hide it.
 - **`id`, `name`, `form` and event handlers** never pass.
 - **Scripts, styles, frames, SVG and similar elements** are removed together with their content.
-- **Mentions, formulas and footnotes** are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text. Footnotes keep only bold, italic and links.
+- **Mentions, formulas and footnotes** are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text. Footnotes keep only bold, italic and links. A footnote placed inside a link is reduced to its text.
 
 ## PHP memory note
 
-In PHP the parser cannot be stopped from inside, so some short hostile inputs (a few tens of KB of unclosed formatting tags) can reach PHP's `memory_limit` before the check runs. PHP then ends that request with a fatal error, which is safe but not a clean exception.
+In PHP the parser cannot be stopped from inside, so the PHP sanitizer checks the structure before it parses. Hostile inputs, such as short runs of unclosed formatting tags or very deep nesting, are refused with `TOO_COMPLEX` in well under a second and without building the document.
 
-Keep `memory_limit` and `max_execution_time` at their usual values for the endpoints that sanitize, and limit the request body size there.
+What passes the check is limited by `maxBytes` and `maxTags`. In our measurements a document with 100 000 elements used about 70 MB, and 2 MB of broken markup that creates no elements used up to about 130 MB, because the parser records every error it meets. Give the endpoints that sanitize a `memory_limit` of 256 MB, or lower `maxBytes` and `maxTags`: half the limits need about half the memory.
+
+Very long HTML with misnested formatting tags, which older systems sometimes write, can be refused in PHP sooner than in Node, because PHP must decide before it parses. The editor never writes such HTML.
 
 ## When to clean
 

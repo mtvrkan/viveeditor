@@ -2,7 +2,7 @@
 key: toolbar
 title: Araç çubuğu ve kısayollar
 description: Yüzen araç çubuğu, seçim balonu, / menüsü, blok menüsü, kelime sayacı, okunabilirlik ölçümü ve tüm klavye kısayolları.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: Araç çubuğunu tamamen kapatabilir miyim?
     a: Evet. Çerçeve bileşenlerinde ve mountEditor ile ui false verin; npm ile kendiniz kuruyorsanız createUI çağırmayın. Klavye kısayolları eklentilerden geldiği için araç çubuğu olmadan da çalışır.
@@ -35,6 +35,8 @@ const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
 | `slash` | `false` `/` menüsünü kapatır. |
 | `source` | `false` HTML kaynağı düğmesini kaldırır. |
 | `files` | Dosya menüsü; `false` gizler. Ayrıntılar [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında. |
+| `exclude` | Gösterilmeyecek araçların adları, örneğin `['fullscreen', 'shortcuts']`. |
+| `autosave` | Kaydedilmemiş metnin taslağını tutar. Ayrıntılar [Otomatik taslak](/dokumantasyon/otomatik-taslak/) sayfasında. |
 | `plugins` | Bahsetme, emoji, şablon gibi ek menüler `@viveeditor/ui/extras` paketinden buraya takılır. |
 | `onError` | Arayüzde oluşan hataları alır. |
 
@@ -42,15 +44,35 @@ const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
 
 Araç çubuğu yazı alanının altında durur ve uzun bir yazıda aşağı kaydırırken ekranın altında kalır. Telefonda ekran klavyesi açılınca onun üstüne çıkar.
 
-Soldan sağa şunlar vardır: blok türü düğmesi; kalın, italik, altı çizili, üstü çizili ve satır içi kod; yazı rengi ve vurgu; madde işaretli liste, numaralı liste, görev listesi, alıntı, tablo, görsel ve video; hizalama; bağlantı ile bul ve değiştir; geri al, yinele, Dosya ve HTML kaynağı. En sonda kelime sayacı durur.
+Soldan sağa şunlar vardır: blok türü düğmesi; kalın, italik, altı çizili, üstü çizili, satır içi kod, biçimi temizle ve biçim boyacısı; yazı rengi, vurgu ve yazı biçimi (boyut, üst simge, alt simge, büyük/küçük harf); madde işaretli liste, numaralı liste, görev listesi, alıntı, tablo, görsel, video ve özel karakter; hizalama ve girinti; bağlantı ile bul ve değiştir; geri al, yinele, Dosya ve HTML kaynağı; ana hat, erişilebilirlik denetimi, klavye kısayolları ve tam ekran. En sonda kelime sayacı durur.
 
 Alan 560 pikselden darsa yalnızca kalın, italik ve bağlantı yerinde kalır, diğer araçlar "Diğer araçlar" menüsüne geçer. Daha geniş alanlarda sığmayan araçlar belirli bir sırayla bu menüye taşınır; menü yalnızca taşınan araçları gösterir.
 
 HTML kaynağı düğmesi belgenin HTML'ini düzenlenebilir bir metin alanında açar. Kaynak açıkken diğer araçlar devre dışıdır; kapattığınızda değişiklikler editöre uygulanır.
 
+## Ana hat, erişilebilirlik denetimi ve tam ekran
+
+**Ana hat** belgedeki başlıkları düzeylerine göre girintili listeler. Birini seçtiğinizde imleç o başlığa gider ve sayfa oraya kayar. Düğme yalnızca başlık eklentisi yüklüyse görünür.
+
+**Erişilebilirlik denetimi** ekran okuyucu kullanan birinin karşılaşacağı sorunları arar ve belgedeki sırasıyla listeler:
+
+- boş bir başlık ya da düzey atlayan bir başlık (Başlık 2'den sonra Başlık 4);
+- alt metni olmayan bir görsel ya da başlığı olmayan bir video;
+- başlık satırı olmayan bir tablo;
+- metni olmayan ya da "buraya tıklayın" gibi belirsiz metinli bir bağlantı;
+- beyaz sayfada karşıtlığı 4,5:1'in altında kalan bir yazı rengi.
+
+Sorunun yanındaki "Göster" onu metinde seçer; "Yeniden denetle" değişikliklerinizden sonra denetimi tekrarlar. Denetim yazara yardım eder, tam bir incelemenin yerini tutmaz; karşıtlık yalnızca beyaza göre ölçülür.
+
+**Klavye kısayolları** yüklü araçların kısayollarını işletim sisteminize uygun tuşlarla gösterir. Metindeyken <kbd>Alt</kbd>+<kbd>0</kbd> listeyi açar.
+
+**Tam ekran** editörü tarayıcı penceresine yayar ve metni okunaklı bir sütunda tutar. Arkadaki sayfa kaymaz. Metindeyken <kbd>Esc</kbd> ya da düğmeye yeniden basmak tam ekrandan çıkar; açık bir menü ya da panel varsa <kbd>Esc</kbd> önce onu kapatır.
+
+Bunlardan istemediklerinizi `exclude: ['outline', 'accessibility', 'shortcuts', 'fullscreen']` ile kaldırabilirsiniz. Kodda `editor.query.findNodes(['heading'])` ve `editor.query.findMarks(['link'])` panellerin kullandığı listeleri belgedeki sırasıyla `{ name, attrs, text, from, to }` olarak verir (en çok 2000).
+
 ## Seçim balonu
 
-Metin seçince seçimin hemen üstünde küçük bir araç çubuğu açılır. Dokunmatik ekranlarda, parmağınızın altında kalmaması için seçimin altında açılır. İçinde kalın, italik, bağlantı ve satır içi kod düğmeleri bulunur; [yapay zeka asistanı](/dokumantasyon/yapay-zeka/) gibi eklentiler kendi düğmelerini buraya ekler. Bir görsel seçiliyken balon açılmaz. <kbd>Esc</kbd> balonu kapatır, `bubble: false` tamamen kaldırır.
+Metin seçince seçimin hemen üstünde küçük bir araç çubuğu açılır. Dokunmatik ekranlarda, parmağınızın altında kalmaması için seçimin altında açılır. İçinde kalın, italik, bağlantı, satır içi kod ve biçimi temizle düğmeleri bulunur; [yapay zeka asistanı](/dokumantasyon/yapay-zeka/) gibi eklentiler kendi düğmelerini buraya ekler. Bir görsel seçiliyken balon açılmaz. <kbd>Esc</kbd> balonu kapatır, `bubble: false` tamamen kaldırır.
 
 ## / menüsü
 
@@ -99,6 +121,8 @@ Mac'te <kbd>Ctrl</kbd> yerine <kbd>⌘</kbd>, <kbd>Alt</kbd> yerine <kbd>⌥</kb
 | Üstü çizili | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd> |
 | Satır içi kod | <kbd>Ctrl</kbd>+<kbd>E</kbd> | <kbd>⌘</kbd>+<kbd>E</kbd> |
 | Vurgu | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd> |
+| Biçimi temizle | <kbd>Ctrl</kbd>+<kbd>&#92;</kbd> | <kbd>⌘</kbd>+<kbd>&#92;</kbd> |
+| Düz metin olarak yapıştır | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> ya da <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> |
 | Başlık 1–6 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>6</kbd> | <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>1</kbd> … <kbd>6</kbd> |
 | Madde işaretli liste | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>8</kbd> |
 | Numaralı liste | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>7</kbd> |
@@ -110,14 +134,38 @@ Mac'te <kbd>Ctrl</kbd> yerine <kbd>⌘</kbd>, <kbd>Alt</kbd> yerine <kbd>⌥</kb
 | Sağa hizala | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd> |
 | İki yana yasla | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>J</kbd> |
 | Bağlantı | <kbd>Ctrl</kbd>+<kbd>K</kbd> | <kbd>⌘</kbd>+<kbd>K</kbd> |
+| Üst simge | <kbd>Ctrl</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>.</kbd> |
+| Alt simge | <kbd>Ctrl</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>,</kbd> |
+| Yazıyı büyüt | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd> |
+| Yazıyı küçült | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>,</kbd> |
+| Girintiyi artır | <kbd>Ctrl</kbd>+<kbd>]</kbd> | <kbd>⌘</kbd>+<kbd>]</kbd> |
+| Girintiyi azalt | <kbd>Ctrl</kbd>+<kbd>[</kbd> | <kbd>⌘</kbd>+<kbd>[</kbd> |
+| Büyük/küçük harf değiştir | <kbd>Shift</kbd>+<kbd>F3</kbd> | <kbd>⇧</kbd>+<kbd>F3</kbd> |
 | Bul ve değiştir | <kbd>Ctrl</kbd>+<kbd>F</kbd> | <kbd>⌘</kbd>+<kbd>F</kbd> |
 | Geri al | <kbd>Ctrl</kbd>+<kbd>Z</kbd> | <kbd>⌘</kbd>+<kbd>Z</kbd> |
 | Yinele | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> ya da <kbd>Ctrl</kbd>+<kbd>Y</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> ya da <kbd>⌘</kbd>+<kbd>Y</kbd> |
 | Aynı paragrafta yeni satır | <kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>⇧</kbd>+<kbd>Enter</kbd> |
 | Araç çubuğuna geç | <kbd>Alt</kbd>+<kbd>F10</kbd> | <kbd>⌥</kbd>+<kbd>F10</kbd> |
+| Klavye kısayolları listesi | <kbd>Alt</kbd>+<kbd>0</kbd> | <kbd>⌥</kbd>+<kbd>0</kbd> |
 | Yapay zeka asistanı | <kbd>Ctrl</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>J</kbd> |
 
+Biçimi temizle; seçimdeki kalın, italik, altı çizili, üstü çizili, satır içi kod, yazı rengi ve vurguyu kaldırır, seçili paragraf ve başlıkların hizalamasını sıfırlar. Bağlantılar ve başlık, liste gibi blok türleri olduğu gibi kalır. Yalnızca imleç varsa, sonra yazdığınız metin düz olur. `@viveeditor/ext-format` paketindeki `ClearFormatting.configure({ keepMarks: ['link', 'code'] })` daha fazla biçimi korur; komutu `editor.commands.clearFormatting()`.
+
+Biçim boyacısı, imlecin bulunduğu ya da seçimin başındaki metnin biçimini kopyalar. Ardından başka bir metni fareyle ya da <kbd>Shift</kbd> ve ok tuşlarıyla seçin; bıraktığınız anda biçim uygulanır. Hedef metin aynı kalın, italik, altı çizili, üstü çizili, satır içi kod, renk ve vurguyu alır, bağlantılar korunur. Boyacı açıkken imleç kopyalama imlecine döner; <kbd>Esc</kbd> ya da düğmeye ikinci kez tıklamak boyacıyı kapatır. Kodda komutları `copyFormat()`, `applyFormat()` ve `cancelFormat()`; açık olup olmadığını `editor.query.isPaintingFormat()` söyler.
+
+Düz metin olarak yapıştır, panodaki tüm biçimi atar ve imlecin bulunduğu yerdeki metnin biçimini alır; her satır bir paragraf olur. Yapıştırılan bağlantılar video gömmeye dönüşmez, Markdown da çevrilmez. Safari'de <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> kendiliğinden çalışmadığı için editör panoyu kendisi okur ve Safari onay için küçük bir Yapıştır düğmesi gösterir; <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> bu adım olmadan yapıştırır.
+
+Yazı biçimi menüsü beş boyuttan birini (çok küçük, küçük, normal, büyük, çok büyük), üst ya da alt simgeyi ve harf düzenini ayarlar. Boyutlar göreli (`em`) olduğu için yayınladığınız sayfanın yazı tipine uyar. Harf değiştirme metnin diline göre çalışır: Türkçe metinde `i` harfi `İ`, `I` harfi `ı` olur. Yalnızca imleç varsa harf değiştirme ve <kbd>Shift</kbd>+<kbd>F3</kbd> imlecin bulunduğu kelimeye uygulanır; kısayola yeniden basmak BÜYÜK HARF, küçük harf ve Her Kelimenin İlk Harfi Büyük arasında döner.
+
+Girinti, paragraf ve başlıkları 2 em adımlarla, en çok sekiz düzey içeri alır; listelerde <kbd>Tab</kbd> yine listeyi iç içe sokar. Biçimi temizle girintiyi de sıfırlar.
+
+Yazarken düz tırnaklar kıvrık tırnağa, `--` uzun tireye, `...` üç noktaya, `(c)`, `(r)` ve `(tm)` sırasıyla ©, ® ve ™ işaretine, `->` ve `<-` de oka dönüşür. Değişiklikten hemen sonra <kbd>Backspace</kbd> yazdığınızı geri getirir. Kodun içinde hiçbir şey değişmez. `@viveeditor/ext-format` paketindeki `Typography.configure({ quotes: null })` tırnak değişimini kapatır; `quotes: ['«', '»', '‹', '›']` başka tırnak işaretleri seçer.
+
+Özel karakter paneli noktalama, para birimleri (₺, € …), matematik, oklar, aksanlı harfler, Yunan harfleri ve simgeleri gruplar. Ok tuşları karakterler arasında gezinir, <kbd>Enter</kbd> seçileni ekler.
+
 Yapay zeka kısayolu yalnızca [yapay zeka asistanı](/dokumantasyon/yapay-zeka/) eklentisi takılıysa çalışır.
+
+Mac'te birçok klavye düzeninde <kbd>⌥</kbd>+<kbd>0</kbd> `º` yazar. Kısayol listesi aracı açıkken editör bu tuşu listeye ayırır; `exclude: ['shortcuts']` karakteri geri verir.
 
 ### Gezinme
 
@@ -127,6 +175,7 @@ Yapay zeka kısayolu yalnızca [yapay zeka asistanı](/dokumantasyon/yapay-zeka/
 - Kod bloğunda <kbd>Tab</kbd> girinti ekler, <kbd>Shift</kbd>+<kbd>Tab</kbd> geri alır.
 - Tablodan ya da kod bloğundan klavyeyle çıkmak için önce <kbd>Esc</kbd>, sonra <kbd>Tab</kbd> tuşuna basın; odak editörden sonraki öğeye geçer.
 - Paneller ve menüler <kbd>Esc</kbd> ile kapanır, odak açıldıkları düğmeye ya da metne döner.
+- Tam ekrandayken metinde <kbd>Esc</kbd> tam ekrandan çıkar.
 
 ### Yazarken dönüşenler
 

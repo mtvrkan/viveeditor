@@ -2,7 +2,7 @@
 key: files
 title: Dosya aç, kaydet, yazdır
 description: Dosya menüsüyle Word, Markdown, HTML ve metin dosyalarını açın, belgeyi Word, Markdown ya da HTML olarak kaydedin ve yazdırın.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: PDF olarak nasıl kaydederim?
     a: Dosya menüsünden "Yazdır veya PDF" seçin ve tarayıcının yazdırma penceresinde "PDF olarak kaydet" seçeneğini kullanın.
@@ -16,13 +16,23 @@ Araç çubuğunda bir Dosya menüsü vardır. `.docx`, `.md`, `.html` ve `.txt` 
 
 ## Dosya menüsü
 
-Menüde şu öğeler bulunur: "Dosya aç…", "Word olarak kaydet (.docx)", "Markdown olarak kaydet (.md)", "HTML olarak kaydet (.html)" ve "Yazdır veya PDF".
+Menüde şu öğeler bulunur: "Dosya aç…", "Word olarak kaydet (.docx)", "Markdown olarak kaydet (.md)", "HTML olarak kaydet (.html)", "Yazdır veya PDF" ve "Belgeyi toparla".
 
 - Açılan dosya boş bir belgenin yerini alır. Belgede metin varsa dosya imlecin olduğu yere eklenir. Tek bir geri al işlemi bunu geri alır.
 - Metin dosyalarında boş satırlar paragrafları ayırır, tek satır sonları satır sonu olarak kalır.
 - Açılan her dosya, yapıştırılan içerikle aynı belge kurallarından geçer; bilinmeyen biçimlendirme çıktıya hiçbir zaman ulaşmaz. Kaydedilen HTML'i sunucuda da temizleyin.
 - Kaydedilen dosyanın adı `fileName` seçeneğinden gelir (verilmezse "belge"). Dosya adlarında kullanılamayan karakterler değiştirilir, ad en fazla 100 karakter olur.
 - Hatalar görünür bir bildirimle gösterilir. "Dosya açılıyor…" gibi ilerleme mesajları ekran okuyuculara duyurulur.
+
+## Belgeyi toparla
+
+"Belgeyi toparla" bütün belgeyi tek adımda temizler; tek bir geri al işlemi hepsini geri getirir:
+
+- paragrafların başındaki ve sonundaki boşluklar ile kelimeler arasındaki tekrarlanan boşluklar silinir; bilerek yazılmış bölünmez boşluklar kalır,
+- paragrafın sonundaki satır sonları silinir,
+- belgenin başındaki ve sonundaki boş paragraflar silinir, art arda gelen boş paragraflar teke iner; belgenin en sonunda tablo, çizgi gibi bir blok varsa altına yazabilmeniz için bir boş paragraf kalır.
+
+Kod bloklarına hiç dokunulmaz. Bir bildirim kaç boşluk, satır sonu ve boş paragrafın silindiğini gösterir. Bu öğe `@viveeditor/ext-format` paketindeki `CleanDocument` eklentisinden gelir (`formatExtensions` içinde); kodda `editor.query.documentCleanup()` hiçbir şeyi değiştirmeden sayıları döndürür, `editor.commands.cleanDocument()` temizliği uygular.
 
 ## Tek betikli kurulumda
 

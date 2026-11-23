@@ -1,0 +1,91 @@
+---
+key: autosave
+title: Drafts and autosave
+description: Keep a draft of unsaved text in the browser, offer it back after a reload or crash, and save to your server while the writer pauses.
+updated: 2026-11-21
+faq:
+  - q: Where is the draft kept?
+    a: In the browser's localStorage under viveeditor:draft:<key>, on the writer's own device. Nothing is sent anywhere unless you add a save function.
+  - q: Is a draft safe on a shared computer?
+    a: Anyone using the same browser profile can read it. On shared computers, use storage 'session' so the draft goes away when the tab closes, or storage false to keep only server saves.
+  - q: Does restoring a draft overwrite the text for good?
+    a: No. Restoring is one undo step; Ctrl+Z (⌘+Z on a Mac) brings back the text that was loaded.
+---
+
+Autosave keeps a copy of what the writer types. If the page is reloaded, the browser crashes or the tab is closed before the form is sent, the editor offers the draft back the next time it opens. You can also save to your own server whenever the writer pauses. This page covers the one-script build, the npm setup, server saves and privacy.
+
+## With the one-script build
+
+Add `data-autosave` to the textarea, with a key that is unique to the text being edited:
+
+```html
+<form method="post" action="/posts/42">
+  <label for="body">Article</label>
+  <textarea id="body" name="body" data-editor data-autosave="post-42"></textarea>
+  <button>Publish</button>
+</form>
+```
+
+A second after the writer stops typing, the draft is stored. When the form is sent and nothing cancels the submit, the draft is removed. Use a different key for every record, such as the post id, so drafts of different texts never mix.
+
+## With npm
+
+```ts
+import { createUI } from '@viveeditor/ui'
+
+const ui = createUI(editor, { locale: 'en', autosave: { key: 'post-42' } })
+
+form.addEventListener('submit', () => ui.autosave?.clear())
+```
+
+| Option | What it does |
+| --- | --- |
+| `key` | Required. Up to 200 characters; the draft is stored under `viveeditor:draft:<key>`. |
+| `wait` | Milliseconds to wait after the last change before saving. Default `1000`. |
+| `storage` | `'local'` (default), `'session'` or `false`. |
+| `save` | Your own save function, called after each pause. See below. |
+| `onError` | Receives storage and save errors. |
+
+The draft is also written when the tab is hidden or the page is left, so a quick reload does not lose the last words.
+
+## The draft bar
+
+When a stored draft differs from the content the editor opened with, a bar above the text says so and shows when the draft was saved. "Restore draft" puts the draft into the editor as one undo step; "Delete draft" removes it. A draft that matches the loaded content is never offered, and emptying the text removes the draft.
+
+`ui.autosave` gives you the same controls in code:
+
+| Method | What it does |
+| --- | --- |
+| `draft()` | `{ savedAt }` of the offered draft, or `null`. |
+| `restore()` / `discard()` | Restores or deletes the offered draft. |
+| `clear()` | Removes the stored draft, for example after a successful save. |
+| `flush()` | Saves now instead of waiting. |
+| `status()` | `'idle'`, `'pending'`, `'saving'`, `'saved'` or `'error'`. |
+| `onChange(listener)` | Calls `listener` when the status or the draft changes; returns a function that stops it. |
+
+`createAutosave(editor, options)` from `@viveeditor/ui` gives the same object without the bar, if you build your own interface.
+
+## Saving to your server
+
+```ts
+createUI(editor, {
+  autosave: {
+    key: 'post-42',
+    save: async (editor, { signal }) => {
+      const response = await fetch('/posts/42/draft', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: editor.getHTML() }),
+        signal,
+      })
+      if (!response.ok) throw new Error('Draft not saved')
+    },
+  },
+})
+```
+
+Saves run one at a time: if the writer keeps typing while a save is running, one more save follows with the latest text. A failed save sets the status to `'error'` and goes to `onError`. While a server save is waiting or running, leaving the page shows the browser's "leave site?" warning. Sanitize the HTML on your server as you would for a normal submit; see [Server sanitizing](/en/docs/server-sanitizing/).
+
+## Privacy
+
+Drafts stay in the writer's browser and are readable by anyone who uses the same browser profile. On shared or public computers, set `storage: 'session'` so the draft is gone when the tab closes, or `storage: false` to keep only your server saves. Do not use autosave for text that must never be stored on the device, such as passwords or health records.

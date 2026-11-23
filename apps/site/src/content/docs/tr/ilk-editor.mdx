@@ -25,7 +25,7 @@ En kısa yol budur; CDN betiğiyle de npm ile de çalışır.
 </form>
 ```
 
-Textarea gizlenir ama formda kalır ve her zaman en güncel HTML'i tutar (belge boşsa `''`). Her değişiklikte `input` olayı tetiklenir. `required` varsa boş editör gönderimi durdurur, kendini `aria-invalid="true"` olarak işaretler, textarea üzerinde `vive:invalid` olayını tetikler ve odağı alır. Görseller hâlâ yükleniyorsa gönderim bekler ve yüklemeler bitince yapılır. Bir textarea'nın Dosya menüsünü gizlemek için ona `data-files="false"` ekleyin.
+Textarea gizlenir ama formda kalır ve her zaman en güncel HTML'i tutar (belge boşsa `''`). Her değişiklikte `input` olayı tetiklenir. `required` varsa boş editör gönderimi durdurur, kendini `aria-invalid="true"` olarak işaretler, textarea üzerinde `vive:invalid` olayını tetikler ve odağı alır. Görseller hâlâ yükleniyorsa gönderim bekler ve yüklemeler bitince yapılır. Bir textarea'nın Dosya menüsünü gizlemek için ona `data-files="false"` ekleyin. Kaydedilmemiş metnin taslağını tarayıcıda tutmak için `data-autosave="yazi-42"` ekleyin; taslak bu anahtarla saklanır ve form gönderilince silinir. Ayrıntılar [Otomatik taslak](/dokumantasyon/otomatik-taslak/) sayfasında.
 
 ### Kendi kodunuzdan
 

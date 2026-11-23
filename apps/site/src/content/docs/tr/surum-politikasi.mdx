@@ -1,8 +1,8 @@
 ---
 key: versioning
 title: Sürüm politikası
-description: viveEditor paketlerini 1.0 öncesinde nasıl sürümler, neler uyumlu kalır ve CDN betiği neden tam sürüm numarası ister.
-updated: 2026-11-01
+description: viveEditor paketlerini nasıl sürümler, 1.0'dan itibaren hangi değişiklik uyumu bozar, kullanımdan kaldırma nasıl işler ve 0.x'ten nasıl geçilir.
+updated: 2026-11-21
 ---
 
 viveEditor, alışılmış 0.x kuralıyla anlamsal sürümlemeyi izler ve tüm npm paketleri tek bir sürüm numarasını paylaşır. Bu sayfa sürümler arasında nelerin değişebileceğini, nelerin hiç bozulmayacağını ve bir sürümü nasıl güvenle sabitleyeceğinizi anlatıyor.
@@ -16,6 +16,41 @@ viveEditor şu anda ilk kararlı sürümünden önceki 0.x aşamasında.
 
 Yeni bir ara sürüme geçmeden önce sürüm notlarını okuyun. Her sürüm etiketlenir ve bir [GitHub sürümü](https://github.com/mtvrkan/viveeditor/releases) olarak yayımlanır.
 
+## 1.0'dan itibaren
+
+1.0.0 ile alışılmış anlamsal sürümleme kuralları geçerli olur:
+
+- **Ana sürüm** (1.x'ten 2.0'a): uyumu bozan değişikliklerin geldiği tek yer. Sürüm notları her değişikliği ve ne yapmanız gerektiğini listeler.
+- **Ara sürüm** (1.1'den 1.2'ye): yeni özellikler ve yeni seçenekler. Daha önceki bir 1.x için yazılmış kod çalışmaya devam eder.
+- **Yama sürümü** (1.1.0'dan 1.1.1'e): yalnızca hata ve güvenlik düzeltmeleri.
+
+### Hangi değişiklik uyumu bozar
+
+Aşağıdakiler genel arayüzdür; bunları mevcut kodu bozacak şekilde yalnızca bir ana sürüm değiştirir:
+
+- `api/` raporundaki her şey: dışa açılan fonksiyonlar, sınıflar, türler, eklenti seçenekleri, komut ve sorgu adları ve bunların parametreleri.
+- Kayıtlı içeriğin okunması: 0.x dahil önceki herhangi bir sürümle kaydedilen HTML ve JSON aynı belge olarak açılır.
+- Editörün zaten var olan içerik için yazdığı HTML: etiketler, öznitelikler ve `data-*` öznitelikleri. Yeni bir özellik yeni işaretleme ekleyebilir.
+- `dist/` içindeki CDN dosya adları ve tek betikli sürümün `data-autosave`, `data-required-message` gibi `data-*` öznitelikleri.
+- `--ve-accent` gibi belgelenmiş CSS değişkenleri ve kayıtlı içerikteki `vive-*` sınıfları.
+
+Aşağıdakiler bir ara sürümde değişebilir:
+
+- Araç çubuğunun ve panellerin görünümü, araçların sırası, arayüzün iç `ve-*` sınıf adları ve DOM yapısı.
+- Arayüz metinleri ve varsayılan araç listesi. Araç çubuğunda yeni bir araç görünebilir; istemiyorsanız `exclude` seçeneğiyle kaldırın.
+- Paket boyutları, yayımlanan bütçelerin içinde kaldıkları sürece.
+- Adı karma (hash) ile biten ve yalnızca derlemenin yüklediği parça dosyalarının adları.
+
+### Kullanımdan kaldırma
+
+Bir özellik hiçbir zaman haber verilmeden kaldırılmaz:
+
+1. Bir ara sürüm onu sürüm notlarında ve bu belgelerde kullanımdan kaldırılmış olarak işaretler ve yerine geçeni söyler.
+2. Kullanımdan kaldırılan özellik o ana sürümün sonuna kadar, en az da altı ay çalışmaya devam eder.
+3. Yalnızca bir sonraki ana sürümde kaldırılır ve o sürüm onu uyumu bozan değişiklikler arasında listeler.
+
+Çalışma sırasında konsola uyarı yazılmaz; böylece bir kullanımdan kaldırma kullanıcılarınızın tarayıcı konsolunda hiç görünmez. Güncellerken sürüm notlarını okuyun.
+
 ## Her paket için tek sürüm
 
 `viveeditor` ve tüm `@viveeditor/*` paketleri, yani bütün npm paketleri aynı sürüm numarasıyla birlikte yayımlanır. Editör, eklentileri ve çerçeve bileşeniniz her zaman uyuşsun diye hepsini aynı sürümde kurun.
@@ -27,6 +62,10 @@ PHP paketleri `viveeditor/sanitizer` ve `viveeditor/laravel` ise Composer üzeri
 Herhangi bir 0.x sürümüyle kaydedilen HTML ve JSON, sonraki her 0.x sürümünde okunabilir kalır. Güncelleme yaptığınızda kayıtlı içerik için hiçbir zaman taşıma gerekmez.
 
 Asıl saklama biçimi ProseMirror JSON'udur (`editor.getJSON()`); HTML (`editor.getHTML()`) bir gösterim biçimidir. İkisinden birini saklayabilirsiniz.
+
+1.0'dan itibaren `editor.getJSON()` belgenin en üstüne bir `schemaVersion` numarası yazar. Bu alanı taşımayan JSON, 0.x ile kaydedilmiş içerik sayılır ve eskisi gibi açılır. Editörün bildiğinden daha yeni bir şemayla kaydedilmiş JSON, eksik parçalarla açılmak yerine kodu `SCHEMA_TOO_NEW` olan bir `ViveEditorError` ile reddedilir; `commands.replaceContent` ve `commands.insertContent` bu içerik için `false` döndürür. Daha yeni bir sürümle kaydedilmiş içeriği açmadan önce editörü güncelleyin.
+
+Test paketi 0.1.0 ile kaydedilmiş bir belgeyi HTML, JSON ve Markdown olarak saklar ve her sürümün HTML ile JSON'u aynı belge olarak okuduğunu denetler.
 
 ## Genel API kayıt altında
 
@@ -45,3 +84,18 @@ CDN betiğini her zaman tam sürümle yükleyin:
 ## Güvenlik düzeltmeleri
 
 1.0'a kadar yalnızca yayımlanmış en son ara sürüm güvenlik düzeltmesi alır. Tüm paketler aynı sürüm numarasını paylaştığı için düzeltme, her paketin yama sürümü olarak çıkar. Bu düzeltmeleri almanın yolu en son ara sürümde kalmaktır. Bkz. [Güvenlik ve CSP](/dokumantasyon/guvenlik-ve-csp/).
+
+1.0'dan itibaren geçerli ana sürümün en son ara sürümü güvenlik düzeltmesi alır. Yeni bir ana sürüm çıktığında önceki ana sürümün son ara sürümü altı ay daha güvenlik düzeltmesi almaya devam eder.
+
+## 0.x'ten 1.0'a geçiş
+
+Kayıtlı HTML ve JSON'da hiçbir değişiklik gerekmez. Güncellerken şunlara bakın:
+
+1. **Tüm paketleri birlikte**, aynı sürüme güncelleyin: `viveeditor`, tüm `@viveeditor/*` paketleri ve çatı bileşeniniz.
+2. **Sunucudaki temizleyiciyi de aynı anda güncelleyin.** 1.0 yazı boyutlarını, üst ve alt simgeyi, paragraf girintisini, görsel alt yazısı ile hizalamasını ve tablo hücresi renklerini ekler. Eski bir `@viveeditor/sanitize` ya da `viveeditor/sanitizer`, içerik kaydedilirken bunları siler.
+3. **Araç çubuğunda yeni araçlar var.** Araç çubuğu artık biçimi temizleme, biçim boyacısı, yazı boyutu, üst ve alt simge, girinti, özel karakterler, ana hat, erişilebilirlik denetimi, klavye kısayolları ve tam ekran sunuyor. İstemediklerinizi `exclude` seçeneğiyle kaldırın; bkz. [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/).
+4. **Alt+0 kısayol listesini açar.** Mac'te Option+0 birçok klavye düzeninde `º` yazar. Kullanıcılarınızın bu karaktere ihtiyacı varsa `exclude` listesine `'shortcuts'` ekleyin.
+5. **JSON artık `schemaVersion` taşır.** `editor.getJSON()` belgenin en üstüne `schemaVersion: 1` yazar. Kayıtlı JSON'u kendi katı şemanızla doğruluyorsanız bu alana izin verin.
+6. **Markdown'daki video bağlantıları eksiksiz.** Markdown dışa aktarımı artık Vimeo gizli bağlantı parçasını ve YouTube ya da Vimeo başlangıç süresini korur, örneğin `https://vimeo.com/76979871/abcdef12`. Önceki dışa aktarımlar yalnızca videonun kendisini gösteriyordu.
+7. **CDN kullanıcıları**: yeni sürümün betiğini ve `viveeditor.css` dosyasını aynı tam sürüm klasöründen yükleyin. Dosyaları kendiniz barındırıyorsanız ek dosyalar dahil `dist/` içindeki her dosyayı kopyalayın.
+8. **`MountDestroyedError`** artık kodu `DESTROYED` olan bir `ViveEditorError`. `instanceof MountDestroyedError` çalışmaya devam eder.

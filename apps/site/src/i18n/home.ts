@@ -195,7 +195,7 @@ upgradeAll()</code></pre>
       {
         icon: 'i-board',
         title: 'Tablolar',
-        body: 'Hücre birleştirme, başlık satırı ve sütun genişliği; Word dosyalarında da korunur.',
+        body: 'Hücre birleştirme, başlık satırı, sütun genişliği ve hücre rengi; Word dosyalarında da korunur.',
         doc: 'tables',
       },
       {
@@ -203,6 +203,24 @@ upgradeAll()</code></pre>
         title: 'Formül, dipnot, bahsetme',
         body: 'LaTeX formülleri, yerinde düzenlenen dipnotlar, @ ile bahsetme, emoji ve şablonlar npm eklentisi olarak gelir.',
         doc: 'math',
+      },
+      {
+        icon: 'i-pen',
+        title: 'Biçimi toparlayan araçlar',
+        body: 'Biçimi tek tuşla temizleyin, biçim boyacısıyla kopyalayın, yapıştırdıktan sonra biçimi koruyup korumamayı seçin.',
+        doc: 'toolbar',
+      },
+      {
+        icon: 'i-check',
+        title: 'Ana hat ve erişilebilirlik denetimi',
+        body: 'Başlıklar arasında gezinin; eksik alternatif metni, atlanan başlık düzeyini ve düşük kontrastı yayımlamadan görün.',
+        doc: 'toolbar',
+      },
+      {
+        icon: 'i-archive',
+        title: 'Kaybolmayan taslak',
+        body: 'Sekme kapanır ya da tarayıcı çökerse taslak tarayıcıda kalır; geri yüklemek tek adımda geri alınabilir.',
+        doc: 'autosave',
       },
     ],
   },
@@ -402,7 +420,7 @@ upgradeAll()</code></pre>
       {
         icon: 'i-board',
         title: 'Tables',
-        body: 'Merged cells, header rows and column widths, kept in Word files too.',
+        body: 'Merged cells, header rows, column widths and cell colours, kept in Word files too.',
         doc: 'tables',
       },
       {
@@ -410,6 +428,24 @@ upgradeAll()</code></pre>
         title: 'Formulas, footnotes, mentions',
         body: 'LaTeX formulas, footnotes edited in place, @ mentions, emoji and templates come as npm extras.',
         doc: 'math',
+      },
+      {
+        icon: 'i-pen',
+        title: 'Tools that tidy formatting',
+        body: 'Clear formatting with one key, copy it with the format painter, and choose after a paste whether to keep it.',
+        doc: 'toolbar',
+      },
+      {
+        icon: 'i-check',
+        title: 'Outline and accessibility check',
+        body: 'Jump between headings, and see missing alt text, skipped heading levels and low contrast before you publish.',
+        doc: 'toolbar',
+      },
+      {
+        icon: 'i-archive',
+        title: 'Drafts that survive',
+        body: 'If the tab closes or the browser crashes the draft stays in the browser, and restoring it is one undoable step.',
+        doc: 'autosave',
       },
     ],
   },

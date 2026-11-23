@@ -50,11 +50,18 @@ While the cursor is inside a table, the table button in the toolbar opens the ta
 
 | Group | Tools |
 | --- | --- |
+| Cell | Cell colour, Vertical alignment (Top, Middle, Bottom) |
 | Insert | Insert row above, Insert row below, Insert column left, Insert column right |
 | Arrange | Merge cells, Split cell, Header row, Widen column, Narrow column |
 | Delete | Delete row, Delete column, Delete table |
 
 Tools that cannot run at that moment are shown as disabled. For example, "Merge cells" is not available while a single cell is selected. <kbd>Esc</kbd> closes the panel.
+
+## Cell colour and vertical alignment
+
+"Cell colour" gives the cells at the cursor, or the selected cells, one of seven light background colours; the crossed-out circle removes it. "Vertical alignment" places the cell content at the top, middle or bottom. Use the alignment menu in the toolbar for left, center or right alignment of the text itself.
+
+The values are saved as a style on the cell, such as `<td style="background-color: #cde8ff; vertical-align: middle">`. Background colours pasted from Word and Google Docs are kept, except plain white. The commands are `setCellBackground(color)` and `setCellVerticalAlign('middle' | 'bottom' | null)`; pass `null` to clear. `editor.query.cellStyle()` returns the values of the cell at the cursor.
 
 ## Merged cells
 
@@ -87,6 +94,8 @@ A table with set widths carries a `colgroup` and a `width` style per column in t
 | `mergeCells()`, `splitCell()` | Merges or splits cells. |
 | `toggleHeaderRow()`, `toggleHeaderColumn()` | Turns the header row or column on or off. |
 | `resizeColumn(delta)` | Widens or narrows the column at the cursor, in pixels. |
+| `setCellBackground(color)` | Sets or clears (`null`) the background colour of the selected cells. |
+| `setCellVerticalAlign(align)` | Sets the vertical alignment of the selected cells: `'middle'`, `'bottom'` or `null` for top. |
 
 `editor.query.inTable()` returns `true` while the cursor is inside a table. To test a command first, use the `can` form, such as `editor.can.mergeCells()`.
 

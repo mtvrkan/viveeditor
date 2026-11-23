@@ -14,6 +14,7 @@ export type DocKey =
   | 'search'
   | 'characterCount'
   | 'files'
+  | 'autosave'
   | 'officePaste'
   | 'mentions'
   | 'emoji'
@@ -92,6 +93,12 @@ export const DOCS: DocEntry[] = [
     group: 'features',
     icon: 'i-convert',
     slug: { tr: 'dosya-ac-kaydet-yazdir', en: 'open-save-print' },
+  },
+  {
+    key: 'autosave',
+    group: 'features',
+    icon: 'i-archive',
+    slug: { tr: 'otomatik-taslak', en: 'autosave-and-drafts' },
   },
   {
     key: 'officePaste',

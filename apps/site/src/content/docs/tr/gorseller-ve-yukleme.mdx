@@ -185,4 +185,29 @@ img {
 
 ## Görsel paneli
 
-Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni ve boyutu değiştirmenizi sağlar.
+Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni, altyazıyı, yerleşimi ve boyutu değiştirmenizi sağlar.
+
+## Altyazı ve yerleşim
+
+"Altyazı" alanı görselin altına kısa, düz metin bir satır ekler. "Yerleşim" görselin yerini belirler: "Yok" görseli kendi satırında bırakır, "Sola" ve "Sağa" metnin görselin yanından akmasını sağlar, "Ortaya" görseli ortalar. 480 pikselden dar ekranlarda sola ya da sağa yaslanmış görsel yeniden kendi satırına geçer.
+
+Altyazısı ya da yerleşimi olan görsel bir `figure` içinde kaydedilir; ikisi de yoksa eskisi gibi yalın bir `img` olarak kalır:
+
+```html
+<figure data-align="right">
+  <img src="https://cdn.example.com/grafik.png" alt="Satış grafiği" width="640" height="360">
+  <figcaption>Şekil 1: aylara göre satışlar</figcaption>
+</figure>
+```
+
+Editörün stil dosyası bu kuralları zaten içerir. Aynı yerleşimi kendi sayfalarınızda göstermek için onları oraya da ekleyin:
+
+```css
+figure { width: fit-content; max-width: 100%; margin: 0 0 1em; }
+figure[data-align="center"] { margin-inline: auto; }
+figure[data-align="left"] { float: left; max-width: 50%; margin: 0.2em 1.25em 0.6em 0; }
+figure[data-align="right"] { float: right; max-width: 50%; margin: 0.2em 0 0.6em 1.25em; }
+figcaption { width: 0; min-width: 100%; font-size: 0.875em; text-align: center; }
+```
+
+Aynı değerler komutla da verilebilir: `editor.commands.setImageAttributes({ caption: 'Şekil 1', align: 'right' })`. `align` değeri `'left'`, `'center'`, `'right'` ya da `null` olabilir. Altyazı düz metindir; Word'e "Caption" (Resim Yazısı) paragrafı olarak, Markdown'a görselin altında italik bir satır olarak yazılır.

@@ -1,8 +1,8 @@
 ---
 key: toolbar
 title: Toolbar and shortcuts
-description: The floating toolbar, selection bubble, / menu, block menu, word count, readability score and every keyboard shortcut.
-updated: 2026-11-01
+description: The floating toolbar, selection bubble, / menu, block menu, outline, accessibility check, full screen, word count, readability score and every keyboard shortcut.
+updated: 2026-11-21
 faq:
   - q: Can I turn the toolbar off completely?
     a: Yes. Pass ui false to the framework components or mountEditor; with the npm packages, do not call createUI. Keyboard shortcuts come from the extensions, so they still work without the toolbar.
@@ -35,6 +35,8 @@ const ui = createUI(editor, { locale: 'en', theme: 'auto' })
 | `slash` | `false` turns off the `/` menu. |
 | `source` | `false` removes the HTML source button. |
 | `files` | The File menu; `false` hides it. See [Open, save and print](/en/docs/open-save-print/). |
+| `exclude` | Tool names to leave out, such as `['fullscreen', 'shortcuts']`. |
+| `autosave` | Keeps a draft of unsaved text. See [Drafts and autosave](/en/docs/autosave-and-drafts/). |
 | `plugins` | Extra menus such as mentions, emoji and templates plug in here from `@viveeditor/ui/extras`. |
 | `onError` | Receives errors raised in the interface. |
 
@@ -42,15 +44,35 @@ const ui = createUI(editor, { locale: 'en', theme: 'auto' })
 
 The toolbar sits below the text and stays at the bottom of the screen while you scroll a long article. On phones it moves above the on-screen keyboard.
 
-From left to right: the block type button; bold, italic, underline, strikethrough and inline code; text colour and highlight; bulleted list, numbered list, task list, quote, table, image and video; alignment; link and find and replace; undo, redo, File and HTML source. The word count sits at the end.
+From left to right: the block type button; bold, italic, underline, strikethrough, inline code, clear formatting and format painter; text colour, highlight and text style (size, superscript, subscript, letter case); bulleted list, numbered list, task list, quote, table, image, video and special characters; alignment and indent; link and find and replace; undo, redo, File and HTML source; outline, accessibility check, keyboard shortcuts and full screen. The word count sits at the end.
 
 Below 560 pixels only bold, italic and link stay in place, and the other tools move to the "More tools" menu. In wider spaces, tools that do not fit move into that menu in a fixed order; the menu shows only the tools that moved.
 
 The HTML source button opens the document's HTML in an editable text area. While it is open the other tools are disabled; when you close it, your changes are applied to the editor.
 
+## Outline, accessibility check and full screen
+
+**Outline** lists the document's headings, indented by level. Choose one and the cursor moves to it and the page scrolls there. The button appears only when headings are available.
+
+**Accessibility check** looks for problems a screen reader user would meet and lists them in document order:
+
+- an empty heading, or a heading that skips a level (Heading 2 followed by Heading 4);
+- an image without alt text, or a video without a title;
+- a table without a header row;
+- a link with no text or with vague text such as "click here";
+- a text colour with a contrast below 4.5:1 on a white page.
+
+"Show" next to a problem selects it in the text; "Check again" runs the check after your changes. The check helps the writer and does not replace a full review; contrast is measured against white only.
+
+**Keyboard shortcuts** shows the shortcuts of the tools that are loaded, with the right keys for your operating system. <kbd>Alt</kbd>+<kbd>0</kbd> opens it from the text.
+
+**Full screen** fills the browser window with the editor and keeps the text in a readable column. The page behind it stops scrolling. <kbd>Esc</kbd> in the text or the button again leaves full screen; while a menu or panel is open, <kbd>Esc</kbd> closes that first.
+
+Leave out any of these with `exclude: ['outline', 'accessibility', 'shortcuts', 'fullscreen']`. In code, `editor.query.findNodes(['heading'])` and `editor.query.findMarks(['link'])` return the same lists the panels use, as `{ name, attrs, text, from, to }` in document order (at most 2000).
+
 ## Selection bubble
 
-When you select text, a small toolbar opens just above the selection. On touch screens it opens below the selection, so your finger does not cover it. It holds bold, italic, link and inline code; plugins such as the [AI assistant](/en/docs/ai-assistant/) add their own buttons. The bubble does not open while an image is selected. <kbd>Esc</kbd> closes it, and `bubble: false` removes it.
+When you select text, a small toolbar opens just above the selection. On touch screens it opens below the selection, so your finger does not cover it. It holds bold, italic, link, inline code and clear formatting; plugins such as the [AI assistant](/en/docs/ai-assistant/) add their own buttons. The bubble does not open while an image is selected. <kbd>Esc</kbd> closes it, and `bubble: false` removes it.
 
 ## The / menu
 
@@ -99,6 +121,8 @@ On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd> and <kbd>⌥</kbd> inste
 | Strikethrough | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd> |
 | Inline code | <kbd>Ctrl</kbd>+<kbd>E</kbd> | <kbd>⌘</kbd>+<kbd>E</kbd> |
 | Highlight | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd> |
+| Clear formatting | <kbd>Ctrl</kbd>+<kbd>&#92;</kbd> | <kbd>⌘</kbd>+<kbd>&#92;</kbd> |
+| Paste as plain text | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> or <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> |
 | Heading 1–6 | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>1</kbd> … <kbd>6</kbd> | <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>1</kbd> … <kbd>6</kbd> |
 | Bulleted list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>8</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>8</kbd> |
 | Numbered list | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>7</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>7</kbd> |
@@ -109,15 +133,39 @@ On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd> and <kbd>⌥</kbd> inste
 | Align center | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd> |
 | Align right | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd> |
 | Justify | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>J</kbd> |
+| Superscript | <kbd>Ctrl</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>.</kbd> |
+| Subscript | <kbd>Ctrl</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>,</kbd> |
+| Bigger text | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd> |
+| Smaller text | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>,</kbd> |
+| Increase indent | <kbd>Ctrl</kbd>+<kbd>]</kbd> | <kbd>⌘</kbd>+<kbd>]</kbd> |
+| Decrease indent | <kbd>Ctrl</kbd>+<kbd>[</kbd> | <kbd>⌘</kbd>+<kbd>[</kbd> |
+| Change letter case | <kbd>Shift</kbd>+<kbd>F3</kbd> | <kbd>⇧</kbd>+<kbd>F3</kbd> |
 | Link | <kbd>Ctrl</kbd>+<kbd>K</kbd> | <kbd>⌘</kbd>+<kbd>K</kbd> |
 | Find and replace | <kbd>Ctrl</kbd>+<kbd>F</kbd> | <kbd>⌘</kbd>+<kbd>F</kbd> |
 | Undo | <kbd>Ctrl</kbd>+<kbd>Z</kbd> | <kbd>⌘</kbd>+<kbd>Z</kbd> |
 | Redo | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> or <kbd>⌘</kbd>+<kbd>Y</kbd> |
 | New line in the same paragraph | <kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>⇧</kbd>+<kbd>Enter</kbd> |
 | Move to the toolbar | <kbd>Alt</kbd>+<kbd>F10</kbd> | <kbd>⌥</kbd>+<kbd>F10</kbd> |
+| Keyboard shortcut list | <kbd>Alt</kbd>+<kbd>0</kbd> | <kbd>⌥</kbd>+<kbd>0</kbd> |
 | AI assistant | <kbd>Ctrl</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>J</kbd> |
 
+Clear formatting removes bold, italic, underline, strikethrough, inline code, text colour and highlight from the selection and resets the alignment of the selected paragraphs and headings. Links and block types such as headings and lists stay. With only a cursor, the text you type next is plain. `ClearFormatting.configure({ keepMarks: ['link', 'code'] })` from `@viveeditor/ext-format` keeps more marks; the command is `editor.commands.clearFormatting()`.
+
+The format painter copies the formatting of the text under the cursor or the start of the selection. Then select other text with the mouse, or with <kbd>Shift</kbd> and the arrow keys, and the formatting is applied as soon as you let go: the target gets the same bold, italic, underline, strikethrough, inline code, colour and highlight, and links stay. The pointer shows a copy cursor while the painter is on; <kbd>Esc</kbd> or a second click on the button turns it off. In code the commands are `copyFormat()`, `applyFormat()` and `cancelFormat()`, and `editor.query.isPaintingFormat()` tells whether it is on.
+
+Paste as plain text drops all formatting from the clipboard and takes the style of the text around the cursor; each line becomes a paragraph. Pasted links do not turn into video embeds and Markdown is not converted. Safari has no built-in <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd>, so the editor reads the clipboard itself and Safari shows a small Paste button to confirm; <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> pastes without that step.
+
+The text style menu sets one of five sizes (very small, small, normal, big, very big), superscript or subscript, and letter case. Sizes are relative (`em`), so they follow the font of the page you publish on. Case change follows the language of the text: Turkish text turns `i` into `İ` and `I` into `ı`. With only a cursor, case change and <kbd>Shift</kbd>+<kbd>F3</kbd> act on the word under the cursor; pressing it again cycles UPPER, lower and Title Case.
+
+Indent moves paragraphs and headings in by 2 em steps, up to eight levels; inside lists <kbd>Tab</kbd> still nests the list. Clear formatting resets the indent too.
+
+While you type, straight quotes become curly quotes, `--` becomes an em dash, `...` an ellipsis, `(c)`, `(r)` and `(tm)` become ©, ® and ™, and `->` / `<-` become arrows. <kbd>Backspace</kbd> right after the change brings back what you typed. Nothing changes inside code. `Typography.configure({ quotes: null })` from `@viveeditor/ext-format` turns quote replacement off; `quotes: ['«', '»', '‹', '›']` picks other quote marks.
+
+The special characters panel groups punctuation, currency (₺, €, …), math, arrows, accented letters, Greek letters and symbols. Arrow keys move between characters and <kbd>Enter</kbd> inserts one.
+
 The AI shortcut works only when the [AI assistant](/en/docs/ai-assistant/) plugin is added.
+
+On a Mac, <kbd>⌥</kbd>+<kbd>0</kbd> types `º` on many keyboard layouts. While the shortcut list tool is on, the editor uses the key for the list instead; `exclude: ['shortcuts']` gives the character back.
 
 ### Moving around
 
@@ -127,6 +175,7 @@ The AI shortcut works only when the [AI assistant](/en/docs/ai-assistant/) plugi
 - In a code block, <kbd>Tab</kbd> indents and <kbd>Shift</kbd>+<kbd>Tab</kbd> outdents.
 - To leave a table or code block with the keyboard, press <kbd>Esc</kbd> and then <kbd>Tab</kbd>; focus moves to the next element after the editor.
 - Panels and menus close with <kbd>Esc</kbd>, and focus returns to their button or to the text.
+- In full screen, <kbd>Esc</kbd> in the text leaves full screen.
 
 ### Typing shortcuts
 

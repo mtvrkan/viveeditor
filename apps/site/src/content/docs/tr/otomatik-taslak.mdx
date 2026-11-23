@@ -1,0 +1,91 @@
+---
+key: autosave
+title: Otomatik taslak
+description: Kaydedilmemiş metnin taslağını tarayıcıda tutun, sayfa yenilenince ya da çökünce geri önerin, yazar duraksadıkça sunucunuza kaydedin.
+updated: 2026-11-21
+faq:
+  - q: Taslak nerede saklanır?
+    a: Yazarın kendi cihazında, tarayıcının localStorage alanında viveeditor:draft:<anahtar> adıyla. Bir kaydetme işlevi eklemediğiniz sürece hiçbir yere gönderilmez.
+  - q: Ortak kullanılan bir bilgisayarda taslak güvende mi?
+    a: Aynı tarayıcı profilini kullanan herkes okuyabilir. Ortak bilgisayarlarda storage 'session' kullanın; taslak sekme kapanınca silinir. Yalnızca sunucuya kaydetmek için storage false verin.
+  - q: Taslağı geri yüklemek metni kalıcı olarak değiştirir mi?
+    a: Hayır. Geri yükleme tek bir geri alma adımıdır; Ctrl+Z (Mac'te ⌘+Z) yüklenen metni geri getirir.
+---
+
+Otomatik taslak, yazarın yazdıklarının bir kopyasını tutar. Form gönderilmeden sayfa yenilenirse, tarayıcı çökerse ya da sekme kapanırsa editör bir sonraki açılışta taslağı geri önerir. Yazar duraksadıkça kendi sunucunuza da kaydedebilirsiniz. Bu sayfa tek betikli kurulumu, npm kurulumunu, sunucuya kaydetmeyi ve gizliliği anlatır.
+
+## Tek betikli kurulumda
+
+Textarea'ya, düzenlenen metne özgü bir anahtarla `data-autosave` ekleyin:
+
+```html
+<form method="post" action="/yazilar/42">
+  <label for="metin">Makale</label>
+  <textarea id="metin" name="metin" data-editor data-autosave="yazi-42"></textarea>
+  <button>Yayınla</button>
+</form>
+```
+
+Yazar yazmayı bıraktıktan bir saniye sonra taslak saklanır. Form gönderildiğinde ve gönderimi hiçbir şey durdurmadığında taslak silinir. Her kayıt için, örneğin yazının numarasıyla, ayrı bir anahtar kullanın; böylece farklı metinlerin taslakları karışmaz.
+
+## npm ile
+
+```ts
+import { createUI } from '@viveeditor/ui'
+
+const ui = createUI(editor, { locale: 'tr', autosave: { key: 'yazi-42' } })
+
+form.addEventListener('submit', () => ui.autosave?.clear())
+```
+
+| Seçenek | Ne yapar |
+| --- | --- |
+| `key` | Zorunlu. En çok 200 karakter; taslak `viveeditor:draft:<key>` adıyla saklanır. |
+| `wait` | Son değişiklikten sonra kaydetmeden önce beklenecek milisaniye. Varsayılan `1000`. |
+| `storage` | `'local'` (varsayılan), `'session'` ya da `false`. |
+| `save` | Her duraksamadan sonra çağrılan kendi kaydetme işleviniz. Aşağıya bakın. |
+| `onError` | Saklama ve kaydetme hatalarını alır. |
+
+Sekme arka plana geçtiğinde ya da sayfadan çıkılırken de taslak yazılır; hızlı bir yenileme son kelimeleri kaybettirmez.
+
+## Taslak çubuğu
+
+Saklanan taslak editörün açıldığı içerikten farklıysa, metnin üstündeki bir çubuk bunu ve taslağın ne zaman kaydedildiğini gösterir. "Taslağı geri yükle" taslağı tek bir geri alma adımı olarak editöre koyar; "Taslağı sil" onu kaldırır. Yüklenen içerikle aynı olan bir taslak hiç önerilmez; metni tamamen silmek de taslağı kaldırır.
+
+`ui.autosave` aynı denetimleri kodda verir:
+
+| Yöntem | Ne yapar |
+| --- | --- |
+| `draft()` | Önerilen taslağın `{ savedAt }` bilgisi ya da `null`. |
+| `restore()` / `discard()` | Önerilen taslağı geri yükler ya da siler. |
+| `clear()` | Saklanan taslağı kaldırır, örneğin başarılı bir kayıttan sonra. |
+| `flush()` | Beklemeden hemen kaydeder. |
+| `status()` | `'idle'`, `'pending'`, `'saving'`, `'saved'` ya da `'error'`. |
+| `onChange(listener)` | Durum ya da taslak değişince `listener` işlevini çağırır; durdurmak için bir işlev döndürür. |
+
+Kendi arayüzünüzü kuruyorsanız `@viveeditor/ui` paketindeki `createAutosave(editor, options)` aynı nesneyi çubuk olmadan verir.
+
+## Sunucunuza kaydetmek
+
+```ts
+createUI(editor, {
+  autosave: {
+    key: 'yazi-42',
+    save: async (editor, { signal }) => {
+      const response = await fetch('/yazilar/42/taslak', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html: editor.getHTML() }),
+        signal,
+      })
+      if (!response.ok) throw new Error('Taslak kaydedilemedi')
+    },
+  },
+})
+```
+
+Kayıtlar sırayla, birer birer yapılır: bir kayıt sürerken yazar yazmaya devam ederse en son metinle bir kayıt daha yapılır. Başarısız bir kayıt durumu `'error'` yapar ve `onError` işlevine gider. Sunucuya kayıt beklerken ya da sürerken sayfadan çıkmak, tarayıcının "siteden ayrılmak istiyor musunuz?" uyarısını gösterir. Gelen HTML'i normal bir form gönderimindeki gibi sunucunuzda temizleyin; ayrıntılar [Sunucuda temizleme](/dokumantasyon/sunucuda-temizleme/) sayfasında.
+
+## Gizlilik
+
+Taslaklar yazarın tarayıcısında kalır ve aynı tarayıcı profilini kullanan herkes tarafından okunabilir. Ortak ya da herkese açık bilgisayarlarda `storage: 'session'` verin; taslak sekme kapanınca silinir. Yalnızca sunucu kayıtlarınızı tutmak için `storage: false` kullanın. Parola ya da sağlık kaydı gibi cihazda hiç saklanmaması gereken metinlerde otomatik taslağı kullanmayın.

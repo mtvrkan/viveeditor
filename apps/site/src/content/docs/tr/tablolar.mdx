@@ -50,11 +50,18 @@ Boş bir paragrafta eklenen tablo o paragrafın yerini alır. Tablonun içine ik
 
 | Grup | Araçlar |
 | --- | --- |
+| Hücre | Hücre rengi, Dikey hizalama (Üst, Orta, Alt) |
 | Ekle | Üste satır ekle, Alta satır ekle, Sola sütun ekle, Sağa sütun ekle |
 | Düzen | Hücreleri birleştir, Hücreyi böl, Başlık satırı, Sütunu genişlet, Sütunu daralt |
 | Sil | Satırı sil, Sütunu sil, Tabloyu sil |
 
 O an uygulanamayan araçlar devre dışı görünür. Örneğin tek bir hücre seçiliyken "Hücreleri birleştir" kullanılamaz. Panel <kbd>Esc</kbd> ile kapanır.
+
+## Hücre rengi ve dikey hizalama
+
+"Hücre rengi" imlecin bulunduğu hücreye ya da seçili hücrelere yedi açık arka plan renginden birini verir; üstü çizili daire rengi kaldırır. "Dikey hizalama" hücre içeriğini üste, ortaya ya da alta yerleştirir. Metni sola, ortaya ya da sağa hizalamak için araç çubuğundaki hizalama menüsünü kullanın.
+
+Değerler hücrede stil olarak kaydedilir: `<td style="background-color: #cde8ff; vertical-align: middle">`. Word ve Google Dokümanlar'dan yapıştırılan arka plan renkleri, düz beyaz dışında korunur. Komutlar `setCellBackground(color)` ve `setCellVerticalAlign('middle' | 'bottom' | null)`; kaldırmak için `null` verin. `editor.query.cellStyle()` imlecin bulunduğu hücrenin değerlerini döndürür.
 
 ## Birleştirilmiş hücreler
 
@@ -87,6 +94,8 @@ Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başın
 | `mergeCells()`, `splitCell()` | Hücreleri birleştirir ya da böler. |
 | `toggleHeaderRow()`, `toggleHeaderColumn()` | Başlık satırını ya da sütununu açıp kapatır. |
 | `resizeColumn(delta)` | İmlecin bulunduğu sütunu piksel olarak genişletir ya da daraltır. |
+| `setCellBackground(color)` | Seçili hücrelerin arka plan rengini verir ya da (`null` ile) kaldırır. |
+| `setCellVerticalAlign(align)` | Seçili hücrelerin dikey hizasını verir: `'middle'`, `'bottom'` ya da üst için `null`. |
 
 `editor.query.inTable()` imleç bir tablonun içindeyse `true` döner. Komutları önce denemek için `editor.can.mergeCells()` gibi `can` biçimini kullanın.
 

@@ -184,4 +184,29 @@ img {
 
 ## Image panel
 
-The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text and size.
+The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text, caption, position and size.
+
+## Caption and position
+
+The "Caption" field adds a short line of plain text under the image. "Position" places the image: "None" keeps it on its own line, "Left" and "Right" let the text flow beside it, and "Center" centers it. On screens narrower than 480 pixels a left or right image goes back to its own line.
+
+An image with a caption or a position is saved inside a `figure`; an image with neither stays a plain `img`, exactly as before:
+
+```html
+<figure data-align="right">
+  <img src="https://cdn.example.com/chart.png" alt="Sales chart" width="640" height="360">
+  <figcaption>Figure 1: sales by month</figcaption>
+</figure>
+```
+
+The editor stylesheet already includes these rules. To show the same layout on your own pages, add them there too:
+
+```css
+figure { width: fit-content; max-width: 100%; margin: 0 0 1em; }
+figure[data-align="center"] { margin-inline: auto; }
+figure[data-align="left"] { float: left; max-width: 50%; margin: 0.2em 1.25em 0.6em 0; }
+figure[data-align="right"] { float: right; max-width: 50%; margin: 0.2em 0 0.6em 1.25em; }
+figcaption { width: 0; min-width: 100%; font-size: 0.875em; text-align: center; }
+```
+
+The same values are available as commands: `editor.commands.setImageAttributes({ caption: 'Figure 1', align: 'right' })`. `align` accepts `'left'`, `'center'`, `'right'` or `null`. A caption is plain text; it is written to Word as a "Caption" paragraph and to Markdown as an italic line under the image.

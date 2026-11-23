@@ -2,7 +2,7 @@
 key: sanitize
 title: Sunucuda temizleme
 description: Gönderilen HTML'i Node için @viveeditor/sanitize, PHP 8.4+ için viveeditor/sanitizer ile kaydederken ve gösterirken temizleyin.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: Editör zaten temiz HTML üretiyor; sunucuda neden yeniden temizlemeliyim?
     a: Çünkü herkes editörü kullanmadan sunucunuza istediği HTML'i gönderebilir. Tarayıcı bir güvenlik sınırı değildir.
@@ -54,6 +54,7 @@ Her öğe ve öznitelik tam bir HTML5 ayrıştırıcısıyla (Node'da `parse5`, 
 | `allowBase64` | `false` | `data:` adresi olarak saklanan görsellere (PNG, JPEG, GIF, WebP, AVIF) izin verir. |
 | `allowRelativeImages` | `false` | Göreli görsel adreslerine izin verir. |
 | `maxBytes` | 2 MB | Bundan büyük HTML `TOO_LARGE` hatası fırlatır. |
+| `maxTags` | 100 000 | Bundan fazla açılış etiketi olan HTML `TOO_COMPLEX` hatası fırlatır. 2 MB'lık olağan içerikte yaklaşık 20 000 ile 40 000 etiket bulunur. |
 
 `allowRelativeImages`'ı yalnızca gerçekten gerekiyorsa açın: göreli bir görsel adresi, her okurun tarayıcısının kendi sitenize bir GET isteği göndermesine yol açar; bir yazar bunu bir şeyi değiştiren bir adrese yöneltebilir.
 
@@ -64,7 +65,7 @@ Temizleyici HTML'i hiçbir zaman yarıda kesmez. Girdiyi temizleyemediğinde hat
 | Kod | Ne zaman |
 | --- | --- |
 | `TOO_LARGE` | HTML, `maxBytes` değerinden büyük. |
-| `TOO_COMPLEX` | Yapı, ayrıştırıcıyı yavaşlatacak ya da çok bellek harcatacak türden: bir etikette 64'ten fazla öznitelik, 512 düzeyden derin iç içe geçme ya da girdideki etiket sayısından çok daha fazla öğe. Editör böyle HTML yazmaz. |
+| `TOO_COMPLEX` | Yapı, ayrıştırıcıyı yavaşlatacak ya da çok bellek harcatacak türden: `maxTags` değerinden fazla açılış etiketi, bir etikette 64'ten fazla öznitelik, 512 düzeyden derin iç içe geçme, girdideki etiket sayısından çok daha fazla öğe ya da bir `<template>` etiketi. Editör böyle HTML yazmaz. |
 
 Node'da hata, `code` alanı taşıyan bir `SanitizeError`'dır:
 
@@ -100,16 +101,19 @@ try {
 - **Bağlantılar** `http`, `https`, `mailto`, `tel` ve göreli adresleri tutar ve her zaman `rel="noopener noreferrer nofollow"` alır.
 - **Görseller** `https` adresi ister. `allowBase64` ve `allowRelativeImages` bunu genişletir.
 - **Yerleştirmeler** `embeds: true` verilmedikçe kaldırılır.
-- **`style`** yalnızca metin hizalamasını, metin ve vurgu rengini ve tablo genişliklerini tutar.
+- **Şekiller** `figure` ve `figcaption` olarak kalır; `data-align` yalnızca `left`, `center` ya da `right` ise korunur.
+- **`style`** yalnızca metin hizalamasını, paragraf girintisini (paragraf ve başlıklarda 2 em adımlarla en çok 16 em), editörün beş yazı boyutunu (`span` üzerinde), metin ve vurgu rengini, tablo genişliklerini ve tablo hücrelerinin arka plan rengiyle dikey hizasını (orta ya da alt) tutar. Başka bir yazı boyutunun içindeki yazı boyutu ve üst ya da alt simgenin içindeki üst ya da alt simge atılır; böylece iç içe yazarak metin büyütülemez ya da gizlenemez.
 - **`id`, `name`, `form` ve olay işleyicileri** hiçbir zaman geçmez.
 - **Betikler, stiller, çerçeveler, SVG ve benzeri öğeler** içerikleriyle birlikte kaldırılır.
-- **Bahsetmeler, formüller ve dipnotlar** tam olarak editörün yazdığı biçimde tutulur. Kimliği ya da formülü denetimden geçmeyen, veya bir bağlantının ya da dipnotun içine konmuş bahsetme ve formüller düz metne indirilir. Dipnotlar yalnızca kalın, italik ve bağlantı tutar.
+- **Bahsetmeler, formüller ve dipnotlar** tam olarak editörün yazdığı biçimde tutulur. Kimliği ya da formülü denetimden geçmeyen, veya bir bağlantının ya da dipnotun içine konmuş bahsetme ve formüller düz metne indirilir. Dipnotlar yalnızca kalın, italik ve bağlantı tutar. Bir bağlantının içine konmuş dipnot düz metne indirilir.
 
 ## PHP bellek notu
 
-PHP'de ayrıştırıcı içeriden durdurulamaz; bu yüzden bazı kısa ve kötü niyetli girdiler (birkaç on KB kapatılmamış biçim etiketi) denetim çalışmadan önce PHP'nin `memory_limit` sınırına ulaşabilir. PHP o isteği ölümcül bir hatayla bitirir; bu güvenlidir ama temiz bir istisna değildir.
+PHP'de ayrıştırıcı içeriden durdurulamaz; bu yüzden PHP temizleyicisi yapıyı ayrıştırmadan önce denetler. Kısa kapatılmamış biçim etiketi dizileri ya da çok derin iç içe geçme gibi kötü niyetli girdiler, belge hiç kurulmadan bir saniyenin çok altında `TOO_COMPLEX` ile reddedilir.
 
-Temizleme yapan uç noktalarda `memory_limit` ve `max_execution_time` değerlerini olağan düzeyde tutun ve istek gövdesinin boyutunu orada sınırlayın.
+Denetimden geçen girdiyi `maxBytes` ve `maxTags` sınırlar. Ölçümlerimizde 100 000 öğeli bir belge yaklaşık 70 MB kullandı; hiç öğe oluşturmayan 2 MB'lık bozuk işaretleme ise ayrıştırıcı karşılaştığı her hatayı kaydettiği için 130 MB'a kadar çıktı. Temizleme yapan uç noktalara 256 MB `memory_limit` verin ya da `maxBytes` ve `maxTags` değerlerini düşürün: sınırları yarıya indirmek gereken belleği de yaklaşık yarıya indirir.
+
+Eski sistemlerin bazen yazdığı, biçim etiketleri yanlış iç içe geçmiş çok uzun HTML, PHP'de Node'dakinden daha erken reddedilebilir; çünkü PHP kararı ayrıştırmadan önce vermek zorundadır. Editör böyle HTML yazmaz.
 
 ## Ne zaman temizlenmeli
 

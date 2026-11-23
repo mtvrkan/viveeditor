@@ -2,7 +2,7 @@
 key: officePaste
 title: Word'den yapıştırma
 description: Word, Google Docs ve LibreOffice'ten temiz yapıştırma; sahte madde işaretleri gerçek listelere dönüşür, Markdown metni biçimlenir.
-updated: 2026-11-01
+updated: 2026-11-21
 faq:
   - q: Word'den yapıştırdığım görseller neden gelmiyor?
     a: Word bazı görselleri kopyalayan bilgisayardaki dosyalara giden adreslerle panoya koyar. Bu görseller tarayıcıdan okunamaz ve atlanır; onDropped kaç tanesinin atlandığını bildirir.
@@ -68,6 +68,16 @@ Aynı temizliği yapıştırma dışında kullanmak için paket üç fonksiyon d
 | `cleanOffice(html)` | `{ html, source, droppedImages }` |
 | `cleanOfficeHtml(html)` | Yalnızca temizlenmiş HTML |
 
+## Yapıştırma seçenekleri
+
+Biçimli bir yapıştırmadan sonra imlecin yanında küçük bir pano düğmesi çıkar. Aynı pano içeriğini üç farklı biçimde yeniden yapıştırmanızı sağlar:
+
+- **Biçimi koru**: yapıştırma geldiği gibi kalır (yukarıdaki temizlikten sonra).
+- **Yalnızca başlık, liste ve bağlantıları koru**: başlıklar, listeler, tablolar ve bağlantılar kalır; kalın, italik, renk gibi karakter biçimleri gider.
+- **Yalnızca metin**: düz metin; her satır bir paragraf olur ve imlecin bulunduğu yerdeki metnin biçimini alır.
+
+Tek başına basıp bırakılan <kbd>Ctrl</kbd> tuşu menüyü klavyeden açar (Mac'te de); <kbd>Esc</kbd> düğmeyi gizler, bir şey yazınca düğme kaybolur. Seçim değiştirildiğinde pano içeriği aynı temizlikten yeniden geçer; normal yapıştırmanın içeri almayacağı hiçbir şey belgeye girmez. Düğme `@viveeditor/ext-format` paketindeki `PasteOptions` eklentisinden gelir (`formatExtensions` içinde); kodda `editor.query.lastPaste()` değiştirilebilecek bir yapıştırma olup olmadığını söyler, `editor.commands.pasteAs('keep' | 'clean' | 'plain')` yapıştırmayı değiştirir.
+
 ## Markdown yapıştırma
 
 `@viveeditor/markdown/paste` paketindeki `MarkdownPaste`, düz metin olarak yapıştırılan Markdown'ı biçimli içeriğe çevirir. Dönüştürücü yalnızca gerektiğinde yüklenir:
@@ -82,7 +92,8 @@ Dönüştürme yalnızca şu koşullarda yapılır:
 
 - panoda HTML yoktur, yalnızca düz metin vardır,
 - metin Markdown'a benzer: başlık, çitli kod, alıntı, tablo, kalın yazı, bağlantı, görev maddesi ya da en az iki liste satırı içerir,
-- imleç bir kod bloğunda değildir.
+- imleç bir kod bloğunda değildir,
+- yapıştırma düz metin yapıştırması (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) değildir; düz metin yapıştırması metni her zaman olduğu gibi bırakır.
 
 Dönüştürücü yüklenemezse metin düz metin olarak yapıştırılır. 1 milyon karakterden uzun metinler dönüştürülmez. Markdown içindeki ham HTML hiçbir zaman geçirilmez. Bir metnin dönüştürülüp dönüştürülmeyeceğini önceden görmek için aynı paketteki `looksLikeMarkdown(text)` fonksiyonunu kullanabilirsiniz.
 
