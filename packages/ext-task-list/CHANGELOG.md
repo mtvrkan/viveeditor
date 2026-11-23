@@ -1,5 +1,23 @@
 # @viveeditor/ext-task-list
 
+## 1.0.0-rc.0
+
+### Patch Changes
+
+- Updated dependencies [9f59c19]
+- Updated dependencies [e8c82d0]
+- Updated dependencies [96ea657]
+- Updated dependencies [1a1a861]
+- Updated dependencies [96ea657]
+- Updated dependencies [96ea657]
+- Updated dependencies [319b968]
+- Updated dependencies [96ea657]
+- Updated dependencies [96ea657]
+- Updated dependencies [96ea657]
+- Updated dependencies [095b69b]
+- Updated dependencies [96ea657]
+  - @viveeditor/core@1.0.0-rc.0
+
 ## 0.1.0
 
 ### Minor Changes
