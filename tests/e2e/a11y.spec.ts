@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import AxeBuilder from '@axe-core/playwright'
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { chooseFromOverflow } from './overflow'
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 
@@ -53,11 +54,7 @@ async function openTool(page: Page, name: string | RegExp): Promise<void> {
     await button.click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page
-    .getByRole('menu', { name: 'Diğer araçlar' })
-    .getByRole('menuitem', { name, exact: typeof name === 'string' })
-    .click()
+  await chooseFromOverflow(page, name)
 }
 
 async function selectAll(page: Page): Promise<void> {

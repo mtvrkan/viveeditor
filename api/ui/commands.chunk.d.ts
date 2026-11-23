@@ -122,6 +122,13 @@ interface Messages {
   undo: string;
   redo: string;
   more: string;
+  categoryText: string;
+  categoryFormat: string;
+  categoryLists: string;
+  categoryInsert: string;
+  categoryParagraph: string;
+  categoryLinks: string;
+  categoryDocument: string;
   panelLoading: string;
   panelFailed: string;
   panelRetry: string;
@@ -276,6 +283,23 @@ interface Messages {
   cut: string;
   copy: string;
   copied: string;
+  imageWidth: string;
+  imageHeight: string;
+  imageSizeAuto: string;
+  imageKeepRatio: string;
+  imageResetSize: string;
+  imageCrop: string;
+  imageCropMenu: string;
+  imageCropTitle: string;
+  imageCropArea: string;
+  imageCropHelp: string;
+  imageCropAspect: string;
+  imageCropFree: string;
+  imageCropOriginal: string;
+  imageCropCancel: string;
+  imageCropLoading: string;
+  imageCropOff: string;
+  imageCropBlocked: string;
 }
 type MessageKey = keyof Messages;
 type Locale = "tr" | "en";

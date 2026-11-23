@@ -84,7 +84,7 @@
         "@viveeditor/core",
         "./panel-kit.js"
       ],
-      "limit": "26 KB"
+      "limit": "27.4 KB"
     },
     {
       "name": "@viveeditor/ui panels (loaded on first panel open)",
@@ -92,7 +92,7 @@
       "ignore": [
         "@viveeditor/core"
       ],
-      "limit": "16.6 KB"
+      "limit": "19.7 KB"
     },
     {
       "name": "@viveeditor/ui/extras",

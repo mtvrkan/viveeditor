@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { chooseFromOverflow } from './overflow'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -10,11 +11,7 @@ async function openTableTool(page: Page): Promise<void> {
     await button.click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page
-    .getByRole('menu', { name: 'Diğer araçlar' })
-    .getByRole('menuitem', { name: 'Tablo' })
-    .click()
+  await chooseFromOverflow(page, 'Tablo')
 }
 
 async function insertFromGrid(page: Page, right: number, down: number): Promise<void> {
@@ -176,7 +173,7 @@ const rowHeights = (page: Page) =>
     .locator('table')
     .first()
     .evaluate((table: HTMLTableElement) =>
-      [...table.rows].map((row) => row.getBoundingClientRect().height),
+      [...table.rows].map((row) => Math.round(row.getBoundingClientRect().height * 10) / 10),
     )
 
 test('drags a row border to make the row taller and double-click resets it', async ({
@@ -234,4 +231,110 @@ test('keeps every row height while the pointer is on a row border', async ({ pag
       ]
     }),
   ).toEqual([0, 0])
+})
+
+const grip = (page: Page, axis: 'column' | 'row') =>
+  surface(page).locator(`.table-touch-grip[data-axis="${axis}"]`)
+
+async function tapBodyCell(page: Page) {
+  await page.goto('/ui.html')
+  const table = surface(page).locator('table').first()
+  await table.scrollIntoViewIfNeeded()
+  const row = table.locator('tr').nth(1)
+  await row.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+  const cell = row.locator('td, th').first()
+  const before = await rowHeights(page)
+  await cell.tap()
+  await expect(grip(page, 'column')).toBeVisible()
+  await expect(grip(page, 'row')).toBeVisible()
+  return { table, row, cell, before }
+}
+
+async function dragGrip(page: Page, axis: 'column' | 'row', distance: number): Promise<void> {
+  const box = await grip(page, axis).boundingBox()
+  if (!box) throw new Error(`${axis} grip not found`)
+  const x = box.x + box.width / 2
+  const y = box.y + box.height / 2
+  const at = (step: number) => ({
+    pointerId: 7,
+    pointerType: 'touch',
+    isPrimary: true,
+    bubbles: true,
+    cancelable: true,
+    clientX: axis === 'column' ? x + (distance * step) / 6 : x,
+    clientY: axis === 'row' ? y + (distance * step) / 6 : y,
+  })
+  await grip(page, axis).dispatchEvent('pointerdown', at(0))
+  for (let step = 1; step <= 6; step++)
+    await grip(page, axis).dispatchEvent('pointermove', at(step))
+  await grip(page, axis).dispatchEvent('pointerup', at(6))
+}
+
+test.describe('touch grips', () => {
+  test.skip(({ isMobile }) => !isMobile, 'touch grips need a touch screen')
+
+  test('shows the grips on the tapped cell without moving any row', async ({ page }) => {
+    const { table, before } = await tapBodyCell(page)
+
+    expect(await rowHeights(page)).toEqual(before)
+    expect(
+      await table.evaluate((element) => {
+        const wrapper = element.parentElement as HTMLElement
+        return wrapper.scrollHeight - wrapper.clientHeight
+      }),
+    ).toBe(0)
+    await expect(surface(page).locator('.table-touch-grips')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  test('drags the column grip with a finger to set the column width', async ({ page }) => {
+    const { cell } = await tapBodyCell(page)
+    const width = (await cell.boundingBox())?.width ?? 0
+
+    await dragGrip(page, 'column', 60)
+
+    expect((await cell.boundingBox())?.width).toBeGreaterThan(width + 40)
+    await expect(output(page)).toContainText(/<col style="width: \d+px;?">/)
+    await expect(output(page)).toContainText('data-colwidth="')
+  })
+
+  test('drags the row grip with a finger to set the row height', async ({ page }) => {
+    const { row } = await tapBodyCell(page)
+    const height = (await row.boundingBox())?.height ?? 0
+
+    await dragGrip(page, 'row', 60)
+
+    expect((await row.boundingBox())?.height).toBeGreaterThan(height + 50)
+    await expect(output(page)).toContainText(/<tr style="height: \d+px;?">/)
+  })
+
+  test('leaves scrolling to the page outside the grips and hides them while it scrolls', async ({
+    page,
+  }) => {
+    const { table, cell } = await tapBodyCell(page)
+    const touchAction = (element: Element) => getComputedStyle(element).touchAction
+
+    expect(await grip(page, 'column').evaluate(touchAction)).toBe('none')
+    expect(
+      await Promise.all(
+        [cell, table, surface(page)].map((locator) => locator.evaluate(touchAction)),
+      ),
+    ).toEqual(['auto', 'auto', 'auto'])
+    await page.evaluate(() => window.scrollBy(0, 40))
+    await expect(grip(page, 'column')).toBeHidden()
+    await expect(grip(page, 'column')).toBeVisible()
+  })
+})
+
+test('never shows the touch grips for a mouse', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-safari', 'checks mouse input')
+  await page.goto('/ui.html')
+  const table = surface(page).locator('table').first()
+  await table.scrollIntoViewIfNeeded()
+
+  await table.locator('td').first().click()
+  await page.mouse.down()
+  await page.mouse.up()
+
+  await expect(surface(page)).toBeFocused()
+  await expect(surface(page).locator('.table-touch-grip').first()).toBeHidden()
 })

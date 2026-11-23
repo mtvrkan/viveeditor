@@ -1,5 +1,6 @@
 import type { Editor, FoundItem } from '@viveeditor/core'
 import type { CommandAccess } from './commands.js'
+import { cropBlocker } from './crop.js'
 import { clamp, h } from './dom.js'
 import { createMenu, type Menu, type MenuItem } from './menu.js'
 import type { MessageKey, Messages } from './messages.js'
@@ -217,8 +218,14 @@ export function createContextMenu(options: ContextMenuOptions): ContextMenu {
 
   const imageItems = (): MenuItem[] => {
     const image = (): Record<string, unknown> | null => record(commands.query('selectedImage'))
+    const cropBlocked = cropBlocker(commands.query('imageReplaceMode'), true)
     return [
       entry('image-edit', 'imageEdit', openPanel('image'), 0, { hidden: mutating('insertImage') }),
+      entry('image-crop', 'imageCropMenu', openPanel('imageCrop'), 0, {
+        hidden: mutating('replaceImage'),
+        disabled: () => cropBlocked !== null,
+        ...(cropBlocked ? { hint: messages[cropBlocked] } : {}),
+      }),
       ...IMAGE_ALIGNS.map(
         ([value, label]): MenuItem => ({
           id: `image-align-${value}`,

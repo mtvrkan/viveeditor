@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { chooseFromOverflow } from './overflow'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const toolbar = (page: Page) => page.getByRole('toolbar', { name: 'Biçimlendirme' })
@@ -9,12 +10,7 @@ async function useTool(page: Page, name: string): Promise<void> {
     await button.click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page
-    .getByRole('menu', { name: 'Diğer araçlar' })
-    .getByRole('menuitem', { name })
-    .or(page.getByRole('menu', { name: 'Diğer araçlar' }).getByRole('menuitemcheckbox', { name }))
-    .click()
+  await chooseFromOverflow(page, name)
 }
 
 async function load(page: Page, html: string): Promise<void> {

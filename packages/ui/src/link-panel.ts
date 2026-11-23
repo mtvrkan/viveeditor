@@ -137,13 +137,13 @@ export function createLinkPanel(options: LinkPanelOptions): LinkPanel {
     newTab.checked = linked && currentLink()?.newTab === true
     remove.hidden = !linked
     element.hidden = false
+    if (canLink) validate()
+    else setHint(messages.linkNeedsSelection, 'info')
     options.place(element)
     if (canLink) {
-      validate()
       input.focus()
       input.select()
     } else {
-      setHint(messages.linkNeedsSelection, 'info')
       element.tabIndex = -1
       element.focus()
     }

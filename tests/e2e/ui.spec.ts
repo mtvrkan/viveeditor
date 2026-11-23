@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
+import { chooseFromOverflow } from './overflow'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -146,8 +147,7 @@ test('moves secondary tools into the more menu on a narrow screen', async ({ pag
   await page.keyboard.press('ControlOrMeta+a')
 
   await expect(toolbar(page).getByRole('button', { name: /^Altı çizili/ })).toBeHidden()
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page.getByRole('menuitemcheckbox', { name: /Altı çizili/ }).click()
+  await chooseFromOverflow(page, /Altı çizili/)
 
   await expect(output(page)).toHaveText('<p><u>alt</u></p>')
   const box = await toolbar(page).boundingBox()
@@ -160,11 +160,7 @@ async function toggleSource(page: Page): Promise<void> {
     await button.click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page
-    .getByRole('menu', { name: 'Diğer araçlar' })
-    .getByRole('menuitemcheckbox', { name: 'HTML kaynağı' })
-    .click()
+  await chooseFromOverflow(page, 'HTML kaynağı')
 }
 
 test('edits the HTML source, drops unsafe markup and undoes the change in one step', async ({

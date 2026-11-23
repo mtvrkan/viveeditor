@@ -529,3 +529,181 @@ describe('linked image', () => {
     expect(editor.dom.querySelector('a')).toBeNull()
   })
 })
+
+describe('image size commands', () => {
+  const sized = '<img src="https://a.example/1.png" width="800" height="400">'
+  const naturalOf = (editor: Editor, width: number, height: number): void => {
+    const image = editor.dom.querySelector('.vive-image img') as HTMLImageElement
+    Object.defineProperty(image, 'naturalWidth', { configurable: true, value: width })
+    Object.defineProperty(image, 'naturalHeight', { configurable: true, value: height })
+  }
+
+  it('resizes by width and keeps the stored aspect ratio as integers', async () => {
+    const editor = await mount({}, { content: sized })
+    selectNode(editor, 0)
+
+    const done = editor.commands.resizeImage({ width: 301.6 })
+
+    expect(done).toBe(true)
+    expect(editor.query.selectedImage()).toMatchObject({ width: 302, height: 151 })
+  })
+
+  it('derives the width from a height and sets both freely without the ratio', async () => {
+    const editor = await mount({}, { content: sized })
+    selectNode(editor, 0)
+
+    editor.commands.resizeImage({ height: 100 })
+    const ratioKept = editor.query.selectedImage()
+    editor.commands.resizeImage({ height: 90 }, false)
+
+    expect(ratioKept).toMatchObject({ width: 200, height: 100 })
+    expect(editor.query.selectedImage()).toMatchObject({ width: 200, height: 90 })
+  })
+
+  it('clamps to 16 px and to the content width', async () => {
+    const editor = await mount({}, { content: sized })
+    Object.defineProperty(editor.dom, 'clientWidth', { configurable: true, value: 600 })
+    selectNode(editor, 0)
+
+    editor.commands.resizeImage({ width: 2 })
+    const smallest = editor.query.selectedImage()
+    editor.commands.resizeImage({ width: 5000 })
+
+    expect(smallest).toMatchObject({ width: 32, height: 16 })
+    expect(editor.query.selectedImage()).toMatchObject({ width: 600, height: 300 })
+  })
+
+  it('resets to the natural size capped at the content width', async () => {
+    const editor = await mount({}, { content: sized })
+    Object.defineProperty(editor.dom, 'clientWidth', { configurable: true, value: 500 })
+    naturalOf(editor, 1000, 750)
+    selectNode(editor, 0)
+
+    editor.commands.resetImageSize()
+
+    expect(editor.query.selectedImage()).toMatchObject({ width: 500, height: 375 })
+  })
+
+  it('clears the size on reset when the natural size is unknown', async () => {
+    const editor = await mount({}, { content: sized })
+    selectNode(editor, 0)
+
+    editor.commands.resetImageSize()
+
+    expect(editor.query.selectedImage()).toMatchObject({ width: null, height: null })
+  })
+
+  it('refuses size commands without a selected image or a usable value', async () => {
+    const editor = await mount({}, { content: `<p>Hi</p>${sized}` })
+
+    const withoutImage = editor.can.resizeImage({ width: 100 })
+    selectNode(editor, 4)
+
+    expect(withoutImage).toBe(false)
+    expect(editor.can.resizeImage({ width: Number.NaN })).toBe(false)
+    expect(editor.can.resetImageSize()).toBe(true)
+  })
+})
+
+describe('image resize handles', () => {
+  it('renders four hidden corner handles and a size badge outside the flow', async () => {
+    const editor = await mount(
+      {},
+      { content: '<img src="https://a.example/1.png" width="640" height="360">' },
+    )
+
+    const handles = editor.dom.querySelector('.vive-image-handles')
+
+    expect(handles?.getAttribute('aria-hidden')).toBe('true')
+    expect(handles?.querySelectorAll('[data-corner]')).toHaveLength(4)
+    expect(handles?.querySelector('.vive-image-size')?.textContent).toBe('640 × 360')
+  })
+
+  it('leaves the handles out when resizing is turned off', async () => {
+    const editor = await mount(
+      { resizable: false },
+      { content: '<img src="https://a.example/1.png">' },
+    )
+
+    expect(editor.dom.querySelector('.vive-image-handles')).toBeNull()
+  })
+
+  it('resets to the natural size on a handle double-click', async () => {
+    const editor = await mount(
+      {},
+      { content: '<img src="https://a.example/1.png" width="80" height="60">' },
+    )
+    const image = editor.dom.querySelector('.vive-image img') as HTMLImageElement
+    Object.defineProperty(image, 'naturalWidth', { configurable: true, value: 400 })
+    Object.defineProperty(image, 'naturalHeight', { configurable: true, value: 100 })
+    selectNode(editor, 0)
+
+    editor.dom
+      .querySelector('[data-corner="se"]')
+      ?.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))
+
+    expect(editor.query.selectedImage()).toMatchObject({ width: 400, height: 100 })
+  })
+})
+
+describe('image replace', () => {
+  it('reports how a replaced image would be stored', async () => {
+    const { upload } = controlledUploader()
+    const none = await mount()
+    const base64 = await mount({ allowBase64: true })
+    const uploads = await mount({ upload, allowBase64: true })
+
+    expect([none, base64, uploads].map((editor) => editor.query.imageReplaceMode())).toEqual([
+      null,
+      'base64',
+      'upload',
+    ])
+  })
+
+  it('replaces the source through the uploader and keeps the other attributes', async () => {
+    const { upload, calls } = controlledUploader()
+    const editor = await mount(
+      { upload },
+      {
+        content:
+          '<figure data-align="center"><img src="https://a.example/1.png" alt="Kedi" width="400" height="300"><figcaption>Not</figcaption></figure>',
+      },
+    )
+    selectNode(editor, 0)
+
+    editor.commands.replaceImage(pngFile(), { width: 200, height: 200 })
+    await settle()
+    const pending = editor.query.isUploading()
+    calls[0]?.resolve('https://cdn.example.com/crop.png')
+    await settle()
+
+    expect(pending).toBe(true)
+    expect(editor.query.selectedImage()).toMatchObject({
+      src: 'https://cdn.example.com/crop.png',
+      alt: 'Kedi',
+      caption: 'Not',
+      align: 'center',
+      width: 200,
+      height: 200,
+    })
+  })
+
+  it('is unavailable without an uploader or base64 and leaves a moved image alone', async () => {
+    const { upload, calls } = controlledUploader()
+    const plain = await mount({}, { content: '<img src="https://a.example/1.png">' })
+    selectNode(plain, 0)
+    const editor = await mount({ upload }, { content: '<img src="https://a.example/1.png">' })
+    selectNode(editor, 0)
+
+    const refused = plain.can.replaceImage(pngFile())
+    editor.commands.replaceImage(pngFile())
+    await settle()
+    editor.commands.setImageAttributes({ alt: 'x' })
+    viewOf(editor).dispatch(viewOf(editor).state.tr.delete(0, 1))
+    calls[0]?.resolve('https://cdn.example.com/crop.png')
+    await settle()
+
+    expect(refused).toBe(false)
+    expect(editor.getHTML()).not.toContain('crop.png')
+  })
+})

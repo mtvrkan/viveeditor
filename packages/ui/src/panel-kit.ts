@@ -1,5 +1,6 @@
 export { createCharPanel } from './char-panel.js'
 export { createContextMenu } from './context-menu.js'
+export { createCropDialog } from './crop-dialog.js'
 export { documentMessages } from './doc-messages.js'
 export { createCheckPanel, createOutlinePanel, createShortcutsPanel } from './doc-panels.js'
 export { createEmbedPanel } from './embed-panel.js'

@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { dispatchPaste } from './clipboard'
+import { chooseFromOverflow } from './overflow'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -18,8 +19,7 @@ async function openTool(page: Page, name: RegExp): Promise<void> {
     await button.click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page.getByRole('menu', { name: 'Diğer araçlar' }).getByRole('menuitem', { name }).click()
+  await chooseFromOverflow(page, name)
 }
 
 test('colours the selection from the text colour panel', async ({ page }) => {
@@ -56,7 +56,7 @@ test('centers a paragraph from the alignment menu', async ({ page }) => {
   const align = toolbar(page).getByRole('button', { name: 'Hizalama' })
 
   if (await align.isVisible()) await align.click()
-  else await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
+  else await chooseFromOverflow(page, 'Hizalama')
   await page.getByRole('menuitemradio', { name: /^Ortala/ }).click()
 
   await expect(output(page)).toHaveText(/^<p style="text-align: center;?">ortalanacak satır<\/p>$/)
@@ -90,10 +90,21 @@ for (const width of [700, 1024]) {
     let offered = 0
     if (hidden > 0) {
       await more.click()
-      offered = await page
-        .getByRole('menu', { name: 'Diğer araçlar' })
-        .locator('button:not([hidden])')
+      const menu = page.getByRole('menu', { name: 'Diğer araçlar' })
+      offered = await menu
+        .locator(':scope > .ve-item:not([hidden]):not([data-item^="category-"])')
         .count()
+      for (const category of await menu
+        .locator(':scope > [data-item^="category-"]:not([hidden])')
+        .all()) {
+        await category.click()
+        offered += await page
+          .getByRole('menu')
+          .last()
+          .locator(':scope > .ve-item:not([hidden]):not(.ve-back)')
+          .count()
+        await page.keyboard.press('Escape')
+      }
     }
 
     expect(fits).toBe(true)
@@ -197,8 +208,8 @@ async function pickFromMenu(
 ): Promise<void> {
   const button = toolbar(page).getByRole('button', { name: tool })
   if (await button.isVisible()) await button.click()
-  else await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page.locator('[role="menu"]:not([hidden])').getByRole(role, { name: item }).click()
+  else await chooseFromOverflow(page, tool)
+  await page.getByRole('menu').last().getByRole(role, { name: item }).click()
 }
 
 test('makes the selection superscript from the text style menu and bigger from the size control', async ({
@@ -293,7 +304,7 @@ test('inserts a special character from the panel with the keyboard', async ({ pa
 async function openMenuTool(page: Page, name: RegExp): Promise<void> {
   const button = toolbar(page).getByRole('button', { name })
   if (await button.isVisible()) await button.click()
-  else await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
+  else await chooseFromOverflow(page, name)
 }
 
 test('changes the font family from the font menu', async ({ page }) => {

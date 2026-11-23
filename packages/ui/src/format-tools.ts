@@ -231,6 +231,7 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
   }
 
   if (commands.has('insertImage')) {
+    const cropping = commands.has('replaceImage')
     lazy('image', (panels) =>
       panels.createImagePanel({
         commands,
@@ -238,8 +239,21 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
         place,
         returnToEditor: options.returnToEditor,
         onClose: options.onClose,
+        ...(cropping
+          ? { openCrop: (anchor: HTMLElement) => popovers.get('imageCrop')?.open(anchor) }
+          : {}),
       }),
     )
+    if (cropping) {
+      lazy('imageCrop', (panels) =>
+        panels.createCropDialog({
+          commands,
+          messages,
+          returnToEditor: options.returnToEditor,
+          onClose: options.onClose,
+        }),
+      )
+    }
   }
 
   if (commands.has('insertEmbed')) {

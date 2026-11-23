@@ -1,5 +1,6 @@
 import { isAllowedUrl } from '@viveeditor/core'
 import type { CommandAccess } from './commands.js'
+import { cropBlocker } from './crop.js'
 import { h, uniqueId } from './dom.js'
 import { icon } from './icons.js'
 import { normalizeHref } from './link-panel.js'
@@ -12,10 +13,13 @@ export interface ImagePanelOptions {
   place: (element: HTMLElement, anchor: HTMLElement) => void
   returnToEditor: () => void
   onClose: () => void
+  openCrop?: (anchor: HTMLElement) => void
 }
 
 interface SelectedImage {
   alt: string | null
+  width?: number | null
+  height?: number | null
   caption?: string | null
   align?: string | null
   href?: string | null
@@ -116,10 +120,46 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
       ),
     ],
   )
+  const dimension = (name: 'width' | 'height'): HTMLInputElement =>
+    h('input', {
+      id: `${id}-${name}`,
+      class: 've-input',
+      type: 'number',
+      inputmode: 'numeric',
+      min: '16',
+      step: '1',
+      autocomplete: 'off',
+      placeholder: messages.imageSizeAuto,
+    })
+  const width = dimension('width')
+  const height = dimension('height')
+  const keepRatio = h('input', { id: `${id}-ratio`, type: 'checkbox', checked: '' })
+  const resetSize = h('button', { type: 'button', class: 've-quiet' }, [messages.imageResetSize])
+  const cropHintId = `${id}-crop-hint`
+  const crop = h('button', { type: 'button', class: 've-quiet', 'aria-describedby': cropHintId }, [
+    messages.imageCrop,
+  ])
+  const cropHint = h('p', { id: cropHintId, class: 've-hint' })
+  const dimensions = h('div', { class: 've-image-dimensions' }, [
+    h('div', { class: 've-field-row' }, [
+      h('label', { class: 've-image-dimension' }, [
+        h('span', { class: 've-eyebrow' }, [messages.imageWidth]),
+        width,
+      ]),
+      h('label', { class: 've-image-dimension' }, [
+        h('span', { class: 've-eyebrow' }, [messages.imageHeight]),
+        height,
+      ]),
+    ]),
+    h('label', { class: 've-checkbox', for: `${id}-ratio` }, [keepRatio, messages.imageKeepRatio]),
+    h('div', { class: 've-image-edit-row' }, [resetSize, crop]),
+    cropHint,
+  ])
   const scaleButtons = SCALES.map((percent) => {
     const button = h('button', { type: 'button', class: 've-quiet' }, [`${percent}%`])
     button.addEventListener('click', () => {
       commands.run('scaleImage', percent)
+      syncSize()
       keepFocus()
     })
     return button
@@ -130,6 +170,7 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     [
       h('span', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages.imageSize]),
       h('div', { class: 've-image-scale' }, scaleButtons),
+      dimensions,
     ],
   )
   const submit = h('button', { type: 'button', class: 've-primary' }, [messages.imageAdd])
@@ -163,6 +204,47 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
 
   const keepFocus = (): void => {
     if (!element.contains(document.activeElement)) alt.focus()
+  }
+
+  const syncSize = (): void => {
+    const selected = commands.query('selectedImage')
+    const current = isSelectedImage(selected) ? selected : null
+    width.value = current?.width ? String(current.width) : ''
+    height.value = current?.height ? String(current.height) : ''
+  }
+
+  const fieldValue = (input: HTMLInputElement): number | null => {
+    const value = Number(input.value)
+    return input.value.trim() !== '' && Number.isFinite(value) && value > 0 ? value : null
+  }
+
+  const previewRatio = (from: HTMLInputElement, to: HTMLInputElement): void => {
+    const selected = commands.query('selectedImage')
+    const value = fieldValue(from)
+    if (!keepRatio.checked || !isSelectedImage(selected) || value === null) return
+    if (!selected.width || !selected.height) return
+    const ratio =
+      from === width ? selected.height / selected.width : selected.width / selected.height
+    to.value = String(Math.round(value * ratio))
+  }
+
+  const applySize = (from: HTMLInputElement): void => {
+    const value = fieldValue(from)
+    if (value === null) {
+      syncSize()
+      return
+    }
+    const change = keepRatio.checked
+      ? { [from === width ? 'width' : 'height']: value }
+      : { width: fieldValue(width), height: fieldValue(height) }
+    commands.run('resizeImage', change, keepRatio.checked)
+    syncSize()
+  }
+
+  const syncCrop = (): void => {
+    const blocked = cropBlocker(commands.query('imageReplaceMode'), true)
+    crop.disabled = blocked !== null
+    cropHint.textContent = blocked ? messages[blocked] : ''
   }
 
   const markAlign = (value: string | null): void => {
@@ -252,6 +334,11 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     upload.hidden = editing || !commands.can('uploadImages', [])
     urlBlock.hidden = editing
     sizes.hidden = !editing || !commands.can('scaleImage', 100)
+    dimensions.hidden = !editing || !commands.has('resizeImage')
+    crop.hidden = !options.openCrop || !commands.has('replaceImage')
+    keepRatio.checked = true
+    syncSize()
+    syncCrop()
     aligns.hidden = !editing
     linkBlock.hidden = !editing || !commands.has('setImageLink')
     link.value = (isSelectedImage(selected) ? selected.href : null) ?? ''
@@ -281,6 +368,24 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     finish()
     commands.run('uploadImages', files)
   })
+  for (const [from, to] of [
+    [width, height],
+    [height, width],
+  ] as const) {
+    from.addEventListener('input', () => previewRatio(from, to))
+    from.addEventListener('change', () => applySize(from))
+  }
+  resetSize.addEventListener('click', () => {
+    commands.run('resetImageSize')
+    syncSize()
+    keepFocus()
+  })
+  crop.addEventListener('click', () => {
+    const target = anchor
+    if (!target || !options.openCrop) return
+    close(false)
+    options.openCrop(target)
+  })
   decorative.addEventListener('change', syncDecorative)
   url.addEventListener('input', () => setHint(''))
   link.addEventListener('input', validateLink)
@@ -295,6 +400,10 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     if (event.key === 'Enter' && event.target instanceof HTMLInputElement) {
       if (event.target.type === 'checkbox') return
       event.preventDefault()
+      if (event.target === width || event.target === height) {
+        applySize(event.target)
+        return
+      }
       apply()
     }
   })

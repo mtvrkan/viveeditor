@@ -1101,6 +1101,52 @@ i.ve-glyph {
   background: var(--ve-muted);
 }
 
+.ve-menu.ve-drilled {
+  visibility: hidden;
+}
+
+.ve-menu[data-side="over"] {
+  animation: ve-drill 0.16s ease-out;
+}
+
+@keyframes ve-drill {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+.ve-item.ve-back {
+  gap: 6px;
+  color: var(--ve-primary);
+  font-weight: 600;
+}
+
+.ve-back-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  flex: none;
+}
+
+.ve-back-icon .ve-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+  transform: rotate(90deg);
+}
+
+.ve-menu > .ve-eyebrow {
+  padding: 8px 8px 2px;
+  font-size: 10.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ve-menu[data-side="over"] {
+    animation: none;
+  }
+}
+
 .ve-item.ve-danger {
   color: var(--ve-danger);
 }
@@ -1853,4 +1899,213 @@ i.ve-glyph {
 
 .ve-color-toggle[aria-expanded="true"] .ve-item-more .ve-icon {
   transform: none;
+}
+
+.ve-image-dimensions {
+  margin-top: 10px;
+}
+
+.ve-image-dimension {
+  flex: 1;
+  min-width: 0;
+}
+
+.ve-panel .ve-image-dimension .ve-eyebrow {
+  padding: 0 0 4px;
+}
+
+.ve-image-dimension .ve-input {
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.ve-image-dimension .ve-input::-webkit-inner-spin-button,
+.ve-image-dimension .ve-input::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ve-image-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ve-crop {
+  width: min(720px, calc(100vw - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 16px;
+  overflow-y: auto;
+  border: 1px solid var(--ve-border);
+  border-radius: 18px;
+  background: var(--ve-card);
+  color: var(--ve-fg);
+  box-shadow: var(--ve-shadow);
+  font: 14px var(--ve-ui);
+}
+
+.ve-crop::backdrop {
+  background: hsl(222 30% 6% / 0.5);
+}
+
+.ve-crop-title {
+  margin: 0 0 12px;
+  font: 600 16px / 1.3 var(--ve-ui);
+}
+
+.ve-crop-stage {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto;
+  line-height: 0;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ve-crop-stage[hidden] {
+  display: none;
+}
+
+.ve-crop-image {
+  display: block;
+  max-width: 100%;
+  max-height: min(60vh, 520px);
+  border-radius: 4px;
+}
+
+.ve-crop-clip {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.ve-crop-shade {
+  position: absolute;
+  box-shadow: 0 0 0 100vmax hsl(222 30% 6% / 0.6);
+}
+
+.ve-crop-frame {
+  position: absolute;
+  outline: 1px solid hsl(0 0% 100% / 0.95);
+  background:
+    linear-gradient(hsl(0 0% 100% / 0.35), hsl(0 0% 100% / 0.35)) 33.33% 0 / 1px 100% no-repeat,
+    linear-gradient(hsl(0 0% 100% / 0.35), hsl(0 0% 100% / 0.35)) 66.66% 0 / 1px 100% no-repeat,
+    linear-gradient(hsl(0 0% 100% / 0.35), hsl(0 0% 100% / 0.35)) 0 33.33% / 100% 1px no-repeat,
+    linear-gradient(hsl(0 0% 100% / 0.35), hsl(0 0% 100% / 0.35)) 0 66.66% / 100% 1px no-repeat;
+  cursor: move;
+  touch-action: none;
+}
+
+.ve-crop-frame:focus-visible {
+  outline: 2px solid var(--ve-primary);
+  outline-offset: 2px;
+}
+
+.ve-crop-handle {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: -22px;
+  touch-action: none;
+}
+
+.ve-crop-handle::after {
+  position: absolute;
+  inset: 16px;
+  border-radius: 3px;
+  background: hsl(0 0% 100%);
+  box-shadow: 0 1px 3px hsl(222 30% 6% / 0.5);
+  content: "";
+}
+
+.ve-crop-handle:is([data-handle="n"], [data-handle="s"])::after {
+  inset: 19px 10px;
+}
+
+.ve-crop-handle:is([data-handle="e"], [data-handle="w"])::after {
+  inset: 10px 19px;
+}
+
+.ve-crop-handle[data-handle^="n"] {
+  top: 0;
+}
+
+.ve-crop-handle[data-handle^="s"] {
+  bottom: 0;
+}
+
+.ve-crop-handle[data-handle$="w"] {
+  left: 0;
+}
+
+.ve-crop-handle[data-handle$="e"] {
+  right: 0;
+}
+
+.ve-crop-handle:is([data-handle="n"], [data-handle="s"]) {
+  left: 50%;
+  cursor: ns-resize;
+}
+
+.ve-crop-handle:is([data-handle="e"], [data-handle="w"]) {
+  top: 50%;
+  cursor: ew-resize;
+}
+
+.ve-crop-handle:is([data-handle="nw"], [data-handle="se"]) {
+  cursor: nwse-resize;
+}
+
+.ve-crop-handle:is([data-handle="ne"], [data-handle="sw"]) {
+  cursor: nesw-resize;
+}
+
+.ve-crop-size {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: hsl(222 20% 12% / 0.78);
+  color: hsl(0 0% 100%);
+  font: 600 12px / 1.4 var(--ve-ui);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ve-crop-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ve-crop-aspects .ve-quiet {
+  flex: 1 1 auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-crop-aspects .ve-quiet[aria-pressed="true"] {
+  background: var(--ve-accent-bg);
+  color: var(--ve-accent-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 40%, transparent);
+}
+
+.ve-crop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
 }

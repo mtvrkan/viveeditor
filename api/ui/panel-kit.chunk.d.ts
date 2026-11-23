@@ -69,6 +69,13 @@ interface ContextMenu {
   isOpen(): boolean;
 }
 declare function createContextMenu(options: ContextMenuOptions): ContextMenu;
+interface CropDialogOptions {
+  commands: CommandAccess;
+  messages: Messages;
+  returnToEditor: () => void;
+  onClose: () => void;
+}
+declare function createCropDialog(options: CropDialogOptions): Popover;
 interface DocumentPanelOptions {
   commands: CommandAccess;
   messages: Messages;
@@ -103,6 +110,7 @@ interface ImagePanelOptions {
   place: (element: HTMLElement, anchor: HTMLElement) => void;
   returnToEditor: () => void;
   onClose: () => void;
+  openCrop?: (anchor: HTMLElement) => void;
 }
 declare function createImagePanel(options: ImagePanelOptions): Popover;
 interface ListStylePanelOptions {
@@ -146,6 +154,6 @@ interface TablePanelOptions {
 }
 declare function createTablePanel(options: TablePanelOptions): Popover;
 declare namespace panel_kit_d_exports {
-  export { createCharPanel, createCheckPanel, createContextMenu, createEmbedPanel, createFontSizePanel, createImagePanel, createListStylePanel, createOutlinePanel, createSearchPanel, createShortcutsPanel, createSwatchPanel, createTablePanel, documentMessages };
+  export { createCharPanel, createCheckPanel, createContextMenu, createCropDialog, createEmbedPanel, createFontSizePanel, createImagePanel, createListStylePanel, createOutlinePanel, createSearchPanel, createShortcutsPanel, createSwatchPanel, createTablePanel, documentMessages };
 }
-export { createListStylePanel as a, createEmbedPanel as c, createShortcutsPanel as d, createContextMenu as f, documentMessages as h, createSearchPanel as i, createCheckPanel as l, DocumentMessages as m, createTablePanel as n, createImagePanel as o, createCharPanel as p, createSwatchPanel as r, createFontSizePanel as s, panel_kit_d_exports as t, createOutlinePanel as u };
+export { createListStylePanel as a, createEmbedPanel as c, createShortcutsPanel as d, createCropDialog as f, documentMessages as g, DocumentMessages as h, createSearchPanel as i, createCheckPanel as l, createCharPanel as m, createTablePanel as n, createImagePanel as o, createContextMenu as p, createSwatchPanel as r, createFontSizePanel as s, panel_kit_d_exports as t, createOutlinePanel as u };

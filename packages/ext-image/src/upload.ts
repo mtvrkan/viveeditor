@@ -71,6 +71,7 @@ interface Job {
   controller: AbortController
   element: HTMLElement
   bar: HTMLElement | null
+  replace?: string
 }
 
 const HEAD_BYTES = 65_536
@@ -210,6 +211,24 @@ export class UploadManager {
     }
     view.dispatch(view.state.tr.setMeta(uploadKey, { add: placeholders } satisfies PlaceholderMeta))
     this.queue.push(...queued)
+    this.pump()
+    return true
+  }
+
+  replace(source: File, pos: number, previous: string, attrs: Record<string, unknown>): boolean {
+    const view = this.view
+    if (!view?.editable) return false
+    const job = { ...this.createJob(source, attrs), replace: previous }
+    const code = this.precheck(source)
+    if (code) this.markFailed(job, code)
+    else {
+      this.jobs.set(job.id, job)
+      this.queue.push(job)
+    }
+    const placeholder = { id: job.id, pos, side: -1, failed: code !== null }
+    view.dispatch(
+      view.state.tr.setMeta(uploadKey, { add: [placeholder] } satisfies PlaceholderMeta),
+    )
     this.pump()
     return true
   }
@@ -431,7 +450,11 @@ export class UploadManager {
       const context = { signal, onProgress: (value: number) => this.progress(job, value) }
       const result = await withSignal(this.transfer(job, context), signal)
       const fields = typeof result === 'string' ? { src: result } : result
-      const image = cleanImage({ ...job.attrs, ...fields }, this.settings.policy)
+      const merged =
+        job.replace === undefined
+          ? { ...job.attrs, ...fields }
+          : { ...fields, ...job.attrs, src: fields.src }
+      const image = cleanImage(merged, this.settings.policy)
       if (!image.src) {
         this.fail(job, 'SOURCE')
         return
@@ -454,6 +477,24 @@ export class UploadManager {
     const transaction = view.state.tr.setMeta(uploadKey, {
       remove: job.id,
     } satisfies PlaceholderMeta)
+    if (job.replace !== undefined) {
+      const node = view.state.doc.nodeAt(placeholder.from)
+      if (view.editable && node?.type === this.settings.type && node.attrs.src === job.replace) {
+        const { src, width, height } = attrs
+        transaction.setNodeMarkup(placeholder.from, undefined, {
+          ...node.attrs,
+          src,
+          width,
+          height,
+        })
+        const { selection } = view.state
+        if (selection instanceof NodeSelection && selection.from === placeholder.from) {
+          transaction.setSelection(NodeSelection.create(transaction.doc, placeholder.from))
+        }
+      }
+      view.dispatch(transaction)
+      return
+    }
     const pos = view.editable
       ? insertPoint(view.state.doc, placeholder.from, this.settings.type)
       : null

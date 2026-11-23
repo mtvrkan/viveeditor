@@ -65,6 +65,7 @@ export const ADDON_MEMBERS: {
     'createCharPanel',
     'createCheckPanel',
     'createContextMenu',
+    'createCropDialog',
     'createEmbedPanel',
     'createFontSizePanel',
     'createImagePanel',

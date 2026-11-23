@@ -1,5 +1,6 @@
 import { expect, type Page, test } from '@playwright/test'
 import { dispatchPaste } from './clipboard'
+import { chooseFromOverflow } from './overflow'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -11,11 +12,7 @@ async function openEmbedTool(page: Page): Promise<void> {
     await button.click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page
-    .getByRole('menu', { name: 'Diğer araçlar' })
-    .getByRole('menuitem', { name: 'Video' })
-    .click()
+  await chooseFromOverflow(page, 'Video')
 }
 
 test.beforeEach(async ({ page }) => {

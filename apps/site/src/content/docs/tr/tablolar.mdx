@@ -117,9 +117,13 @@ Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başın
 
 ## Satır yükseklikleri
 
-`resizable` açıkken bir satırın alt kenarına gelin: yatay bir tutamaç belirir. Satırı yükseltmek ya da alçaltmak için tutamacı sürükleyin, fareyi bırakınca yükseklik kalır; tek bir geri alma onu geri getirir. Tutamaca çift tıklamak satırı otomatik yüksekliğe döndürür. Sütun kenarına yakın yerde sütun tutamacı önceliklidir. Sürüklemek için fare gerekir; dokunmatik ekranda ve klavyeyle tablo panelinin Tablo sekmesindeki ya da sağ tık menüsünün Satır alt menüsündeki "Satırı yükselt" ve "Satırı alçalt" seçeneklerini kullanın. Bunlar imlecin bulunduğu ya da seçili satırları 16 piksel değiştirir; "Satır yüksekliğini sıfırla" yüksekliği kaldırır.
+`resizable` açıkken bir satırın alt kenarına gelin: yatay bir tutamaç belirir. Satırı yükseltmek ya da alçaltmak için tutamacı sürükleyin, fareyi bırakınca yükseklik kalır; tek bir geri alma onu geri getirir. Tutamaca çift tıklamak satırı otomatik yüksekliğe döndürür. Sütun kenarına yakın yerde sütun tutamacı önceliklidir. Klavyeyle tablo panelinin Tablo sekmesindeki ya da sağ tık menüsünün Satır alt menüsündeki "Satırı yükselt" ve "Satırı alçalt" seçeneklerini kullanın. Bunlar imlecin bulunduğu ya da seçili satırları 16 piksel değiştirir; "Satır yüksekliğini sıfırla" yüksekliği kaldırır.
 
 Yükseklik bir en küçük yüksekliktir: satır içeriğinden kısa olamaz, daha çok yazdıkça uzar. Yükseklikler 24 ile 2000 piksel arasındadır ve satıra stil olarak kaydedilir: `<tr style="height: 48px">`. [Sunucu temizleyicisi](/dokumantasyon/sunucuda-temizleme/) bunları korur, Word de "en az" satır yüksekliği olarak kaydeder.
+
+## Dokunmatik ekranlarda
+
+Telefonda ya da tablette bir hücreye dokunun: sağ kenarında ve alt kenarında birer küçük tutamaç belirir. Sütun genişliği için sağdaki tutamacı yana, satır yüksekliği için alttakini yukarı ya da aşağı sürükleyin; parmağınızı kaldırınca boyut kalır, tek bir geri alma onu geri getirir. Birleştirilmiş ya da seçili hücrelerde tutamaçlar dış sağ ve alt kenarda durur. Tutamaçlar yalnızca parmak ya da kalemle dokununca çıkar, fareyle hiç çıkmaz; yazarken, kaydırırken, salt okunur modda ve `resizable` kapalıyken gizlenir. Başka bir yerde kaydırmak sayfayı kaydırır, uzun basmak yine metin seçer. Ekran okuyucular tutamaçları atlar; aynı işlemler klavyeyle tablo panelinde ve sağ tık menüsünde vardır.
 
 ## Klavye
 

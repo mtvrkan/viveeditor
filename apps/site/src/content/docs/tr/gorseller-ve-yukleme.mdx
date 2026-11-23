@@ -1,7 +1,7 @@
 ---
 key: images
 title: Görseller ve yükleme
-description: Görsel eklentisini kurun, yükleme fonksiyonunu yazın, ilerleme ve iptali yönetin, sunucuyu güvene alın ve alternatif metni takip edin.
+description: Görsel eklentisini kurun, yükleme fonksiyonunu yazın, görselleri boyutlandırıp kırpın, sunucuyu güvene alın ve alternatif metni takip edin.
 updated: 2026-11-23
 faq:
   - q: Yükleme fonksiyonu vermezsem ne olur?
@@ -52,6 +52,7 @@ Tek betikli kurulumda görsel eklentisi yükleyicisiz gelir: görseller yalnızc
 | `timeout` | 60 sn | Bir yüklemenin en uzun süresi. |
 | `maxPreviewPixels` | 25 milyon | Bu piksel sayısının üstündeki dosyalar için önizleme gösterilmez. |
 | `requireAlt` | `'warn'` | Alternatif metni eksik görsellerde uyarı rozeti; `'off'` kapatır. |
+| `resizable` | `true` | Seçili görselde köşe boyutlandırma tutamaklarını gösterir; `false` gizler. |
 | `labels` | İngilizce | Yükleme, hata ve eksik alternatif metin etiketleri. |
 | `onError` | `null` | Başarısız bir dosya için `{ code, fileName }` alır. |
 
@@ -172,7 +173,29 @@ Kaydedilen her görsel `width` ve `height` taşır, böylece sayfa yüklenirken 
 - yükleme fonksiyonunun döndürdüğü boyut her zaman önceliklidir,
 - döndürülmezse PNG, GIF ve WebP dosyalarının boyutu dosyadan okunur.
 
-Editörde görselin köşesindeki tutamakla genişliği sürükleyerek değiştirebilirsiniz; yükseklik orana göre ayarlanır. Görsel panelindeki %25, %50, %75 ve %100 düğmeleri görseli içerik genişliğine göre ölçekler.
+Görsel panelindeki %25, %50, %75 ve %100 düğmeleri görseli içerik genişliğine göre ölçekler.
+
+## Boyutlandırma
+
+Seçili görselde dört köşe tutamağı ve "640 × 360" gibi boyutu görünür. Herhangi bir köşeyi sürükleyin: görsel en-boy oranını korur, önizleme imleci izler ve bıraktığınızda tam piksel `width` ve `height` tek adımda kaydedilir; tek bir geri alma bunu geri çevirir. Boyut 16 piksel ile içerik genişliği arasında kalır. Bir tutamağa çift tıklamak görseli doğal boyutuna, en fazla içerik genişliğine döndürür.
+
+Dokunmatik ekranlarda her tutamağın 44 piksellik dokunma alanı vardır ve sayfanın kaymasını yalnızca tutamaklar engeller. Tutamaklar bağlantılı bir görselin bağlantısını açmaz, editör salt okunurken gizlenir. `Image.configure({ resizable: false })` tutamakları kapatır.
+
+Tutamaklar fare ve dokunma içindir. Klavye kullananlar için görsel panelinde "Genişlik" ve "Yükseklik" alanları, varsayılan olarak işaretli "En-boy oranını koru" kutusu ve "Boyutu sıfırla" düğmesi vardır. Aynı işlemler komut olarak da var:
+
+```ts
+editor.commands.resizeImage({ width: 480 })
+editor.commands.resizeImage({ width: 480, height: 200 }, false)
+editor.commands.resetImageSize()
+```
+
+## Kırpma
+
+Görsel panelindeki "Kırp" düğmesi ya da görselin sağ tık menüsündeki "Kırp…" kırpma penceresini açar. Çerçeveyi sürükleyerek taşıyın, köşe ve kenar tutamaklarıyla boyutlandırın ya da bir oran seçin: Serbest, 1:1, 4:3, 16:9 veya Orijinal. Klavyede ok tuşları çerçeveyi taşır, Shift ile ok tuşları boyutunu değiştirir. "Uygula" kırpmayı kaydeder, Escape ya da "İptal" hiçbir şeyi değiştirmeden kapatır.
+
+Kırpma görselin tam çözünürlüğünde çizilir ve özgün türünde kaydedilir (PNG, JPEG ya da WebP; diğer türler PNG olur). Yeni dosya her zamanki ilerleme ve hata kutusuyla `upload` fonksiyonunuzdan geçer; fonksiyon yoksa `allowBase64: true` onu veri adresi olarak gömer. İkisi de yoksa kırpma kapalıdır ve nedenini söyler. Yeni `src` eskisinin yerine geçer, genişlik ve yükseklik aynı görüntüleme ölçeğini korur, tek geri alma özgün görseli geri getirir. Kodda `editor.commands.replaceImage(file, { width, height })` değiştirmeyi yapar, `editor.query.imageReplaceMode()` ise `'upload'`, `'base64'` ya da `null` döndürür.
+
+Başka bir siteden gelen görsel, ancak o site görsel için CORS başlıkları (`Access-Control-Allow-Origin`) gönderiyorsa kırpılabilir; yoksa tarayıcı sayfanın piksellerini okumasına izin vermez. Pencere bunu görseli göstermeden önce denetler ve hata vermek yerine sorunu açıklar. Kırpmak için görseli kendi sunucunuza yükleyin ya da görselin sunucusunda CORS'a izin verin.
 
 Kaydedilen görsel `loading="lazy"`, `decoding="async"` ve `referrerpolicy="no-referrer"` ile yazılır. İçeriği gösteren sayfalara şu kuralı ekleyin:
 
@@ -185,7 +208,7 @@ img {
 
 ## Görsel paneli
 
-Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni, altyazıyı, yerleşimi, bağlantıyı ve boyutu değiştirmenizi sağlar. Görsele sağ tıklayınca "Görseli düzenle…", üç hizalama, "Görsel adresini kopyala" ve "Görseli sil" seçeneklerinden oluşan bir menü açılır; ayrıntılar [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
+Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni, altyazıyı, yerleşimi, bağlantıyı ve boyutu değiştirmenizi sağlar. Görsele sağ tıklayınca "Görseli düzenle…", "Kırp…", üç hizalama, "Görsel adresini kopyala" ve "Görseli sil" seçeneklerinden oluşan bir menü açılır; ayrıntılar [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
 
 ## Altyazı ve yerleşim
 

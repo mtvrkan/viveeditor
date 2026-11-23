@@ -26,8 +26,37 @@ export function clamp(value: number, min: number, max: number): number {
 
 const GAP = 10
 const EDGE = 8
+const MIN_ROOM = 160
+
+function visibleBand(): { top: number; bottom: number } {
+  const viewport = window.visualViewport
+  if (!viewport) return { top: 0, bottom: window.innerHeight }
+  return { top: viewport.offsetTop, bottom: viewport.offsetTop + viewport.height }
+}
+
+interface Docked {
+  anchor: HTMLElement
+  dock: HTMLElement
+  spot: string
+}
+
+const docked = new Map<HTMLElement, Docked>()
+
+const spotOf = (anchor: HTMLElement): string => {
+  const rect = anchor.getBoundingClientRect()
+  const band = visibleBand()
+  return `${rect.left},${rect.top},${rect.bottom},${band.top},${band.bottom}`
+}
+
+export function replaceDocked(): void {
+  for (const [panel, { anchor, dock, spot }] of docked) {
+    if (!panel.isConnected || !anchor.isConnected) docked.delete(panel)
+    else if (!panel.hidden && spotOf(anchor) !== spot) placeInDock(panel, anchor, dock)
+  }
+}
 
 export function placeInDock(panel: HTMLElement, anchor: HTMLElement, dock: HTMLElement): void {
+  docked.set(panel, { anchor, dock, spot: spotOf(anchor) })
   panel.style.maxHeight = ''
   const dockRect = dock.getBoundingClientRect()
   const anchorRect = anchor.getBoundingClientRect()
@@ -36,13 +65,13 @@ export function placeInDock(panel: HTMLElement, anchor: HTMLElement, dock: HTMLE
   const right = Math.min(dockRect.width, document.documentElement.clientWidth - dockRect.left)
   const left = Math.max(EDGE, EDGE - dockRect.left)
   panel.style.left = `${clamp(center - width / 2, left, right - width - EDGE)}px`
-  const viewportHeight = window.visualViewport?.height ?? window.innerHeight
-  const above = anchorRect.top - GAP - EDGE
-  const below = viewportHeight - anchorRect.bottom - GAP - EDGE
+  const band = visibleBand()
+  const above = anchorRect.top - band.top - GAP - EDGE
+  const below = band.bottom - anchorRect.bottom - GAP - EDGE
   const flip = panel.offsetHeight > above && below > above
   panel.classList.toggle('ve-below', flip)
   const room = flip ? below : above
-  if (room > 0 && panel.offsetHeight > room) panel.style.maxHeight = `${Math.floor(room)}px`
+  if (panel.offsetHeight > room) panel.style.maxHeight = `${Math.floor(Math.max(room, MIN_ROOM))}px`
 }
 
 export function placeAtRect(

@@ -709,3 +709,160 @@ describe('row height', () => {
     expect(editor.dom.querySelector('.row-resize-handle')).toBeNull()
   })
 })
+
+describe('touch grips', () => {
+  const press = (target: Element, type: string, init: PointerEventInit = {}): void => {
+    target.dispatchEvent(
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 1,
+        pointerType: 'touch',
+        ...init,
+      }),
+    )
+  }
+  const layerOf = (editor: Editor) => editor.dom.querySelector<HTMLElement>('.table-touch-grips')
+  const gripOf = (editor: Editor, axis: 'column' | 'row'): HTMLElement => {
+    const grip = editor.dom.querySelector<HTMLElement>(`.table-touch-grip[data-axis="${axis}"]`)
+    if (!grip) throw new Error(`no ${axis} grip`)
+    return grip
+  }
+  const drag = (grip: HTMLElement, axis: 'x' | 'y', delta: number, end = 'pointerup'): void => {
+    press(grip, 'pointerdown', { clientX: 0, clientY: 0 })
+    press(grip, 'pointermove', axis === 'x' ? { clientX: delta } : { clientY: delta })
+    press(grip, end, axis === 'x' ? { clientX: delta } : { clientY: delta })
+  }
+  const stub = (element: Element, values: Record<string, unknown>): void => {
+    for (const [name, value] of Object.entries(values)) {
+      Object.defineProperty(element, name, { configurable: true, value })
+    }
+  }
+  const rect = (left: number, top: number, right: number, bottom: number) => () =>
+    ({ left, top, right, bottom, width: right - left, height: bottom - top }) as DOMRect
+
+  async function touched(content = grid, position = 4): Promise<Editor> {
+    const editor = await mount({ content })
+    placeCursor(editor, position)
+    press(editor.dom, 'pointerdown')
+    return editor
+  }
+
+  it('shows grips hidden from assistive technology in the table wrapper after a touch', async () => {
+    const editor = await touched()
+    const layer = layerOf(editor)
+
+    expect(layer?.hidden).toBe(false)
+    expect(layer?.getAttribute('aria-hidden')).toBe('true')
+    expect(layer?.contentEditable).toBe('false')
+    expect(layer?.parentElement?.classList.contains('tableWrapper')).toBe(true)
+    expect(layer?.querySelectorAll('.table-touch-grip')).toHaveLength(2)
+    expect(editor.getHTML()).toBe(grid)
+  })
+
+  it('never shows grips for a mouse and hides them while typing until the next touch', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+    press(editor.dom, 'pointerdown', { pointerType: 'mouse' })
+    const mouse = layerOf(editor)?.hidden ?? true
+    press(editor.dom, 'pointerdown')
+    editor.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true }))
+    const typing = layerOf(editor)?.hidden
+    press(editor.dom, 'pointerdown')
+
+    expect([mouse, typing, layerOf(editor)?.hidden]).toEqual([true, true, false])
+  })
+
+  it('hides the grips in read-only mode, outside a table and without resizable', async () => {
+    const editor = await touched(`${grid}<p>x</p>`)
+    placeCursor(editor, viewOf(editor).state.doc.content.size - 1)
+    const outside = layerOf(editor)?.hidden
+    placeCursor(editor, 4)
+    editor.setEditable(false)
+    const readOnly = layerOf(editor)?.hidden
+    const fixed = await mount({
+      content: grid,
+      extensions: [Table.configure({ resizable: false })],
+    })
+    placeCursor(fixed, 4)
+    press(fixed.dom, 'pointerdown')
+
+    expect([outside, readOnly, layerOf(fixed)]).toEqual([true, true, null])
+  })
+
+  it('places the grips on the cell borders and keeps them inside the table', async () => {
+    const editor = await mount({ content: grid })
+    const wrapper = editor.dom.querySelector('.tableWrapper') as HTMLElement
+    const table = wrapper.querySelector('table') as HTMLElement
+    const cells = wrapper.querySelectorAll('td')
+    stub(wrapper, { getBoundingClientRect: rect(10, 20, 410, 100), clientWidth: 400 })
+    stub(table, { offsetLeft: 0, offsetTop: 0, offsetWidth: 400, offsetHeight: 80 })
+    stub(cells[0] as Element, { getBoundingClientRect: rect(10, 20, 210, 60) })
+    stub(cells[3] as Element, { getBoundingClientRect: rect(210, 60, 410, 100) })
+    placeCursor(editor, 4)
+    press(editor.dom, 'pointerdown')
+    const first = [gripOf(editor, 'column').style.cssText, gripOf(editor, 'row').style.cssText]
+    placeCursor(editor, 21)
+    const last = [gripOf(editor, 'column').style.cssText, gripOf(editor, 'row').style.cssText]
+
+    expect(first).toEqual([
+      'left: 178px; top: 0px; --vive-grip-x: 22px; --vive-grip-y: 20px;',
+      'left: 78px; top: 18px; --vive-grip-x: 22px; --vive-grip-y: 22px;',
+    ])
+    expect(last).toEqual([
+      'left: 356px; top: 36px; --vive-grip-x: 41px; --vive-grip-y: 24px;',
+      'left: 278px; top: 36px; --vive-grip-x: 22px; --vive-grip-y: 41px;',
+    ])
+  })
+
+  it('resizes the right edge column of a merged cell in one undoable step', async () => {
+    const merged =
+      '<table><tbody><tr><td colspan="2"><p>a</p></td></tr><tr><td><p>c</p></td><td><p>d</p></td></tr></tbody></table>'
+    const editor = await touched(merged)
+    const before = editor.getHTML()
+
+    drag(gripOf(editor, 'column'), 'x', 40)
+    const html = editor.getHTML()
+    editor.commands.undo()
+
+    expect(html).toContain('<td colspan="2" data-colwidth="0,160">')
+    expect(html).toContain('<td data-colwidth="160"><p>d</p>')
+    expect(html).toContain('<td><p>c</p>')
+    expect(editor.getHTML()).toBe(before)
+  })
+
+  it('previews and then sets the bottom row of a row-spanning cell on release', async () => {
+    const spanned =
+      '<table><tbody><tr><td rowspan="2"><p>a</p></td><td><p>b</p></td></tr><tr><td><p>d</p></td></tr></tbody></table>'
+    const editor = await touched(spanned)
+    const grip = gripOf(editor, 'row')
+    press(grip, 'pointerdown', { clientY: 0 })
+    press(grip, 'pointermove', { clientY: 60 })
+    const live = editor.dom.querySelector<HTMLElement>('tr.row-resizing')
+    const liveHeight = live?.style.getPropertyValue('--vive-row-height')
+    const liveIndex = live
+      ? [...editor.dom.querySelectorAll('tr')].indexOf(live as HTMLTableRowElement)
+      : -1
+    press(grip, 'pointerup', { clientY: 60 })
+    const rows = editor.getHTML().match(/<tr[^>]*>/g)
+    editor.commands.undo()
+
+    expect([liveHeight, liveIndex]).toEqual(['92px', 1])
+    expect(rows).toEqual(['<tr>', expect.stringMatching(/^<tr style="height: 92px;?">$/)])
+    expect(editor.dom.querySelector('tr.row-resizing')).toBeNull()
+    expect(editor.getHTML()).toBe(spanned)
+  })
+
+  it('clamps the row and column minimums and leaves the document alone on cancel', async () => {
+    const editor = await touched()
+    drag(gripOf(editor, 'row'), 'y', 60, 'pointercancel')
+    const cancelled = editor.getHTML()
+    drag(gripOf(editor, 'column'), 'x', -500)
+    drag(gripOf(editor, 'row'), 'y', -500)
+
+    expect(cancelled).toBe(grid)
+    expect(editor.getHTML()).toMatch(
+      /^<table style="min-width: 96px;?"><colgroup><col style="width: 48px;?"><col><\/colgroup><tbody><tr style="height: 24px;?"><td data-colwidth="48">/,
+    )
+  })
+})

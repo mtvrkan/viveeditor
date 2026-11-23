@@ -1,4 +1,5 @@
 .vive-content .tableWrapper {
+  position: relative;
   margin: 0 0 0.9em;
   overflow-x: auto;
 }
@@ -68,6 +69,48 @@
 
 .vive-content .row-resize-edge::before {
   bottom: 0;
+}
+
+.vive-content .table-touch-grips {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.vive-content .table-touch-grip {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vive-content .table-touch-grip::before {
+  position: absolute;
+  top: var(--vive-grip-y);
+  left: var(--vive-grip-x);
+  width: 6px;
+  height: 20px;
+  border-radius: 3px;
+  background: var(--ve-primary, hsl(202 80% 36%));
+  box-shadow: 0 0 0 2px var(--ve-card, #fff);
+  content: "";
+  transform: translate(-50%, -50%);
+}
+
+.vive-content .table-touch-grip[data-axis="row"]::before {
+  width: 20px;
+  height: 6px;
+}
+
+.vive-content .table-touch-grips[data-dragging="column"] [data-axis="row"],
+.vive-content .table-touch-grips[data-dragging="row"] [data-axis="column"] {
+  visibility: hidden;
 }
 
 .vive-content.row-resize-cursor {

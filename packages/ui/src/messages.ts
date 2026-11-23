@@ -121,6 +121,13 @@ export interface Messages {
   undo: string
   redo: string
   more: string
+  categoryText: string
+  categoryFormat: string
+  categoryLists: string
+  categoryInsert: string
+  categoryParagraph: string
+  categoryLinks: string
+  categoryDocument: string
   panelLoading: string
   panelFailed: string
   panelRetry: string
@@ -275,6 +282,23 @@ export interface Messages {
   cut: string
   copy: string
   copied: string
+  imageWidth: string
+  imageHeight: string
+  imageSizeAuto: string
+  imageKeepRatio: string
+  imageResetSize: string
+  imageCrop: string
+  imageCropMenu: string
+  imageCropTitle: string
+  imageCropArea: string
+  imageCropHelp: string
+  imageCropAspect: string
+  imageCropFree: string
+  imageCropOriginal: string
+  imageCropCancel: string
+  imageCropLoading: string
+  imageCropOff: string
+  imageCropBlocked: string
 }
 
 export type MessageKey = keyof Messages
@@ -406,6 +430,13 @@ const tr: Messages = {
   undo: 'Geri al',
   redo: 'Yinele',
   more: 'Diğer araçlar',
+  categoryText: 'Yazı',
+  categoryFormat: 'Biçim',
+  categoryLists: 'Liste ve alıntı',
+  categoryInsert: 'Ekle',
+  categoryParagraph: 'Paragraf',
+  categoryLinks: 'Bağlantı ve arama',
+  categoryDocument: 'Belge',
   panelLoading: 'Yükleniyor…',
   panelFailed: 'Bu panel yüklenemedi.',
   panelRetry: 'Tekrar dene',
@@ -560,6 +591,24 @@ const tr: Messages = {
   cut: 'Kes',
   copy: 'Kopyala',
   copied: 'Kopyalandı',
+  imageWidth: 'Genişlik',
+  imageHeight: 'Yükseklik',
+  imageSizeAuto: 'Otomatik',
+  imageKeepRatio: 'En-boy oranını koru',
+  imageResetSize: 'Boyutu sıfırla',
+  imageCrop: 'Kırp',
+  imageCropMenu: 'Kırp…',
+  imageCropTitle: 'Görseli kırp',
+  imageCropArea: 'Kırpma alanı',
+  imageCropHelp: 'Ok tuşları alanı taşır, Shift ile ok tuşları boyutunu değiştirir.',
+  imageCropAspect: 'Oran',
+  imageCropFree: 'Serbest',
+  imageCropOriginal: 'Orijinal',
+  imageCropCancel: 'İptal',
+  imageCropLoading: 'Görsel hazırlanıyor…',
+  imageCropOff: 'Kırpmak için görsel yükleme açık olmalı',
+  imageCropBlocked:
+    'Bu görsel okunamıyor. Başka bir siteden geliyorsa o site izin vermiyor olabilir (CORS). Görseli indirip yükleyerek kırpabilirsiniz.',
 }
 
 const en: Messages = {
@@ -687,6 +736,13 @@ const en: Messages = {
   undo: 'Undo',
   redo: 'Redo',
   more: 'More tools',
+  categoryText: 'Text',
+  categoryFormat: 'Format',
+  categoryLists: 'Lists and quotes',
+  categoryInsert: 'Insert',
+  categoryParagraph: 'Paragraph',
+  categoryLinks: 'Links and search',
+  categoryDocument: 'Document',
   panelLoading: 'Loading…',
   panelFailed: 'This panel could not be loaded.',
   panelRetry: 'Try again',
@@ -841,6 +897,24 @@ const en: Messages = {
   cut: 'Cut',
   copy: 'Copy',
   copied: 'Copied',
+  imageWidth: 'Width',
+  imageHeight: 'Height',
+  imageSizeAuto: 'Auto',
+  imageKeepRatio: 'Keep aspect ratio',
+  imageResetSize: 'Reset size',
+  imageCrop: 'Crop',
+  imageCropMenu: 'Crop…',
+  imageCropTitle: 'Crop image',
+  imageCropArea: 'Crop area',
+  imageCropHelp: 'Arrow keys move the area, Shift with arrow keys resizes it.',
+  imageCropAspect: 'Aspect ratio',
+  imageCropFree: 'Free',
+  imageCropOriginal: 'Original',
+  imageCropCancel: 'Cancel',
+  imageCropLoading: 'Preparing the image…',
+  imageCropOff: 'Cropping needs image uploads turned on',
+  imageCropBlocked:
+    'This image cannot be read. If it comes from another site, that site may not allow it (CORS). Download the image and upload it to crop it.',
 }
 
 export const MESSAGES: Readonly<Record<Locale, Messages>> = { tr, en }

@@ -1,4 +1,4 @@
-import { m as DocumentMessages, t as panel_kit_d_exports } from "./panel-kit.chunk.js";
+import { h as DocumentMessages, t as panel_kit_d_exports } from "./panel-kit.chunk.js";
 import { a as Messages, i as MessageKey, n as Locale, o as resolveLocale, r as MESSAGES } from "./commands.chunk.js";
 import { i as UiPluginInstance, n as UiPlugin, r as UiPluginHost, t as SlashEntry } from "./plugins.chunk.js";
 import { Editor } from "@viveeditor/core";

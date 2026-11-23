@@ -1,6 +1,13 @@
 import { defineExtension, type Extension, normalizeColor } from '@viveeditor/core'
 import type { DOMOutputSpec, NodeSpec, Node as ProseMirrorNode, Schema } from 'prosemirror-model'
-import { type Command, type EditorState, Plugin, PluginKey, TextSelection } from 'prosemirror-state'
+import {
+  type Command,
+  type EditorState,
+  Plugin,
+  PluginKey,
+  TextSelection,
+  type Transaction,
+} from 'prosemirror-state'
 import {
   addColumnAfter,
   addColumnBefore,
@@ -26,8 +33,14 @@ import {
   tableNodeTypes,
   toggleHeaderColumn,
   toggleHeaderRow,
+  updateColumnsOnResize,
 } from 'prosemirror-tables'
-import { Decoration, DecorationSet, type EditorView } from 'prosemirror-view'
+import {
+  Decoration,
+  DecorationSet,
+  type EditorView,
+  type ViewMutationRecord,
+} from 'prosemirror-view'
 
 export interface TableOptions {
   resizable: boolean
@@ -295,6 +308,9 @@ function syncTable(table: HTMLTableElement, node: ProseMirrorNode): void {
   }
 }
 
+const inGripLayer = (node: Node): boolean =>
+  node instanceof Element && node.closest('.table-touch-grips') !== null
+
 class StyledTableView extends TableView {
   constructor(node: ProseMirrorNode, cellMinWidth: number) {
     super(node, cellMinWidth)
@@ -305,6 +321,15 @@ class StyledTableView extends TableView {
     if (!super.update(node)) return false
     syncTable(this.table, this.node)
     return true
+  }
+
+  override ignoreMutation(record: ViewMutationRecord): boolean {
+    if (inGripLayer(record.target)) return true
+    if (record.type === 'childList' && record.target === this.dom) {
+      const nodes = [...record.addedNodes, ...record.removedNodes]
+      if (nodes.length > 0 && nodes.every(inGripLayer)) return true
+    }
+    return super.ignoreMutation(record)
   }
 }
 
@@ -440,46 +465,69 @@ const appendRow: Command = (state, dispatch) => {
   return true
 }
 
+function columnCells(map: TableMap, column: number): number[] {
+  const cells = new Set<number>()
+  for (let row = 0; row < map.height; row++) {
+    const position = map.map[row * map.width + column]
+    if (position !== undefined) cells.add(position)
+  }
+  return [...cells]
+}
+
+function knownColumnWidth(
+  table: ProseMirrorNode,
+  map: TableMap,
+  cells: number[],
+  column: number,
+): number | undefined {
+  return cells
+    .map((position) => {
+      const colwidth: unknown = table.nodeAt(position)?.attrs.colwidth
+      return Array.isArray(colwidth) ? colwidth[column - map.colCount(position)] : null
+    })
+    .find((width): width is number => typeof width === 'number' && width > 0)
+}
+
+function writeColumnWidth(
+  transaction: Transaction,
+  table: ProseMirrorNode,
+  tableStart: number,
+  column: number,
+  width: number,
+): Transaction {
+  const map = TableMap.get(table)
+  for (const position of columnCells(map, column)) {
+    const cell = table.nodeAt(position)
+    if (!cell) continue
+    const colspan = Number(cell.attrs.colspan)
+    const colwidth: unknown = cell.attrs.colwidth
+    const widths: number[] = Array.isArray(colwidth)
+      ? colwidth.map((value) => (typeof value === 'number' ? value : 0))
+      : Array.from({ length: colspan }, () => 0)
+    widths[column - map.colCount(position)] = width
+    transaction.setNodeMarkup(tableStart + position, undefined, {
+      ...cell.attrs,
+      colwidth: widths,
+    })
+  }
+  return transaction
+}
+
 function resizeColumn(delta: number, cellMinWidth: number): Command {
   return (state, dispatch, view) => {
     if (!isInTable(state) || !Number.isFinite(delta) || delta === 0) return false
     if (!dispatch) return true
     const { map, table, tableStart, left } = selectedRect(state)
-    const cells = new Set<number>()
-    for (let row = 0; row < map.height; row++) {
-      const position = map.map[row * map.width + left]
-      if (position !== undefined) cells.add(position)
-    }
-    const known = [...cells]
-      .map((position) => {
-        const cell = table.nodeAt(position)
-        const colwidth: unknown = cell?.attrs.colwidth
-        return Array.isArray(colwidth) ? colwidth[left - map.colCount(position)] : null
-      })
-      .find((width): width is number => typeof width === 'number' && width > 0)
-    const first = [...cells][0]
+    const cells = columnCells(map, left)
+    const known = knownColumnWidth(table, map, cells, left)
+    const first = cells[0]
     const dom = first === undefined ? null : view?.nodeDOM(tableStart + first)
     const measured = dom instanceof HTMLElement ? dom.offsetWidth : 0
     const width = Math.max(
       cellMinWidth,
       Math.round((known ?? (measured || FALLBACK_WIDTH)) + delta),
     )
-    const transaction = state.tr
-    for (const position of cells) {
-      const cell = table.nodeAt(position)
-      if (!cell) continue
-      const colspan = Number(cell.attrs.colspan)
-      const colwidth: unknown = cell.attrs.colwidth
-      const widths: number[] = Array.isArray(colwidth)
-        ? colwidth.map((value) => (typeof value === 'number' ? value : 0))
-        : Array.from({ length: colspan }, () => 0)
-      widths[left - map.colCount(position)] = width
-      transaction.setNodeMarkup(tableStart + position, undefined, {
-        ...cell.attrs,
-        colwidth: widths,
-      })
-    }
-    dispatch(transaction)
+    dispatch(writeColumnWidth(state.tr, table, tableStart, left, width))
     return true
   }
 }
@@ -714,6 +762,311 @@ function rowResizing(): Plugin<RowResizeState> {
   })
 }
 
+const GRIP_LAYER = 'table-touch-grips'
+const GRIP_SIZE = 44
+const GRIP_SLOP = 4
+const SCROLL_SETTLE = 160
+
+type GripAxis = 'column' | 'row'
+
+interface GripTarget {
+  table: number
+  column: number
+  row: number
+  first: number
+  last: number
+}
+
+interface GripDrag {
+  axis: GripAxis
+  pointer: number
+  origin: number
+  start: number
+  value: number
+  moved: boolean
+  target: GripTarget
+}
+
+function gripTarget(state: EditorState): GripTarget | null {
+  if (!isInTable(state)) return null
+  const { map, tableStart, top, left, bottom, right } = selectedRect(state)
+  const first = map.map[top * map.width + left]
+  const last = map.map[(bottom - 1) * map.width + right - 1]
+  if (first === undefined || last === undefined) return null
+  return {
+    table: tableStart - 1,
+    column: right - 1,
+    row: bottom - 1,
+    first: tableStart + first,
+    last: tableStart + last,
+  }
+}
+
+function rowPosition(state: EditorState, table: number, index: number): number {
+  const node = state.doc.nodeAt(table)
+  let position = table + 1
+  for (let row = 0; node && row < index; row++) position += node.child(row).nodeSize
+  return position
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.round(Math.max(min, Math.min(value, max)))
+}
+
+function placeGrip(grip: HTMLElement, x: number, y: number, width: number, height: number) {
+  const across = grip.dataset.axis === 'column' ? 3 : 10
+  const along = 13 - across
+  const pillX = clamp(x, across, width - across)
+  const pillY = clamp(y, along, height - along)
+  const left = clamp(pillX - GRIP_SIZE / 2, 0, width - GRIP_SIZE)
+  const top = clamp(pillY - GRIP_SIZE / 2, 0, height - GRIP_SIZE)
+  grip.style.cssText = `left: ${left}px; top: ${top}px; --vive-grip-x: ${pillX - left}px; --vive-grip-y: ${pillY - top}px`
+}
+
+function capture(element: Element, pointer: number): boolean {
+  try {
+    element.setPointerCapture(pointer)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function touchResizing(cellMinWidth: number): Plugin {
+  return new Plugin({
+    view: (view) => {
+      const document = view.dom.ownerDocument
+      const owner = document.defaultView ?? window
+      const layer = document.createElement('div')
+      layer.className = GRIP_LAYER
+      layer.contentEditable = 'false'
+      layer.setAttribute('aria-hidden', 'true')
+      layer.hidden = true
+      let touch = false
+      let paused = false
+      let scrolling = false
+      let settle: ReturnType<typeof setTimeout> | undefined
+      let drag: GripDrag | null = null
+      const listeners: Array<() => void> = []
+      const listen = (
+        target: EventTarget,
+        type: string,
+        handler: (event: Event) => void,
+        options?: AddEventListenerOptions,
+      ): void => {
+        target.addEventListener(type, handler, options)
+        listeners.push(() => target.removeEventListener(type, handler, options))
+      }
+      const elementAt = (position: number): HTMLElement | null => {
+        const dom = view.nodeDOM(position)
+        return dom instanceof HTMLElement ? dom : null
+      }
+      const tableAt = (position: number): HTMLTableElement | null =>
+        elementAt(position)?.querySelector(':scope > table') ?? null
+      const render = (): void => {
+        const target =
+          touch && !paused && !scrolling && view.editable ? gripTarget(view.state) : null
+        const wrapper = target && elementAt(target.table)
+        const table = target && tableAt(target.table)
+        const first = target && elementAt(target.first)
+        const last = target && elementAt(target.last)
+        if (!wrapper || !table || !first || !last) {
+          layer.hidden = true
+          return
+        }
+        if (layer.parentNode !== wrapper) wrapper.append(layer)
+        const box = wrapper.getBoundingClientRect()
+        const x = box.left + wrapper.clientLeft - wrapper.scrollLeft
+        const y = box.top + wrapper.clientTop - wrapper.scrollTop
+        const from = first.getBoundingClientRect()
+        const to = last.getBoundingClientRect()
+        const width = Math.max(wrapper.clientWidth, table.offsetLeft + table.offsetWidth)
+        const height = table.offsetTop + table.offsetHeight
+        placeGrip(columnGrip, to.right - x, (from.top + to.bottom) / 2 - y, width, height)
+        placeGrip(rowGrip, (from.left + to.right) / 2 - x, to.bottom - y, width, height)
+        layer.hidden = false
+      }
+      const preview = (current: GripDrag, value: number | null): void => {
+        const { table, column, row } = current.target
+        if (current.axis === 'row') {
+          const resize: RowResizeState = {
+            row: rowPosition(view.state, table, row),
+            drag: {
+              startY: current.origin,
+              startHeight: current.start,
+              height: value ?? 0,
+              moved: true,
+            },
+          }
+          view.dispatch(view.state.tr.setMeta(rowResizingKey, value === null ? IDLE : resize))
+          return
+        }
+        const node = view.state.doc.nodeAt(table)
+        const dom = tableAt(table)
+        const colgroup = dom?.querySelector<HTMLTableColElement>(':scope > colgroup')
+        if (node && dom && colgroup) {
+          updateColumnsOnResize(
+            node,
+            colgroup,
+            dom,
+            cellMinWidth,
+            value === null ? undefined : column,
+            value ?? undefined,
+          )
+        }
+        render()
+      }
+      const commit = (finished: GripDrag): void => {
+        const { state } = view
+        const { table, column, row } = finished.target
+        const node = state.doc.nodeAt(table)
+        if (finished.axis === 'column') {
+          if (node?.type.spec.tableRole === 'table') {
+            view.dispatch(writeColumnWidth(state.tr, node, table + 1, column, finished.value))
+          }
+          return
+        }
+        const position = rowPosition(state, table, row)
+        const current = rowAt(state, position)
+        const height = rowHeightOf(finished.value)
+        const transaction = state.tr.setMeta(rowResizingKey, IDLE)
+        if (current && current.attrs.height !== height) {
+          transaction.setNodeMarkup(position, undefined, { ...current.attrs, height })
+        }
+        view.dispatch(transaction)
+      }
+      const start = (axis: GripAxis, event: PointerEvent): void => {
+        const target = gripTarget(view.state)
+        const node = target && view.state.doc.nodeAt(target.table)
+        if (event.pointerType === 'mouse' || !target || !node || drag || !view.editable) return
+        event.preventDefault()
+        event.stopPropagation()
+        if (event.currentTarget instanceof Element) capture(event.currentTarget, event.pointerId)
+        let base: number
+        if (axis === 'column') {
+          const map = TableMap.get(node)
+          const col = tableAt(target.table)?.querySelector(':scope > colgroup')?.children[
+            target.column
+          ]
+          base =
+            knownColumnWidth(node, map, columnCells(map, target.column), target.column) ??
+            (Math.round(col?.getBoundingClientRect().width ?? 0) || FALLBACK_WIDTH)
+        } else {
+          const dom = elementAt(rowPosition(view.state, target.table, target.row))
+          base = Math.round(dom?.getBoundingClientRect().height ?? 0) || FALLBACK_HEIGHT
+        }
+        const origin = axis === 'column' ? event.clientX : event.clientY
+        drag = {
+          axis,
+          pointer: event.pointerId,
+          origin,
+          start: base,
+          value: base,
+          moved: false,
+          target,
+        }
+        layer.dataset.dragging = axis
+      }
+      const move = (event: PointerEvent): void => {
+        if (!drag || event.pointerId !== drag.pointer) return
+        event.preventDefault()
+        const delta = (drag.axis === 'column' ? event.clientX : event.clientY) - drag.origin
+        if (!drag.moved && Math.abs(delta) < GRIP_SLOP) return
+        drag.moved = true
+        drag.value =
+          drag.axis === 'column'
+            ? Math.max(cellMinWidth, Math.round(drag.start + delta))
+            : (rowHeightOf(drag.start + delta) ?? MIN_ROW_HEIGHT)
+        preview(drag, drag.value)
+      }
+      const tap = (event: PointerEvent): void => {
+        layer.hidden = true
+        const found = view.posAtCoords({ left: event.clientX, top: event.clientY })
+        if (found) {
+          const $position = view.state.doc.resolve(found.pos)
+          view.dispatch(view.state.tr.setSelection(TextSelection.near($position)))
+        }
+        view.focus()
+        render()
+      }
+      const end = (event: PointerEvent, cancelled: boolean): void => {
+        const finished = drag
+        if (!finished || event.pointerId !== finished.pointer) return
+        drag = null
+        delete layer.dataset.dragging
+        if (finished.moved && cancelled) preview(finished, null)
+        else if (finished.moved) commit(finished)
+        else if (!cancelled) tap(event)
+        render()
+      }
+      const grip = (axis: GripAxis): HTMLElement => {
+        const element = document.createElement('div')
+        element.className = 'table-touch-grip'
+        element.dataset.axis = axis
+        listen(element, 'pointerdown', (event) => start(axis, event as PointerEvent))
+        listen(element, 'pointermove', (event) => move(event as PointerEvent))
+        listen(element, 'pointerup', (event) => end(event as PointerEvent, false))
+        listen(element, 'pointercancel', (event) => end(event as PointerEvent, true))
+        listen(
+          element,
+          'touchstart',
+          (event) => {
+            event.preventDefault()
+            event.stopPropagation()
+          },
+          { passive: false },
+        )
+        layer.append(element)
+        return element
+      }
+      const columnGrip = grip('column')
+      const rowGrip = grip('row')
+      const pointer = (type: string): void => {
+        const next = type === 'touch' || type === 'pen'
+        if (next === touch && !paused) return
+        touch = next
+        paused = false
+        render()
+      }
+      const pause = (): void => {
+        if (drag || paused) return
+        paused = true
+        render()
+      }
+      listen(view.dom, 'pointerdown', (event) => pointer((event as PointerEvent).pointerType))
+      listen(view.dom, 'touchstart', () => pointer('touch'), { passive: true })
+      listen(view.dom, 'keydown', pause)
+      listen(view.dom, 'beforeinput', pause)
+      listen(view.dom, 'blur', pause)
+      listen(owner, 'resize', render)
+      listen(
+        owner,
+        'scroll',
+        () => {
+          if (!touch || drag) return
+          clearTimeout(settle)
+          settle = setTimeout(() => {
+            scrolling = false
+            render()
+          }, SCROLL_SETTLE)
+          if (scrolling) return
+          scrolling = true
+          render()
+        },
+        { capture: true, passive: true },
+      )
+      return {
+        update: () => render(),
+        destroy: () => {
+          clearTimeout(settle)
+          for (const remove of listeners) remove()
+          layer.remove()
+        },
+      }
+    },
+  })
+}
+
 function tableSpecs(cellMinWidth: number): Record<string, NodeSpec> {
   const specs = tableNodes({
     tableGroup: 'block',
@@ -829,7 +1182,7 @@ export const Table: Extension<TableOptions> = defineExtension({
       options.resizable
         ? columnResizing({ cellMinWidth: options.cellMinWidth, View: StyledTableView })
         : new Plugin({ props: { nodeViews: { table: view } } }),
-      ...(options.resizable ? [rowResizing()] : []),
+      ...(options.resizable ? [rowResizing(), touchResizing(options.cellMinWidth)] : []),
       tableEditing(),
       new Plugin({
         props: {

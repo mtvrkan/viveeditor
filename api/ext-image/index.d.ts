@@ -2,6 +2,24 @@ import { Extension } from "@viveeditor/core";
 import { Command, Plugin, PluginKey } from "prosemirror-state";
 import { Slice } from "prosemirror-model";
 import { Decoration, DecorationSet } from "prosemirror-view";
+interface ImageSize {
+  width: number;
+  height: number;
+}
+export declare function sniffImageType(bytes: Uint8Array): string | null;
+export declare function imageSize(bytes: Uint8Array): ImageSize | null;
+interface ImageSizeChange {
+  width?: number | null;
+  height?: number | null;
+}
+interface StoredSize {
+  width: number | null;
+  height: number | null;
+}
+export declare const MIN_IMAGE_SIZE = 16;
+export declare function clampSize(width: number, ratio: number, max: number): ImageSize;
+export declare function fitNatural(natural: ImageSize, max: number): ImageSize;
+export declare function nextSize(current: StoredSize, change: ImageSizeChange, keepRatio: boolean, natural: ImageSize | null, max: number): StoredSize | null;
 interface ImageSourcePolicy {
   allowBase64: boolean;
   maxBase64Length: number;
@@ -40,12 +58,6 @@ type UploadResult = string | {
 };
 type ImageUploader = (file: File, context: UploadContext) => Promise<UploadResult>;
 type ImageRehoster = (url: string, context: UploadContext) => Promise<UploadResult>;
-interface ImageSize {
-  width: number;
-  height: number;
-}
-export declare function sniffImageType(bytes: Uint8Array): string | null;
-export declare function imageSize(bytes: Uint8Array): ImageSize | null;
 export interface ImageLabels {
   uploading: string;
   failed: string;
@@ -66,6 +78,7 @@ export interface ImageOptions {
   timeout: number;
   maxPreviewPixels: number;
   requireAlt: "off" | "warn" | "block";
+  resizable: boolean;
   labels: ImageLabels;
   onError: ((error: ImageError) => void) | null;
 }
@@ -84,11 +97,15 @@ export interface PendingUploads {
   failed: number;
 }
 export type ImageChanges = Partial<Omit<ImageAttributes, "src">>;
+export type ImageReplaceMode = "upload" | "base64";
 declare module "@viveeditor/core" {
   interface CommandRegistry {
     insertImage: (attributes: ImageAttributes) => Command;
     setImageAttributes: (changes: ImageChanges) => Command;
     scaleImage: (percent: number) => Command;
+    resizeImage: (size: ImageSizeChange, keepRatio?: boolean) => Command;
+    resetImageSize: () => Command;
+    replaceImage: (file: File, size?: ImageSizeChange) => Command;
     uploadImages: (files: readonly File[]) => Command;
     setImageLink: (href: string | null) => Command;
   }
@@ -97,7 +114,8 @@ declare module "@viveeditor/core" {
     isUploading: () => boolean;
     pendingUploads: () => PendingUploads;
     imagesWithoutAlt: () => number;
+    imageReplaceMode: () => ImageReplaceMode | null;
   }
 }
 export declare const Image: Extension<ImageOptions>;
-export type { ImageAlign, ImageAttributes, ImageError, ImageErrorCode, ImageRehoster, ImageSize, ImageSourcePolicy, ImageUploader, UploadContext, UploadResult };
+export type { ImageAlign, ImageAttributes, ImageError, ImageErrorCode, ImageRehoster, ImageSize, ImageSizeChange, ImageSourcePolicy, ImageUploader, UploadContext, UploadResult };

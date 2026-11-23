@@ -7,6 +7,8 @@ import {
   Plugin,
   TextSelection,
 } from 'prosemirror-state'
+import type { EditorView } from 'prosemirror-view'
+import { fitNatural, type ImageSizeChange, nextSize, type StoredSize } from './size.js'
 import {
   cleanAlign,
   cleanDimension,
@@ -26,8 +28,16 @@ import {
   placeholdersOf,
   uploadManager,
 } from './upload.js'
-import { contentWidth, ImageView, imageAttributes, scaledHeight } from './view.js'
+import {
+  contentWidth,
+  ImageView,
+  imageAttributes,
+  maxImageWidth,
+  naturalSize,
+  scaledHeight,
+} from './view.js'
 
+export { clampSize, fitNatural, type ImageSizeChange, MIN_IMAGE_SIZE, nextSize } from './size.js'
 export { type ImageSize, imageSize, sniffImageType } from './sniff.js'
 export {
   cleanDimension,
@@ -69,6 +79,7 @@ export interface ImageOptions {
   timeout: number
   maxPreviewPixels: number
   requireAlt: 'off' | 'warn' | 'block'
+  resizable: boolean
   labels: ImageLabels
   onError: ((error: ImageError) => void) | null
 }
@@ -91,11 +102,16 @@ export interface PendingUploads {
 
 export type ImageChanges = Partial<Omit<ImageAttributes, 'src'>>
 
+export type ImageReplaceMode = 'upload' | 'base64'
+
 declare module '@viveeditor/core' {
   interface CommandRegistry {
     insertImage: (attributes: ImageAttributes) => Command
     setImageAttributes: (changes: ImageChanges) => Command
     scaleImage: (percent: number) => Command
+    resizeImage: (size: ImageSizeChange, keepRatio?: boolean) => Command
+    resetImageSize: () => Command
+    replaceImage: (file: File, size?: ImageSizeChange) => Command
     uploadImages: (files: readonly File[]) => Command
     setImageLink: (href: string | null) => Command
   }
@@ -104,6 +120,7 @@ declare module '@viveeditor/core' {
     isUploading: () => boolean
     pendingUploads: () => PendingUploads
     imagesWithoutAlt: () => number
+    imageReplaceMode: () => ImageReplaceMode | null
   }
 }
 
@@ -272,6 +289,69 @@ function scaleImage(type: NodeType): (percent: number) => Command {
   }
 }
 
+function measured(view: EditorView | undefined, pos: number) {
+  const dom = view?.nodeDOM(pos)
+  const element = dom instanceof HTMLElement ? dom : null
+  return {
+    natural: naturalSize(element?.querySelector('img')),
+    max: view ? maxImageWidth(view, element) : 0,
+  }
+}
+
+function sizeCommand(
+  type: NodeType,
+  size: (attrs: SelectedImage, view: EditorView | undefined, pos: number) => StoredSize | null,
+): Command {
+  return (state, dispatch, view) => {
+    const selection = selectedImageNode(state, type)
+    if (!selection) return false
+    const next = size(selection.node.attrs as SelectedImage, view, selection.from)
+    if (!next) return false
+    if (dispatch) {
+      const transaction = state.tr.setNodeMarkup(selection.from, undefined, {
+        ...selection.node.attrs,
+        width: next.width,
+        height: next.height,
+      })
+      dispatch(transaction.setSelection(NodeSelection.create(transaction.doc, selection.from)))
+    }
+    return true
+  }
+}
+
+function resizeImage(type: NodeType) {
+  return (change: ImageSizeChange, keepRatio = true): Command =>
+    sizeCommand(type, (attrs, view, pos) => {
+      const { natural, max } = measured(view, pos)
+      return nextSize(attrs, change, keepRatio, natural, max)
+    })
+}
+
+function resetImageSize(type: NodeType) {
+  return (): Command =>
+    sizeCommand(type, (_attrs, view, pos) => {
+      const { natural, max } = measured(view, pos)
+      return natural ? fitNatural(natural, max) : { width: null, height: null }
+    })
+}
+
+function replaceImage(type: NodeType) {
+  return (file: File, size: ImageSizeChange = {}): Command =>
+    (state, dispatch, view) => {
+      const selection = selectedImageNode(state, type)
+      const manager = uploadManager(view)
+      if (!selection || !manager?.canUpload || !view?.editable) return false
+      if (dispatch) {
+        const { width, height } = size
+        manager.replace(file, selection.from, String(selection.node.attrs.src), {
+          ...(width ? { width } : {}),
+          ...(height ? { height } : {}),
+        })
+      }
+      return true
+    }
+}
+
 export const Image: Extension<ImageOptions> = defineExtension({
   name: 'image',
   defaultOptions: {
@@ -289,6 +369,7 @@ export const Image: Extension<ImageOptions> = defineExtension({
     timeout: 60_000,
     maxPreviewPixels: 25_000_000,
     requireAlt: 'warn',
+    resizable: true,
     labels: {
       uploading: 'Uploading',
       failed: 'Image could not be added',
@@ -304,6 +385,9 @@ export const Image: Extension<ImageOptions> = defineExtension({
       setImageAttributes: setImageAttributes(type),
       scaleImage: scaleImage(type),
       setImageLink: setImageLink(type),
+      resizeImage: resizeImage(type),
+      resetImageSize: resetImageSize(type),
+      replaceImage: replaceImage(type),
       uploadImages:
         (files: readonly File[]): Command =>
         (state, dispatch, view) => {
@@ -314,7 +398,7 @@ export const Image: Extension<ImageOptions> = defineExtension({
         },
     }
   },
-  queries: ({ schema }) => ({
+  queries: ({ schema, options }) => ({
     selectedImage: (state) => {
       const selection = selectedImageNode(state, schema.nodes.image as NodeType)
       return selection ? ({ ...selection.node.attrs } as SelectedImage) : null
@@ -332,6 +416,7 @@ export const Image: Extension<ImageOptions> = defineExtension({
       })
       return count
     },
+    imageReplaceMode: () => (options.upload ? 'upload' : options.allowBase64 ? 'base64' : null),
   }),
   plugins: ({ schema, options }) => {
     const type = schema.nodes.image as NodeType
@@ -355,6 +440,7 @@ export const Image: Extension<ImageOptions> = defineExtension({
       policy,
       requireAlt: options.requireAlt,
       missingAltLabel: options.labels.missingAlt,
+      resizable: options.resizable,
     }
     const views = new Plugin({
       props: {

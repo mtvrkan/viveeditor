@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { expect, type Page, test } from '@playwright/test'
+import { chooseFromOverflow } from './overflow'
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -23,8 +24,7 @@ async function chooseFileItem(page: Page, name: string): Promise<void> {
     await page.getByRole('menu', { name: 'Dosya' }).getByRole('menuitem', { name }).click()
     return
   }
-  await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page.getByRole('menu', { name: 'Diğer araçlar' }).getByRole('menuitem', { name }).click()
+  await chooseFromOverflow(page, 'Dosya', name)
 }
 
 test('a document with the 1.0 features comes back from Word with what Word can hold', async ({

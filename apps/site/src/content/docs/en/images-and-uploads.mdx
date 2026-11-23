@@ -1,7 +1,7 @@
 ---
 key: images
 title: Images and uploads
-description: Set up the image extension, write the upload function, handle progress and abort, secure your server and track alt text.
+description: Set up the image extension, write the upload function, resize and crop images, secure your server and track alt text.
 updated: 2026-11-23
 faq:
   - q: What happens if I do not pass an upload function?
@@ -51,6 +51,7 @@ In the one-script build the image extension comes without an uploader: images ca
 | `timeout` | 60 s | The longest time one upload may take. |
 | `maxPreviewPixels` | 25 million | Files above this pixel count get no preview. |
 | `requireAlt` | `'warn'` | Shows a badge on images without alt text; `'off'` turns it off. |
+| `resizable` | `true` | Shows the corner resize handles on a selected image; `false` hides them. |
 | `labels` | English | Labels for uploading, failure and missing alt text. |
 | `onError` | `null` | Receives `{ code, fileName }` for a failed file. |
 
@@ -171,7 +172,29 @@ Every saved image carries `width` and `height`, so the layout does not jump whil
 - the size your upload function returns, which always wins,
 - otherwise, for PNG, GIF and WebP files, the size read from the file.
 
-In the editor, drag the handle at the image corner to change its width; the height follows the ratio. The 25%, 50%, 75% and 100% buttons in the image panel scale the image to the content width.
+The 25%, 50%, 75% and 100% buttons in the image panel scale the image to the content width.
+
+## Resizing
+
+A selected image shows four corner handles and its size, for example "640 × 360". Drag any corner: the image keeps its aspect ratio, the preview follows the pointer, and releasing it saves whole-pixel `width` and `height` in one step that a single undo reverts. The size stays between 16 pixels and the content width. Double-click a handle to go back to the image's natural size, capped at the content width.
+
+On touch screens each handle has a 44 pixel target, and only the handles stop the page from scrolling. Handles never open the link of a linked image, and they are hidden while the editor is read-only. `Image.configure({ resizable: false })` turns them off.
+
+The handles are mouse and touch only. Keyboard users get "Width" and "Height" fields in the image panel with a "Keep aspect ratio" checkbox, checked by default, and a "Reset size" button. The same actions are commands:
+
+```ts
+editor.commands.resizeImage({ width: 480 })
+editor.commands.resizeImage({ width: 480, height: 200 }, false)
+editor.commands.resetImageSize()
+```
+
+## Cropping
+
+"Crop" in the image panel or "Crop…" in the image's right-click menu opens the crop dialog. Drag the frame to move it, drag its corner or edge handles to resize it, or pick a preset: Free, 1:1, 4:3, 16:9 or Original. With the keyboard, the arrow keys move the frame and Shift with the arrow keys resizes it. "Apply" saves the crop and Escape or "Cancel" closes the dialog without changes.
+
+The crop is drawn at the image's full resolution and saved in the original type (PNG, JPEG or WebP; other types become PNG). The new file goes through your `upload` function with the usual progress and error box; without one, `allowBase64: true` embeds it as a data address. Without either, the crop action is disabled and says why. The new `src` replaces the old one, the width and height keep the same display scale, and one undo brings the original back. In code, `editor.commands.replaceImage(file, { width, height })` does the replacing and `editor.query.imageReplaceMode()` returns `'upload'`, `'base64'` or `null`.
+
+An image from another site can be cropped only if that site sends CORS headers (`Access-Control-Allow-Origin`) for it; otherwise the browser does not let the page read its pixels. The dialog checks this before it shows the image and explains the problem instead of failing. Upload the image to your own server, or allow CORS on the image host, to crop it.
 
 Saved images are written with `loading="lazy"`, `decoding="async"` and `referrerpolicy="no-referrer"`. Add this rule to the pages that show the content:
 
@@ -184,7 +207,7 @@ img {
 
 ## Image panel
 
-The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text, caption, position, link and size. Right-clicking an image opens a menu with "Edit image…", the three alignments, "Copy image address" and "Delete image"; see [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/).
+The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text, caption, position, link and size. Right-clicking an image opens a menu with "Edit image…", "Crop…", the three alignments, "Copy image address" and "Delete image"; see [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/).
 
 ## Caption and position
 

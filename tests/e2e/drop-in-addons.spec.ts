@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { expect, type Page, test } from '@playwright/test'
 import { dispatchPaste } from './clipboard'
+import { chooseFromOverflow } from './overflow'
 
 const dist = fileURLToPath(new URL('../../packages/viveeditor/dist/', import.meta.url))
 const CDN = 'https://cdn.viveeditor.test/viveeditor@0/dist/'
@@ -41,8 +42,7 @@ async function chooseFileItem(page: Page, name: string): Promise<void> {
     await page.getByRole('menu', { name: 'Dosya' }).getByRole('menuitem', { name }).click()
     return
   }
-  await toolbar.getByRole('button', { name: 'Diğer araçlar' }).click()
-  await page.getByRole('menu', { name: 'Diğer araçlar' }).getByRole('menuitem', { name }).click()
+  await chooseFromOverflow(page, 'Dosya', name)
 }
 
 test('loads the Word add-on from the folder of the CDN script on first use', async ({ page }) => {

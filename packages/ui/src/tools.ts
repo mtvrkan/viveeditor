@@ -383,6 +383,51 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
   ],
 ]
 
+export interface ToolCategory {
+  label: MessageKey
+  icon: IconName
+  tools: readonly string[]
+}
+
+export const TOOL_CATEGORIES: readonly ToolCategory[] = [
+  {
+    label: 'categoryText',
+    icon: 'textColor',
+    tools: ['fontFamily', 'fontSize', 'textColor', 'highlight', 'textStyle'],
+  },
+  {
+    label: 'categoryFormat',
+    icon: 'formatPainter',
+    tools: ['underline', 'strike', 'code', 'clearFormatting', 'formatPainter'],
+  },
+  {
+    label: 'categoryLists',
+    icon: 'bulletList',
+    tools: ['bulletList', 'orderedList', 'listStyle', 'taskList', 'blockquote'],
+  },
+  {
+    label: 'categoryInsert',
+    icon: 'image',
+    tools: ['table', 'image', 'embed', 'specialCharacters'],
+  },
+  { label: 'categoryParagraph', icon: 'alignLeft', tools: ['align', 'lineHeight'] },
+  { label: 'categoryLinks', icon: 'link', tools: ['search'] },
+  {
+    label: 'categoryDocument',
+    icon: 'file',
+    tools: [
+      'undo',
+      'redo',
+      'file',
+      'source',
+      'outline',
+      'accessibility',
+      'shortcuts',
+      'fullscreen',
+    ],
+  },
+]
+
 const heading = (level: 1 | 2 | 3, hint: string): BlockSpec => ({
   id: `heading${level}`,
   command: 'toggleHeading',

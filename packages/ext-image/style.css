@@ -78,26 +78,81 @@
   outline-offset: 2px;
 }
 
-.vive-content .vive-image-resize {
+.vive-content .vive-image-handles {
   position: absolute;
-  inset-inline-end: -6px;
-  bottom: -6px;
-  width: 14px;
-  height: 14px;
+  inset: 0;
+  display: none;
+  pointer-events: none;
+}
+
+.vive-content .vive-image.ProseMirror-selectednode .vive-image-handles,
+.vive-content .vive-image.is-resizing .vive-image-handles {
+  display: block;
+}
+
+.vive-content[contenteditable="false"] .vive-image .vive-image-handles {
+  display: none;
+}
+
+.vive-content .vive-image-handle {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.vive-content .vive-image-handle::after {
+  position: absolute;
+  inset: 15px;
   border: 2px solid var(--ve-card, hsl(0 0% 100%));
   border-radius: 50%;
   background: var(--ve-primary, hsl(221 83% 53%));
+  box-shadow: 0 1px 3px hsl(222 30% 10% / 0.35);
+  content: "";
+}
+
+.vive-content .vive-image-handle[data-corner="nw"] {
+  top: -22px;
+  left: -22px;
   cursor: nwse-resize;
-  touch-action: none;
-  opacity: 0;
 }
 
-.vive-content .vive-image.ProseMirror-selectednode .vive-image-resize,
-.vive-content .vive-image.is-resizing .vive-image-resize {
-  opacity: 1;
+.vive-content .vive-image-handle[data-corner="ne"] {
+  top: -22px;
+  right: -22px;
+  cursor: nesw-resize;
 }
 
-.vive-content[contenteditable="false"] .vive-image .vive-image-resize {
+.vive-content .vive-image-handle[data-corner="sw"] {
+  bottom: -22px;
+  left: -22px;
+  cursor: nesw-resize;
+}
+
+.vive-content .vive-image-handle[data-corner="se"] {
+  right: -22px;
+  bottom: -22px;
+  cursor: nwse-resize;
+}
+
+.vive-content .vive-image-size {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: hsl(222 20% 12% / 0.78);
+  color: hsl(0 0% 100%);
+  font: 600 12px / 1.4 var(--ve-ui, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.vive-content .vive-image-size:empty {
   display: none;
 }
 
@@ -175,11 +230,8 @@
 }
 
 @media (pointer: coarse) {
-  .vive-content .vive-image-resize {
-    width: 24px;
-    height: 24px;
-    inset-inline-end: -12px;
-    bottom: -12px;
+  .vive-content .vive-image-handle::after {
+    inset: 12px;
   }
 }
 

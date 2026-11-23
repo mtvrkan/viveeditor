@@ -6,7 +6,7 @@ import { commandAccess } from './commands.js'
 import { bindContextMenu } from './context-trigger.js'
 import { createCountControl } from './count-control.js'
 import { createDockMenus } from './dock-menus.js'
-import { h, placeInDock } from './dom.js'
+import { h, placeInDock, replaceDocked } from './dom.js'
 import { createDraftBar } from './draft-bar.js'
 import { createFileMenu } from './file-menu.js'
 import { createFormatTools } from './format-tools.js'
@@ -279,6 +279,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
       layout.relayout(true)
     }
     updateTools()
+    replaceDocked()
     count.updateLimit()
     if (options.slash !== false) slash.update(focused)
     plugins.update(focused)

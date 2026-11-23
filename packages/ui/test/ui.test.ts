@@ -2001,3 +2001,227 @@ describe('image link field', () => {
     expect(editor.getHTML()).not.toContain('<a ')
   })
 })
+
+describe('overflow categories', () => {
+  const extensions = [...basicExtensions, ...listExtensions, ...formatExtensions, Table]
+  const NARROW = ['bold', 'italic', 'link']
+
+  function collapse(root: HTMLElement, ids?: readonly string[]): void {
+    for (const button of root.querySelectorAll<HTMLButtonElement>('.ve-pill [data-tool]')) {
+      const id = button.dataset.tool ?? ''
+      button.hidden = ids ? ids.includes(id) : !NARROW.includes(id)
+    }
+  }
+
+  function openMore(root: HTMLElement): HTMLElement {
+    root.querySelector<HTMLButtonElement>('.ve-more')?.click()
+    const menu = root.querySelector<HTMLElement>('[role="menu"][aria-label="Diğer araçlar"]')
+    if (!menu) throw new Error('Missing overflow menu')
+    return menu
+  }
+
+  const rows = (menu: HTMLElement): string[] =>
+    [...menu.querySelectorAll<HTMLElement>(':scope > .ve-item')]
+      .filter((row) => !row.hidden)
+      .map((row) => row.dataset.item ?? '')
+
+  const openMenu = (root: HTMLElement, label: string): HTMLElement | null =>
+    root.querySelector<HTMLElement>(`[role="menu"][aria-label="${label}"]:not([hidden])`)
+
+  const key = (target: Element | null, name: string): void => {
+    target?.dispatchEvent(new KeyboardEvent('keydown', { key: name, bubbles: true }))
+  }
+
+  it('groups a narrow overflow into category rows and opens dialogs from them', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'tr' }, extensions)
+    collapse(root)
+    const menu = openMore(root)
+    const top = rows(menu)
+
+    expect(top).toEqual([
+      'category-text',
+      'category-format',
+      'category-lists',
+      'table',
+      'specialCharacters',
+      'align',
+      'lineHeight',
+      'category-document',
+    ])
+    const text = menu.querySelector<HTMLButtonElement>('[data-item="category-text"]')
+    expect(text?.getAttribute('aria-haspopup')).toBe('menu')
+
+    text?.click()
+    openMenu(root, 'Yazı')?.querySelector<HTMLButtonElement>('[data-item="textColor"]')?.click()
+    await Promise.resolve()
+
+    expect(menu.hidden).toBe(true)
+    expect(openMenu(root, 'Yazı')).toBeNull()
+    expect(text?.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it('shows line height as one submenu with its five items and the current one checked', async () => {
+    const { editor, root } = await mount('<p>aralık</p>', { locale: 'tr' }, extensions)
+    editor.commands.setLineHeight('1.5')
+    collapse(root, ['lineHeight'])
+    const menu = openMore(root)
+
+    expect(rows(menu)).toEqual(['lineHeight'])
+    expect(menu.querySelector('[data-item^="lineHeight-"]')).toBeNull()
+    menu.querySelector<HTMLButtonElement>('[data-item="lineHeight"]')?.click()
+    const items = [
+      ...(openMenu(root, 'Satır aralığı')?.querySelectorAll('[role="menuitemradio"]') ?? []),
+    ]
+
+    expect(items.map((item) => item.textContent)).toEqual([
+      'Tek (1)',
+      '1,15',
+      '1,5',
+      'Çift (2)',
+      'Varsayılan',
+    ])
+    expect(
+      items
+        .filter((item) => item.getAttribute('aria-checked') === 'true')
+        .map((item) => item.textContent),
+    ).toEqual(['1,5'])
+  })
+
+  it('drills into a category on touch and returns to its row with the keyboard', async () => {
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: (query: string) => ({ matches: query === '(pointer: coarse)', media: query }),
+    })
+    try {
+      const { root } = await mount('<p>a</p>', { locale: 'tr' }, extensions)
+      collapse(root)
+      const menu = openMore(root)
+      const row = menu.querySelector<HTMLButtonElement>('[data-item="category-format"]')
+      row?.focus()
+      key(row, 'ArrowRight')
+      const submenu = openMenu(root, 'Biçim')
+      const back = submenu?.querySelector<HTMLElement>('.ve-back')
+
+      expect(row?.getAttribute('aria-expanded')).toBe('true')
+      expect(menu.classList.contains('ve-drilled')).toBe(true)
+      expect(back?.hidden).toBe(false)
+      expect(back?.textContent).toBe('Diğer araçlar')
+      expect(submenu?.contains(document.activeElement)).toBe(true)
+
+      key(document.activeElement, 'ArrowLeft')
+
+      expect(openMenu(root, 'Biçim')).toBeNull()
+      expect(menu.classList.contains('ve-drilled')).toBe(false)
+      expect(row?.getAttribute('aria-expanded')).toBe('false')
+      expect(document.activeElement).toBe(row)
+
+      row?.click()
+      key(document.activeElement, 'Escape')
+
+      expect(openMenu(root, 'Biçim')).toBeNull()
+      expect(menu.hidden).toBe(false)
+      expect(document.activeElement).toBe(row)
+    } finally {
+      Reflect.deleteProperty(window, 'matchMedia')
+    }
+  })
+
+  it('hides empty categories and lists one or two tools under their category name', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'tr' }, extensions)
+    collapse(root, ['strike'])
+    const menu = openMore(root)
+    const visible = (selector: string): string[] =>
+      [...menu.querySelectorAll<HTMLElement>(selector)]
+        .filter((element) => !element.hidden)
+        .map((element) => element.textContent ?? '')
+
+    expect(rows(menu)).toEqual(['strike'])
+    expect(visible('.ve-eyebrow')).toEqual(['Biçim'])
+    expect(visible('.ve-sep')).toEqual([])
+  })
+})
+
+describe('image size fields and crop button', () => {
+  const content = '<p>a</p><img src="https://cdn.example.com/a.png" width="400" height="200">'
+  const openPanel = async (extensions = [...basicExtensions, Image]) => {
+    const mounted = await mount(content, { locale: 'tr' }, extensions)
+    mounted.editor.commands.selectAt(mounted.root.querySelector('.vive-image') as Element)
+    tool(mounted.root, 'image').click()
+    const panel = mounted.root.querySelector<HTMLElement>('.ve-image-panel') as HTMLElement
+    const field = (label: string): HTMLInputElement => {
+      const found = [...panel.querySelectorAll('label')].find((entry) =>
+        entry.textContent?.startsWith(label),
+      )
+      return found?.querySelector('input') as HTMLInputElement
+    }
+    const button = (label: string): HTMLButtonElement =>
+      [...panel.querySelectorAll('button')].find(
+        (entry) => entry.textContent === label,
+      ) as HTMLButtonElement
+    return { ...mounted, panel, field, button }
+  }
+  const change = (input: HTMLInputElement, value: string): void => {
+    input.value = value
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+  }
+
+  it('shows the stored size and keeps the aspect ratio by default', async () => {
+    const { editor, field } = await openPanel()
+
+    const shown = [field('Genişlik').value, field('Yükseklik').value]
+    change(field('Genişlik'), '300')
+
+    expect(shown).toEqual(['400', '200'])
+    expect(field('En-boy oranını koru').checked).toBe(true)
+    expect(field('Yükseklik').value).toBe('150')
+    expect(editor.query.selectedImage()).toMatchObject({ width: 300, height: 150 })
+  })
+
+  it('sets width and height apart when the ratio is not kept', async () => {
+    const { editor, field } = await openPanel()
+
+    field('En-boy oranını koru').click()
+    change(field('Yükseklik'), '90')
+
+    expect(editor.query.selectedImage()).toMatchObject({ width: 400, height: 90 })
+  })
+
+  it('resets to the natural size from the panel', async () => {
+    const { editor, root, button } = await openPanel()
+    const image = root.querySelector('.vive-image img') as HTMLImageElement
+    Object.defineProperty(image, 'naturalWidth', { configurable: true, value: 120 })
+    Object.defineProperty(image, 'naturalHeight', { configurable: true, value: 90 })
+
+    button('Boyutu sıfırla').click()
+
+    expect(editor.query.selectedImage()).toMatchObject({ width: 120, height: 90 })
+  })
+
+  it('disables cropping with a reason when images cannot be stored', async () => {
+    const { button, panel } = await openPanel()
+
+    const crop = button('Kırp')
+
+    expect(crop.disabled).toBe(true)
+    expect(panel.textContent).toContain('Kırpmak için görsel yükleme açık olmalı')
+  })
+
+  it('enables cropping with an uploader or base64 and opens the crop dialog', async () => {
+    const upload = vi.fn(async () => 'https://cdn.example.com/b.png')
+    const uploads = await openPanel([...basicExtensions, Image.configure({ upload })])
+    const base64 = await openPanel([...basicExtensions, Image.configure({ allowBase64: true })])
+    HTMLDialogElement.prototype.showModal ??= function showModal(this: HTMLDialogElement) {
+      this.setAttribute('open', '')
+    }
+
+    const enabled = [uploads, base64].map(({ button }) => button('Kırp').disabled)
+    base64.button('Kırp').click()
+    const dialog = base64.root.querySelector<HTMLDialogElement>('dialog.ve-crop')
+
+    expect(enabled).toEqual([false, false])
+    expect(dialog?.open).toBe(true)
+    expect(dialog?.getAttribute('aria-labelledby')).toBeTruthy()
+    expect(base64.panel.hidden).toBe(true)
+  })
+})

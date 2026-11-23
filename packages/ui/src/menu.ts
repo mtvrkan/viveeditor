@@ -13,6 +13,7 @@ export interface MenuItem {
   disabled?: () => boolean
   hidden?: () => boolean
   group?: number
+  heading?: string
   danger?: boolean
   items?: readonly MenuItem[]
   action?: () => unknown
@@ -36,6 +37,8 @@ export interface MenuOptions {
   onDone: () => void
   onClose?: (returnFocus: boolean) => void
   onBack?: () => void
+  onPick?: () => void
+  backLabel?: string
 }
 
 const SUBMENU_DELAY = 250
@@ -55,6 +58,27 @@ function placeSubmenu(element: HTMLElement, item: HTMLElement): void {
   element.style.bottom = 'auto'
   element.style.left = `${left - base.left}px`
   element.style.top = `${clamp(rect.top - 6, EDGE, viewportHeight - height - EDGE) - base.top}px`
+}
+
+function placeOver(element: HTMLElement, parent: HTMLElement): void {
+  element.dataset.side = 'over'
+  const below = parent.classList.contains('ve-below')
+  element.classList.toggle('ve-below', below)
+  for (const side of ['left', 'top', 'bottom'] as const) element.style[side] = parent.style[side]
+  element.style.minWidth = `${parent.offsetWidth}px`
+  const rect = parent.getBoundingClientRect()
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight
+  const anchoredTop = below || (parent.style.top !== '' && parent.style.top !== 'auto')
+  const room = anchoredTop ? viewportHeight - rect.top - EDGE : rect.bottom - EDGE
+  element.style.maxHeight = room > 0 ? `${Math.floor(room)}px` : ''
+}
+
+function drillsIn(parent: HTMLElement): boolean {
+  if (window.matchMedia?.('(pointer: coarse)').matches) return true
+  const rect = parent.getBoundingClientRect()
+  const width = parent.offsetWidth
+  const viewportWidth = document.documentElement.clientWidth || window.innerWidth
+  return rect.right + width + EDGE > viewportWidth && rect.left - width < EDGE
 }
 
 export function createMenu(options: MenuOptions): Menu {
@@ -79,13 +103,17 @@ export function createMenu(options: MenuOptions): Menu {
       if (focus) submenu.open(true)
       return
     }
+    const drill = drillsIn(element)
+    submenu.element.toggleAttribute('data-drill', drill)
     button.setAttribute('aria-expanded', 'true')
-    submenu.open(focus)
+    submenu.open(focus || drill)
+    element.classList.toggle('ve-drilled', drill)
   }
   const hover = (button: HTMLButtonElement | null): void => {
     window.clearTimeout(hoverTimer)
     hoverTimer = window.setTimeout(() => {
-      if (!isOpen()) return
+      if (!isOpen() || element.classList.contains('ve-drilled')) return
+      if (button && drillsIn(element)) return
       if (button) openSubmenu(button, false)
       else closeSubmenus()
     }, SUBMENU_DELAY)
@@ -127,7 +155,11 @@ export function createMenu(options: MenuOptions): Menu {
         createMenu({
           label: item.label,
           items: children,
-          place: (submenu) => placeSubmenu(submenu, button),
+          backLabel: options.label,
+          place: (submenu) =>
+            submenu.hasAttribute('data-drill')
+              ? placeOver(submenu, element)
+              : placeSubmenu(submenu, button),
           onOpen: () => window.clearTimeout(hoverTimer),
           onDone: () => {
             close(false)
@@ -135,9 +167,14 @@ export function createMenu(options: MenuOptions): Menu {
           },
           onClose: (returnFocus) => {
             button.setAttribute('aria-expanded', 'false')
+            element.classList.remove('ve-drilled')
             if (returnFocus) button.focus()
           },
           onBack: () => close(false),
+          onPick: () => {
+            close(false)
+            options.onPick?.()
+          },
         }),
       )
     }
@@ -149,17 +186,45 @@ export function createMenu(options: MenuOptions): Menu {
         return
       }
       close(false)
+      options.onPick?.()
       if (item.action?.() !== true) options.onDone()
     })
     return button
   })
+  const back = options.backLabel
+    ? h(
+        'button',
+        { type: 'button', class: 've-item ve-back', role: 'menuitem', tabindex: '-1', hidden: '' },
+        [
+          h('span', { class: 've-back-icon', 'aria-hidden': 'true' }, [icon('chevron')]),
+          h('span', { class: 've-item-label' }, [options.backLabel]),
+        ],
+      )
+    : null
+  const title = back
+    ? h('div', { class: 've-eyebrow ve-menu-title', 'aria-hidden': 'true', hidden: '' }, [
+        options.label,
+      ])
+    : null
+  if (back && title) {
+    back.addEventListener('click', () => close(true))
+    element.append(back, title)
+  }
+  const groups = new Map<HTMLElement, number | undefined>()
   options.items.forEach((item, index) => {
     const previous = options.items[index - 1]
     if (previous && previous.group !== item.group) {
       element.append(h('div', { class: 've-sep', role: 'separator' }))
     }
     const button = buttons[index]
-    if (button) element.append(button)
+    if (!button) return
+    if (item.heading && (previous?.heading !== item.heading || previous.group !== item.group)) {
+      const header = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [item.heading])
+      groups.set(header, item.group)
+      element.append(header)
+    }
+    groups.set(button, item.group)
+    element.append(button)
   })
 
   const refresh = (): void => {
@@ -172,23 +237,34 @@ export function createMenu(options: MenuOptions): Menu {
       button.hidden =
         item.hidden?.() ?? item.items?.every((child) => child.hidden?.() ?? false) ?? false
     })
+    if (back) back.hidden = !element.hasAttribute('data-drill')
+    if (title) title.hidden = !element.hasAttribute('data-drill')
     tidySeparators()
   }
 
   const tidySeparators = (): void => {
     let previous: HTMLElement | null = null
+    let pending: HTMLElement | null = null
+    let header: HTMLElement | null = null
     for (const child of element.children as HTMLCollectionOf<HTMLElement>) {
+      const group = groups.get(child)
       if (child.classList.contains('ve-sep')) {
-        child.hidden = !previous || previous.classList.contains('ve-sep')
-        if (!child.hidden) previous = child
+        child.hidden = true
+        if (previous) pending = child
+      } else if (child.classList.contains('ve-eyebrow') && groups.has(child)) {
+        child.hidden = true
+        header = child
       } else if (!child.hidden) {
+        if (header && groups.get(header) === group) header.hidden = false
+        if (pending && previous && groups.get(previous) !== group) pending.hidden = false
+        pending = null
         previous = child
       }
     }
-    if (previous?.classList.contains('ve-sep')) previous.hidden = true
   }
 
-  const visible = (): HTMLButtonElement[] => buttons.filter((button) => !button.hidden)
+  const visible = (): HTMLButtonElement[] =>
+    [...(back ? [back] : []), ...buttons].filter((button) => !button.hidden)
 
   const isOpen = (): boolean => !element.hidden
 
@@ -199,7 +275,7 @@ export function createMenu(options: MenuOptions): Menu {
     trigger?.setAttribute('aria-expanded', 'true')
     options.place(element)
     if (!focus) return
-    const shown = visible()
+    const shown = buttons.filter((button) => !button.hidden)
     const checked = shown.find((button) => button.getAttribute('aria-checked') === 'true')
     ;(checked ?? shown[0])?.focus()
   }

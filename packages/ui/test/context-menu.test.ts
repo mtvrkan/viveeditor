@@ -286,12 +286,47 @@ describe('context menu', () => {
     expect(menu?.dataset.kind).toBe('image')
     expect(shownLabels(menu)).toEqual([
       'Görseli düzenle…',
+      'Kırp…',
       'Sola hizala',
       'Ortala',
       'Sağa hizala',
       'Görsel adresini kopyala',
       'Görseli sil',
     ])
+  })
+
+  it('disables cropping with a reason when images cannot be stored', async () => {
+    const { editor, root } = await mount(
+      '<p>a</p><img src="https://cdn.example.com/kedi.png" alt="Kedi">',
+    )
+    editor.commands.selectAt(root.querySelector('.vive-image') as Element)
+
+    press(editor.dom, 'F10', { shiftKey: true })
+    await settle()
+    const crop = item(contextMenu(root) as HTMLElement, 'Kırp…')
+
+    expect(crop.getAttribute('aria-disabled')).toBe('true')
+    expect(crop.textContent).toContain('Kırpmak için görsel yükleme açık olmalı')
+  })
+
+  it('offers cropping when uploads are on and hides it while read-only', async () => {
+    const content = '<p>a</p><img src="https://cdn.example.com/kedi.png" alt="Kedi">'
+    const { editor, root } = await mount(content, {}, [
+      ...basicExtensions,
+      Image.configure({ allowBase64: true }),
+    ])
+    editor.commands.selectAt(root.querySelector('.vive-image') as Element)
+
+    press(editor.dom, 'F10', { shiftKey: true })
+    await settle()
+    const enabled = item(contextMenu(root) as HTMLElement, 'Kırp…').getAttribute('aria-disabled')
+    press(document.activeElement ?? editor.dom, 'Escape')
+    editor.setEditable(false)
+    press(editor.dom, 'F10', { shiftKey: true })
+    await settle()
+
+    expect(enabled).not.toBe('true')
+    expect(shownLabels(contextMenu(root))).not.toContain('Kırp…')
   })
 
   it('copies the link address to the clipboard and announces it', async () => {

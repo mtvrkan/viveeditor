@@ -117,9 +117,13 @@ A table with set widths carries a `colgroup` and a `width` style per column in t
 
 ## Row heights
 
-With `resizable` on, point at the bottom edge of a row: a horizontal handle appears. Drag it to make the row taller or shorter, and release the mouse to keep the height; one undo takes it back. Double-click the handle to go back to the automatic height. Near a column edge the column handle wins. Dragging needs a mouse; on touch screens, and from the keyboard, use "Make row taller" and "Make row shorter" in the table panel's Table tab or the Row submenu of the right-click menu. They change the rows at the cursor or the selected rows by 16 pixels; "Reset row height" clears the height.
+With `resizable` on, point at the bottom edge of a row: a horizontal handle appears. Drag it to make the row taller or shorter, and release the mouse to keep the height; one undo takes it back. Double-click the handle to go back to the automatic height. Near a column edge the column handle wins. From the keyboard, use "Make row taller" and "Make row shorter" in the table panel's Table tab or the Row submenu of the right-click menu. They change the rows at the cursor or the selected rows by 16 pixels; "Reset row height" clears the height.
 
 The height is a minimum height: a row never gets shorter than its content, and it grows when you type more. Heights are between 24 and 2000 pixels and are saved as a style on the row, such as `<tr style="height: 48px">`. The [server sanitizer](/en/docs/server-sanitizing/) keeps them, and Word saves them as an "at least" row height.
+
+## On touch screens
+
+On a phone or tablet, tap a cell: a small grip appears on its right edge and another on its bottom edge. Drag the right grip sideways to set the column width, or the bottom grip up or down to set the row height; lifting your finger keeps the size, and one undo takes it back. For merged cells and selected cells the grips sit on the outer right and bottom edges. The grips only appear after a finger or pen touch, never for a mouse, and they hide while you type or scroll, in read-only mode and with `resizable` off. Swiping elsewhere still scrolls the page, and long-press still selects text. Screen readers skip the grips; the table panel and the right-click menu offer the same actions from the keyboard.
 
 ## Keyboard
 

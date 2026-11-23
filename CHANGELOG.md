@@ -4,6 +4,8 @@
 
 ### Added
 
+- Images get four corner handles with a live size badge (double-click resets to natural size) and a Crop dialog with ratio presets and keyboard control; the cropped file goes through the normal upload path. [2026-11-23]
+- Tables can be resized by touch: grips appear on a tapped cell's column and row borders on phones and tablets. [2026-11-23]
 - Table rows can be made taller or shorter by dragging their bottom border (double-click resets), from the table panel or the right-click menu; Word and both sanitizers keep the height. [2026-11-23]
 - Right-click menu for tables, images, links, code blocks, videos and formulas (`contextMenu` option); plain text keeps the browser menu. [2026-11-23]
 - Toolbar controls for font family, line height and list style; new-tab option for links and a link field for images. [2026-11-23]
@@ -109,6 +111,7 @@
 
 ### Changed
 
+- The More tools menu is grouped into categories (Text, Format, Lists and quotes, Insert, Paragraph, Links and search, Document) with submenus. [2026-11-23]
 - Pasted fonts are matched to the font list by their first name, and Word's percentage line heights become the editor's values; both sanitizers follow the same font rule. [2026-11-23]
 - Menus mark the current item with a check and a single focus ring, headings 1–3 have their own icons, and colour panels have a built-in picker (colour area, hue slider, code field) instead of the browser's colour window. [2026-11-23]
 - Documentation covers the table panel, font, size, line spacing and list style controls, the right-click menu, the code block Copy button, linked images and the new Word mappings. [2026-11-23]
@@ -145,6 +148,7 @@
 
 ### Fixed
 
+- Toolbar panels such as the link panel are no longer squeezed into a sliver near the screen edge and follow their button when the page scrolls or zooms. [2026-11-23]
 - Table rows no longer grow when the pointer reaches a column border. [2026-11-23]
 - Saved HTML writes font families the same way in every browser, and font size and font family show no value for a mixed selection. [2026-11-23]
 - Images opened from a Word file no longer come with an empty paragraph before them. [2026-11-23]
