@@ -16,6 +16,7 @@ export interface ToolSpec {
   shortcut?: string
   narrow: boolean
   collapse?: number
+  narrowCollapse?: number
   popup?: 'menu' | 'dialog'
   enabledQuery?: string
 }
@@ -292,6 +293,7 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       icon: 'link',
       shortcut: 'Mod-K',
       narrow: true,
+      narrowCollapse: 1,
       popup: 'dialog',
     },
     {
@@ -313,8 +315,8 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       label: 'undo',
       icon: 'undo',
       shortcut: 'Mod-Z',
-      narrow: false,
-      collapse: 1,
+      narrow: true,
+      narrowCollapse: 3,
     },
     {
       id: 'redo',
@@ -322,8 +324,8 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       label: 'redo',
       icon: 'redo',
       shortcut: 'Mod-Shift-Z',
-      narrow: false,
-      collapse: 1,
+      narrow: true,
+      narrowCollapse: 2,
     },
     {
       id: 'file',
@@ -332,7 +334,6 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       label: 'file',
       icon: 'file',
       narrow: false,
-      collapse: 1,
       popup: 'menu',
     },
     {
@@ -411,7 +412,7 @@ export const TOOL_CATEGORIES: readonly ToolCategory[] = [
     tools: ['table', 'image', 'embed', 'specialCharacters'],
   },
   { label: 'categoryParagraph', icon: 'alignLeft', tools: ['align', 'lineHeight'] },
-  { label: 'categoryLinks', icon: 'link', tools: ['search'] },
+  { label: 'categoryLinks', icon: 'link', tools: ['link', 'search'] },
   {
     label: 'categoryDocument',
     icon: 'file',

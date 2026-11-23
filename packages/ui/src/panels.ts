@@ -44,6 +44,10 @@ export function createPanelRouter(options: PanelRouterOptions): PanelRouter {
   const { pill, dock } = toolbar
 
   const openPopover = (id: string, anchor: HTMLElement): boolean => {
+    if (id === 'link') {
+      openLink(anchor)
+      return true
+    }
     const popover = formatTools.popovers.get(id)
     if (!popover) return false
     if (popover.isOpen()) {

@@ -3,6 +3,7 @@ import { expect, type Locator, type Page, test } from '@playwright/test'
 import { chooseFromOverflow } from './overflow'
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
+const HISTORY_GROUP_DELAY = 600
 
 const surface = (page: Page) => page.getByRole('textbox', { name: 'Makale metni' })
 const output = (page: Page) => page.getByTestId('output')
@@ -60,6 +61,7 @@ test.describe('mouse resize', () => {
 
   test('drags a corner, keeps the ratio and undoes in one step', async ({ page }) => {
     await insertSample(page)
+    await page.waitForTimeout(HISTORY_GROUP_DELAY)
     await image(page).click()
     const handles = page.locator('.vive-image-handles')
     await expect(handles).toBeVisible()

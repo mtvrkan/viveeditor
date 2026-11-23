@@ -191,7 +191,7 @@ async function selectAllSettled(page: Page): Promise<void> {
   )
 }
 
-test('opens every toolbar popup without a horizontal scrollbar', async ({ page }) => {
+test('opens every toolbar popup without a horizontal scrollbar', async ({ page }, testInfo) => {
   test.setTimeout(90_000)
   await openEmpty(page)
   await page.keyboard.type('taşma denetimi')
@@ -203,7 +203,7 @@ test('opens every toolbar popup without a horizontal scrollbar', async ({ page }
         .filter((element) => (element as HTMLElement).offsetParent !== null)
         .map((element) => element.getAttribute('data-tool') ?? ''),
     )
-  expect(tools.length).toBeGreaterThan(0)
+  if (testInfo.project.name !== 'mobile-safari') expect(tools.length).toBeGreaterThan(0)
 
   for (const tool of tools) {
     await test.step(tool, async () => {
@@ -224,4 +224,43 @@ test('opens every toolbar popup without a horizontal scrollbar', async ({ page }
       await selectAllSettled(page)
     })
   }
+})
+
+test('keeps undo, redo and File on a laptop-width toolbar', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-safari', 'phones use the compact toolbar')
+  await page.setViewportSize({ width: 1366, height: 768 })
+  await openEmpty(page)
+
+  for (const name of [/^Geri al/, /^Yinele/, /^Dosya/]) {
+    await expect(toolbar(page).getByRole('button', { name })).toBeVisible()
+  }
+  expect(
+    await toolbar(page).evaluate((element) => element.scrollWidth - element.clientWidth),
+  ).toBeLessThanOrEqual(1)
+})
+
+test('fits the phone toolbar and keeps undo before the link button', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-safari', 'phone layout only')
+  await openEmpty(page)
+
+  await expect(toolbar(page).getByRole('button', { name: /^Geri al/ })).toBeVisible()
+  await expect(toolbar(page).getByRole('button', { name: /^Bağlantı/ })).toBeHidden()
+  expect(
+    await toolbar(page).evaluate((element) => element.scrollWidth - element.clientWidth),
+  ).toBeLessThanOrEqual(1)
+})
+
+test('opens the link panel from the More menu on a phone', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-safari', 'phone layout only')
+  await openEmpty(page)
+  await page.keyboard.type('kurulum')
+  await selectAllSettled(page)
+
+  await chooseFromOverflow(page, /^Bağlantı/)
+
+  const field = page.getByRole('textbox', { name: 'Bağlantı adresi' })
+  await expect(field).toBeVisible()
+  await field.fill('viveeditor.dev')
+  await page.getByRole('button', { name: 'Uygula' }).click()
+  await expect(output(page)).toContainText('href="https://viveeditor.dev"')
 })

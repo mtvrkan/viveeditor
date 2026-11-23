@@ -104,7 +104,10 @@ function moreMenuItems(options: DockMenusOptions): MenuItem[] {
   return TOOL_CATEGORIES.flatMap<MenuItem>((category, index) => {
     const members = options.groups.flatMap((tools, group) =>
       tools
-        .filter((tool) => !tool.narrow && category.tools.includes(tool.id))
+        .filter(
+          (tool) =>
+            (!tool.narrow || tool.narrowCollapse !== undefined) && category.tools.includes(tool.id),
+        )
         .map((tool) => ({ tool, group })),
     )
     if (members.length === 0) return []

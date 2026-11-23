@@ -96,18 +96,22 @@ export function createToolbar(options: ToolbarOptions): Toolbar {
   const rankOf = (button: HTMLButtonElement): number | undefined =>
     toolById.get(button.dataset.tool ?? '')?.collapse
 
+  const narrowRankOf = (button: HTMLButtonElement): number | undefined =>
+    toolById.get(button.dataset.tool ?? '')?.narrowCollapse
+
   const setNarrow = (narrow: boolean): void => {
     for (const button of toolButtons()) {
       button.hidden = narrow && toolById.get(button.dataset.tool ?? '')?.narrow === false
     }
     syncGroups()
     moreGroup.hidden = !narrow || moreTools.length === 0
-    if (!narrow && overflowing()) {
+    if (overflowing()) {
+      const ranked = narrow ? narrowRankOf : rankOf
       const candidates = toolButtons()
-        .filter((button) => rankOf(button) !== undefined)
+        .filter((button) => !button.hidden && ranked(button) !== undefined)
         .reverse()
-        .sort((a, b) => (rankOf(a) ?? 0) - (rankOf(b) ?? 0))
-      moreGroup.hidden = candidates.length === 0
+        .sort((a, b) => (ranked(a) ?? 0) - (ranked(b) ?? 0))
+      if (!narrow) moreGroup.hidden = candidates.length === 0
       for (const button of candidates) {
         if (!overflowing()) break
         button.hidden = true

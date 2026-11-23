@@ -111,6 +111,7 @@
 
 ### Changed
 
+- Undo, redo and File always stay on the toolbar at laptop and tablet widths; phones show undo and redo when there is room, and link moves to the More menu first. [2026-11-23]
 - The More tools menu is grouped into categories (Text, Format, Lists and quotes, Insert, Paragraph, Links and search, Document) with submenus. [2026-11-23]
 - Pasted fonts are matched to the font list by their first name, and Word's percentage line heights become the editor's values; both sanitizers follow the same font rule. [2026-11-23]
 - Menus mark the current item with a check and a single focus ring, headings 1–3 have their own icons, and colour panels have a built-in picker (colour area, hue slider, code field) instead of the browser's colour window. [2026-11-23]

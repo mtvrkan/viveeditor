@@ -173,8 +173,13 @@ const rowHeights = (page: Page) =>
     .locator('table')
     .first()
     .evaluate((table: HTMLTableElement) =>
-      [...table.rows].map((row) => Math.round(row.getBoundingClientRect().height * 10) / 10),
+      [...table.rows].map((row) => row.getBoundingClientRect().height),
     )
+
+function expectSameHeights(after: number[], before: number[]): void {
+  expect(after).toHaveLength(before.length)
+  for (const [index, height] of after.entries()) expect(height).toBeCloseTo(before[index] ?? 0, 0)
+}
 
 test('drags a row border to make the row taller and double-click resets it', async ({
   page,
@@ -221,7 +226,7 @@ test('keeps every row height while the pointer is on a row border', async ({ pag
   const { table } = await rowBorder(page)
 
   await expect(surface(page)).toHaveClass(/row-resize-cursor/)
-  expect(await rowHeights(page)).toEqual(before)
+  expectSameHeights(await rowHeights(page), before)
   expect(
     await table.evaluate((element) => {
       const wrapper = element.parentElement as HTMLElement
@@ -276,7 +281,7 @@ test.describe('touch grips', () => {
   test('shows the grips on the tapped cell without moving any row', async ({ page }) => {
     const { table, before } = await tapBodyCell(page)
 
-    expect(await rowHeights(page)).toEqual(before)
+    expectSameHeights(await rowHeights(page), before)
     expect(
       await table.evaluate((element) => {
         const wrapper = element.parentElement as HTMLElement

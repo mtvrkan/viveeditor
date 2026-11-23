@@ -405,6 +405,10 @@
   flex: none;
 }
 
+.ve-root[data-size="narrow"] .ve-group + .ve-group::before {
+  margin: 0 2px;
+}
+
 .ve-btn,
 .ve-type,
 .ve-count {
