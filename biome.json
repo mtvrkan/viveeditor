@@ -14,7 +14,8 @@
       "!api",
       "!**/dist",
       "!**/playwright-report",
-      "!**/test-results"
+      "!**/test-results",
+      "!.changeset/*.md"
     ]
   },
   "formatter": {

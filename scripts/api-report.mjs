@@ -11,6 +11,7 @@ if (mode !== 'check' && mode !== 'update') {
 
 const SPECIFIER = /(from\s+|import\(\s*)(['"])(\.{1,2}\/[^'"]+)\2/g
 const CHUNK_HASH = /-([A-Za-z0-9_-]{8})$/
+const SOURCE_MAP = /^\/\/# sourceMappingURL=.*$/gm
 
 const typesOf = (target) => {
   if (typeof target === 'string') return /\.d\.[cm]?ts$/.test(target) ? target : null
@@ -103,7 +104,7 @@ function collect(dir) {
       const path = posix.relative(from, to)
       return `${lead}${quote}${path.startsWith('.') ? path : `./${path}`}${quote}`
     })
-    out.set(`${dir}/${names.get(file)}`, `${rewritten.trimEnd()}\n`)
+    out.set(`${dir}/${names.get(file)}`, `${rewritten.replace(SOURCE_MAP, '').trimEnd()}\n`)
   }
   return out
 }
