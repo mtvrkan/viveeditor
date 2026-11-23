@@ -2,6 +2,7 @@ import {
   afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -47,6 +48,7 @@ export class ViveEditorComponent implements ControlValueAccessor {
   readonly editorBlur: OutputEmitterRef<Editor> = output<Editor>()
 
   readonly #host: ElementRef<HTMLElement> = inject(ElementRef)
+  readonly #changes: ChangeDetectorRef = inject(ChangeDetectorRef)
   readonly #disabled: WritableSignal<boolean> = signal(false)
   readonly #editable: Signal<boolean> = computed(() => !this.readonly() && !this.#disabled())
   #mount: EditorMount | null = null
@@ -70,11 +72,13 @@ export class ViveEditorComponent implements ControlValueAccessor {
         onChange: (html) => {
           this.#value = html
           this.#onChange(html)
+          this.#changes.markForCheck()
         },
         onReady: (editor) => this.ready.emit(editor),
         onFocus: (editor) => this.editorFocus.emit(editor),
         onBlur: (editor) => {
           this.#onTouched()
+          this.#changes.markForCheck()
           this.editorBlur.emit(editor)
         },
       })

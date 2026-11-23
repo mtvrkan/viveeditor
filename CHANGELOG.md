@@ -110,6 +110,7 @@
 - The server sanitizers (Node and PHP) now keep `<sub>`, plain `<sup>`, the five editor font sizes on `span` and indent on paragraphs and headings; a font size inside a font size and a superscript or subscript inside another are dropped. [2026-11-21]
 - Releases with a pre-release version (such as `1.0.0-rc.0`) are published to npm under the `next` tag, so `latest` keeps the last stable version, and their GitHub release is marked as a pre-release; the repository is in Changesets pre-release mode for the 1.0 release candidate. [2026-11-23]
 - The site home page lists the 1.0 tools (formatting tools, outline and accessibility check, drafts) and table cell colours in its feature grid; on two-column screens the last card spans the row. [2026-11-23]
+- Size budgets: the core may use 61.1 KB (was 61 KB) and the one-script build 119.5 KB (was 119 KB). [2026-11-23]
 - Size budgets: the format extension may use 6.5 KB (was 4.5 KB), the interface 22.5 KB (was 20 KB), its lazy panels 9.5 KB (was 5.5 KB), the table extension 12.5 KB (was 12 KB), the Word converter 17 KB (was 16.5 KB), the one-script build 119 KB (was 116 KB) and its panels add-on 9.5 KB (was 5.5 KB). [2026-11-21]
 - The release pull request is opened with the workflow's own token instead of a GitHub App, and the release workflow runs only when the `RELEASE_ENABLED` repository variable is `true`. [2026-11-14]
 - The repository lives at github.com/mtvrkan/viveeditor; package manifests, READMEs, Composer files and the site link there. [2026-11-01]
@@ -133,6 +134,8 @@
 
 ### Fixed
 
+- Angular: bindings to a reactive form value or its touched state now update while typing in apps without zone.js and with OnPush components, the Angular 22 default; they used to stop after the first keystroke. [2026-11-23]
+- With Caps Lock on in Windows and Linux, Ctrl+Shift+E centres the text instead of turning it into inline code: shortcuts from every extension are now looked up together, so an exact match wins over another extension's shortcut without Shift. [2026-11-23]
 - Markdown export keeps the Vimeo private link part and the YouTube or Vimeo start time in video links, so exported unlisted videos play. [2026-11-21]
 - Spaces at the start or end of a footnote and repeated spaces inside it survive saving and reloading. [2026-11-21]
 - Changes typed in the HTML source view are sent when a script submits the form while the source view is still focused. [2026-11-21]

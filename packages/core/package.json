@@ -64,7 +64,7 @@
     {
       "name": "@viveeditor/core",
       "path": "dist/index.js",
-      "limit": "61 KB"
+      "limit": "61.1 KB"
     }
   ],
   "engines": {

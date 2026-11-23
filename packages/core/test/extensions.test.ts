@@ -237,3 +237,76 @@ describe('queries', () => {
     await expectCode(promise, 'DUPLICATE_QUERY')
   })
 })
+
+describe('extension keymaps', () => {
+  function press(editor: Editor, init: KeyboardEventInit): boolean {
+    const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init })
+    editor.dom.dispatchEvent(event)
+    return event.defaultPrevented
+  }
+
+  function bindings(name: string, keys: Record<string, () => boolean>) {
+    return defineExtension({
+      name,
+      defaultOptions: {},
+      keymap: () =>
+        Object.fromEntries(Object.entries(keys).map(([key, run]) => [key, () => run()])),
+    })
+  }
+
+  it('runs a later extension’s shifted shortcut before an earlier one’s unshifted fallback', async () => {
+    const plain = vi.fn(() => true)
+    const shifted = vi.fn(() => true)
+    const editor = await mount({
+      extensions: [
+        bindings('plain', { 'Mod-e': plain }),
+        bindings('shifted', { 'Mod-Shift-e': shifted }),
+      ],
+    })
+
+    const handled = press(editor, {
+      key: 'e',
+      code: 'KeyE',
+      keyCode: 69,
+      ctrlKey: true,
+      shiftKey: true,
+    })
+
+    expect(handled).toBe(true)
+    expect(shifted).toHaveBeenCalledTimes(1)
+    expect(plain).not.toHaveBeenCalled()
+  })
+
+  it('tries the next extension when the first binding for the same key declines', async () => {
+    const declines = vi.fn(() => false)
+    const accepts = vi.fn(() => true)
+    const editor = await mount({
+      extensions: [
+        bindings('first', { 'Mod-e': declines }),
+        bindings('second', { 'Ctrl-e': accepts }),
+      ],
+    })
+
+    const handled = press(editor, { key: 'e', code: 'KeyE', keyCode: 69, ctrlKey: true })
+
+    expect(handled).toBe(true)
+    expect(declines).toHaveBeenCalledTimes(1)
+    expect(accepts).toHaveBeenCalledTimes(1)
+  })
+
+  it('leaves Shift with an uppercase letter alone when only the unshifted key is bound', async () => {
+    const plain = vi.fn(() => true)
+    const editor = await mount({ extensions: [bindings('plain', { 'Mod-e': plain })] })
+
+    const handled = press(editor, {
+      key: 'E',
+      code: 'KeyE',
+      keyCode: 69,
+      ctrlKey: true,
+      shiftKey: true,
+    })
+
+    expect(handled).toBe(false)
+    expect(plain).not.toHaveBeenCalled()
+  })
+})

@@ -1,4 +1,4 @@
-import { baseKeymap } from 'prosemirror-commands'
+import { baseKeymap, chainCommands } from 'prosemirror-commands'
 import { type InputRule, inputRules } from 'prosemirror-inputrules'
 import { keymap } from 'prosemirror-keymap'
 import {
@@ -10,7 +10,7 @@ import {
   type AttributeSpec as SchemaAttributeSpec,
   type TagParseRule,
 } from 'prosemirror-model'
-import type { Plugin } from 'prosemirror-state'
+import type { Command, Plugin } from 'prosemirror-state'
 import { Base } from './base.js'
 import { ViveEditorError } from './errors.js'
 import type {
@@ -190,6 +190,27 @@ function buildSchema(nodes: Record<string, NodeSpec>, marks: Record<string, Mark
   }
 }
 
+const MAC = typeof navigator !== 'undefined' && /Mac|iP(hone|[oa]d)/.test(navigator.platform)
+
+function normalizeKeyName(name: string): string {
+  const parts = name.split(/-(?!$)/)
+  const key = parts.pop() ?? name
+  if (!parts.every((part) => /^(s(hift)?|cmd|meta|m|a(lt)?|c|ctrl|control|mod)$/i.test(part))) {
+    return name
+  }
+  const has = (pattern: RegExp) => parts.some((part) => pattern.test(part))
+  const mod = has(/^mod$/i)
+  const meta = has(/^(cmd|meta|m)$/i) || (mod && MAC)
+  const ctrl = has(/^c(trl|ontrol)?$/i) || (mod && !MAC)
+  return `${has(/^s/i) ? 'Shift-' : ''}${meta ? 'Meta-' : ''}${ctrl ? 'Ctrl-' : ''}${has(/^a/i) ? 'Alt-' : ''}${key}`
+}
+
+function mergeBindings(bindings: Map<string, Command[]>): Record<string, Command> {
+  return Object.fromEntries(
+    [...bindings].map(([key, commands]) => [key, chainCommands(...commands)]),
+  )
+}
+
 export function resolveExtensions(extensions: readonly Extension[]): ResolvedExtensions {
   const all: Extension[] = [Base as Extension, ...extensions]
   const names = new Set<string>()
@@ -219,7 +240,7 @@ export function resolveExtensions(extensions: readonly Extension[]): ResolvedExt
   const commands = new Map<string, CommandFactory>()
   const queries = new Map<string, QueryFactory>()
   const rules: InputRule[] = []
-  const keymaps: Plugin[] = []
+  const keymaps = new Map<string, Command[]>()
   const extraPlugins: Plugin[] = []
 
   for (const extension of ordered) {
@@ -243,15 +264,17 @@ export function resolveExtensions(extensions: readonly Extension[]): ResolvedExt
       }
       queries.set(name, factory as QueryFactory)
     }
-    const bindings = config.keymap?.(context)
-    if (bindings) keymaps.push(keymap(bindings))
+    for (const [key, command] of Object.entries(config.keymap?.(context) ?? {})) {
+      const name = normalizeKeyName(key)
+      keymaps.set(name, [...(keymaps.get(name) ?? []), command])
+    }
     rules.push(...(config.inputRules?.(context) ?? []))
     extraPlugins.push(...(config.plugins?.(context) ?? []))
   }
 
   const plugins = [
     ...(rules.length > 0 ? [inputRules({ rules })] : []),
-    ...keymaps,
+    ...(keymaps.size > 0 ? [keymap(mergeBindings(keymaps))] : []),
     keymap(baseKeymap),
     ...extraPlugins,
   ]

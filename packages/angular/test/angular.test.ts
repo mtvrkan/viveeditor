@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core'
 import { type ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { ViveEditorComponent } from '@viveeditor/angular'
@@ -10,6 +10,16 @@ import type { Editor } from 'viveeditor'
   template: `<vive-ng-editor [formControl]="control" locale="tr" (ready)="onReady($event)" />`,
 })
 class ReactiveHost {
+  readonly control: FormControl<string | null> = new FormControl('<p>Merhaba</p>')
+  readonly onReady: (editor: Editor) => void = vi.fn()
+}
+
+@Component({
+  imports: [ViveEditorComponent, ReactiveFormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `<vive-ng-editor [formControl]="control" (ready)="onReady($event)" /><output data-value>{{ control.value }}</output><output data-touched>{{ control.touched }}</output>`,
+})
+class ShowingHost {
   readonly control: FormControl<string | null> = new FormControl('<p>Merhaba</p>')
   readonly onReady: (editor: Editor) => void = vi.fn()
 }
@@ -63,6 +73,18 @@ describe('ViveEditorComponent', () => {
 
     expect(fixture.componentInstance.control.value).toBe('<p>yeni</p>')
     expect(fixture.componentInstance.control.touched).toBe(true)
+  })
+
+  it('refreshes an OnPush host when the text or touched state changes', async () => {
+    const { fixture, editor } = await create(ShowingHost)
+    const root = fixture.nativeElement as HTMLElement
+
+    editor.setContent('<p>yazıldı</p>')
+    editor.dom.dispatchEvent(new FocusEvent('blur'))
+    await fixture.whenStable()
+
+    expect(root.querySelector('[data-value]')?.textContent).toBe('<p>yazıldı</p>')
+    expect(root.querySelector('[data-touched]')?.textContent).toBe('true')
   })
 
   it('follows a value set on the control without marking it dirty', async () => {
