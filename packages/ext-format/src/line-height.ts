@@ -18,6 +18,19 @@ declare module '@viveeditor/core' {
 
 export const LINE_HEIGHTS: readonly LineHeightValue[] = ['1', '1.15', '1.5', '2']
 
+const PERCENT_LINE_HEIGHTS: Readonly<Record<string, LineHeightValue>> = {
+  '100%': '1',
+  '115%': '1.15',
+  '150%': '1.5',
+  '200%': '2',
+}
+
+const readLineHeight = (raw: string): LineHeightValue | null => {
+  const value = raw.trim()
+  if (isLineHeight(value)) return value
+  return Object.hasOwn(PERCENT_LINE_HEIGHTS, value) ? (PERCENT_LINE_HEIGHTS[value] ?? null) : null
+}
+
 const isLineHeight = (value: unknown): value is LineHeightValue =>
   typeof value === 'string' && (LINE_HEIGHTS as readonly string[]).includes(value)
 
@@ -64,10 +77,7 @@ export const LineHeight: Extension<LineHeightOptions> = defineExtension({
       attributes: {
         lineHeight: {
           default: null,
-          parse: (element) => {
-            const value = element.style.lineHeight.trim()
-            return isLineHeight(value) ? value : null
-          },
+          parse: (element) => readLineHeight(element.style.lineHeight),
           render: (value) => (isLineHeight(value) ? { style: `line-height: ${value}` } : null),
         },
       },

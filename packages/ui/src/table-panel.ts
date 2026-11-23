@@ -241,6 +241,9 @@ export function createTablePanel(options: TablePanelOptions): Popover {
       current: () => current() ?? null,
       exclude: colors.map((color) => color.value),
       apply: (color) => apply(command, [color]),
+      onResize: () => {
+        if (anchor) options.place(element, anchor)
+      },
     })
     syncs.push(() => field.sync())
     return section(

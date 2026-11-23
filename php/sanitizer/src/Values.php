@@ -217,6 +217,17 @@ final class Values
         ));
     }
 
+    private static function leadKey(string $key): string
+    {
+        return "\n" . explode(',', $key)[0];
+    }
+
+    private static function findFamily(array $fonts, string $value): ?string
+    {
+        $key = self::familyKey($value);
+        return $fonts[$key] ?? $fonts[self::leadKey($key)] ?? null;
+    }
+
     public static function fontFamilyMap(array $list): array
     {
         $map = [];
@@ -230,7 +241,9 @@ final class Values
                 throw new \InvalidArgumentException('Each font family must be a comma-separated list of plain family names.');
             }
             $canonical = implode(', ', $parts);
-            $map[self::familyKey($canonical)] = $canonical;
+            $key = self::familyKey($canonical);
+            $map[$key] = $canonical;
+            $map[self::leadKey($key)] ??= $canonical;
         }
         return $map;
     }
@@ -284,7 +297,7 @@ final class Values
             return in_array($style, Profile::get()['bulletStyles'], true) ? $style : null;
         }
         if ($property === 'font-family') {
-            return $fonts[self::familyKey($value)] ?? null;
+            return self::findFamily($fonts, $value);
         }
         $number = preg_match(self::PIXELS, $value, $parts) === 1 ? (int) $parts[1] : 0;
         return $number > 0 && $number <= Profile::limit('maxTableWidth') ? $number . 'px' : null;

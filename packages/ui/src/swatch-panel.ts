@@ -20,8 +20,6 @@ export interface SwatchPanelOptions {
   onClose: () => void
 }
 
-const COLUMNS = 5
-
 export function createSwatchPanel(options: SwatchPanelOptions): Popover {
   const { messages } = options
   const buttons = options.swatches.map((swatch) => {
@@ -50,6 +48,9 @@ export function createSwatchPanel(options: SwatchPanelOptions): Popover {
     apply: (color) => {
       options.applyColor(color)
       close(false)
+    },
+    onResize: () => {
+      if (anchor) options.place(element, anchor)
     },
   })
   const clear = h('button', { type: 'button', class: 've-item ve-clear' }, [
@@ -123,11 +124,14 @@ export function createSwatchPanel(options: SwatchPanelOptions): Popover {
     }
     const index = buttons.indexOf(document.activeElement as HTMLButtonElement)
     if (index < 0) return
+    const top = buttons[0]?.offsetTop ?? 0
+    const wrap = buttons.findIndex((button) => button.offsetTop !== top)
+    const columns = wrap > 0 ? wrap : buttons.length
     const steps: Record<string, number> = {
       ArrowRight: 1,
       ArrowLeft: -1,
-      ArrowDown: COLUMNS,
-      ArrowUp: -COLUMNS,
+      ArrowDown: columns,
+      ArrowUp: -columns,
     }
     const step = steps[event.key]
     if (step === undefined) return

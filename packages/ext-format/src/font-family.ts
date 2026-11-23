@@ -47,6 +47,13 @@ const familyKey = (value: string): string =>
     .map((part) => trimAscii(part).replace(SPACE, ' '))
     .join(',')
 
+const leadKey = (key: string): string => `\n${key.split(',')[0] ?? ''}`
+
+const findFamily = (families: FontFamilies, value: string): string | null => {
+  const key = familyKey(value)
+  return families.get(key) ?? families.get(leadKey(key)) ?? null
+}
+
 function familyMap(list: readonly string[]): FontFamilies {
   const map = new Map<string, string>()
   for (const entry of list) {
@@ -61,28 +68,29 @@ function familyMap(list: readonly string[]): FontFamilies {
       )
     }
     const canonical = parts.join(', ')
-    map.set(familyKey(canonical), canonical)
+    const key = familyKey(canonical)
+    map.set(key, canonical)
+    const first = leadKey(key)
+    if (!map.has(first)) map.set(first, canonical)
   }
   return map
 }
 
 const familyOf = (families: FontFamilies, value: unknown): string | null =>
-  typeof value === 'string' ? (families.get(familyKey(value)) ?? null) : null
+  typeof value === 'string' ? findFamily(families, value) : null
 
 function currentFamily(state: EditorState, type: MarkType, families: FontFamilies): string | null {
   const { empty, $from, from, to } = state.selection
   if (empty) {
     return familyOf(families, type.isInSet(state.storedMarks ?? $from.marks())?.attrs.family)
   }
-  let found: string | null = null
-  let seen = false
+  const found = new Set<string | null>()
   state.doc.nodesBetween(from, to, (node) => {
-    if (seen || !node.isText) return !seen
-    seen = true
-    found = familyOf(families, type.isInSet(node.marks)?.attrs.family)
-    return false
+    if (found.size > 1) return false
+    if (node.isText) found.add(familyOf(families, type.isInSet(node.marks)?.attrs.family))
+    return true
   })
-  return found
+  return found.size === 1 ? ([...found][0] ?? null) : null
 }
 
 const familiesByOptions = new WeakMap<FontFamilyOptions, FontFamilies>()
@@ -103,6 +111,7 @@ export const FontFamily: Extension<FontFamilyOptions> = defineExtension({
     return {
       fontFamily: {
         attrs: { family: {} },
+        verbatimStyle: true,
         parseDOM: [
           {
             style: 'font-family',
@@ -133,6 +142,6 @@ export const FontFamily: Extension<FontFamilyOptions> = defineExtension({
   queries: ({ schema, options }) => ({
     fontFamily: (state) =>
       currentFamily(state, getMarkType(schema, 'fontFamily'), familiesOf(options)),
-    fontFamilies: () => [...familiesOf(options).values()],
+    fontFamilies: () => [...new Set(familiesOf(options).values())],
   }),
 })

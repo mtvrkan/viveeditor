@@ -25,7 +25,17 @@ describe('line height', () => {
     )
   })
 
-  it.each(['150%', '1.6', '24px', 'normal'])('drops the pasted line height %s', async (value) => {
+  it.each([
+    ['100%', '1'],
+    ['115%', '1.15'],
+    ['150%', '1.5'],
+    ['200%', '2'],
+  ])('reads the Word line height %s as %s', async (value, expected) => {
+    const editor = await mount(`<p style="line-height: ${value}">metin</p>`)
+    expect(html(editor)).toBe(`<p style="line-height: ${expected}">metin</p>`)
+  })
+
+  it.each(['120%', '1.6', '24px', 'normal'])('drops the pasted line height %s', async (value) => {
     const editor = await mount(`<p style="line-height: ${value}">metin</p>`)
 
     expect(html(editor)).toBe('<p>metin</p>')

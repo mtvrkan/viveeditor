@@ -602,11 +602,34 @@ i.ve-glyph {
   background: var(--ve-muted);
 }
 
-.ve-item[aria-selected="true"],
 .ve-item[aria-checked="true"] {
-  background: var(--ve-accent-bg);
   color: var(--ve-accent-fg);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 22%, transparent);
+}
+
+.ve-root .ve-item:focus-visible {
+  outline: 2px solid var(--ve-primary);
+  outline-offset: -2px;
+  background: var(--ve-muted);
+}
+
+.ve-item-check {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 16px;
+  margin-left: auto;
+  color: var(--ve-primary);
+  visibility: hidden;
+}
+
+.ve-item-check .ve-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2;
+}
+
+.ve-item[aria-checked="true"] .ve-item-check {
+  visibility: visible;
 }
 
 .ve-item[aria-disabled="true"] {
@@ -989,7 +1012,7 @@ i.ve-glyph {
 }
 
 .ve-size-form {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .ve-size-form .ve-hint[hidden] {
@@ -1037,7 +1060,22 @@ i.ve-glyph {
 }
 
 .ve-swatches {
-  width: auto;
+  width: min(272px, calc(100% - 16px));
+}
+
+.ve-panel > .ve-clear {
+  position: relative;
+  margin-top: 9px;
+}
+
+.ve-panel > .ve-clear::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 8px;
+  left: 8px;
+  height: 1px;
+  background: var(--ve-border);
 }
 
 .ve-sep {
@@ -1123,17 +1161,31 @@ i.ve-glyph {
 }
 
 .ve-swatch-grid {
+  --ve-swatch-size: 26px;
   display: grid;
-  grid-template-columns: repeat(5, var(--ve-target));
-  gap: 8px;
-  padding: 4px 4px 8px;
+  grid-template-columns: repeat(auto-fill, var(--ve-swatch-size));
+  justify-content: space-between;
+  gap: 8px 4px;
+  padding: 4px;
+}
+
+@media (pointer: coarse) {
+  .ve-swatch-grid {
+    --ve-swatch-size: 36px;
+    column-gap: 3px;
+    padding: 4px 2px;
+  }
+
+  .ve-swatches {
+    width: min(348px, calc(100% - 16px));
+  }
 }
 
 .ve-swatch {
   display: grid;
   place-items: center;
-  width: var(--ve-target);
-  height: var(--ve-target);
+  width: var(--ve-swatch-size);
+  height: var(--ve-swatch-size);
   padding: 0;
   border: 0;
   border-radius: 999px;
@@ -1148,8 +1200,8 @@ i.ve-glyph {
 }
 
 .ve-swatch .ve-icon {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   stroke-width: 2.4;
   opacity: 0;
 }
@@ -1165,44 +1217,147 @@ i.ve-glyph {
 }
 
 .ve-color-field {
+  --ve-hues:
+    hsl(0 100% 50%), hsl(60 100% 50%), hsl(120 100% 50%), hsl(180 100% 50%), hsl(240 100% 50%),
+    hsl(300 100% 50%), hsl(360 100% 50%);
+  --ve-knob: 0 0 0 2px #fff, 0 0 0 3px hsl(0 0% 0% / 0.22), 0 2px 6px hsl(0 0% 0% / 0.3);
   display: grid;
-  gap: 10px;
-  margin: 4px 0 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--ve-border);
 }
 
 .ve-color-recent[hidden],
+.ve-color-form[hidden],
 .ve-color-form .ve-hint[hidden] {
   display: none;
 }
 
 .ve-color-field .ve-eyebrow {
-  padding: 0 0 6px;
+  padding: 2px 0 4px;
 }
 
-.ve-color-picker {
-  flex: none;
-  width: var(--ve-target);
-  height: var(--ve-target);
-  padding: 4px;
-  border: 0;
+.ve-color-toggle {
+  min-height: calc(var(--ve-target) - 4px);
+}
+
+.ve-color-toggle[aria-expanded="true"]:not(:hover, :focus-visible) {
+  background: transparent;
+}
+
+.ve-color-toggle .ve-color-any {
+  width: 20px;
+  height: 20px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background: conic-gradient(var(--ve-hues));
+}
+
+.ve-color-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.ve-color-area,
+.ve-color-hue,
+.ve-color-preview {
   border-radius: 10px;
-  background: var(--ve-muted);
-  box-shadow: inset 0 0 0 1px var(--ve-border);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-fg) 14%, transparent);
+}
+
+.ve-color-area {
+  position: relative;
+  height: 140px;
+  background:
+    linear-gradient(to top, #000, transparent),
+    linear-gradient(to right, #fff, hsl(var(--ve-hue) 100% 50%));
+  cursor: crosshair;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ve-root .ve-color-area:focus-visible {
+  outline: 2px solid var(--ve-primary);
+  outline-offset: 2px;
+}
+
+.ve-color-thumb {
+  position: absolute;
+  top: var(--ve-y);
+  left: var(--ve-x);
+  width: 18px;
+  height: 18px;
+  margin: -9px;
+  border-radius: 50%;
+  background: var(--ve-swatch);
+  box-shadow: var(--ve-knob);
+  pointer-events: none;
+}
+
+.ve-color-hue {
+  display: block;
+  width: 100%;
+  height: 14px;
+  margin: 0;
+  border-radius: 9px;
+  background: linear-gradient(to right, var(--ve-hues));
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
 }
 
-.ve-color-picker::-webkit-color-swatch-wrapper {
-  padding: 0;
+.ve-color-hue::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: hsl(var(--ve-hue) 100% 50%);
+  box-shadow: var(--ve-knob);
+  -webkit-appearance: none;
 }
 
-.ve-color-picker::-webkit-color-swatch {
+.ve-color-hue::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 50%;
+  background: hsl(var(--ve-hue) 100% 50%);
+  box-shadow: var(--ve-knob);
 }
 
-.ve-color-picker::-moz-color-swatch {
-  border: 0;
-  border-radius: 7px;
+.ve-color-preview {
+  flex: none;
+  width: var(--ve-target);
+  height: var(--ve-target);
+  background: var(--ve-swatch);
+}
+
+.ve-color-dropper {
+  border-radius: 10px;
+  background: var(--ve-muted);
+}
+
+.ve-color-form .ve-hint {
+  margin: 0;
+}
+
+@media (pointer: coarse) {
+  .ve-color-area {
+    height: 132px;
+  }
+
+  .ve-color-hue {
+    height: 20px;
+  }
+
+  .ve-color-hue::-webkit-slider-thumb {
+    width: 26px;
+    height: 26px;
+  }
 }
 
 .ve-clear .ve-item-icon .ve-icon {
@@ -1322,7 +1477,9 @@ i.ve-glyph {
 }
 
 .ve-table-section .ve-color-field {
-  margin-bottom: 0;
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .ve-table-switch {
@@ -1687,4 +1844,13 @@ i.ve-glyph {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.ve-item[aria-checked="true"] .ve-item-icon {
+  background: var(--ve-accent-bg);
+  color: var(--ve-primary);
+}
+
+.ve-color-toggle[aria-expanded="true"] .ve-item-more .ve-icon {
+  transform: none;
 }

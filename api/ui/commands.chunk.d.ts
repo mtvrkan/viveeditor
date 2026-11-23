@@ -207,6 +207,8 @@ interface Messages {
   customColor: string;
   colorCode: string;
   colorPicker: string;
+  colorHue: string;
+  colorEyedropper: string;
   colorApply: string;
   colorInvalid: string;
   recentColors: string;

@@ -310,3 +310,73 @@ describe('extension keymaps', () => {
     expect(plain).not.toHaveBeenCalled()
   })
 })
+
+const Verbatim = defineExtension({
+  name: 'verbatim-style',
+  defaultOptions: {},
+  marks: () => ({
+    family: {
+      attrs: { value: {} },
+      verbatimStyle: true,
+      parseDOM: [
+        { tag: 'span[data-family]', getAttrs: (element) => ({ value: element.dataset.family }) },
+      ],
+      toDOM: (mark) => [
+        'span',
+        {
+          'data-family': String(mark.attrs.value),
+          style: `font-family: ${String(mark.attrs.value)}`,
+        },
+        0,
+      ],
+    },
+  }),
+  nodes: () => ({
+    frame: {
+      group: 'block',
+      content: 'inline*',
+      verbatimStyle: true,
+      parseDOM: [{ tag: 'section' }],
+      toDOM: () => ['section', ['div', { style: 'color: #ABCDEF' }, 0]],
+    },
+    plain: {
+      group: 'block',
+      content: 'inline*',
+      parseDOM: [{ tag: 'aside' }],
+      toDOM: () => ['aside', { style: 'color: #abcdef' }, 0],
+    },
+  }),
+})
+
+describe('verbatim styles', () => {
+  it('writes a verbatim style attribute exactly as the spec returns it, before later attributes', async () => {
+    const editor = await mount({
+      extensions: [Verbatim],
+      content: `<p><span data-family="'Open Sans', &quot;Noto&quot; &amp; sans">metin</span></p>`,
+    })
+
+    const html = editor.getHTML()
+
+    expect(html).toBe(
+      `<p><span data-family="'Open Sans', &quot;Noto&quot; &amp; sans" style="font-family: 'Open Sans', &quot;Noto&quot; &amp; sans">metin</span></p>`,
+    )
+  })
+
+  it('keeps a verbatim style on a nested element of the spec', async () => {
+    const editor = await mount({ extensions: [Verbatim], content: '<section>iç</section>' })
+
+    expect(editor.getHTML()).toBe('<section><div style="color: #ABCDEF">iç</div></section>')
+  })
+
+  it('leaves the style of other specs to the browser and never rewrites matching text', async () => {
+    const editor = await mount({
+      extensions: [Verbatim],
+      content: '<aside>a</aside><p> data-vive-style="x-0"</p>',
+    })
+
+    const html = editor.getHTML()
+
+    expect(html).toMatch(/^<aside style="color: rgb\(171, 205, 239\);?">a<\/aside>/)
+    expect(html).toContain('data-vive-style="x-0"</p>')
+  })
+})

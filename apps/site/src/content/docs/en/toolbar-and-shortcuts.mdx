@@ -71,7 +71,7 @@ const editor = await Editor.create(document.querySelector('#editor'), {
 })
 ```
 
-Each entry is a comma-separated list of plain family names, such as `Inter, sans-serif` or `'Fira Code', monospace`; an entry with anything else throws a `TypeError` when the editor starts. Only fonts from the list are applied: pasted or loaded text keeps its font only when it matches an entry, and other fonts are dropped.
+Each entry is a comma-separated list of plain family names, such as `Inter, sans-serif` or `'Fira Code', monospace`; an entry with anything else throws a `TypeError` when the editor starts. Only fonts from the list are applied: pasted or loaded text keeps its font when it matches an entry, or when its first font name is the first name of an entry (so `"Times New Roman", serif` from Word becomes `'Times New Roman', Times, serif`); other fonts are dropped. The server sanitizer follows the same rule.
 
 <Callout type="warn" title="Give the server the same list">
 The server sanitizer keeps only the fonts in its own `fontFamilies` option, which has the same eight families by default. If you change the list in the editor, pass exactly the same list to the sanitizer, or the fonts disappear when the content is saved. See [Server sanitizing](/en/docs/server-sanitizing/).
@@ -83,7 +83,7 @@ In code, `setFontFamily(family)` applies an entry of the list, `unsetFontFamily(
 
 Sizes are saved in points, such as `<span style="font-size: 10.5pt">`. In code, `setFontSize(14)` takes a number from 6 to 96 and rounds it to the nearest half point; `stepFontSize(1)` and `stepFontSize(-1)` move through `FONT_POINT_PRESETS` (8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48 and 72); `unsetFontSize()` removes the size and `editor.query.fontSizePoints()` returns it as a number, or `null`. The older steps `'tiny'`, `'small'`, `'big'` and `'huge'` still work with `setFontSize`, and documents saved with them load unchanged.
 
-**Line spacing** sets the line height of the selected paragraphs and headings: Single (1), 1.15, 1.5, Double (2), or Default, which removes it. It is saved as `line-height` on the paragraph or heading. In code, use `setLineHeight('1' | '1.15' | '1.5' | '2' | null)`; `editor.query.lineHeight()` returns the value at the cursor.
+**Line spacing** sets the line height of the selected paragraphs and headings: Single (1), 1.15, 1.5, Double (2), or Default, which removes it. It is saved as `line-height` on the paragraph or heading. Pasted text keeps these four values, and Word's 100%, 115%, 150% and 200% become 1, 1.15, 1.5 and 2; other line heights are dropped. In code, use `setLineHeight('1' | '1.15' | '1.5' | '2' | null)`; `editor.query.lineHeight()` returns the value at the cursor.
 
 Leave any of these out with `exclude: ['fontFamily', 'fontSize', 'lineHeight']`.
 

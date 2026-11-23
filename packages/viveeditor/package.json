@@ -79,7 +79,7 @@
     {
       "name": "viveeditor (CDN script, everything included)",
       "path": "dist/viveeditor.classic.iife.js",
-      "limit": "126 KB",
+      "limit": "126.3 KB",
       "rolldown": false
     },
     {
@@ -97,13 +97,13 @@
     {
       "name": "viveeditor.panels add-on (loaded on first panel open)",
       "path": "dist/viveeditor.panels.iife.js",
-      "limit": "16 KB",
+      "limit": "16.7 KB",
       "rolldown": false
     },
     {
       "name": "viveeditor.css",
       "path": "dist/viveeditor.css",
-      "limit": "7.8 KB",
+      "limit": "8.1 KB",
       "rolldown": false
     }
   ],

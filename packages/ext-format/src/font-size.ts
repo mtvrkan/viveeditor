@@ -92,15 +92,13 @@ function currentSize(state: EditorState, type: MarkType): string | null {
   if (empty) {
     return normalizeSize(type.isInSet(state.storedMarks ?? $from.marks())?.attrs.size)
   }
-  let found: string | null = null
-  let seen = false
+  const found = new Set<string | null>()
   state.doc.nodesBetween(from, to, (node) => {
-    if (seen || !node.isText) return !seen
-    seen = true
-    found = normalizeSize(type.isInSet(node.marks)?.attrs.size)
-    return false
+    if (found.size > 1) return false
+    if (node.isText) found.add(normalizeSize(type.isInSet(node.marks)?.attrs.size))
+    return true
   })
-  return found
+  return found.size === 1 ? ([...found][0] ?? null) : null
 }
 
 function step(type: MarkType, direction: 1 | -1): Command {

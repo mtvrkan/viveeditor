@@ -113,6 +113,33 @@ describe('block menu', () => {
   })
 })
 
+describe('block menu states', () => {
+  it('marks only the current block with a check and focuses it on open', async () => {
+    const { root } = await mount('<h2>Merhaba</h2>')
+    root.querySelector<HTMLButtonElement>('.ve-type')?.click()
+    const menu = root.querySelector<HTMLElement>('.ve-menu:not([hidden])')
+    const checked = menu?.querySelector<HTMLElement>('[aria-checked="true"]')
+
+    expect(checked?.dataset.item).toBe('heading2')
+    expect(checked?.querySelector('.ve-item-check .ve-icon')).not.toBeNull()
+    expect(menu?.querySelectorAll('[role="menuitemradio"] .ve-item-check')).toHaveLength(
+      menu?.querySelectorAll('[role="menuitemradio"]').length ?? -1,
+    )
+    expect(document.activeElement).toBe(checked)
+  })
+
+  it('draws a different icon for each heading level', async () => {
+    const { root } = await mount()
+    root.querySelector<HTMLButtonElement>('.ve-type')?.click()
+    const paths = ['heading1', 'heading2', 'heading3'].map((id) =>
+      root.querySelector(`.ve-menu [data-item="${id}"] .ve-item-icon path`)?.getAttribute('d'),
+    )
+
+    expect(new Set(paths).size).toBe(3)
+    expect(paths.every((path) => typeof path === 'string' && path.length > 0)).toBe(true)
+  })
+})
+
 describe('task list', () => {
   it('turns the paragraph into a task list from the block menu and names it', async () => {
     const { editor, ui, root } = await mount('<p>süt al</p>', { locale: 'tr' }, [
@@ -1112,6 +1139,99 @@ describe('format tools', () => {
     expect(code.getAttribute('aria-invalid')).toBe('true')
     expect(tool(root, 'highlight').getAttribute('aria-expanded')).toBe('true')
     expect(editor.getHTML()).toBe('<p>renk</p>')
+  })
+
+  describe('custom colour picker', () => {
+    const openPicker = async (html = '<p><span style="color: #1a73e8">renk</span></p>') => {
+      const { editor, root } = await mount(html, { locale: 'tr' }, extensions)
+      editor.commands.selectAll()
+      tool(root, 'textColor').click()
+      const panel = root.querySelector<HTMLElement>('.ve-swatches[aria-label="Yazı rengi"]')
+      if (!panel) throw new Error('Missing text colour panel')
+      const toggle = panel.querySelector<HTMLButtonElement>('.ve-color-toggle')
+      const form = panel.querySelector<HTMLFormElement>('.ve-color-form')
+      const area = panel.querySelector<HTMLElement>('.ve-color-area')
+      const hue = panel.querySelector<HTMLInputElement>('.ve-color-hue')
+      const code = panel.querySelector<HTMLInputElement>('.ve-color-code')
+      if (!toggle || !form || !area || !hue || !code) throw new Error('Missing picker part')
+      return { editor, root, panel, toggle, form, area, hue, code }
+    }
+    const preview = (form: HTMLElement): string => form.style.getPropertyValue('--ve-swatch')
+
+    it('renders no native colour input and starts from the current colour', async () => {
+      const { root, code, area } = await openPicker()
+
+      expect(root.querySelector('input[type="color"]')).toBeNull()
+      expect(code.value).toBe('#1a73e8')
+      expect(area.getAttribute('aria-valuetext')).toBe('#1a73e8')
+    })
+
+    it('starts from a meaningful colour instead of black when nothing is set', async () => {
+      const { code } = await openPicker('<p>renk</p>')
+
+      expect(code.value).toMatch(/^#[\da-f]{6}$/)
+      expect(code.value).not.toBe('#000000')
+    })
+
+    it('toggles the disclosure and its aria-expanded state', async () => {
+      const { toggle, form } = await openPicker()
+
+      expect(toggle.getAttribute('aria-expanded')).toBe('false')
+      expect(form.hidden).toBe(true)
+      toggle.click()
+      expect(toggle.getAttribute('aria-expanded')).toBe('true')
+      expect(form.hidden).toBe(false)
+      expect(toggle.getAttribute('aria-controls')).toBe(form.id)
+      toggle.click()
+      expect(form.hidden).toBe(true)
+    })
+
+    it('moves saturation and brightness with the arrow keys', async () => {
+      const { area, code } = await openPicker()
+      const key = (name: string, shiftKey = false) =>
+        area.dispatchEvent(new KeyboardEvent('keydown', { key: name, shiftKey, bubbles: true }))
+      const before = area.getAttribute('aria-valuetext')
+
+      key('ArrowDown', true)
+      key('ArrowLeft')
+
+      expect(area.getAttribute('aria-valuetext')).not.toBe(before)
+      expect(area.getAttribute('aria-valuetext')).toBe(code.value)
+      expect(Number(area.getAttribute('aria-valuenow'))).toBeLessThan(90)
+    })
+
+    it('changes the preview from the hue slider', async () => {
+      const { form, hue, code } = await openPicker()
+      const before = preview(form)
+
+      hue.value = '120'
+      hue.dispatchEvent(new Event('input', { bubbles: true }))
+
+      expect(preview(form)).not.toBe(before)
+      expect(preview(form)).toBe(code.value)
+    })
+
+    it('applies the typed hex on Enter and closes the panel', async () => {
+      const { editor, root, toggle, code } = await openPicker()
+      toggle.click()
+
+      code.value = '#0f766e'
+      code.dispatchEvent(new Event('input', { bubbles: true }))
+      code.form?.requestSubmit()
+
+      expect(editor.getAttributes('textColor').color).toBe('#0f766e')
+      expect(tool(root, 'textColor').getAttribute('aria-expanded')).toBe('false')
+    })
+
+    it('applies the colour picked on the area with Enter', async () => {
+      const { editor, area, code } = await openPicker()
+
+      area.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+      const picked = code.value
+      area.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+
+      expect(editor.getAttributes('textColor').color).toBe(picked)
+    })
   })
 
   it('marks the current highlight and removes it', async () => {

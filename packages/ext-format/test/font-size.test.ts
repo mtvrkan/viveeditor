@@ -129,4 +129,30 @@ describe('font size', () => {
       '<p><span style="font-size: 72pt">büyük</span> <span style="font-size: 8pt">küçük</span></p>',
     )
   })
+
+  it('reports no size for a selection that mixes sizes and refuses to step past the bounds', async () => {
+    const editor = await mount(
+      '<p><span style="font-size: 18pt">iri</span> düz <span style="font-size: 96pt">dev</span> <span style="font-size: 6pt">ufak</span></p>',
+    )
+    editor.commands.setTextSelection(1, 8)
+    const mixed = [editor.query.fontSize(), editor.query.fontSizePoints()]
+    editor.commands.setTextSelection(9, 12)
+    const top = [editor.query.fontSizePoints(), editor.commands.stepFontSize(1)]
+    editor.commands.setTextSelection(13, 17)
+    const bottom = [editor.query.fontSizePoints(), editor.commands.stepFontSize(-1)]
+
+    expect(mixed).toEqual([null, null])
+    expect(top).toEqual([96, false])
+    expect(bottom).toEqual([6, false])
+  })
+
+  it('steps a mixed selection from the default size to one size for all of it', async () => {
+    const editor = await mount('<p><span style="font-size: 18pt">iri</span> düz</p>')
+    editor.commands.selectAll()
+
+    const stepped = editor.commands.stepFontSize(1)
+
+    expect(stepped).toBe(true)
+    expect(editor.query.fontSize()).toBe('14pt')
+  })
 })

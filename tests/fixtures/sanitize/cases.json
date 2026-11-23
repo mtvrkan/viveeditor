@@ -765,8 +765,13 @@
   },
   {
     "name": "font family outside the list",
-    "input": "<p><span style=\"font-family: 'Material Icons'\">a</span><span style=\"font-family: Georgia\">b</span><span style=\"font-family: Arial, sans-serif\">c</span></p>",
+    "input": "<p><span style=\"font-family: 'Material Icons'\">a</span><span style=\"font-family: Calibri, sans-serif\">b</span><span style=\"font-family: Helvetica, Arial\">c</span></p>",
     "expected": "<p><span>a</span><span>b</span><span>c</span></p>"
+  },
+  {
+    "name": "font family matched by its first name, as Word and Google Docs write it",
+    "input": "<p><span style=\"font-family: Georgia\">a</span><span style=\"font-family: &quot;Times New Roman&quot;,serif\">b</span><span style=\"font-family: ARIAL, sans-serif\">c</span></p>",
+    "expected": "<p><span style=\"font-family: Georgia, serif\">a</span><span style=\"font-family: 'Times New Roman', Times, serif\">b</span><span style=\"font-family: Arial, Helvetica, sans-serif\">c</span></p>"
   },
   {
     "name": "font family from a host list",

@@ -30,9 +30,8 @@ export function createBlockControl(
     block.active ? editor.isActive(block.active, block.activeAttrs ?? {}) : false
 
   const iconOfBlock = (id: string): IconName =>
-    id.startsWith('heading')
-      ? 'heading'
-      : (BLOCKS.find((block) => block.id === id)?.icon ?? 'paragraph')
+    BLOCKS.find((block) => block.id === id)?.icon ??
+    (id.startsWith('heading') ? 'heading' : 'paragraph')
 
   const current = (): { id: string; label: string } => {
     const level = editor.getAttributes('heading').level

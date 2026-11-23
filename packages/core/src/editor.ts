@@ -1,9 +1,4 @@
-import {
-  DOMSerializer,
-  type Mark,
-  type Node as ProseMirrorNode,
-  type Schema,
-} from 'prosemirror-model'
+import type { Mark, Node as ProseMirrorNode, Schema } from 'prosemirror-model'
 import { type Command, EditorState, type Transaction } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
 import { parseContent, SCHEMA_VERSION } from './content.js'
@@ -19,6 +14,7 @@ import type {
   QueryRegistry,
 } from './extension.js'
 import { resolveExtensions } from './extension-manager.js'
+import { serializeHtml } from './html.js'
 import { plainTextPaste } from './paste.js'
 import { withKeptSpaces } from './whitespace.js'
 
@@ -242,13 +238,7 @@ export class Editor {
   }
 
   getHTML(): string {
-    const container = document.createElement('div')
-    container.append(
-      DOMSerializer.fromSchema(this.schema).serializeFragment(
-        withKeptSpaces(this.currentDoc()).content,
-      ),
-    )
-    return container.innerHTML
+    return serializeHtml(this.schema, withKeptSpaces(this.currentDoc()).content)
   }
 
   setContent(content: EditorContent): void {

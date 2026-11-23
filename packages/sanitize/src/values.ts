@@ -151,6 +151,13 @@ const familyKey = (value: string): string =>
     .map((part) => trimAscii(part).replace(SPACE, ' '))
     .join(',')
 
+const leadKey = (key: string): string => `\n${key.split(',')[0] ?? ''}`
+
+const findFamily = (fonts: FontFamilies, value: string): string | null => {
+  const key = familyKey(value)
+  return fonts.get(key) ?? fonts.get(leadKey(key)) ?? null
+}
+
 export function fontFamilyMap(list: readonly string[]): FontFamilies {
   const map = new Map<string, string>()
   for (const entry of list) {
@@ -163,7 +170,10 @@ export function fontFamilyMap(list: readonly string[]): FontFamilies {
       throw new TypeError('Each font family must be a comma-separated list of plain family names.')
     }
     const canonical = parts.join(', ')
-    map.set(familyKey(canonical), canonical)
+    const key = familyKey(canonical)
+    map.set(key, canonical)
+    const first = leadKey(key)
+    if (!map.has(first)) map.set(first, canonical)
   }
   return map
 }
@@ -206,7 +216,7 @@ function styleValue(property: string, value: string, fonts: FontFamilies): strin
     const style = lowerAscii(value)
     return VIVE_PROFILE.bulletStyles.includes(style) ? style : null
   }
-  if (property === 'font-family') return fonts.get(familyKey(value)) ?? null
+  if (property === 'font-family') return findFamily(fonts, value)
   const pixels = PIXELS.exec(value)
   const number = pixels ? Number(pixels[1]) : 0
   return number > 0 && number <= limits.maxTableWidth ? `${number}px` : null

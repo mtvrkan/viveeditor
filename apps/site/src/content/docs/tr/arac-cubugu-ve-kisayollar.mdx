@@ -71,7 +71,7 @@ const editor = await Editor.create(document.querySelector('#editor'), {
 })
 ```
 
-Her girdi, düz adlardan oluşan ve virgülle ayrılan bir aile listesidir: `Inter, sans-serif` ya da `'Fira Code', monospace` gibi. Başka bir şey içeren girdi editör başlarken `TypeError` fırlatır. Yalnızca listedeki yazı tipleri uygulanır: yapıştırılan ya da yüklenen metin yazı tipini ancak listedeki bir girdiyle eşleşirse korur, diğerleri atılır.
+Her girdi, düz adlardan oluşan ve virgülle ayrılan bir aile listesidir: `Inter, sans-serif` ya da `'Fira Code', monospace` gibi. Başka bir şey içeren girdi editör başlarken `TypeError` fırlatır. Yalnızca listedeki yazı tipleri uygulanır: yapıştırılan ya da yüklenen metin, yazı tipi listedeki bir girdiyle eşleşirse ya da ilk yazı tipi adı bir girdinin ilk adıyla aynıysa yazı tipini korur (Word'den gelen `"Times New Roman", serif`, `'Times New Roman', Times, serif` olur); diğerleri atılır. Sunucu temizleyicisi de aynı kuralı uygular.
 
 <Callout type="warn" title="Sunucuya aynı listeyi verin">
 Sunucu temizleyicisi yalnızca kendi `fontFamilies` seçeneğindeki yazı tiplerini tutar; varsayılan olarak aynı sekiz aile tanımlıdır. Editördeki listeyi değiştirirseniz temizleyiciye de birebir aynı listeyi verin, yoksa içerik kaydedilirken yazı tipleri kaybolur. Ayrıntılar [Sunucuda temizleme](/dokumantasyon/sunucuda-temizleme/) sayfasında.
@@ -83,7 +83,7 @@ Kodda `setFontFamily(family)` listedeki bir girdiyi uygular, `unsetFontFamily()`
 
 Boyutlar punto olarak kaydedilir: `<span style="font-size: 10.5pt">`. Kodda `setFontSize(14)` 6 ile 96 arasında bir sayı alır ve en yakın yarım puntoya yuvarlar; `stepFontSize(1)` ve `stepFontSize(-1)` `FONT_POINT_PRESETS` listesinde (8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48 ve 72) ilerler; `unsetFontSize()` boyutu kaldırır, `editor.query.fontSizePoints()` boyutu sayı olarak ya da `null` döndürür. Eski `'tiny'`, `'small'`, `'big'` ve `'huge'` adımları `setFontSize` ile hâlâ çalışır, bunlarla kaydedilmiş belgeler de olduğu gibi açılır.
 
-**Satır aralığı** seçili paragraf ve başlıkların satır yüksekliğini ayarlar: Tek (1), 1,15, 1,5, Çift (2) ya da aralığı kaldıran Varsayılan. Değer paragrafa ya da başlığa `line-height` olarak yazılır. Kodda `setLineHeight('1' | '1.15' | '1.5' | '2' | null)` kullanın; `editor.query.lineHeight()` imlecin bulunduğu yerdeki değeri döndürür.
+**Satır aralığı** seçili paragraf ve başlıkların satır yüksekliğini ayarlar: Tek (1), 1,15, 1,5, Çift (2) ya da aralığı kaldıran Varsayılan. Değer paragrafa ya da başlığa `line-height` olarak yazılır. Yapıştırılan metin bu dört değeri korur; Word'ün %100, %115, %150 ve %200 değerleri 1, 1,15, 1,5 ve 2 olur, diğer satır aralıkları atılır. Kodda `setLineHeight('1' | '1.15' | '1.5' | '2' | null)` kullanın; `editor.query.lineHeight()` imlecin bulunduğu yerdeki değeri döndürür.
 
 Bunlardan istemediklerinizi `exclude: ['fontFamily', 'fontSize', 'lineHeight']` ile kaldırabilirsiniz.
 

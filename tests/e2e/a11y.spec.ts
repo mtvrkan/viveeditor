@@ -203,6 +203,72 @@ const panels: { name: string; wide?: boolean; open(page: Page): Promise<Locator>
     },
   },
   {
+    name: 'table panel on the cell tab',
+    async open(page) {
+      await surface(page).locator('td').first().click()
+      await openTool(page, 'Tablo')
+      const panel = page.getByRole('dialog', { name: 'Tablo' })
+      await panel.getByRole('tab', { name: 'Hücre' }).click()
+      return panel
+    },
+  },
+  {
+    name: 'table panel on the table tab',
+    async open(page) {
+      await surface(page).locator('td').first().click()
+      await openTool(page, 'Tablo')
+      const panel = page.getByRole('dialog', { name: 'Tablo' })
+      await panel.getByRole('tab', { name: 'Tablo' }).click()
+      return panel
+    },
+  },
+  {
+    name: 'font size panel',
+    async open(page) {
+      await selectAll(page)
+      await openTool(page, /^Yazı boyutu/)
+      return page.getByRole('dialog', { name: 'Yazı boyutu' })
+    },
+  },
+  {
+    name: 'list style panel',
+    async open(page) {
+      await surface(page).locator('ul li').first().click()
+      await openTool(page, /^Liste stili/)
+      return page.getByRole('dialog', { name: 'Liste stili' })
+    },
+  },
+  {
+    name: 'font family menu',
+    wide: true,
+    async open(page) {
+      await selectAll(page)
+      await openTool(page, /^Yazı tipi/)
+      return page.getByRole('menuitemradio', { name: 'Georgia' })
+    },
+  },
+  {
+    name: 'line height menu',
+    wide: true,
+    async open(page) {
+      await selectAll(page)
+      await openTool(page, /^Satır aralığı/)
+      return page.getByRole('menuitemradio', { name: '1,5' })
+    },
+  },
+  {
+    name: 'context menu with a submenu',
+    async open(page) {
+      test.skip(test.info().project.use.isMobile === true, 'the custom menu is for mouse')
+      await surface(page).locator('td').first().click({ button: 'right' })
+      await page
+        .getByRole('menu', { name: 'Bağlam menüsü' })
+        .getByRole('menuitem', { name: 'Satır' })
+        .click()
+      return page.getByRole('menu', { name: 'Satır' })
+    },
+  },
+  {
     name: 'more menu',
     async open(page) {
       await page.setViewportSize({ width: 390, height: 800 })

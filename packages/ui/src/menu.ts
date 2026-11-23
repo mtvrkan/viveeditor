@@ -113,7 +113,9 @@ export function createMenu(options: MenuOptions): Menu {
         item.hint ? h('span', { class: 've-item-hint' }, [item.hint]) : null,
         item.items
           ? h('span', { class: 've-item-more', 'aria-hidden': 'true' }, [icon('chevron')])
-          : null,
+          : item.role === 'menuitem'
+            ? null
+            : h('span', { class: 've-item-check', 'aria-hidden': 'true' }, [icon('check')]),
       ],
     )
     const children = item.items

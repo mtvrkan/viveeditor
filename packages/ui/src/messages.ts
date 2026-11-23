@@ -206,6 +206,8 @@ export interface Messages {
   customColor: string
   colorCode: string
   colorPicker: string
+  colorHue: string
+  colorEyedropper: string
   colorApply: string
   colorInvalid: string
   recentColors: string
@@ -486,6 +488,8 @@ const tr: Messages = {
   customColor: 'Özel renk',
   colorCode: 'Renk kodu',
   colorPicker: 'Renk seçici',
+  colorHue: 'Renk tonu',
+  colorEyedropper: 'Ekrandan renk al',
   colorApply: 'Uygula',
   colorInvalid: 'Geçerli bir renk kodu yazın, ör. #1a73e8',
   recentColors: 'Son kullanılanlar',
@@ -762,6 +766,8 @@ const en: Messages = {
   customColor: 'Custom color',
   colorCode: 'Color code',
   colorPicker: 'Color picker',
+  colorHue: 'Hue',
+  colorEyedropper: 'Pick a color from the screen',
   colorApply: 'Apply',
   colorInvalid: 'Enter a valid color code, e.g. #1a73e8',
   recentColors: 'Recent colors',

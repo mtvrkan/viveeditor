@@ -1,3 +1,4 @@
+const HEADING = 'M4 5v14M13 5v14M4 12h9'
 const DOT = (x: number, y: number): string => `M${x} ${y - 1}a1 1 0 1 1 0 2a1 1 0 1 1 0-2`
 
 export type IconName =
@@ -12,6 +13,10 @@ export type IconName =
   | 'more'
   | 'paragraph'
   | 'heading'
+  | 'heading1'
+  | 'heading2'
+  | 'heading3'
+  | 'eyedropper'
   | 'horizontalRule'
   | 'chevron'
   | 'check'
@@ -86,6 +91,11 @@ const PATHS: Record<IconName, string> = {
   more: `${DOT(5, 12)}${DOT(12, 12)}${DOT(19, 12)}`,
   paragraph: 'M13 4v16M17 4v16M19 4H9.5a4.5 4.5 0 0 0 0 9H13',
   heading: 'M5 5v14M15 5v14M5 12h10M19 19v-6l-2 1',
+  heading1: `${HEADING}M19.5 19v-8l-2.5 1.5`,
+  heading2: `${HEADING}M16.5 13a2.25 2.25 0 0 1 4.5 0c0 2.2-4.5 3.4-4.5 6h4.5`,
+  heading3: `${HEADING}M16.5 11h4.5l-2.6 3a2.5 2.5 0 1 1-2.1 4`,
+  eyedropper:
+    'M4 20l1.5-1.5H8l7.5-7.5M5.5 18.5V16l7.5-7.5M12 7.5l4.5 4.5M14.5 5.5l2-2a2.1 2.1 0 0 1 3 3l-2 2',
   horizontalRule: 'M4 12h16',
   chevron: 'm6 9 6 6 6-6',
   check: 'm5 12 5 5 9-10',

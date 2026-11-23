@@ -108,6 +108,9 @@ createUI(editor, {
     fileName: 'Sürüm notları',
   },
   ...(params.has('autosave') ? { autosave: { key: 'playground', wait: 300 } } : {}),
+  ...(params.has('contextMenu')
+    ? { contextMenu: params.get('contextMenu') === 'always' ? ('always' as const) : false }
+    : {}),
 })
 
 const render = (): void => {

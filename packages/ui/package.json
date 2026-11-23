@@ -92,7 +92,7 @@
       "ignore": [
         "@viveeditor/core"
       ],
-      "limit": "16 KB"
+      "limit": "16.6 KB"
     },
     {
       "name": "@viveeditor/ui/extras",

@@ -14,7 +14,7 @@ describe('font family', () => {
 
     expect(set).toBe(true)
     expect(html(editor)).toBe(
-      `<p><span style="font-family: &quot;Times New Roman&quot;, Times, serif">yazı</span> tipi</p>`,
+      `<p><span style="font-family: 'Times New Roman', Times, serif">yazı</span> tipi</p>`,
     )
     expect(editor.query.fontFamily()).toBe("'Times New Roman', Times, serif")
   })
@@ -43,14 +43,24 @@ describe('font family', () => {
     expect(defaults.query.fontFamilies()).toEqual(DEFAULT_FONT_FAMILIES)
   })
 
-  it('maps a pasted family to the list entry only on an exact canonical match', async () => {
+  it('maps a pasted family to the list entry by its full list or its first name', async () => {
     const editor = await mount(
-      '<p><span style=\'font-family: "Times New Roman", Times, SERIF\'>bir</span> <span style=\'font-family: "Times New Roman", serif\'>iki</span> <span style="font-family: Calibri">üç</span></p>',
+      '<p><span style=\'font-family: "Times New Roman", Times, SERIF\'>bir</span> <span style=\'font-family: "Times New Roman", serif\'>iki</span> <span style="font-family: Calibri, sans-serif">üç</span> <span style="font-family: Helvetica, Arial">dört</span></p>',
     )
 
     expect(html(editor)).toBe(
-      `<p><span style="font-family: &quot;Times New Roman&quot;, Times, serif">bir</span> iki üç</p>`,
+      `<p><span style="font-family: 'Times New Roman', Times, serif">bir</span> <span style="font-family: 'Times New Roman', Times, serif">iki</span> üç dört</p>`,
     )
+  })
+
+  it('keeps the first list entry when two entries share a first name', async () => {
+    const editor = await mount('<p><span style="font-family: Georgia">bir</span></p>', [
+      ...basicExtensions,
+      FontFamily.configure({ fontFamilies: ['Georgia, serif', 'Georgia, Times, serif'] }),
+    ])
+
+    expect(html(editor)).toBe('<p><span style="font-family: Georgia, serif">bir</span></p>')
+    expect(editor.query.fontFamilies()).toEqual(['Georgia, serif', 'Georgia, Times, serif'])
   })
 
   it('refuses a family outside the configured list', async () => {
@@ -92,7 +102,7 @@ describe('font family', () => {
 
     expect(results).toEqual([false, true])
     expect(html(editor)).toBe(
-      `<p><span style="font-family: &quot;Open Sans&quot;, sans-serif">metin</span></p>`,
+      `<p><span style="font-family: 'Open Sans', sans-serif">metin</span></p>`,
     )
   })
 
@@ -108,4 +118,27 @@ describe('font family', () => {
       await expect(mount('<p>metin</p>', extensions)).rejects.toThrow(TypeError)
     },
   )
+
+  it('reports no family for a selection that mixes families and the one family when it does not', async () => {
+    const editor = await mount(
+      '<p><span style="font-family: Georgia, serif">bir</span> iki <span style="font-family: Georgia, serif">üç</span></p>',
+    )
+    editor.commands.setTextSelection(1, 6)
+    const mixed = editor.query.fontFamily()
+    editor.commands.setTextSelection(1, 3)
+    const single = editor.query.fontFamily()
+
+    expect(mixed).toBeNull()
+    expect(single).toBe('Georgia, serif')
+  })
+
+  it('writes the canonical entry when a browser hands back the family with double quotes', async () => {
+    const editor = await mount(
+      '<p><span style="font-family: &quot;Courier New&quot;, Courier, monospace">kod</span></p>',
+    )
+
+    expect(editor.getHTML()).toBe(
+      `<p><span style="font-family: 'Courier New', Courier, monospace">kod</span></p>`,
+    )
+  })
 })

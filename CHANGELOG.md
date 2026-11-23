@@ -108,6 +108,8 @@
 
 ### Changed
 
+- Pasted fonts are matched to the font list by their first name, and Word's percentage line heights become the editor's values; both sanitizers follow the same font rule. [2026-11-23]
+- Menus mark the current item with a check and a single focus ring, headings 1–3 have their own icons, and colour panels have a built-in picker (colour area, hue slider, code field) instead of the browser's colour window. [2026-11-23]
 - Documentation covers the table panel, font, size, line spacing and list style controls, the right-click menu, the code block Copy button, linked images and the new Word mappings. [2026-11-23]
 - End-to-end tests run on Playwright 1.65.1, whose Firefox build starts on macOS 27. [2026-11-21]
 - `MountDestroyedError` is now a `ViveEditorError` with the code `DESTROYED`, like the other editor errors; `instanceof MountDestroyedError` still works. [2026-11-21]
@@ -142,6 +144,7 @@
 
 ### Fixed
 
+- Saved HTML writes font families the same way in every browser, and font size and font family show no value for a mixed selection. [2026-11-23]
 - Images opened from a Word file no longer come with an empty paragraph before them. [2026-11-23]
 - Opening a Word file from the File menu keeps the fonts of a custom font family list. [2026-11-23]
 - The CDN build loads the font size panel. [2026-11-23]

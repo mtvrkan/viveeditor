@@ -383,7 +383,7 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
   ],
 ]
 
-const heading = (level: number, hint: string): BlockSpec => ({
+const heading = (level: 1 | 2 | 3, hint: string): BlockSpec => ({
   id: `heading${level}`,
   command: 'toggleHeading',
   args: { level },
@@ -391,7 +391,7 @@ const heading = (level: number, hint: string): BlockSpec => ({
   activeAttrs: { level },
   label: 'heading',
   labelValues: { level },
-  icon: 'heading',
+  icon: `heading${level}`,
   hint,
   keywords: `baslik heading h${level} title`,
   menu: true,

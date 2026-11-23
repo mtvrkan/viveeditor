@@ -1,7 +1,7 @@
 import { Editor, type EditorOptions } from '@viveeditor/core'
 import { CodeBlock } from '@viveeditor/ext-code-block'
 import { TextSelection } from 'prosemirror-state'
-import { CellSelection } from 'prosemirror-tables'
+import { CellSelection, TableMap } from 'prosemirror-tables'
 import type { EditorView } from 'prosemirror-view'
 import { afterEach, describe, expect, it } from 'vitest'
 import { Table } from '../src/index.js'
@@ -483,5 +483,127 @@ describe('distributeColumns', () => {
     placeCursor(editor, 4)
 
     expect(editor.commands.distributeColumns()).toBe(false)
+  })
+})
+
+const merged =
+  '<table><tr><th data-colwidth="100"><p>h1</p></th><th data-colwidth="200"><p>h2</p></th><th data-colwidth="60"><p>h3</p></th></tr><tr><td colspan="2" data-colwidth="100,200"><p>m</p></td><td rowspan="2" data-colwidth="60"><p>r</p></td></tr><tr><td data-colwidth="100"><p>x</p></td><td data-colwidth="200"><p>y</p></td></tr></table>'
+
+function cursorIn(editor: Editor, text: string): void {
+  let found = -1
+  viewOf(editor).state.doc.descendants((node, position) => {
+    if (found < 0 && node.isText && node.text === text) found = position
+    return found < 0
+  })
+  if (found < 0) throw new Error(`No cell with ${text}`)
+  placeCursor(editor, found)
+}
+
+function selectedTexts(editor: Editor): string[] {
+  const { selection } = viewOf(editor).state
+  if (!(selection instanceof CellSelection)) return []
+  const texts: string[] = []
+  selection.forEachCell((node) => {
+    texts.push(node.textContent)
+  })
+  return texts
+}
+
+function tableProblems(editor: Editor): unknown {
+  let problems: unknown = null
+  viewOf(editor).state.doc.descendants((node) => {
+    if (node.type.spec.tableRole === 'table') {
+      problems = TableMap.get(node).problems ?? null
+      return false
+    }
+    return true
+  })
+  return problems
+}
+
+describe('tables with merged cells', () => {
+  it('styles every cell of a column selection that runs from the header into the body', async () => {
+    const editor = await mount({ content: merged })
+    cursorIn(editor, 'h1')
+    editor.commands.selectColumn()
+    const selected = selectedTexts(editor)
+
+    const done = [
+      editor.commands.setCellBackground('#ffeeaa'),
+      editor.commands.setCellTextAlign('center'),
+      editor.commands.setCellVerticalAlign('bottom'),
+    ]
+
+    const html = clean(editor.getHTML())
+    expect(done).toEqual([true, true, true])
+    expect(selected).toEqual(['h1', 'm', 'x'])
+    expect(
+      html.match(/text-align: center; background-color: #ffeeaa; vertical-align: bottom/g),
+    ).toHaveLength(3)
+    expect(html).toContain('<th data-colwidth="200"><p>h2</p></th>')
+    expect(html).toContain('<td rowspan="2" data-colwidth="60"><p>r</p></td>')
+  })
+
+  it('spreads widths evenly over merged cells and keeps the total', async () => {
+    const editor = await mount({ content: merged })
+    cursorIn(editor, 'm')
+
+    const done = editor.commands.distributeColumns()
+
+    const html = clean(editor.getHTML())
+    expect(done).toBe(true)
+    expect(html).toContain(
+      '<colgroup><col style="width: 120px"><col style="width: 120px"><col style="width: 120px"></colgroup>',
+    )
+    expect(html).toContain('<td colspan="2" data-colwidth="120,120"><p>m</p></td>')
+    expect(html).toContain('<td rowspan="2" data-colwidth="120"><p>r</p></td>')
+    expect(html).toContain('style="width: 360px"')
+  })
+
+  it('adds a row inside a row span and removes a column through a column span without breaking the grid', async () => {
+    const editor = await mount({ content: merged })
+    cursorIn(editor, 'm')
+    editor.commands.addRowAfter()
+    cursorIn(editor, 'h2')
+
+    editor.commands.deleteColumn()
+
+    const html = clean(editor.getHTML())
+    expect(tableProblems(editor)).toBeNull()
+    expect(html).toContain('<td data-colwidth="100"><p>m</p></td>')
+    expect(html).toContain('rowspan="3"')
+    expect(html.match(/<tr>/g)).toHaveLength(4)
+  })
+
+  it('merges a selection that already holds a merged cell and splits it back', async () => {
+    const editor = await mount({ content: merged })
+    cursorIn(editor, 'm')
+    editor.commands.selectTable()
+
+    const mergedAll = editor.commands.mergeCells()
+    const afterMerge = tableProblems(editor)
+    const split = editor.commands.splitCell()
+
+    expect(mergedAll).toBe(true)
+    expect(afterMerge).toBeNull()
+    expect(split).toBe(true)
+    expect(tableProblems(editor)).toBeNull()
+    expect(clean(editor.getHTML()).match(/<t[hd][ >]/g)).toHaveLength(9)
+  })
+
+  it('selects the last row and the last column from their edge cells', async () => {
+    const editor = await mount({ content: merged })
+    cursorIn(editor, 'y')
+    editor.commands.selectRow()
+    const row = selectedTexts(editor)
+    cursorIn(editor, 'h3')
+    editor.commands.selectColumn()
+    const column = selectedTexts(editor)
+    cursorIn(editor, 'x')
+    editor.commands.selectTable()
+
+    expect(row).toEqual(expect.arrayContaining(['x', 'y', 'r']))
+    expect(column).toEqual(['h3', 'r'])
+    expect(selectedTexts(editor)).toHaveLength(7)
   })
 })
