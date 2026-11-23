@@ -13,9 +13,10 @@ import type {
   QueryName,
   QueryRegistry,
 } from './extension.js'
-import { resolveExtensions } from './extension-manager.js'
+import { resolveExtensions, type TransactionTransformer } from './extension-manager.js'
 import { serializeHtml } from './html.js'
 import { plainTextPaste } from './paste.js'
+import { isRemote } from './remote.js'
 import { withKeptSpaces } from './whitespace.js'
 
 export interface JSONMark {
@@ -55,7 +56,7 @@ export interface EditorOptions {
 }
 
 export interface EditorEventMap {
-  change: { editor: Editor }
+  change: { editor: Editor; remote: boolean }
   update: { editor: Editor }
   focus: { editor: Editor; event: FocusEvent }
   blur: { editor: Editor; event: FocusEvent }
@@ -79,6 +80,7 @@ export class Editor {
   private readonly view: EditorView
   private readonly commandFactories: Map<string, CommandFactory>
   private readonly queryFactories: Map<string, QueryFactory>
+  private readonly transformers: readonly TransactionTransformer[]
   private readonly events: Emitter<EditorEventMap> = new Emitter((error, name) =>
     this.reportListenerError(error, name),
   )
@@ -95,6 +97,7 @@ export class Editor {
     this.schema = resolved.schema
     this.commandFactories = resolved.commands
     this.queryFactories = resolved.queries
+    this.transformers = resolved.transformers
     const state = EditorState.create({
       doc: parseContent(this.schema, options.content),
       plugins: [plainTextPaste(), ...resolved.plugins],
@@ -342,13 +345,36 @@ export class Editor {
     return command(this.view.state, this.view.dispatch, this.view)
   }
 
-  private dispatch(transaction: Transaction): void {
+  private dispatch(incoming: Transaction): void {
+    const transaction = this.transform(incoming)
     const state = this.view.state.apply(transaction)
     this.view.updateState(state)
     if (transaction.docChanged) {
-      this.events.emit('change', { editor: this })
+      this.events.emit('change', { editor: this, remote: isRemote(transaction) })
     }
     this.events.emit('update', { editor: this })
+  }
+
+  private transform(transaction: Transaction): Transaction {
+    if (this.transformers.length === 0 || isRemote(transaction)) return transaction
+    const { state } = this.view
+    let current = transaction
+    for (const transformer of this.transformers) {
+      if (!current.docChanged) break
+      try {
+        const next = transformer(current, state)
+        if (next && next.before !== state.doc) {
+          throw new ViveEditorError(
+            'INVALID_TRANSACTION',
+            'transformTransaction returned a transaction that does not start from the current state.',
+          )
+        }
+        if (next) current = next
+      } catch (error) {
+        this.reportListenerError(error, 'change')
+      }
+    }
+    return current
   }
 
   private assertAlive(): void {

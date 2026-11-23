@@ -10,8 +10,8 @@ import {
   type AttributeSpec as SchemaAttributeSpec,
   type TagParseRule,
 } from 'prosemirror-model'
-import type { Command, Plugin } from 'prosemirror-state'
-import { Base } from './base.js'
+import type { Command, EditorState, Plugin, Transaction } from 'prosemirror-state'
+import { Base, BaseHistory } from './base.js'
 import { ViveEditorError } from './errors.js'
 import type {
   AttributeSpec,
@@ -21,12 +21,20 @@ import type {
   QueryFactory,
 } from './extension.js'
 
+export type TransactionTransformer = (
+  transaction: Transaction,
+  state: EditorState,
+) => Transaction | null | undefined
+
 export interface ResolvedExtensions {
   schema: Schema
   plugins: Plugin[]
   commands: Map<string, CommandFactory>
   queries: Map<string, QueryFactory>
+  transformers: TransactionTransformer[]
 }
+
+const refuse: CommandFactory = () => () => false
 
 type Attributes = Record<string, AttributeSpec>
 type SchemaSpec = NodeSpec | MarkSpec
@@ -212,7 +220,12 @@ function mergeBindings(bindings: Map<string, Command[]>): Record<string, Command
 }
 
 export function resolveExtensions(extensions: readonly Extension[]): ResolvedExtensions {
-  const all: Extension[] = [Base as Extension, ...extensions]
+  const replacesHistory = extensions.some((extension) => extension.config.replacesHistory === true)
+  const all: Extension[] = [
+    ...(replacesHistory ? [] : [BaseHistory as Extension]),
+    Base as Extension,
+    ...extensions,
+  ]
   const names = new Set<string>()
   for (const extension of all) {
     if (names.has(extension.name)) {
@@ -242,6 +255,7 @@ export function resolveExtensions(extensions: readonly Extension[]): ResolvedExt
   const rules: InputRule[] = []
   const keymaps = new Map<string, Command[]>()
   const extraPlugins: Plugin[] = []
+  const transformers: TransactionTransformer[] = []
 
   for (const extension of ordered) {
     const context = { schema, options: extension.options }
@@ -270,6 +284,13 @@ export function resolveExtensions(extensions: readonly Extension[]): ResolvedExt
     }
     rules.push(...(config.inputRules?.(context) ?? []))
     extraPlugins.push(...(config.plugins?.(context) ?? []))
+    const { transformTransaction } = config
+    if (transformTransaction) {
+      transformers.push((transaction, state) => transformTransaction(transaction, state, context))
+    }
+  }
+  for (const name of ['undo', 'redo']) {
+    if (!commands.has(name)) commands.set(name, refuse)
   }
 
   const plugins = [
@@ -279,5 +300,5 @@ export function resolveExtensions(extensions: readonly Extension[]): ResolvedExt
     ...extraPlugins,
   ]
 
-  return { schema, plugins, commands, queries }
+  return { schema, plugins, commands, queries, transformers }
 }

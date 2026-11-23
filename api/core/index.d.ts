@@ -1,6 +1,6 @@
 import { InputRule } from "prosemirror-inputrules";
 import { MarkSpec, MarkType, NodeSpec, NodeType, Schema } from "prosemirror-model";
-import { Command, EditorState, Plugin } from "prosemirror-state";
+import { Command, EditorState, Plugin, Transaction } from "prosemirror-state";
 interface JSONMark {
   type: string;
   attrs?: Record<string, unknown>;
@@ -34,6 +34,7 @@ interface EditorOptions {
 interface EditorEventMap {
   change: {
     editor: Editor;
+    remote: boolean;
   };
   update: {
     editor: Editor;
@@ -64,6 +65,7 @@ export declare class Editor {
   private readonly view;
   private readonly commandFactories;
   private readonly queryFactories;
+  private readonly transformers;
   private readonly events;
   private lastDoc;
   private destroyed;
@@ -94,6 +96,7 @@ export declare class Editor {
   private createQueryProxy;
   private run;
   private dispatch;
+  private transform;
   private assertAlive;
 }
 interface CommandRegistry {
@@ -155,6 +158,8 @@ interface ExtensionConfig<Options> {
   keymap?(context: ExtensionContext<Options>): Record<string, Command>;
   inputRules?(context: ExtensionContext<Options>): InputRule[];
   plugins?(context: ExtensionContext<Options>): Plugin[];
+  replacesHistory?: boolean;
+  transformTransaction?(transaction: Transaction, state: EditorState, context: ExtensionContext<Options>): Transaction | null | undefined;
 }
 interface Extension<Options = unknown> {
   readonly name: string;
@@ -168,7 +173,7 @@ export declare function defineExtension<Options = Record<string, never>>(config:
 export declare const Base: Extension<Record<string, never>>;
 export declare function normalizeColor(input: unknown): string | null;
 export declare const SCHEMA_VERSION = 1;
-type ViveEditorErrorCode = "INVALID_CONTENT" | "SCHEMA_TOO_NEW" | "DESTROYED" | "DUPLICATE_EXTENSION" | "DUPLICATE_COMMAND" | "DUPLICATE_QUERY" | "SCHEMA_CONFLICT" | "INVALID_SCHEMA" | "MISSING_SCHEMA_ITEM" | "UNKNOWN_COMMAND" | "UNKNOWN_QUERY";
+type ViveEditorErrorCode = "INVALID_CONTENT" | "SCHEMA_TOO_NEW" | "DESTROYED" | "DUPLICATE_EXTENSION" | "DUPLICATE_COMMAND" | "DUPLICATE_QUERY" | "SCHEMA_CONFLICT" | "INVALID_SCHEMA" | "MISSING_SCHEMA_ITEM" | "UNKNOWN_COMMAND" | "UNKNOWN_QUERY" | "INVALID_TRANSACTION";
 export declare class ViveEditorError extends Error {
   readonly code: ViveEditorErrorCode;
   constructor(code: ViveEditorErrorCode, message: string, options?: {
@@ -178,6 +183,8 @@ export declare class ViveEditorError extends Error {
 export declare function markInputRule(pattern: RegExp, markType: MarkType): InputRule;
 export declare function textInputRule(pattern: RegExp, replacement: string): InputRule;
 export declare function cleanPastedHtml(html: string): string;
+export declare const REMOTE_META = "viveRemote";
+export declare function isRemote(transaction: Transaction): boolean;
 export declare function getNodeType(schema: Schema, name: string): NodeType;
 export declare function getMarkType(schema: Schema, name: string): MarkType;
 export declare const DEFAULT_ALLOWED_PROTOCOLS: readonly string[];

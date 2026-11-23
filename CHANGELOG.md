@@ -4,6 +4,7 @@
 
 ### Added
 
+- Core hooks for comments, track changes and collaboration: extensions can replace the undo history and rewrite local edits before they apply, remote edits can be marked, and the change event says whether an edit was remote (autosave and the character limit skip remote edits). [2026-11-23]
 - Images get four corner handles with a live size badge (double-click resets to natural size) and a Crop dialog with ratio presets and keyboard control; the cropped file goes through the normal upload path. [2026-11-23]
 - Tables can be resized by touch: grips appear on a tapped cell's column and row borders on phones and tablets. [2026-11-23]
 - Table rows can be made taller or shorter by dragging their bottom border (double-click resets), from the table panel or the right-click menu; Word and both sanitizers keep the height. [2026-11-23]

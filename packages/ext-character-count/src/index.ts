@@ -1,4 +1,4 @@
-import { defineExtension, type Extension } from '@viveeditor/core'
+import { defineExtension, type Extension, isRemote } from '@viveeditor/core'
 import type { Node as ProseMirrorNode } from 'prosemirror-model'
 import { Plugin, type Transaction } from 'prosemirror-state'
 
@@ -67,6 +67,7 @@ export const CharacterCount: Extension<CharacterCountOptions> = defineExtension(
       new Plugin({
         filterTransaction: (transaction, state) => {
           if (!transaction.docChanged || transaction.getMeta('addToHistory') === false) return true
+          if (isRemote(transaction)) return true
           const next = countCharacters(transaction.doc)
           if (next <= limit) return true
           const current = countCharacters(state.doc)

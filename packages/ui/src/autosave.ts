@@ -181,7 +181,9 @@ export function createAutosave(editor: Editor, options: AutosaveOptions): Autosa
     writeLocal()
   }
 
-  const unsubscribe = editor.on('change', schedule)
+  const unsubscribe = editor.on('change', ({ remote }) => {
+    if (!remote) schedule()
+  })
   lifecycle.listen(window, 'pagehide', flushLocal)
   lifecycle.listen(document, 'visibilitychange', () => {
     if (document.visibilityState === 'hidden') flushLocal()

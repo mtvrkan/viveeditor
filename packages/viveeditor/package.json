@@ -79,7 +79,7 @@
     {
       "name": "viveeditor (CDN script, everything included)",
       "path": "dist/viveeditor.classic.iife.js",
-      "limit": "131.5 KB",
+      "limit": "131.7 KB",
       "rolldown": false
     },
     {

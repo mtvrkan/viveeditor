@@ -1,8 +1,18 @@
-import { Editor } from '@viveeditor/core'
+import { Editor, REMOTE_META } from '@viveeditor/core'
 import { basicExtensions } from '@viveeditor/ext-basic'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { type AutosaveOptions, createAutosave, createUI, type EditorUI } from '../src/index.js'
 import * as panelKit from '../src/panel-kit.js'
+
+interface RemoteTransaction {
+  insertText(text: string, from: number): RemoteTransaction
+  setMeta(key: string, value: unknown): RemoteTransaction
+}
+
+interface RemoteView {
+  state: { tr: RemoteTransaction }
+  dispatch(transaction: RemoteTransaction): void
+}
 
 const KEY = 'viveeditor:draft:post-1'
 let mounted: Array<{ editor: Editor; ui: EditorUI | null }> = []
@@ -66,6 +76,15 @@ describe('autosave drafts', () => {
     expect(bar?.hidden).toBe(true)
     second.editor.commands.undo()
     expect(second.editor.getHTML()).toBe('<p>ilk</p>')
+  })
+
+  it('does not schedule a save for remote changes', async () => {
+    const { editor, ui } = await mount('<p>uzak</p>')
+    const { view } = editor as unknown as { view: RemoteView }
+
+    view.dispatch(view.state.tr.insertText('x', 1).setMeta(REMOTE_META, true))
+
+    expect(ui.autosave?.status()).toBe('idle')
   })
 
   it('offers nothing when the draft matches the loaded content', async () => {

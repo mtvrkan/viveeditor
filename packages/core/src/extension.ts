@@ -1,6 +1,6 @@
 import type { InputRule } from 'prosemirror-inputrules'
 import type { MarkSpec, NodeSpec, Schema } from 'prosemirror-model'
-import type { Command, EditorState, Plugin } from 'prosemirror-state'
+import type { Command, EditorState, Plugin, Transaction } from 'prosemirror-state'
 import type { EditorContent } from './editor.js'
 
 export interface CommandRegistry {
@@ -76,6 +76,12 @@ export interface ExtensionConfig<Options> {
   keymap?(context: ExtensionContext<Options>): Record<string, Command>
   inputRules?(context: ExtensionContext<Options>): InputRule[]
   plugins?(context: ExtensionContext<Options>): Plugin[]
+  replacesHistory?: boolean
+  transformTransaction?(
+    transaction: Transaction,
+    state: EditorState,
+    context: ExtensionContext<Options>,
+  ): Transaction | null | undefined
 }
 
 export interface Extension<Options = unknown> {

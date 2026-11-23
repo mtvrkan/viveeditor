@@ -10,6 +10,7 @@ export type ViveEditorErrorCode =
   | 'MISSING_SCHEMA_ITEM'
   | 'UNKNOWN_COMMAND'
   | 'UNKNOWN_QUERY'
+  | 'INVALID_TRANSACTION'
 
 export class ViveEditorError extends Error {
   readonly code: ViveEditorErrorCode

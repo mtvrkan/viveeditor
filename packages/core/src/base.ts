@@ -185,8 +185,6 @@ export const Base: Extension<Record<string, never>> = defineExtension({
   }),
   commands: ({ schema }) => ({
     selectAll: () => selectAll,
-    undo: () => undo,
-    redo: () => redo,
     setParagraph: () => setBlockType(getNodeType(schema, 'paragraph')),
     deleteRange: (from: number, to: number) => (state, dispatch) => {
       if (from < 0 || from > to || to > state.doc.content.size) return false
@@ -266,10 +264,23 @@ export const Base: Extension<Record<string, never>> = defineExtension({
     },
   }),
   keymap: () => ({
+    Backspace: undoInputRule,
+  }),
+  plugins: () => [preserveMarksOnReplace, pasteCleanup],
+})
+
+export const BaseHistory: Extension<Record<string, never>> = defineExtension({
+  name: 'baseHistory',
+  priority: 0,
+  defaultOptions: {},
+  commands: () => ({
+    undo: () => undo,
+    redo: () => redo,
+  }),
+  keymap: () => ({
     'Mod-z': undo,
     'Shift-Mod-z': redo,
     'Mod-y': redo,
-    Backspace: undoInputRule,
   }),
-  plugins: () => [history(), preserveMarksOnReplace, pasteCleanup],
+  plugins: () => [history()],
 })

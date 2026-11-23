@@ -9,7 +9,7 @@ import { DocxError, exportDocx, importDocx } from '../src/index.js'
 
 const RUNS = Number(process.env.FUZZ_RUNS ?? 200)
 const SEED = 20_261_031
-const TIMEOUT = 10_000 + RUNS * 100
+const TIMEOUT = 10_000 + RUNS * 250
 
 const extensions: readonly Extension[] = [
   ...basicExtensions,

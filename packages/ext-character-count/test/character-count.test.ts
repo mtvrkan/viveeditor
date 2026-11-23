@@ -1,4 +1,4 @@
-import { Editor } from '@viveeditor/core'
+import { Editor, REMOTE_META } from '@viveeditor/core'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -79,6 +79,15 @@ describe('character count', () => {
 
     expect(editor.getText()).toBe('Merhabadünya')
     expect(editor.query.characterCount()).toBe(12)
+  })
+
+  it('lets remote changes through past the limit', async () => {
+    const editor = await mount(8)
+    const view = viewOf(editor)
+
+    view.dispatch(view.state.tr.insertText(' dünya', 8).setMeta(REMOTE_META, true))
+
+    expect(editor.getText()).toBe('Merhaba dünya')
   })
 
   it('ignores an invalid limit', async () => {

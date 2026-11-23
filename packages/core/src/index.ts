@@ -34,5 +34,6 @@ export {
 } from './extension.js'
 export { markInputRule, textInputRule } from './input-rules.js'
 export { cleanPastedHtml } from './paste.js'
+export { isRemote, REMOTE_META } from './remote.js'
 export { getMarkType, getNodeType } from './schema-utils.js'
 export { DEFAULT_ALLOWED_PROTOCOLS, isAllowedUrl } from './url.js'
