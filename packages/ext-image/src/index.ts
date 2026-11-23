@@ -1,5 +1,5 @@
 import { defineExtension, type Extension } from '@viveeditor/core'
-import type { NodeSpec, NodeType, Schema } from 'prosemirror-model'
+import type { DOMOutputSpec, NodeSpec, NodeType, Schema } from 'prosemirror-model'
 import {
   type Command,
   type EditorState,
@@ -8,9 +8,11 @@ import {
   TextSelection,
 } from 'prosemirror-state'
 import {
+  cleanAlign,
   cleanDimension,
   cleanImage,
   cleanText,
+  type ImageAlign,
   type ImageAttributes,
   type ImageSourcePolicy,
 } from './source.js'
@@ -29,6 +31,7 @@ export { type ImageSize, imageSize, sniffImageType } from './sniff.js'
 export {
   cleanDimension,
   DEFAULT_SOURCE_POLICY,
+  type ImageAlign,
   type ImageAttributes,
   type ImageSourcePolicy,
   isAllowedImageSrc,
@@ -74,6 +77,8 @@ export interface SelectedImage {
   title: string | null
   width: number | null
   height: number | null
+  caption: string | null
+  align: ImageAlign | null
 }
 
 export interface PendingUploads {
@@ -116,22 +121,45 @@ function imageSpec(policy: ImageSourcePolicy): NodeSpec {
       title: { default: null },
       width: { default: null },
       height: { default: null },
+      caption: { default: null },
+      align: { default: null },
     },
     parseDOM: [
       {
-        tag: 'img[src]',
+        tag: 'figure',
         getAttrs: (dom) => {
-          const names = ['src', 'alt', 'title', 'width', 'height']
-          const image = cleanImage(
-            Object.fromEntries(names.map((name) => [name, dom.getAttribute(name)])),
-            policy,
-          )
-          return image.src ? { ...image } : false
+          const image = dom.querySelector('img[src]')
+          return image
+            ? parseImage(image, policy, {
+                caption: dom.querySelector('figcaption')?.textContent ?? null,
+                align: dom.getAttribute('data-align'),
+              })
+            : false
         },
       },
+      { tag: 'img[src]', getAttrs: (dom) => parseImage(dom, policy, {}) },
     ],
-    toDOM: (node) => ['img', imageAttributes(node.attrs, policy)],
+    toDOM: (node) => {
+      const image: DOMOutputSpec = ['img', imageAttributes(node.attrs, policy)]
+      const { caption, align } = cleanImage(node.attrs, policy)
+      if (!caption && !align) return image
+      const figure: DOMOutputSpec[] = caption ? [image, ['figcaption', caption]] : [image]
+      return ['figure', align ? { 'data-align': align } : {}, ...figure]
+    },
   }
+}
+
+function parseImage(
+  dom: Element,
+  policy: ImageSourcePolicy,
+  extra: Record<string, unknown>,
+): Record<string, unknown> | false {
+  const names = ['src', 'alt', 'title', 'width', 'height']
+  const image = cleanImage(
+    { ...Object.fromEntries(names.map((name) => [name, dom.getAttribute(name)])), ...extra },
+    policy,
+  )
+  return image.src ? { ...image } : false
 }
 
 function selectedImageNode(state: EditorState, type: NodeType): NodeSelection | null {
@@ -172,6 +200,8 @@ function setImageAttributes(type: NodeType): (changes: ImageChanges) => Command 
       const next: Record<string, unknown> = { ...current }
       if ('alt' in changes) next.alt = cleanText(changes.alt)
       if ('title' in changes) next.title = cleanText(changes.title) || null
+      if ('caption' in changes) next.caption = cleanText(changes.caption) || null
+      if ('align' in changes) next.align = cleanAlign(changes.align)
       if ('height' in changes) next.height = cleanDimension(changes.height)
       if ('width' in changes) {
         next.width = cleanDimension(changes.width)

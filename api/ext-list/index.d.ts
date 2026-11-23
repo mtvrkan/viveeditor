@@ -14,4 +14,3 @@ export declare const BulletList: Extension<NoOptions>;
 export declare const OrderedList: Extension<NoOptions>;
 export declare const listExtensions: readonly Extension[];
 export {};
-//# sourceMappingURL=index.d.ts.map

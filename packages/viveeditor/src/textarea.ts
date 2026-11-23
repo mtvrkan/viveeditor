@@ -88,6 +88,9 @@ async function createTextareaEditor(
       ? false
       : ((uiOptions ? uiOptions.files : undefined) ?? defaults.files)
   const panels = (uiOptions ? uiOptions.panels : undefined) ?? defaults.panels
+  const draftKey = textarea.dataset.autosave
+  const autosave =
+    (uiOptions ? uiOptions.autosave : undefined) ?? (draftKey ? { key: draftKey } : undefined)
   const ui =
     uiOptions === false
       ? null
@@ -95,6 +98,7 @@ async function createTextareaEditor(
           ...uiOptions,
           ...(files === undefined ? {} : { files }),
           ...(panels === undefined ? {} : { panels }),
+          ...(autosave === undefined ? {} : { autosave }),
         })
   const wasRequired = textarea.required
   const wasHidden = textarea.hidden
@@ -203,8 +207,12 @@ async function createTextareaEditor(
       clearInvalid()
     })
   }
+  const onSubmitted = (event: Event): void => {
+    if (event.target === form && !event.defaultPrevented) ui?.autosave?.clear()
+  }
   form?.addEventListener('submit', onSubmit, { capture: true })
   form?.addEventListener('reset', onReset)
+  if (form && ui?.autosave) window.addEventListener('submit', onSubmitted)
 
   const labels = [...(textarea.labels ?? [])]
   const onLabelClick = (event: MouseEvent): void => {
@@ -228,6 +236,7 @@ async function createTextareaEditor(
       unsubscribe()
       form?.removeEventListener('submit', onSubmit, { capture: true })
       form?.removeEventListener('reset', onReset)
+      window.removeEventListener('submit', onSubmitted)
       for (const element of labels) element.removeEventListener('click', onLabelClick)
       ui?.destroy()
       editor.destroy()

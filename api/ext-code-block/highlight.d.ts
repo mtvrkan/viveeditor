@@ -36,4 +36,3 @@ export interface ShikiHighlighterOptions {
 export declare function shikiHighlighter<Language extends string>(load: () => Promise<ShikiLike<Language>>, options?: ShikiHighlighterOptions): Highlighter;
 export declare const CodeHighlight: Extension<CodeHighlightOptions>;
 export {};
-//# sourceMappingURL=highlight.d.ts.map

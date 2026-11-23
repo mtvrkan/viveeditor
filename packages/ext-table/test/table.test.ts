@@ -191,3 +191,41 @@ describe('table keyboard', () => {
     expect(cellTexts(editor)).toEqual(['  x', 'y'])
   })
 })
+
+describe('cell style', () => {
+  it('colours and aligns the cell at the cursor and writes it to HTML', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+    expect(editor.commands.setCellBackground('rgb(255, 242, 168)')).toBe(true)
+    expect(editor.commands.setCellVerticalAlign('middle')).toBe(true)
+    expect(editor.query.cellStyle()).toEqual({ background: '#fff2a8', verticalAlign: 'middle' })
+    expect(editor.getHTML()).toMatch(
+      /<td style="background-color: (#fff2a8|rgb\(255, 242, 168\)); vertical-align: middle;?"><p>a<\/p><\/td>/,
+    )
+    const copy = await mount({ content: editor.getHTML() })
+    expect(copy.getHTML()).toBe(editor.getHTML())
+  })
+
+  it('rejects unsafe values, clears them again and stays off outside tables', async () => {
+    const editor = await mount({ content: `${grid}<p>dışarı</p>` })
+    placeCursor(editor, 4)
+    expect(editor.can.setCellBackground('url(x)')).toBe(false)
+    expect(editor.can.setCellVerticalAlign('baseline' as 'middle')).toBe(false)
+    editor.commands.setCellBackground('#cde8ff')
+    editor.commands.setCellBackground(null)
+    expect(editor.query.cellStyle()).toEqual({ background: null, verticalAlign: null })
+    placeCursor(editor, viewOf(editor).state.doc.content.size - 2)
+    expect(editor.can.setCellBackground('#cde8ff')).toBe(false)
+    expect(editor.query.cellStyle()).toBeNull()
+  })
+
+  it('reads Word cell shading and valign but drops plain white and top', async () => {
+    const editor = await mount({
+      content:
+        '<table><tr><td style="background:yellow" valign="bottom">a</td><td style="background:white" valign="top">b</td></tr></table>',
+    })
+    const html = editor.getHTML()
+    expect(html).toMatch(/<td style="background-color: yellow; vertical-align: bottom;?">/)
+    expect(html).toContain('<td><p>b</p></td>')
+  })
+})

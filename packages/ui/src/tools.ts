@@ -1,11 +1,14 @@
 import type { IconName } from './icons.js'
 import type { MessageKey } from './messages.js'
 
+export { ariaShortcut, displayShortcut } from './shortcut.js'
+
 export interface ToolSpec {
   id: string
   command: string
   args?: readonly unknown[]
   active?: string
+  activeQuery?: string
   label: MessageKey
   glyph?: MessageKey
   glyphTag?: 'b' | 'i' | 'u'
@@ -86,6 +89,24 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       narrow: false,
       collapse: 2,
     },
+    {
+      id: 'clearFormatting',
+      command: 'clearFormatting',
+      label: 'clearFormatting',
+      icon: 'clearFormatting',
+      shortcut: 'Mod-\\',
+      narrow: false,
+      collapse: 1,
+    },
+    {
+      id: 'formatPainter',
+      command: 'copyFormat',
+      activeQuery: 'isPaintingFormat',
+      label: 'formatPainter',
+      icon: 'formatPainter',
+      narrow: false,
+      collapse: 1,
+    },
   ],
   [
     {
@@ -109,6 +130,16 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       narrow: false,
       collapse: 5,
       popup: 'dialog',
+    },
+    {
+      id: 'textStyle',
+      command: 'setFontSize',
+      args: ['big'],
+      label: 'textStyle',
+      icon: 'textStyle',
+      narrow: false,
+      collapse: 3,
+      popup: 'menu',
     },
   ],
   [
@@ -187,6 +218,16 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       popup: 'dialog',
       enabledQuery: 'selectedEmbed',
     },
+    {
+      id: 'specialCharacters',
+      command: 'insertText',
+      args: ['Ω'],
+      label: 'specialCharacters',
+      icon: 'specialCharacters',
+      narrow: false,
+      collapse: 1,
+      popup: 'dialog',
+    },
   ],
   [
     {
@@ -260,6 +301,42 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       icon: 'source',
       narrow: false,
       collapse: 0,
+    },
+    {
+      id: 'outline',
+      command: 'selectAll',
+      label: 'outline',
+      icon: 'outline',
+      narrow: false,
+      collapse: 0,
+      popup: 'dialog',
+    },
+    {
+      id: 'accessibility',
+      command: 'selectAll',
+      label: 'accessibilityCheck',
+      icon: 'accessibility',
+      narrow: false,
+      collapse: 0,
+      popup: 'dialog',
+    },
+    {
+      id: 'shortcuts',
+      command: 'selectAll',
+      label: 'shortcuts',
+      icon: 'keyboard',
+      shortcut: 'Alt-0',
+      narrow: false,
+      collapse: 0,
+      popup: 'dialog',
+    },
+    {
+      id: 'fullscreen',
+      command: 'selectAll',
+      label: 'fullscreen',
+      icon: 'fullscreen',
+      narrow: false,
+      collapse: 1,
     },
   ],
 ]
@@ -393,25 +470,6 @@ export const BLOCKS: readonly BlockSpec[] = [
   },
 ]
 
-const isApple = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent)
-
-export function displayShortcut(shortcut: string): string {
-  const keys = shortcut.split('-')
-  if (isApple) {
-    return keys
-      .map((key) => (key === 'Mod' ? '⌘' : key === 'Shift' ? '⇧' : key === 'Alt' ? '⌥' : key))
-      .join('')
-  }
-  return keys.map((key) => (key === 'Mod' ? 'Ctrl' : key)).join('+')
-}
-
-export function ariaShortcut(shortcut: string): string {
-  return shortcut
-    .split('-')
-    .map((key) => (key === 'Mod' ? (isApple ? 'Meta' : 'Control') : key))
-    .join('+')
-}
-
 const FOLD: Record<string, string> = { ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' }
 
 export function foldText(text: string): string {
@@ -426,6 +484,7 @@ export interface ToolFilter {
   has(command: string): boolean
   source: boolean
   files: boolean
+  exclude?: readonly string[]
 }
 
 export function availableTools(filter: ToolFilter): (readonly ToolSpec[])[] {
@@ -433,6 +492,8 @@ export function availableTools(filter: ToolFilter): (readonly ToolSpec[])[] {
     group.filter(
       (tool) =>
         filter.has(tool.command) &&
+        !filter.exclude?.includes(tool.id) &&
+        (tool.id !== 'outline' || filter.has('toggleHeading')) &&
         (tool.id !== 'source' || filter.source) &&
         (tool.id !== 'file' || filter.files),
     ),

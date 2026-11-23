@@ -64,7 +64,7 @@
         "prosemirror-model",
         "prosemirror-state"
       ],
-      "limit": "2 KB"
+      "limit": "6.5 KB"
     }
   ],
   "engines": {

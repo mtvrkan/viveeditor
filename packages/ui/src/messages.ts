@@ -7,6 +7,15 @@ export interface Messages {
   italic: string
   underline: string
   strike: string
+  clearFormatting: string
+  formatPainter: string
+  cleanDocument: string
+  pasteOptions: string
+  pasteKeep: string
+  pasteClean: string
+  pastePlain: string
+  cleanDocumentDone: string
+  cleanDocumentNothing: string
   code: string
   bulletList: string
   orderedList: string
@@ -24,6 +33,12 @@ export interface Messages {
   imageAltHint: string
   imageDecorative: string
   imageSize: string
+  imageCaption: string
+  imageAlign: string
+  imageAlignNone: string
+  imageAlignLeft: string
+  imageAlignCenter: string
+  imageAlignRight: string
   imageAdd: string
   imageApply: string
   imageUnsafe: string
@@ -50,6 +65,15 @@ export interface Messages {
   deleteTable: string
   search: string
   source: string
+  outline: string
+  accessibilityCheck: string
+  shortcuts: string
+  fullscreen: string
+  draftLabel: string
+  draftFound: string
+  draftRestore: string
+  draftDiscard: string
+  draftRestored: string
   sourceLabel: string
   file: string
   fileOpen: string
@@ -127,6 +151,29 @@ export interface Messages {
   alignCenter: string
   alignRight: string
   alignJustify: string
+  textStyle: string
+  fontTiny: string
+  fontSmall: string
+  fontNormal: string
+  fontBig: string
+  fontHuge: string
+  superscript: string
+  subscript: string
+  caseUpper: string
+  caseLower: string
+  caseTitle: string
+  caseSentence: string
+  indent: string
+  outdent: string
+  specialCharacters: string
+  charCategory: string
+  charsPunctuation: string
+  charsCurrency: string
+  charsMath: string
+  charsArrows: string
+  charsLetters: string
+  charsGreek: string
+  charsSymbols: string
   textColor: string
   highlight: string
   colorDefault: string
@@ -140,6 +187,12 @@ export interface Messages {
   colorPurple: string
   colorPink: string
   colorGray: string
+  cellColor: string
+  cellColorNone: string
+  cellAlign: string
+  cellAlignTop: string
+  cellAlignMiddle: string
+  cellAlignBottom: string
 }
 
 export type MessageKey = keyof Messages
@@ -155,6 +208,16 @@ const tr: Messages = {
   italic: 'İtalik',
   underline: 'Altı çizili',
   strike: 'Üstü çizili',
+  clearFormatting: 'Biçimi temizle',
+  formatPainter: 'Biçim boyacısı',
+  cleanDocument: 'Belgeyi toparla',
+  pasteOptions: 'Yapıştırma seçenekleri',
+  pasteKeep: 'Biçimi koru',
+  pasteClean: 'Yalnızca başlık, liste ve bağlantıları koru',
+  pastePlain: 'Yalnızca metin',
+  cleanDocumentDone:
+    'Belge toparlandı. Fazla boşluk: {extraSpaces} · Paragraf sonundaki satır sonu: {trailingBreaks} · Boş paragraf: {emptyParagraphs}',
+  cleanDocumentNothing: 'Belge zaten derli toplu.',
   code: 'Satır içi kod',
   bulletList: 'Madde işaretli liste',
   orderedList: 'Numaralı liste',
@@ -172,6 +235,12 @@ const tr: Messages = {
   imageAltHint: 'Görmeyenler için görseli kısaca anlatın',
   imageDecorative: 'Süs amaçlı, açıklama gerekmez',
   imageSize: 'Boyut',
+  imageCaption: 'Altyazı',
+  imageAlign: 'Yerleşim',
+  imageAlignNone: 'Yok',
+  imageAlignLeft: 'Sola',
+  imageAlignCenter: 'Ortaya',
+  imageAlignRight: 'Sağa',
   imageAdd: 'Ekle',
   imageApply: 'Uygula',
   imageUnsafe: 'Bu adres kullanılamaz, https ile başlayan bir görsel adresi girin',
@@ -198,6 +267,15 @@ const tr: Messages = {
   deleteTable: 'Tabloyu sil',
   search: 'Bul ve değiştir',
   source: 'HTML kaynağı',
+  outline: 'Ana hat',
+  accessibilityCheck: 'Erişilebilirlik denetimi',
+  shortcuts: 'Klavye kısayolları',
+  fullscreen: 'Tam ekran',
+  draftLabel: 'Kaydedilmemiş taslak',
+  draftFound: 'Bu metnin kaydedilmemiş bir taslağı var ({time}).',
+  draftRestore: 'Taslağı geri yükle',
+  draftDiscard: 'Taslağı sil',
+  draftRestored: 'Taslak geri yüklendi. Geri almak için {undo}.',
   sourceLabel: 'HTML kaynak kodu',
   file: 'Dosya',
   fileOpen: 'Dosya aç…',
@@ -276,6 +354,29 @@ const tr: Messages = {
   alignCenter: 'Ortala',
   alignRight: 'Sağa hizala',
   alignJustify: 'İki yana yasla',
+  textStyle: 'Yazı biçimi',
+  fontTiny: 'Çok küçük',
+  fontSmall: 'Küçük',
+  fontNormal: 'Normal boyut',
+  fontBig: 'Büyük',
+  fontHuge: 'Çok büyük',
+  superscript: 'Üst simge',
+  subscript: 'Alt simge',
+  caseUpper: 'BÜYÜK HARF',
+  caseLower: 'küçük harf',
+  caseTitle: 'Her Kelimenin İlk Harfi Büyük',
+  caseSentence: 'Cümle düzeni',
+  indent: 'Girintiyi artır',
+  outdent: 'Girintiyi azalt',
+  specialCharacters: 'Özel karakter',
+  charCategory: 'Kategori',
+  charsPunctuation: 'Noktalama',
+  charsCurrency: 'Para birimleri',
+  charsMath: 'Matematik',
+  charsArrows: 'Oklar',
+  charsLetters: 'Harfler',
+  charsGreek: 'Yunan harfleri',
+  charsSymbols: 'Simgeler',
   textColor: 'Yazı rengi',
   highlight: 'Vurgu',
   colorDefault: 'Varsayılan renk',
@@ -289,6 +390,12 @@ const tr: Messages = {
   colorPurple: 'Mor',
   colorPink: 'Pembe',
   colorGray: 'Gri',
+  cellColor: 'Hücre rengi',
+  cellColorNone: 'Renk yok',
+  cellAlign: 'Dikey hizalama',
+  cellAlignTop: 'Üst',
+  cellAlignMiddle: 'Orta',
+  cellAlignBottom: 'Alt',
 }
 
 const en: Messages = {
@@ -300,6 +407,16 @@ const en: Messages = {
   italic: 'Italic',
   underline: 'Underline',
   strike: 'Strikethrough',
+  clearFormatting: 'Clear formatting',
+  formatPainter: 'Format painter',
+  cleanDocument: 'Tidy up document',
+  pasteOptions: 'Paste options',
+  pasteKeep: 'Keep formatting',
+  pasteClean: 'Keep only headings, lists and links',
+  pastePlain: 'Text only',
+  cleanDocumentDone:
+    'Document tidied. Extra spaces: {extraSpaces} · Line breaks at paragraph ends: {trailingBreaks} · Empty paragraphs: {emptyParagraphs}',
+  cleanDocumentNothing: 'The document is already tidy.',
   code: 'Inline code',
   bulletList: 'Bulleted list',
   orderedList: 'Numbered list',
@@ -317,6 +434,12 @@ const en: Messages = {
   imageAltHint: 'Briefly describe the image for people who cannot see it',
   imageDecorative: 'Decorative, no description needed',
   imageSize: 'Size',
+  imageCaption: 'Caption',
+  imageAlign: 'Position',
+  imageAlignNone: 'None',
+  imageAlignLeft: 'Left',
+  imageAlignCenter: 'Center',
+  imageAlignRight: 'Right',
   imageAdd: 'Insert',
   imageApply: 'Apply',
   imageUnsafe: 'This address cannot be used, enter an image address starting with https',
@@ -343,6 +466,15 @@ const en: Messages = {
   deleteTable: 'Delete table',
   search: 'Find and replace',
   source: 'HTML source',
+  outline: 'Outline',
+  accessibilityCheck: 'Accessibility check',
+  shortcuts: 'Keyboard shortcuts',
+  fullscreen: 'Full screen',
+  draftLabel: 'Unsaved draft',
+  draftFound: 'There is an unsaved draft of this text ({time}).',
+  draftRestore: 'Restore draft',
+  draftDiscard: 'Delete draft',
+  draftRestored: 'Draft restored. Press {undo} to undo.',
   sourceLabel: 'HTML source code',
   file: 'File',
   fileOpen: 'Open file…',
@@ -421,6 +553,29 @@ const en: Messages = {
   alignCenter: 'Align center',
   alignRight: 'Align right',
   alignJustify: 'Justify',
+  textStyle: 'Text style',
+  fontTiny: 'Tiny',
+  fontSmall: 'Small',
+  fontNormal: 'Normal size',
+  fontBig: 'Big',
+  fontHuge: 'Huge',
+  superscript: 'Superscript',
+  subscript: 'Subscript',
+  caseUpper: 'UPPERCASE',
+  caseLower: 'lowercase',
+  caseTitle: 'Capitalize Each Word',
+  caseSentence: 'Sentence case',
+  indent: 'Increase indent',
+  outdent: 'Decrease indent',
+  specialCharacters: 'Special characters',
+  charCategory: 'Category',
+  charsPunctuation: 'Punctuation',
+  charsCurrency: 'Currency',
+  charsMath: 'Math',
+  charsArrows: 'Arrows',
+  charsLetters: 'Letters',
+  charsGreek: 'Greek letters',
+  charsSymbols: 'Symbols',
   textColor: 'Text color',
   highlight: 'Highlight',
   colorDefault: 'Default color',
@@ -434,6 +589,12 @@ const en: Messages = {
   colorPurple: 'Purple',
   colorPink: 'Pink',
   colorGray: 'Gray',
+  cellColor: 'Cell colour',
+  cellColorNone: 'No colour',
+  cellAlign: 'Vertical alignment',
+  cellAlignTop: 'Top',
+  cellAlignMiddle: 'Middle',
+  cellAlignBottom: 'Bottom',
 }
 
 export const MESSAGES: Readonly<Record<Locale, Messages>> = { tr, en }
@@ -448,6 +609,6 @@ export function resolveLocale(requested?: string): Locale {
 
 export function format(template: string, values: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) =>
-    key in values ? String(values[key]) : whole,
+    Object.hasOwn(values, key) ? String(values[key]) : whole,
   )
 }

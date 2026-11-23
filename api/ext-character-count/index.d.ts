@@ -11,4 +11,3 @@ declare module "@viveeditor/core" {
 }
 export declare function countCharacters(node: Node): number;
 export declare const CharacterCount: Extension<CharacterCountOptions>;
-//# sourceMappingURL=index.d.ts.map

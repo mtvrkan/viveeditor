@@ -80,6 +80,7 @@ export const Highlight: Extension<ColorOptions> = defineExtension({
           tag: 'mark',
           getAttrs: (element) => ({ color: normalizeColor(element.style.backgroundColor) }),
         },
+        { style: 'background-color', context: 'tableRow/', priority: 60, clearMark: () => false },
         { style: 'background-color', getAttrs: pastedColor(options) },
       ],
       toDOM: (mark) => {

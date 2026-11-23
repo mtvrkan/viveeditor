@@ -30,4 +30,3 @@ declare module "@viveeditor/core" {
 export declare function caseInsensitivePattern(text: string): string;
 export declare function createQuery(terms: SearchTerms, maxLength: number): SearchQuery;
 export declare const Search: Extension<SearchOptions>;
-//# sourceMappingURL=index.d.ts.map

@@ -23,4 +23,3 @@ declare module "@viveeditor/core" {
 }
 export declare const MathExtension: Extension<MathOptions>;
 export { type KatexLike, type KatexLoader, type KatexModule, MAX_LATEX_LENGTH, MIN_KATEX_VERSION, type MathError, type MathErrorCode, type MathLabels, isSupportedKatex };
-//# sourceMappingURL=index.d.ts.map

@@ -1,4 +1,4 @@
-import { Editor, EditorOptions, Extension } from "@viveeditor/core";
+import { Editor, EditorOptions, Extension, ViveEditorError } from "@viveeditor/core";
 import { EditorUI, UiOptions } from "@viveeditor/ui";
 import { MarkdownConverter } from "@viveeditor/markdown/paste";
 export * from "@viveeditor/core";
@@ -35,7 +35,7 @@ interface EditorMount {
   setEditable(editable: boolean): void;
   destroy(): void;
 }
-export declare class MountDestroyedError extends Error {
+export declare class MountDestroyedError extends ViveEditorError {
   constructor();
 }
 export declare function mountEditor(host: HTMLElement, options?: MountOptions): EditorMount;
@@ -58,4 +58,3 @@ interface TextareaEditor {
 export declare function upgradeTextarea(textarea: HTMLTextAreaElement, options?: TextareaEditorOptions): Promise<TextareaEditor>;
 export declare function upgradeAll(root?: ParentNode, options?: TextareaEditorOptions): Promise<TextareaEditor[]>;
 export type { ClassicPresetOptions, EditorMount, MountOptions, TextareaEditor, TextareaEditorOptions };
-//# sourceMappingURL=index.d.ts.map

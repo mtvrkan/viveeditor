@@ -125,3 +125,20 @@ test('prints from a frame without scripts and can print again right away', async
   expect(first).not.toContain('<script')
   expect(await page.locator('iframe.ve-print-frame').count()).toBeLessThanOrEqual(1)
 })
+
+test('tidies the document from the File menu and shows what it removed', async ({ page }) => {
+  await page.goto('/ui.html?empty')
+  await surface(page).click()
+  await page.keyboard.type('  bir   iki ')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Enter')
+  await page.keyboard.type('üç ')
+
+  await chooseFileItem(page, 'Belgeyi toparla')
+
+  await expect(output(page)).toHaveText('<p>bir iki</p><p></p><p>üç</p>')
+  await expect(page.getByRole('alert')).toHaveText(
+    'Belge toparlandı. Fazla boşluk: 6 · Paragraf sonundaki satır sonu: 0 · Boş paragraf: 1',
+  )
+})

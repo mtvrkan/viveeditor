@@ -1,5 +1,6 @@
 export type ViveEditorErrorCode =
   | 'INVALID_CONTENT'
+  | 'SCHEMA_TOO_NEW'
   | 'DESTROYED'
   | 'DUPLICATE_EXTENSION'
   | 'DUPLICATE_COMMAND'

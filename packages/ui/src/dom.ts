@@ -33,7 +33,9 @@ export function placeInDock(panel: HTMLElement, anchor: HTMLElement, dock: HTMLE
   const anchorRect = anchor.getBoundingClientRect()
   const center = anchorRect.left + anchorRect.width / 2 - dockRect.left
   const width = panel.offsetWidth
-  panel.style.left = `${clamp(center - width / 2, EDGE, dockRect.width - width - EDGE)}px`
+  const right = Math.min(dockRect.width, document.documentElement.clientWidth - dockRect.left)
+  const left = Math.max(EDGE, EDGE - dockRect.left)
+  panel.style.left = `${clamp(center - width / 2, left, right - width - EDGE)}px`
   const viewportHeight = window.visualViewport?.height ?? window.innerHeight
   const above = anchorRect.top - GAP - EDGE
   const below = viewportHeight - anchorRect.bottom - GAP - EDGE

@@ -3,6 +3,7 @@ import type { Bubble } from './bubble.js'
 import type { CommandAccess } from './commands.js'
 import { placeAtRect, placeInDock } from './dom.js'
 import type { FormatTools } from './format-tools.js'
+import type { Fullscreen } from './fullscreen.js'
 import type { Listen } from './lifecycle.js'
 import { createLinkPanel, type LinkPanel } from './link-panel.js'
 import type { Messages } from './messages.js'
@@ -20,6 +21,7 @@ export interface PanelRouterOptions {
   bubble: Bubble
   formatTools: FormatTools
   source: SourceView
+  fullscreen: Fullscreen
   toolById: ReadonlyMap<string, ToolSpec>
   closeFloating: () => void
   returnToEditor: () => void
@@ -111,6 +113,12 @@ export function createPanelRouter(options: PanelRouterOptions): PanelRouter {
       toggleSource()
       return
     }
+    if (tool.id === 'fullscreen') {
+      options.closeFloating()
+      options.fullscreen.toggle()
+      if (!keyboard || !pill.contains(button)) options.returnToEditor()
+      return
+    }
     if (tool.popup === 'menu' || openPopover(tool.id, button)) return
     options.closeFloating()
     commands.run(tool.command, ...toolArgs(tool))
@@ -149,7 +157,7 @@ export function bindToolClicks(options: ToolClickOptions): void {
     (event) => {
       const button = (event.target as Element).closest('button')
       if (!source.isOpen() || !button || button === toolbar.moreButton) return
-      if (button.dataset.tool === 'source') return
+      if (button.dataset.tool === 'source' || button.dataset.tool === 'fullscreen') return
       event.preventDefault()
       event.stopPropagation()
     },

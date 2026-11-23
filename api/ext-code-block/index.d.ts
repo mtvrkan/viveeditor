@@ -22,4 +22,3 @@ declare module "@viveeditor/core" {
 export declare function normalizeLanguage(value: unknown): string | null;
 export declare const DEFAULT_LANGUAGES: readonly CodeLanguage[];
 export declare const CodeBlock: Extension<CodeBlockOptions>;
-//# sourceMappingURL=index.d.ts.map

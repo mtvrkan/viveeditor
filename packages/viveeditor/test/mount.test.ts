@@ -1,6 +1,11 @@
 import { basicExtensions } from '@viveeditor/ext-basic'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { type EditorMount, MountDestroyedError, mountEditor } from '../src/index.js'
+import {
+  type EditorMount,
+  MountDestroyedError,
+  mountEditor,
+  ViveEditorError,
+} from '../src/index.js'
 
 let mounts: EditorMount[] = []
 
@@ -84,6 +89,17 @@ describe('mountEditor', () => {
     expect(error).toBeInstanceOf(MountDestroyedError)
     expect(onReady).not.toHaveBeenCalled()
     expect(target.innerHTML).toBe('')
+  })
+
+  it('reports an early destroy with the shared DESTROYED error code', async () => {
+    const result = mountEditor(host())
+
+    result.destroy()
+    const error = await result.ready.catch((reason: unknown) => reason)
+
+    expect(error).toBeInstanceOf(ViveEditorError)
+    expect((error as ViveEditorError).code).toBe('DESTROYED')
+    expect((error as Error).name).toBe('MountDestroyedError')
   })
 
   it('uses the given extensions without a toolbar when ui is false', async () => {

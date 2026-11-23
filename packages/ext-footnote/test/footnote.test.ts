@@ -50,6 +50,28 @@ describe('Footnote schema', () => {
     expect(editor.getHTML()).toBe(html)
   })
 
+  it('keeps leading, trailing and repeated spaces inside a footnote after a reload', async () => {
+    const editor = await mount()
+    editor.setContent({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Metin' },
+            { type: 'footnote', content: [{ type: 'text', text: ' iki  boşluk ' }] },
+          ],
+        },
+      ],
+    })
+    const saved = editor.getHTML()
+
+    const reloaded = await mount({ content: saved })
+
+    expect(saved).toBe('<p>Metin<sup data-footnote="">&nbsp;iki &nbsp;boşluk&nbsp;</sup></p>')
+    expect(reloaded.getJSON()).toEqual(editor.getJSON())
+  })
+
   it('flattens nested footnotes, mentions and unsupported marks to text', async () => {
     const editor = await mount({
       content:

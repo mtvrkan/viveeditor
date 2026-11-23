@@ -17,4 +17,3 @@ export interface OfficePasteOptions {
 }
 export declare const OfficePaste: Extension<OfficePasteOptions>;
 export type { OfficeCleanResult, OfficeSource };
-//# sourceMappingURL=index.d.ts.map

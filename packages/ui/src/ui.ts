@@ -1,18 +1,22 @@
 import type { Editor } from '@viveeditor/core'
+import { createAutosave } from './autosave.js'
 import { createBlockControl } from './blocks.js'
 import { createBubble } from './bubble.js'
 import { commandAccess } from './commands.js'
 import { createCountControl } from './count-control.js'
 import { createDockMenus } from './dock-menus.js'
 import { h, placeInDock } from './dom.js'
+import { createDraftBar } from './draft-bar.js'
 import { createFileMenu } from './file-menu.js'
 import { createFormatTools } from './format-tools.js'
+import { createFullscreen } from './fullscreen.js'
 import { bindEditorKeys, bindKeyboardInset, bindToolbarShortcut } from './keyboard.js'
 import { createLayout, trackPointer } from './layout.js'
 import type { PanelKitLoader } from './lazy-popover.js'
 import { createLifecycle, createScheduler } from './lifecycle.js'
 import { MESSAGES, type Messages, resolveLocale } from './messages.js'
 import { bindToolClicks, createPanelRouter } from './panels.js'
+import { createPasteOptions } from './paste-options.js'
 import { startPlugins } from './plugins.js'
 import { createSlashMenu } from './slash-menu.js'
 import { createSourceView } from './source-view.js'
@@ -22,7 +26,7 @@ import { availableTools } from './tools.js'
 import type { EditorUI, UiOptions } from './ui-options.js'
 
 const loadPanelKit: PanelKitLoader = () => import('./panel-kit.js')
-const BUBBLE_TOOLS = ['bold', 'italic', 'link', 'code']
+const BUBBLE_TOOLS = ['bold', 'italic', 'link', 'code', 'clearFormatting']
 
 export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
   const parent = editor.dom.parentElement
@@ -42,6 +46,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     has: (command) => commands.has(command),
     source: options.source !== false,
     files: options.files !== false,
+    exclude: options.exclude ?? [],
   })
   const toolById = new Map(tools.flat().map((tool) => [tool.id, tool]))
   const block = createBlockControl(editor, commands, messages)
@@ -88,16 +93,21 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     root,
   )
 
+  const pasteOptions = createPasteOptions(editor, commands, messages, root, listen, returnToEditor)
+  const pasteParts = pasteOptions ? [pasteOptions.element, pasteOptions.menu.element] : []
+
   const formatTools = createFormatTools({
     editor,
     commands,
     messages,
+    locale,
     pill,
     dock,
     closeFloating: () => closeFloating(),
     returnToEditor,
     onClose: () => scheduler.schedule(),
     panels: options.panels ?? loadPanelKit,
+    overrides: options.messages ?? {},
     report,
   })
 
@@ -117,6 +127,26 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
   )
 
   const source = createSourceView(editor, commands, messages, root)
+  const markFullscreen = (open: boolean): void => {
+    pill.querySelector('[data-tool="fullscreen"]')?.setAttribute('aria-pressed', String(open))
+  }
+  const fullscreen = createFullscreen(
+    root,
+    listen,
+    () => {
+      markFullscreen(fullscreen.isOpen())
+      layout.relayout(true)
+    },
+    (event) =>
+      event.target === editor.dom &&
+      !event.defaultPrevented &&
+      !slash.isOpen() &&
+      !plugins.isOpen() &&
+      !link.isOpen() &&
+      bubble.element.hidden === true &&
+      pasteOptions?.element.hidden !== false,
+  )
+  markFullscreen(false)
   const panels = createPanelRouter({
     editor,
     commands,
@@ -126,6 +156,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     bubble,
     formatTools,
     source,
+    fullscreen,
     toolById,
     closeFloating: () => closeFloating(),
     returnToEditor,
@@ -143,6 +174,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     formatTools,
     fileMenu,
     source,
+    fullscreen,
     toggleSource: panels.toggleSource,
     openPopover: panels.openPopover,
     block,
@@ -170,6 +202,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     for (const menu of menus) menu.close(false)
     for (const popover of formatTools.popovers.values()) popover.close(false)
     link.close(false)
+    pasteOptions?.menu.close(false)
     count.close(false)
     fileMenu.hideNotice()
   }
@@ -180,7 +213,19 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     count.panel,
     fileMenu.notice,
   )
-  root.append(bubble.element, slash.element, link.element, dock, status)
+  root.append(bubble.element, ...pasteParts, slash.element, link.element, dock, status)
+
+  const autosave = options.autosave
+    ? createAutosave(editor, { onError: report, ...options.autosave })
+    : null
+  const draftBar = autosave
+    ? createDraftBar(autosave, messages, locale, host.announce, returnToEditor)
+    : null
+  if (autosave && draftBar) {
+    root.insertBefore(draftBar.element, editor.dom)
+    lifecycle.add(autosave.onChange(draftBar.sync))
+    draftBar.sync()
+  }
 
   let focused = false
 
@@ -203,6 +248,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     count.updateLimit()
     if (options.slash !== false) slash.update(focused)
     plugins.update(focused)
+    pasteOptions?.update(focused && editor.isEditable && !slash.isOpen())
     bubble.update(
       options.bubble !== false &&
         focused &&
@@ -232,12 +278,13 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     pluginKey: plugins.handleKey,
     openLink: () => panels.openLink(null),
     openSearch: () => panels.openPanel('search'),
+    openShortcuts: () => panels.openPanel('shortcuts'),
     schedule,
   })
 
   const pointer = trackPointer({
     editorDom: editor.dom,
-    floating: [dock, link.element],
+    floating: [dock, link.element, ...pasteParts],
     listen,
     hideBubble: () => bubble.hide(),
     closeFloating,
@@ -270,18 +317,23 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     destroyed = true
     scheduler.cancel()
     count.cancel()
+    fullscreen.close()
     lifecycle.dispose()
+    autosave?.destroy()
+    draftBar?.element.remove()
     for (const unsubscribe of unsubscribers) unsubscribe()
     slash.destroy()
     plugins.destroy()
     source.destroy()
     fileMenu.destroy()
-    for (const element of [bubble.element, link.element, dock, status]) element.remove()
+    for (const element of [bubble.element, ...pasteParts, link.element, dock, status]) {
+      element.remove()
+    }
     root.classList.remove('ve-root')
     delete root.dataset.theme
     delete root.dataset.size
     root.style.removeProperty('--ve-keyboard')
   }
 
-  return { root, toolbar: pill, refresh, destroy }
+  return { root, toolbar: pill, autosave, refresh, destroy }
 }

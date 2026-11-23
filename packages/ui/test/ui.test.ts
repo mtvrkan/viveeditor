@@ -9,7 +9,7 @@ import { listExtensions } from '@viveeditor/ext-list'
 import { Search } from '@viveeditor/ext-search'
 import { Table } from '@viveeditor/ext-table'
 import { taskListExtensions } from '@viveeditor/ext-task-list'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import {
   createUI,
   type EditorUI,
@@ -17,6 +17,7 @@ import {
   printableHtml,
   type UiOptions,
 } from '../src/index.js'
+import { format } from '../src/messages.js'
 import * as panelKit from '../src/panel-kit.js'
 import { formatHtml } from '../src/source-view.js'
 
@@ -192,6 +193,218 @@ describe('table panel', () => {
   })
 })
 
+describe('table cell style', () => {
+  it('colours the cell and aligns it to the middle from the table panel', async () => {
+    const { editor, ui, root } = await mount('<p></p>', { locale: 'tr' }, [
+      ...basicExtensions,
+      Table,
+    ])
+    editor.commands.insertTable({ rows: 1, cols: 2, headerRow: false })
+    ui.refresh()
+    const open = (): HTMLElement => {
+      tool(root, 'table').click()
+      const panel = root.querySelector<HTMLElement>('.ve-table-panel')
+      if (!panel) throw new Error('Missing table panel')
+      return panel
+    }
+
+    open().querySelector<HTMLButtonElement>('[aria-label="Mavi"]')?.click()
+    const panel = open()
+    const middle = [...panel.querySelectorAll<HTMLButtonElement>('.ve-cell-align button')].find(
+      (button) => button.textContent === 'Orta',
+    )
+    const blue = panel.querySelector('[aria-label="Mavi"]')?.getAttribute('aria-pressed')
+    middle?.click()
+
+    expect(blue).toBe('true')
+    expect(editor.query.cellStyle()).toEqual({ background: '#cde8ff', verticalAlign: 'middle' })
+  })
+
+  it('hides the cell style section outside a table', async () => {
+    const { root } = await mount('<p></p>', { locale: 'tr' }, [...basicExtensions, Table])
+
+    tool(root, 'table').click()
+
+    expect(root.querySelector<HTMLElement>('.ve-cell-style')?.hidden).toBe(true)
+  })
+})
+
+describe('document tools', () => {
+  beforeAll(() => {
+    Range.prototype.getBoundingClientRect ??= () => new DOMRect()
+    Range.prototype.getClientRects ??= () => [] as unknown as DOMRectList
+  })
+
+  it('lists headings in the outline and moves the cursor to the chosen one', async () => {
+    const { editor, root } = await mount('<h2>Giriş</h2><p>a</p><h3>Ayrıntı</h3><p>b</p>')
+
+    tool(root, 'outline').click()
+    const items = [...root.querySelectorAll<HTMLButtonElement>('.ve-outline-item')]
+    items[1]?.click()
+
+    expect(items.map((item) => [item.textContent, item.dataset.level])).toEqual([
+      ['Giriş', '2'],
+      ['Ayrıntı', '3'],
+    ])
+    expect(editor.getSelection().from).toBe(11)
+    expect(root.querySelector<HTMLElement>('.ve-outline')?.hidden).toBe(true)
+  })
+
+  it('explains an empty outline', async () => {
+    const { root } = await mount('<p>başlıksız</p>')
+
+    tool(root, 'outline').click()
+
+    expect(root.querySelector('.ve-outline .ve-doc-empty')?.textContent).toMatch(/başlık yok/)
+  })
+
+  it('reports accessibility problems in document order and shows each one', async () => {
+    const { editor, root } = await mount(
+      '<h2>Bir</h2><h4>Dört</h4><p><a href="https://example.com">buraya tıklayın</a> ve <span style="color: #ffff00">sarı</span> <span style="color: #1f2937">koyu</span></p><img src="https://example.com/a.png"><table><tbody><tr><td>x</td></tr></tbody></table>',
+      { locale: 'tr' },
+      [...basicExtensions, ...formatExtensions, Image, Table],
+    )
+
+    tool(root, 'accessibility').click()
+    const panel = root.querySelector<HTMLElement>('.ve-check')
+    const texts = [...(panel?.querySelectorAll('.ve-check-text') ?? [])].map(
+      (item) => item.firstChild?.textContent,
+    )
+    panel?.querySelectorAll<HTMLButtonElement>('.ve-check-item button')[1]?.click()
+
+    expect(panel?.querySelector('.ve-doc-summary')?.textContent).toBe('5 sorun bulundu')
+    expect(texts).toEqual([
+      'Başlık düzeyi atlanmış: H2 sonrası H4',
+      'Bağlantı metni nereye gittiğini anlatmıyor',
+      'Yazı rengi zor okunuyor (1.0:1, en az 4.5:1 olmalı)',
+      'Görselin alternatif metni yok',
+      'Tabloda başlık hücresi yok',
+    ])
+    expect(editor.query.selectedText()).toBe('buraya tıklayın')
+  })
+
+  it('says when the document has no accessibility problems', async () => {
+    const { root } = await mount(
+      '<h2>Başlık</h2><p><a href="https://example.com">Fiyat listesi</a></p>',
+    )
+
+    tool(root, 'accessibility').click()
+
+    expect(root.querySelector('.ve-check .ve-doc-summary')?.textContent).toBe(
+      'Erişilebilirlik sorunu bulunamadı.',
+    )
+  })
+
+  it('opens the shortcut list with Alt+0 and lists only commands the editor has', async () => {
+    const { editor, root } = await mount()
+
+    editor.dom.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'º', code: 'Digit0', altKey: true, bubbles: true }),
+    )
+    const panel = root.querySelector<HTMLElement>('.ve-shortcuts')
+    const labels = [...(panel?.querySelectorAll('dt') ?? [])].map((item) => item.textContent)
+
+    expect(panel?.hidden).toBe(false)
+    expect(labels).toContain('Kalın')
+    expect(labels).toContain('Başlık 1–6')
+    expect(labels).not.toContain('Üst simge')
+  })
+
+  it('switches full screen from the toolbar and leaves it with Escape', async () => {
+    const { editor, root } = await mount()
+    const button = tool(root, 'fullscreen')
+
+    button.click()
+    const opened = [root.classList.contains('ve-fullscreen'), button.getAttribute('aria-pressed')]
+    const overflow = document.documentElement.style.overflow
+    editor.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+
+    expect(opened).toEqual([true, 'true'])
+    expect(overflow).toBe('hidden')
+    expect(root.classList.contains('ve-fullscreen')).toBe(false)
+    expect(button.getAttribute('aria-pressed')).toBe('false')
+    expect(document.documentElement.style.overflow).toBe('')
+  })
+
+  it('stays in full screen when Escape belongs to an open link editor', async () => {
+    const { editor, root } = await mount()
+    tool(root, 'fullscreen').click()
+    editor.commands.setTextSelection(1, 3)
+    tool(root, 'link').click()
+
+    const link = root.querySelector<HTMLElement>('.ve-link')
+    link
+      ?.querySelector('input')
+      ?.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+      )
+
+    expect(root.classList.contains('ve-fullscreen')).toBe(true)
+    expect(link?.hidden).toBe(true)
+  })
+
+  it('keeps the page locked until the last of two full-screen editors closes', async () => {
+    const first = await mount()
+    const second = await mount()
+
+    tool(first.root, 'fullscreen').click()
+    tool(second.root, 'fullscreen').click()
+    tool(first.root, 'fullscreen').click()
+    const whileOne = document.documentElement.style.overflow
+    tool(second.root, 'fullscreen').click()
+
+    expect(whileOne).toBe('hidden')
+    expect(document.documentElement.style.overflow).toBe('')
+  })
+
+  it('lets a plugin keep Ctrl+0 without opening the shortcut list', async () => {
+    const { editor, root } = await mount('<p>a</p>', {
+      locale: 'tr',
+      plugins: [() => ({ handleKey: (event) => event.code === 'Digit0' })],
+    })
+
+    editor.dom.dispatchEvent(
+      new KeyboardEvent('keydown', { key: '0', code: 'Digit0', altKey: true, bubbles: true }),
+    )
+
+    expect(root.querySelector<HTMLElement>('.ve-shortcuts')?.hidden ?? true).toBe(true)
+  })
+
+  it('shows heading and link text as text, never as markup', async () => {
+    const { root } = await mount(
+      '<h2>&lt;img src=x onerror=alert(1)&gt;</h2><h4>&lt;b&gt;here&lt;/b&gt;</h4>',
+    )
+
+    tool(root, 'outline').click()
+    const outline = root.querySelector('.ve-outline')
+    tool(root, 'accessibility').click()
+    const check = root.querySelector('.ve-check')
+
+    expect(outline?.querySelector('.ve-outline-item')?.textContent).toBe(
+      '<img src=x onerror=alert(1)>',
+    )
+    expect(outline?.querySelector('img')).toBeNull()
+    expect(check?.querySelector('.ve-check-excerpt')?.textContent).toBe('<b>here</b>')
+    expect(check?.querySelector('b')).toBeNull()
+  })
+
+  it('leaves out tools named in exclude', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'tr', exclude: ['fullscreen', 'outline'] })
+
+    expect(root.querySelector('[data-tool="fullscreen"]')).toBeNull()
+    expect(root.querySelector('[data-tool="outline"]')).toBeNull()
+    expect(root.querySelector('[data-tool="shortcuts"]')).not.toBeNull()
+  })
+})
+
+describe('message templates', () => {
+  it('fills only the values it was given and leaves built-in names alone', () => {
+    const text = format('{count} · {constructor} · {toString} · {missing}', { count: 3 })
+
+    expect(text).toBe('3 · {constructor} · {toString} · {missing}')
+  })
+})
+
 describe('search panel', () => {
   const openSearch = (editor: { dom: HTMLElement }): void => {
     editor.dom.dispatchEvent(
@@ -359,6 +572,34 @@ describe('image panel', () => {
 
     expect(editor.query.imagesWithoutAlt()).toBe(0)
     expect(editor.getHTML()).toContain('alt=""')
+  })
+
+  it('adds a caption and floats the selected image to the right', async () => {
+    const { editor, root } = await mount(
+      '<img src="https://cdn.example.com/a.png" alt="Grafik"><p>Alt</p>',
+      { locale: 'tr' },
+      [...basicExtensions, Image],
+    )
+    editor.focus()
+    editor.dom.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    )
+    tool(root, 'image').click()
+    const panel = imagePanel(root)
+    const caption = panel.querySelector<HTMLInputElement>('input[id$="-caption"]')
+    const right = [...panel.querySelectorAll<HTMLButtonElement>('[aria-pressed]')].find(
+      (button) => button.textContent === 'Sağa',
+    )
+    if (!caption || !right) throw new Error('Missing caption field or alignment button')
+
+    right.click()
+    caption.value = 'Şekil 1'
+    panel.querySelector<HTMLButtonElement>('.ve-image-actions .ve-primary')?.click()
+
+    expect(right.getAttribute('aria-pressed')).toBe('true')
+    expect(editor.getHTML()).toMatch(
+      /^<figure data-align="right"><img [^>]*alt="Grafik"[^>]*><figcaption>Şekil 1<\/figcaption><\/figure>/,
+    )
   })
 
   it('offers the file picker only when uploads are possible and uploads the chosen files', async () => {
@@ -739,6 +980,206 @@ describe('format tools', () => {
 
     expect(root.querySelector<HTMLElement>('.ve-swatches')?.hidden).toBe(true)
     expect(document.activeElement).toBe(button)
+  })
+
+  it('clears formatting from the toolbar button and keeps the link', async () => {
+    const { editor, ui, root } = await mount(
+      '<p style="text-align: center"><strong>kalın</strong> <a href="https://example.com">bağ</a></p>',
+      { locale: 'tr' },
+      extensions,
+    )
+    editor.commands.selectAll()
+    ui.refresh()
+    const button = tool(root, 'clearFormatting')
+
+    button.click()
+    ui.refresh()
+
+    expect(button.getAttribute('aria-label')).toMatch(/^Biçimi temizle \(/)
+    expect(editor.getHTML()).toBe(
+      '<p>kalın <a rel="noopener noreferrer nofollow" href="https://example.com">bağ</a></p>',
+    )
+    expect(button.getAttribute('aria-disabled')).toBe('true')
+  })
+
+  it('shows clear formatting in the selection bubble', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'en' }, extensions)
+
+    const bubbleButton = root.querySelector('.ve-bubble [data-tool="clearFormatting"]')
+
+    expect(bubbleButton?.getAttribute('aria-label')).toMatch(/^Clear formatting \(/)
+  })
+
+  it('leaves the clear formatting button out when the command is missing', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'tr' }, [...basicExtensions])
+
+    const button = root.querySelector('[data-tool="clearFormatting"]')
+
+    expect(button).toBeNull()
+  })
+
+  it('arms the format painter from the toolbar and shows it as pressed', async () => {
+    const { editor, ui, root } = await mount(
+      '<p><strong>kalın</strong> düz</p>',
+      { locale: 'tr' },
+      extensions,
+    )
+    editor.commands.setTextSelection(2)
+    const button = tool(root, 'formatPainter')
+
+    button.click()
+    ui.refresh()
+    const armed = [button.getAttribute('aria-pressed'), editor.query.isPaintingFormat()]
+    editor.commands.setTextSelection(7, 10)
+    editor.commands.applyFormat()
+    ui.refresh()
+
+    expect(button.getAttribute('aria-label')).toBe('Biçim boyacısı')
+    expect(armed).toEqual(['true', true])
+    expect(button.getAttribute('aria-pressed')).toBe('false')
+    expect(editor.getHTML()).toBe('<p><strong>kalın</strong> <strong>düz</strong></p>')
+  })
+})
+
+describe('text style and indent menus', () => {
+  const extensions = [...basicExtensions, ...listExtensions, ...formatExtensions]
+
+  beforeAll(() => {
+    Range.prototype.getBoundingClientRect ??= () => new DOMRect()
+    Range.prototype.getClientRects ??= () => [] as unknown as DOMRectList
+  })
+
+  function menuNamed(root: HTMLElement, name: string): HTMLElement {
+    const menu = root.querySelector<HTMLElement>(`[role="menu"][aria-label="${name}"]`)
+    if (!menu) throw new Error(`Missing menu ${name}`)
+    return menu
+  }
+
+  function item(menu: HTMLElement, label: string): HTMLButtonElement {
+    const found = [...menu.querySelectorAll<HTMLButtonElement>('button')].find((button) =>
+      button.querySelector('.ve-item-label')?.textContent?.startsWith(label),
+    )
+    if (!found) throw new Error(`Missing item ${label}`)
+    return found
+  }
+
+  it('sets the size, superscript and case of the selection from the text style menu', async () => {
+    const { editor, root } = await mount('<p>istanbul su</p>', { locale: 'tr' }, extensions)
+    editor.commands.setTextSelection(1, 9)
+
+    tool(root, 'textStyle').click()
+    const menu = menuNamed(root, 'Yazı biçimi')
+    item(menu, 'Büyük').click()
+    tool(root, 'textStyle').click()
+    item(menu, 'BÜYÜK HARF').click()
+    editor.commands.setTextSelection(11, 12)
+    tool(root, 'textStyle').click()
+    item(menu, 'Alt simge').click()
+    tool(root, 'textStyle').click()
+    const checked = [...menu.querySelectorAll('[aria-checked="true"]')].map(
+      (element) => element.querySelector('.ve-item-label')?.textContent,
+    )
+
+    expect(editor.getHTML().replace(/;"/g, '"')).toBe(
+      '<p><span style="font-size: 1.25em">İSTANBUL</span> s<sub>u</sub></p>',
+    )
+    expect(checked).toEqual(['Normal boyut', 'Alt simge'])
+  })
+
+  it('indents and outdents from the alignment menu', async () => {
+    const { editor, root } = await mount('<p>girinti</p>', { locale: 'tr' }, extensions)
+    editor.commands.setTextSelection(2)
+
+    tool(root, 'align').click()
+    const menu = menuNamed(root, 'Hizalama')
+    item(menu, 'Girintiyi artır').click()
+    const indented = editor.getHTML().replace(/;"/g, '"')
+    tool(root, 'align').click()
+    const outdentDisabled = item(menu, 'Girintiyi azalt').getAttribute('aria-disabled')
+    item(menu, 'Girintiyi azalt').click()
+
+    expect(indented).toBe('<p style="margin-inline-start: 2em">girinti</p>')
+    expect(outdentDisabled).not.toBe('true')
+    expect(editor.getHTML()).toBe('<p>girinti</p>')
+  })
+
+  it('inserts a special character from the chosen category', async () => {
+    const { editor, root } = await mount('<p>fiyat</p>', { locale: 'tr' }, extensions)
+    editor.commands.setTextSelection(6)
+    const button =
+      root.querySelector<HTMLButtonElement>('.ve-pill [data-tool="specialCharacters"]') ?? null
+    if (!button) throw new Error('Missing special characters tool')
+
+    button.click()
+    const panel = root.querySelector<HTMLElement>('[role="dialog"][aria-label="Özel karakter"]')
+    const select = panel?.querySelector('select')
+    if (!panel || !select) throw new Error('Missing panel')
+    select.value = '1'
+    select.dispatchEvent(new Event('change'))
+    const first = panel.querySelector<HTMLButtonElement>('.ve-char')
+    first?.focus()
+    first?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    const focused = document.activeElement?.textContent
+    first?.click()
+
+    expect(focused).toBe('€')
+    expect(editor.getHTML()).toBe('<p>fiyat₺</p>')
+    expect(panel.hidden).toBe(true)
+  })
+
+  it('leaves the text style button out without the extensions', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'tr' })
+
+    expect(root.querySelector('[data-tool="textStyle"]')).toBeNull()
+  })
+})
+
+describe('paste options', () => {
+  const extensions = [...basicExtensions, ...listExtensions, ...formatExtensions]
+
+  function paste(editor: Editor, data: Record<string, string>): void {
+    const entries = new Map(Object.entries(data))
+    const event = new Event('paste', { bubbles: true, cancelable: true }) as ClipboardEvent
+    Object.defineProperty(event, 'clipboardData', {
+      value: {
+        getData: (type: string) => entries.get(type) ?? '',
+        files: [],
+        types: [...entries.keys()],
+      },
+    })
+    editor.dom.dispatchEvent(event)
+  }
+
+  it('offers the three paste modes and switches to text only', async () => {
+    const { editor, root } = await mount('<p></p>', { locale: 'tr' }, extensions)
+    paste(editor, {
+      'text/html': '<p><strong>kalın</strong> metin</p>',
+      'text/plain': 'kalın metin',
+    })
+    const trigger = root.querySelector<HTMLButtonElement>('.ve-paste button')
+
+    trigger?.click()
+    const menu = root.querySelector<HTMLElement>(
+      '[role="menu"][aria-label="Yapıştırma seçenekleri"]',
+    )
+    const items = [...(menu?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? [])]
+    const states = items.map((item) => [item.textContent, item.getAttribute('aria-checked')])
+    items[2]?.click()
+
+    expect(trigger?.getAttribute('aria-label')).toBe('Yapıştırma seçenekleri (Ctrl)')
+    expect(states).toEqual([
+      ['Biçimi koru', 'true'],
+      ['Yalnızca başlık, liste ve bağlantıları koru', 'false'],
+      ['Yalnızca metin', 'false'],
+    ])
+    expect(menu?.hidden).toBe(true)
+    expect(editor.getHTML()).toBe('<p>kalın metin</p>')
+  })
+
+  it('leaves the paste options out without the extension', async () => {
+    const { root } = await mount('<p></p>', { locale: 'tr' })
+
+    expect(root.querySelector('.ve-paste')).toBeNull()
   })
 })
 

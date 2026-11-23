@@ -5,6 +5,11 @@ export interface TableOptions {
   cellMinWidth: number;
   maxSize: number;
 }
+export type CellVerticalAlign = "middle" | "bottom";
+export interface CellStyle {
+  background: string | null;
+  verticalAlign: CellVerticalAlign | null;
+}
 export interface InsertTableOptions {
   rows?: number;
   cols?: number;
@@ -25,10 +30,12 @@ declare module "@viveeditor/core" {
     toggleHeaderRow: () => Command;
     toggleHeaderColumn: () => Command;
     resizeColumn: (delta: number) => Command;
+    setCellBackground: (color: string | null) => Command;
+    setCellVerticalAlign: (align: CellVerticalAlign | null) => Command;
   }
   interface QueryRegistry {
     inTable: () => boolean;
+    cellStyle: () => CellStyle | null;
   }
 }
 export declare const Table: Extension<TableOptions>;
-//# sourceMappingURL=index.d.ts.map

@@ -41,10 +41,12 @@ export function createMenu(options: MenuOptions): Menu {
     hidden: '',
   })
   const buttons = options.items.map((item) => {
-    const visual = item.icon ? icon(item.icon) : h('span', { class: 've-glyph' }, [item.glyph])
+    const visual = item.icon
+      ? icon(item.icon)
+      : h('span', { class: 've-glyph', 'aria-hidden': 'true' }, [item.glyph])
     const button = h(
       'button',
-      { type: 'button', class: 've-item', role: item.role, tabindex: '-1' },
+      { type: 'button', class: 've-item', role: item.role, tabindex: '-1', 'data-item': item.id },
       [
         h('span', { class: 've-item-icon' }, [visual]),
         h('span', { class: 've-item-label' }, [item.label]),

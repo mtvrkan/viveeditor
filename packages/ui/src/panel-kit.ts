@@ -1,3 +1,6 @@
+export { createCharPanel } from './char-panel.js'
+export { documentMessages } from './doc-messages.js'
+export { createCheckPanel, createOutlinePanel, createShortcutsPanel } from './doc-panels.js'
 export { createEmbedPanel } from './embed-panel.js'
 export { createImagePanel } from './image-panel.js'
 export { createSearchPanel } from './search-panel.js'

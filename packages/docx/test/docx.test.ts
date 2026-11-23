@@ -94,6 +94,7 @@ describe('exportDocx and importDocx', () => {
       '<pre><code>satır 1\nsatır 2</code></pre>',
       '<table><tbody><tr><th><p>A</p></th><th><p>B</p></th><th><p>C</p></th></tr><tr><td colspan="2"><p>geniş</p></td><td rowspan="2"><p>uzun</p></td></tr><tr><td><p>x</p></td><td><p>y</p></td></tr></tbody></table>',
       '<p>son<br>satır</p>',
+      '<p>H<sub>2</sub>O ve x<sup>2</sup></p>',
     ].join('')
     const editor = await editorWith(source)
 
@@ -103,6 +104,31 @@ describe('exportDocx and importDocx', () => {
 
     expect(reloaded.getHTML()).toBe(editor.getHTML())
     expect(result.warnings).toEqual([])
+  })
+
+  it('reads back cell colours and vertical alignment', async () => {
+    const editor = await editorWith(
+      '<table><tbody><tr><td style="background-color: #cde8ff; vertical-align: middle"><p>a</p></td><td style="vertical-align: bottom"><p>b</p></td><td><p>c</p></td></tr></tbody></table><p>son</p>',
+    )
+
+    const reloaded = await editorWith((await importDocx(await exportDocx(editor))).html)
+
+    expect(reloaded.getHTML()).toBe(editor.getHTML())
+  })
+
+  it('writes an aligned image with its caption as a Caption paragraph', async () => {
+    const editor = await editorWith(
+      `<figure data-align="center"><img src="${PNG_DATA}" alt="nokta" width="20" height="10"><figcaption>Şekil 1</figcaption></figure>`,
+    )
+
+    const parts = unzipSync(new Uint8Array(await (await exportDocx(editor)).arrayBuffer()))
+    const document = new TextDecoder().decode(parts['word/document.xml'])
+
+    expect(document).toContain('<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>')
+    expect(document).toContain(
+      '<w:p><w:pPr><w:pStyle w:val="Caption"/><w:jc w:val="center"/></w:pPr><w:r><w:t xml:space="preserve">Şekil 1</w:t></w:r></w:p>',
+    )
+    expect(new TextDecoder().decode(parts['word/styles.xml'])).toContain('w:styleId="Caption"')
   })
 
   it('writes check boxes, players and code marks as plain Word content', async () => {

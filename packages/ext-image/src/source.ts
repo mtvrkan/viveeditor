@@ -5,12 +5,16 @@ export interface ImageSourcePolicy {
   allowRelative: boolean
 }
 
+export type ImageAlign = 'left' | 'center' | 'right'
+
 export interface ImageAttributes {
   src: string
   alt?: string | null
   title?: string | null
   width?: number | null
   height?: number | null
+  caption?: string | null
+  align?: ImageAlign | null
 }
 
 export interface CleanImage {
@@ -19,7 +23,11 @@ export interface CleanImage {
   title: string | null
   width: number | null
   height: number | null
+  caption: string | null
+  align: ImageAlign | null
 }
+
+const ALIGNS: readonly unknown[] = ['left', 'center', 'right']
 
 export const DEFAULT_SOURCE_POLICY: ImageSourcePolicy = {
   allowBase64: false,
@@ -118,13 +126,18 @@ export function cleanDimension(value: unknown): number | null {
   return Math.min(MAX_DIMENSION, Math.max(1, Number(value)))
 }
 
+export function cleanAlign(value: unknown): ImageAlign | null {
+  return ALIGNS.includes(value) ? (value as ImageAlign) : null
+}
+
 export function cleanImage(attrs: Record<string, unknown>, policy: ImageSourcePolicy): CleanImage {
-  const title = cleanText(attrs.title)
   return {
     src: normalizeImageSrc(attrs.src, policy),
     alt: cleanText(attrs.alt),
-    title: title || null,
+    title: cleanText(attrs.title) || null,
     width: cleanDimension(attrs.width),
     height: cleanDimension(attrs.height),
+    caption: cleanText(attrs.caption) || null,
+    align: cleanAlign(attrs.align),
   }
 }

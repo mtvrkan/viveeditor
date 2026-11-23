@@ -21,9 +21,19 @@ export type CommandFactory = (...args: never[]) => Command
 
 export type CommandFactories = { [Name in CommandName]?: CommandRegistry[Name] }
 
+export interface FoundItem {
+  name: string
+  attrs: Record<string, unknown>
+  text: string
+  from: number
+  to: number
+}
+
 export interface QueryRegistry {
   selectedText: () => string
   textBetween: (from: number, to: number) => string
+  findNodes: (names: readonly string[]) => FoundItem[]
+  findMarks: (names: readonly string[]) => FoundItem[]
 }
 
 export type QueryName = keyof QueryRegistry

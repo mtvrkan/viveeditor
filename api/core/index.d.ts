@@ -7,6 +7,7 @@ interface JSONMark {
 }
 interface JSONContent {
   type: string;
+  schemaVersion?: number;
   attrs?: Record<string, unknown>;
   content?: JSONContent[];
   marks?: JSONMark[];
@@ -109,9 +110,18 @@ interface CommandRegistry {
 type CommandName = keyof CommandRegistry;
 type CommandFactory = (...args: never[]) => Command;
 type CommandFactories = { [Name in CommandName]?: CommandRegistry[Name]; };
+interface FoundItem {
+  name: string;
+  attrs: Record<string, unknown>;
+  text: string;
+  from: number;
+  to: number;
+}
 interface QueryRegistry {
   selectedText: () => string;
   textBetween: (from: number, to: number) => string;
+  findNodes: (names: readonly string[]) => FoundItem[];
+  findMarks: (names: readonly string[]) => FoundItem[];
 }
 type QueryName = keyof QueryRegistry;
 type QueryFactory = (state: EditorState, ...args: never[]) => unknown;
@@ -152,7 +162,9 @@ interface Extension<Options = unknown> {
 export declare const DEFAULT_PRIORITY = 100;
 export declare function defineExtension<Options = Record<string, never>>(config: ExtensionConfig<Options>): Extension<Options>;
 export declare const Base: Extension<Record<string, never>>;
-type ViveEditorErrorCode = "INVALID_CONTENT" | "DESTROYED" | "DUPLICATE_EXTENSION" | "DUPLICATE_COMMAND" | "DUPLICATE_QUERY" | "SCHEMA_CONFLICT" | "INVALID_SCHEMA" | "MISSING_SCHEMA_ITEM" | "UNKNOWN_COMMAND" | "UNKNOWN_QUERY";
+export declare function normalizeColor(input: unknown): string | null;
+export declare const SCHEMA_VERSION = 1;
+type ViveEditorErrorCode = "INVALID_CONTENT" | "SCHEMA_TOO_NEW" | "DESTROYED" | "DUPLICATE_EXTENSION" | "DUPLICATE_COMMAND" | "DUPLICATE_QUERY" | "SCHEMA_CONFLICT" | "INVALID_SCHEMA" | "MISSING_SCHEMA_ITEM" | "UNKNOWN_COMMAND" | "UNKNOWN_QUERY";
 export declare class ViveEditorError extends Error {
   readonly code: ViveEditorErrorCode;
   constructor(code: ViveEditorErrorCode, message: string, options?: {
@@ -160,10 +172,10 @@ export declare class ViveEditorError extends Error {
   });
 }
 export declare function markInputRule(pattern: RegExp, markType: MarkType): InputRule;
+export declare function textInputRule(pattern: RegExp, replacement: string): InputRule;
 export declare function cleanPastedHtml(html: string): string;
 export declare function getNodeType(schema: Schema, name: string): NodeType;
 export declare function getMarkType(schema: Schema, name: string): MarkType;
 export declare const DEFAULT_ALLOWED_PROTOCOLS: readonly string[];
 export declare function isAllowedUrl(url: string, protocols?: readonly string[]): boolean;
-export type { AttributeSpec, CommandFactories, CommandFactory, CommandName, CommandRegistry, EditorCommands, EditorContent, EditorEventMap, EditorOptions, EditorQueries, EditorRect, EditorSelection, Extension, ExtensionConfig, ExtensionContext, GlobalAttributes, JSONContent, JSONMark, QueryFactories, QueryFactory, QueryName, QueryRegistry, ViveEditorErrorCode };
-//# sourceMappingURL=index.d.ts.map
+export type { AttributeSpec, CommandFactories, CommandFactory, CommandName, CommandRegistry, EditorCommands, EditorContent, EditorEventMap, EditorOptions, EditorQueries, EditorRect, EditorSelection, Extension, ExtensionConfig, ExtensionContext, FoundItem, GlobalAttributes, JSONContent, JSONMark, QueryFactories, QueryFactory, QueryName, QueryRegistry, ViveEditorErrorCode };

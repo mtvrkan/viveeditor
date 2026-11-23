@@ -21,4 +21,3 @@ export declare function cleanMention(attrs: {
   label?: unknown;
 }, max?: number): MentionAttributes | null;
 export declare const Mention: Extension<MentionOptions>;
-//# sourceMappingURL=index.d.ts.map

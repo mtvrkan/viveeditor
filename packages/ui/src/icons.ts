@@ -23,8 +23,20 @@ export type IconName =
   | 'alignRight'
   | 'alignJustify'
   | 'textColor'
+  | 'outline'
+  | 'accessibility'
+  | 'keyboard'
+  | 'fullscreen'
   | 'highlight'
   | 'clear'
+  | 'clearFormatting'
+  | 'formatPainter'
+  | 'tidy'
+  | 'paste'
+  | 'textStyle'
+  | 'specialCharacters'
+  | 'indent'
+  | 'outdent'
   | 'taskList'
   | 'codeBlock'
   | 'table'
@@ -87,6 +99,18 @@ const PATHS: Record<IconName, string> = {
   highlight: 'm9 11-6 6v3h9l3-3M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4',
   taskList: 'M12 7h8M12 12h8M12 17h8M3.5 6.5l1.5 1.5 3-3M3.5 16.5l1.5 1.5 3-3M4 11h3v3H4z',
   clear: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM5.6 5.6l12.8 12.8',
+  clearFormatting: 'M5 7V5h12v2M11 5 8 19M6 19h4M14.5 13.5l6 6M20.5 13.5l-6 6',
+  formatPainter: 'M5 4h12v5H5zM17 6.5h2.5v5H11v3.5M9.5 15h3v5h-3z',
+  specialCharacters: 'M5 19h4.5v-2.2A6.5 6.5 0 1 1 14.5 16.8V19H19',
+  textStyle: 'M4 6h10M9 6v13M14 11h7M17.5 11v8',
+  indent: 'M3 5h18M11 10h10M11 14h10M3 19h18M3 9l4 3-4 3',
+  outdent: 'M3 5h18M11 10h10M11 14h10M3 19h18M7 9l-4 3 4 3',
+  paste: 'M9 3h6v3H9zM9 4.5H6v16h12v-16h-3M9 11h6M9 15h4',
+  tidy: 'M14 3l7 7M9 8l7 7-2 2c-2 2-5.5 3-10 3 0-4.5 1-8 3-10zM6.5 14.5 9 17',
+  outline: 'M4 6h3M10 6h10M7 12h3M13 12h7M10 18h3M16 18h4',
+  accessibility: `${DOT(12, 4.5)}M5 8.5l7 1.5 7-1.5M12 10v4.5L9 21M12 14.5 15 21`,
+  keyboard: `M3 6h18v12H3zM8 14.5h8${DOT(7, 10)}${DOT(10.5, 10)}${DOT(14, 10)}${DOT(17.5, 10)}`,
+  fullscreen: 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5',
 }
 
 const SVG = 'http://www.w3.org/2000/svg'

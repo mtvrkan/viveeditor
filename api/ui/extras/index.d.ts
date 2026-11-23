@@ -104,4 +104,3 @@ interface SuggestionConfig<Item extends SuggestionItem> {
 }
 export declare function suggestionMenu<Item extends SuggestionItem>(config: SuggestionConfig<Item>): UiPlugin;
 export type { AiAction, AiAssistantOptions, AiProvider, AiRequest, EmojiMenuOptions, EmojiRow, ExtrasMessages, MarkdownRenderer, MentionItem, MentionMenuOptions, SuggestionConfig, SuggestionItem, Template };
-//# sourceMappingURL=index.d.ts.map

@@ -22,6 +22,10 @@
   height: auto;
 }
 
+.vive-content.vive-format-painter {
+  cursor: copy;
+}
+
 .ProseMirror-hideselection *::selection {
   background: transparent;
 }

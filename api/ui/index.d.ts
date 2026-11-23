@@ -1,7 +1,31 @@
-import { t as panel_kit_d_exports } from "./panel-kit.chunk.js";
+import { d as DocumentMessages, t as panel_kit_d_exports } from "./panel-kit.chunk.js";
 import { a as Messages, i as MessageKey, n as Locale, o as resolveLocale, r as MESSAGES } from "./commands.chunk.js";
 import { i as UiPluginInstance, n as UiPlugin, r as UiPluginHost, t as SlashEntry } from "./plugins.chunk.js";
 import { Editor } from "@viveeditor/core";
+type AutosaveStatus = "idle" | "pending" | "saving" | "saved" | "error";
+interface AutosaveOptions {
+  key: string;
+  wait?: number;
+  storage?: "local" | "session" | false;
+  save?: (editor: Editor, context: {
+    signal: AbortSignal;
+  }) => Promise<void> | void;
+  onError?: (error: unknown) => void;
+}
+interface AutosaveDraft {
+  readonly savedAt: number;
+}
+interface Autosave {
+  draft(): AutosaveDraft | null;
+  restore(): boolean;
+  discard(): void;
+  clear(): void;
+  status(): AutosaveStatus;
+  flush(): Promise<void>;
+  onChange(listener: () => void): () => void;
+  destroy(): void;
+}
+export declare function createAutosave(editor: Editor, options: AutosaveOptions): Autosave;
 interface DocxImportResult {
   html: string;
   warnings: readonly {
@@ -70,7 +94,7 @@ export declare function printDocument(editor: Editor, options?: PrintOptions): P
 type UiTheme = "light" | "dark" | "auto";
 interface UiOptions {
   locale?: string;
-  messages?: Partial<Messages>;
+  messages?: Partial<Messages & DocumentMessages>;
   theme?: UiTheme;
   readability?: ReadabilityFormula | false;
   bubble?: boolean;
@@ -79,14 +103,16 @@ interface UiOptions {
   files?: FileOptions | false;
   plugins?: readonly UiPlugin[];
   panels?: PanelSource;
+  exclude?: readonly string[];
+  autosave?: AutosaveOptions;
   onError?: (error: unknown) => void;
 }
 interface EditorUI {
   readonly root: HTMLElement;
   readonly toolbar: HTMLElement;
+  readonly autosave: Autosave | null;
   refresh(): void;
   destroy(): void;
 }
 export declare function createUI(editor: Editor, options?: UiOptions): EditorUI;
-export { type DocxModule, type EditorUI, type FileImageUploader, type FileOptions, type Locale, MESSAGES, type MarkdownModule, type MessageKey, type Messages, type PanelKit, type PanelKitLoader, type PanelSource, type PrintOptions, type ReadabilityBand, type ReadabilityFormula, type SlashEntry, type TextMeasure, type UiOptions, type UiPlugin, type UiPluginHost, type UiPluginInstance, type UiTheme, resolveLocale };
-//# sourceMappingURL=index.d.ts.map
+export { type Autosave, type AutosaveDraft, type AutosaveOptions, type AutosaveStatus, type DocumentMessages, type DocxModule, type EditorUI, type FileImageUploader, type FileOptions, type Locale, MESSAGES, type MarkdownModule, type MessageKey, type Messages, type PanelKit, type PanelKitLoader, type PanelSource, type PrintOptions, type ReadabilityBand, type ReadabilityFormula, type SlashEntry, type TextMeasure, type UiOptions, type UiPlugin, type UiPluginHost, type UiPluginInstance, type UiTheme, resolveLocale };

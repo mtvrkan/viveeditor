@@ -56,15 +56,22 @@ const FILES = new Map<string, string>([
   ['docx', 'viveeditor.docx.iife.js'],
   ['panels', 'viveeditor.panels.iife.js'],
 ])
-const MEMBERS: Readonly<Record<AddonName, readonly string[]>> = {
+export const ADDON_MEMBERS: {
+  readonly [Name in AddonName]: readonly (keyof AddonModules[Name] & string)[]
+} = {
   markdown: ['markdownToHtml', 'toMarkdown'],
   docx: ['importDocx', 'exportDocx'],
   panels: [
+    'createCharPanel',
+    'createCheckPanel',
     'createEmbedPanel',
     'createImagePanel',
+    'createOutlinePanel',
     'createSearchPanel',
+    'createShortcutsPanel',
     'createSwatchPanel',
     'createTablePanel',
+    'documentMessages',
   ],
 }
 const DEFAULT_TIMEOUT = 30_000
@@ -104,7 +111,7 @@ function trustedScriptUrl(url: string): string {
 function pickMembers(name: AddonName, api: unknown): object | null {
   if (typeof api !== 'object' || api === null) return null
   const picked: Record<string, unknown> = {}
-  for (const member of MEMBERS[name]) {
+  for (const member of ADDON_MEMBERS[name]) {
     const value: unknown = Reflect.get(api, member)
     if (typeof value !== 'function') return null
     picked[member] = value

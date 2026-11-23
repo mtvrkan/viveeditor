@@ -1,7 +1,7 @@
 import type { CommandAccess } from './commands.js'
 import { h, uniqueId } from './dom.js'
 import { icon } from './icons.js'
-import type { Messages } from './messages.js'
+import type { MessageKey, Messages } from './messages.js'
 import type { Popover } from './popover.js'
 
 export interface ImagePanelOptions {
@@ -14,10 +14,18 @@ export interface ImagePanelOptions {
 
 interface SelectedImage {
   alt: string | null
+  caption?: string | null
+  align?: string | null
 }
 
 const ACCEPT = 'image/png,image/jpeg,image/gif,image/webp,image/avif'
 const SCALES = [25, 50, 75, 100] as const
+const ALIGNS: readonly { value: string | null; label: MessageKey }[] = [
+  { value: null, label: 'imageAlignNone' },
+  { value: 'left', label: 'imageAlignLeft' },
+  { value: 'center', label: 'imageAlignCenter' },
+  { value: 'right', label: 'imageAlignRight' },
+]
 
 const isSelectedImage = (value: unknown): value is SelectedImage =>
   typeof value === 'object' && value !== null && 'alt' in value
@@ -59,6 +67,35 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     'aria-describedby': altHintId,
   })
   const decorative = h('input', { id: `${id}-decorative`, type: 'checkbox' })
+  const caption = h('input', {
+    id: `${id}-caption`,
+    class: 've-input',
+    type: 'text',
+    autocomplete: 'off',
+  })
+  const alignButtons = ALIGNS.map((option) => {
+    const button = h('button', { type: 'button', class: 've-quiet', 'aria-pressed': 'false' }, [
+      messages[option.label],
+    ])
+    button.addEventListener('click', () => {
+      commands.run('setImageAttributes', { align: option.value })
+      markAlign(option.value)
+      keepFocus()
+    })
+    return { option, button }
+  })
+  const aligns = h(
+    'div',
+    { class: 've-image-sizes', role: 'group', 'aria-label': messages.imageAlign },
+    [
+      h('span', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages.imageAlign]),
+      h(
+        'div',
+        { class: 've-image-scale' },
+        alignButtons.map((entry) => entry.button),
+      ),
+    ],
+  )
   const scaleButtons = SCALES.map((percent) => {
     const button = h('button', { type: 'button', class: 've-quiet' }, [`${percent}%`])
     button.addEventListener('click', () => {
@@ -92,6 +129,9 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
         decorative,
         messages.imageDecorative,
       ]),
+      h('label', { class: 've-eyebrow', for: `${id}-caption` }, [messages.imageCaption]),
+      caption,
+      aligns,
       sizes,
       hint,
       h('div', { class: 've-image-actions' }, [submit]),
@@ -102,6 +142,12 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
 
   const keepFocus = (): void => {
     if (!element.contains(document.activeElement)) alt.focus()
+  }
+
+  const markAlign = (value: string | null): void => {
+    for (const { option, button } of alignButtons) {
+      button.setAttribute('aria-pressed', String(option.value === value))
+    }
   }
 
   const altValue = (): string | null =>
@@ -136,11 +182,11 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
 
   const apply = (): void => {
     if (editing) {
-      commands.run('setImageAttributes', { alt: altValue() })
+      commands.run('setImageAttributes', { alt: altValue(), caption: caption.value })
       finish()
       return
     }
-    const attributes = { src: url.value.trim(), alt: altValue() }
+    const attributes = { src: url.value.trim(), alt: altValue(), caption: caption.value }
     if (!commands.can('insertImage', attributes)) {
       setHint(url.value.trim() === '' ? messages.imageNeedsUrl : messages.imageUnsafe)
       url.focus()
@@ -160,9 +206,12 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     upload.hidden = editing || !commands.can('uploadImages', [])
     urlBlock.hidden = editing
     sizes.hidden = !editing || !commands.can('scaleImage', 100)
+    aligns.hidden = !editing
     submit.textContent = editing ? messages.imageApply : messages.imageAdd
     url.value = ''
     const current = isSelectedImage(selected) ? selected.alt : null
+    caption.value = (isSelectedImage(selected) ? selected.caption : null) ?? ''
+    markAlign((isSelectedImage(selected) ? selected.align : null) ?? null)
     decorative.checked = current === ''
     alt.value = current ?? ''
     syncDecorative()

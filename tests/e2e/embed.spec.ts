@@ -74,7 +74,9 @@ test('opens the video panel from the slash menu', async ({ page }) => {
   await surface(page).click()
 
   await page.keyboard.type('/youtube')
-  await expect(page.getByRole('listbox', { name: 'Blok ekle' })).toBeVisible()
+  const list = page.getByRole('listbox', { name: 'Blok ekle' })
+  await expect(list.getByRole('option')).toHaveCount(1)
+  await expect(list.getByRole('option', { selected: true })).toContainText('Video')
   await expect(surface(page)).toHaveAttribute('aria-activedescendant', /.+/)
   await page.keyboard.press('Enter')
   const dialog = page.getByRole('dialog', { name: 'Video veya ses ekle' })

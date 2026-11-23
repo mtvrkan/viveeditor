@@ -149,14 +149,17 @@ export function createFileMenu(
     text.replaceChildren()
   }
 
-  const showError = (message: string): void => {
+  const showNotice = (message: string, tone: 'ok' | 'error'): void => {
     status.textContent = ''
-    text.replaceChildren(icon('alert'), message)
+    text.dataset.tone = tone
+    text.replaceChildren(icon(tone === 'ok' ? 'check' : 'alert'), message)
     notice.hidden = false
     place(notice)
     window.clearTimeout(noticeTimer)
     noticeTimer = window.setTimeout(hideNotice, NOTICE_TIME)
   }
+
+  const showError = (message: string): void => showNotice(message, 'error')
 
   const announce = (message: string): void => {
     status.textContent = message
@@ -344,6 +347,25 @@ export function createFileMenu(
             showError(messages.filePrintFailed)
           }),
         ),
+    })
+  }
+
+  if (commands.has('cleanDocument')) {
+    items.push({
+      id: 'cleanDocument',
+      label: messages.cleanDocument,
+      icon: 'tidy',
+      role: 'menuitem',
+      group: 3,
+      disabled: () => busy || !editor.isEditable,
+      action: () => {
+        const report = commands.query('documentCleanup') as Record<string, number> | undefined
+        const cleaned = report !== undefined && commands.run('cleanDocument')
+        showNotice(
+          cleaned ? format(messages.cleanDocumentDone, report) : messages.cleanDocumentNothing,
+          'ok',
+        )
+      },
     })
   }
 

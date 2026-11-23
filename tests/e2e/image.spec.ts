@@ -149,3 +149,28 @@ test('opens the image panel from the slash menu and inserts in place of the type
   await expect(output(page)).toContainText('<img src="https://example.invalid/kedi.png"')
   await expect(output(page)).not.toContainText('/görsel')
 })
+
+test('adds a caption and floats the image so the text wraps beside it', async ({ page }) => {
+  await uploadSample(page)
+  await expect(output(page)).toContainText('<img src="data:image/png;base64,')
+  await surface(page).press('ControlOrMeta+End')
+  await page.keyboard.type('Görselin yanında akan metin.')
+  await page.locator('.vive-image img').click()
+
+  await openImageTool(page)
+  const dialog = page.getByRole('dialog', { name: 'Görsel', exact: true })
+  await dialog
+    .getByRole('group', { name: 'Yerleşim' })
+    .getByRole('button', { name: 'Sola' })
+    .click()
+  await dialog.getByLabel('Altyazı').fill('Şekil 1: örnek')
+  await dialog.getByRole('button', { name: 'Uygula' }).click()
+
+  await expect(output(page)).toContainText('<figure data-align="left"><img src="data:image/png')
+  await expect(output(page)).toContainText('<figcaption>Şekil 1: örnek</figcaption></figure>')
+  await expect(page.locator('.vive-image-caption')).toHaveText('Şekil 1: örnek')
+  const float = await page
+    .locator('.vive-image')
+    .evaluate((element) => getComputedStyle(element).float)
+  expect(['left', 'none']).toContain(float)
+})

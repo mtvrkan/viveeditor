@@ -20,4 +20,3 @@ export interface ViveEditorHandle {
 }
 export declare function useViveEditor(options: ViveEditorOptions): ViveEditorHandle;
 export declare const ViveEditor: ForwardRefExoticComponent<ViveEditorProps & RefAttributes<Editor | null>>;
-//# sourceMappingURL=index.d.ts.map

@@ -8,6 +8,15 @@ interface Messages {
   italic: string;
   underline: string;
   strike: string;
+  clearFormatting: string;
+  formatPainter: string;
+  cleanDocument: string;
+  pasteOptions: string;
+  pasteKeep: string;
+  pasteClean: string;
+  pastePlain: string;
+  cleanDocumentDone: string;
+  cleanDocumentNothing: string;
   code: string;
   bulletList: string;
   orderedList: string;
@@ -25,6 +34,12 @@ interface Messages {
   imageAltHint: string;
   imageDecorative: string;
   imageSize: string;
+  imageCaption: string;
+  imageAlign: string;
+  imageAlignNone: string;
+  imageAlignLeft: string;
+  imageAlignCenter: string;
+  imageAlignRight: string;
   imageAdd: string;
   imageApply: string;
   imageUnsafe: string;
@@ -51,6 +66,15 @@ interface Messages {
   deleteTable: string;
   search: string;
   source: string;
+  outline: string;
+  accessibilityCheck: string;
+  shortcuts: string;
+  fullscreen: string;
+  draftLabel: string;
+  draftFound: string;
+  draftRestore: string;
+  draftDiscard: string;
+  draftRestored: string;
   sourceLabel: string;
   file: string;
   fileOpen: string;
@@ -128,6 +152,29 @@ interface Messages {
   alignCenter: string;
   alignRight: string;
   alignJustify: string;
+  textStyle: string;
+  fontTiny: string;
+  fontSmall: string;
+  fontNormal: string;
+  fontBig: string;
+  fontHuge: string;
+  superscript: string;
+  subscript: string;
+  caseUpper: string;
+  caseLower: string;
+  caseTitle: string;
+  caseSentence: string;
+  indent: string;
+  outdent: string;
+  specialCharacters: string;
+  charCategory: string;
+  charsPunctuation: string;
+  charsCurrency: string;
+  charsMath: string;
+  charsArrows: string;
+  charsLetters: string;
+  charsGreek: string;
+  charsSymbols: string;
   textColor: string;
   highlight: string;
   colorDefault: string;
@@ -141,6 +188,12 @@ interface Messages {
   colorPurple: string;
   colorPink: string;
   colorGray: string;
+  cellColor: string;
+  cellColorNone: string;
+  cellAlign: string;
+  cellAlignTop: string;
+  cellAlignMiddle: string;
+  cellAlignBottom: string;
 }
 type MessageKey = keyof Messages;
 type Locale = "tr" | "en";
@@ -153,4 +206,3 @@ interface CommandAccess {
   query(name: string, ...args: unknown[]): unknown;
 }
 export { Messages as a, MessageKey as i, Locale as n, resolveLocale as o, MESSAGES as r, CommandAccess as t };
-//# sourceMappingURL=commands-Ri2mhqif.d.ts.map

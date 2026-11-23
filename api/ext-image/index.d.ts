@@ -8,12 +8,15 @@ interface ImageSourcePolicy {
   insecure: "block" | "upgrade";
   allowRelative: boolean;
 }
+type ImageAlign = "left" | "center" | "right";
 interface ImageAttributes {
   src: string;
   alt?: string | null;
   title?: string | null;
   width?: number | null;
   height?: number | null;
+  caption?: string | null;
+  align?: ImageAlign | null;
 }
 export declare const DEFAULT_SOURCE_POLICY: ImageSourcePolicy;
 export declare function normalizeImageSrc(value: unknown, policy?: ImageSourcePolicy): string | null;
@@ -70,6 +73,8 @@ export interface SelectedImage {
   title: string | null;
   width: number | null;
   height: number | null;
+  caption: string | null;
+  align: ImageAlign | null;
 }
 export interface PendingUploads {
   uploading: number;
@@ -91,5 +96,4 @@ declare module "@viveeditor/core" {
   }
 }
 export declare const Image: Extension<ImageOptions>;
-export type { ImageAttributes, ImageError, ImageErrorCode, ImageRehoster, ImageSize, ImageSourcePolicy, ImageUploader, UploadContext, UploadResult };
-//# sourceMappingURL=index.d.ts.map
+export type { ImageAlign, ImageAttributes, ImageError, ImageErrorCode, ImageRehoster, ImageSize, ImageSourcePolicy, ImageUploader, UploadContext, UploadResult };

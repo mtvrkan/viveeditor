@@ -17,3 +17,7 @@ export function markInputRule(pattern: RegExp, markType: MarkType): InputRule {
     return transaction
   })
 }
+
+export function textInputRule(pattern: RegExp, replacement: string): InputRule {
+  return new InputRule(pattern, replacement, { inCodeMark: false })
+}

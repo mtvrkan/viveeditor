@@ -4,4 +4,3 @@ export interface RenderMathOptions {
   onError?: (error: MathError) => void;
 }
 export declare function renderMath(root: ParentNode, options: RenderMathOptions): Promise<number>;
-//# sourceMappingURL=render.d.ts.map

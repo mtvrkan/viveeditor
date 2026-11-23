@@ -4,6 +4,7 @@ import type { CommandAccess } from './commands.js'
 import { placeInDock } from './dom.js'
 import type { FileMenu } from './file-menu.js'
 import type { FormatTools } from './format-tools.js'
+import type { Fullscreen } from './fullscreen.js'
 import { createMenu, type Menu, type MenuItem } from './menu.js'
 import type { Messages } from './messages.js'
 import type { SourceView } from './source-view.js'
@@ -20,6 +21,7 @@ export interface DockMenusOptions {
   formatTools: FormatTools
   fileMenu: FileMenu
   source: SourceView
+  fullscreen: Fullscreen
   toggleSource: () => boolean
   openPopover: (id: string, anchor: HTMLElement) => boolean
   block: BlockControl
@@ -33,6 +35,8 @@ export interface DockMenus {
   readonly all: Menu[]
 }
 
+const UNLOCKED = new Set(['source', 'fullscreen'])
+
 function moreMenuItems(options: DockMenusOptions): MenuItem[] {
   const { editor, commands, messages, toolbar, source } = options
   return options.groups.flatMap((group, groupIndex) =>
@@ -40,12 +44,9 @@ function moreMenuItems(options: DockMenusOptions): MenuItem[] {
       .filter((tool) => !tool.narrow)
       .flatMap<MenuItem>((tool) => {
         const hidden = (): boolean => !toolbar.isCollapsed(tool.id)
-        if (tool.id === 'align') {
-          return options.formatTools.alignItems.map((item) => ({
-            ...item,
-            group: groupIndex,
-            hidden,
-          }))
+        const menuItems = options.formatTools.menuItems.get(tool.id)
+        if (menuItems) {
+          return menuItems.map((item) => ({ ...item, group: groupIndex, hidden }))
         }
         if (tool.id === 'file') {
           return options.fileMenu.items.map((item) => ({ ...item, group: groupIndex, hidden }))
@@ -59,19 +60,25 @@ function moreMenuItems(options: DockMenusOptions): MenuItem[] {
             ...(tool.icon ? { icon: tool.icon } : { glyph: messages[tool.glyph ?? 'glyphBold'] }),
             ...(tool.shortcut ? { hint: displayShortcut(tool.shortcut) } : {}),
             role:
-              (tool.active && !tool.popup) || tool.id === 'source'
+              (tool.active && !tool.popup) || tool.id === 'source' || tool.id === 'fullscreen'
                 ? 'menuitemcheckbox'
                 : 'menuitem',
             checked: () =>
               tool.id === 'source'
                 ? source.isOpen()
-                : tool.active
-                  ? editor.isActive(tool.active)
-                  : false,
+                : tool.id === 'fullscreen'
+                  ? options.fullscreen.isOpen()
+                  : tool.active
+                    ? editor.isActive(tool.active)
+                    : false,
             disabled: () =>
-              (source.isOpen() && tool.id !== 'source') || !toolEnabled(tool, commands),
+              (source.isOpen() && !UNLOCKED.has(tool.id)) || !toolEnabled(tool, commands),
             action: () => {
               if (tool.id === 'source') return options.toggleSource()
+              if (tool.id === 'fullscreen') {
+                options.fullscreen.toggle()
+                return false
+              }
               if (tool.popup === 'dialog') return options.openPopover(tool.id, toolbar.moreButton)
               commands.run(tool.command, ...toolArgs(tool))
               return false

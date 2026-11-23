@@ -1,4 +1,4 @@
-import { defineExtension, type Extension } from '@viveeditor/core'
+import { defineExtension, type Extension, normalizeColor } from '@viveeditor/core'
 import type { DOMOutputSpec, NodeSpec, Node as ProseMirrorNode, Schema } from 'prosemirror-model'
 import { type Command, Plugin, TextSelection } from 'prosemirror-state'
 import {
@@ -15,6 +15,8 @@ import {
   isInTable,
   mergeCells,
   selectedRect,
+  selectionCell,
+  setCellAttr,
   splitCell,
   TableMap,
   TableView,
@@ -29,6 +31,13 @@ export interface TableOptions {
   resizable: boolean
   cellMinWidth: number
   maxSize: number
+}
+
+export type CellVerticalAlign = 'middle' | 'bottom'
+
+export interface CellStyle {
+  background: string | null
+  verticalAlign: CellVerticalAlign | null
 }
 
 export interface InsertTableOptions {
@@ -52,13 +61,55 @@ declare module '@viveeditor/core' {
     toggleHeaderRow: () => Command
     toggleHeaderColumn: () => Command
     resizeColumn: (delta: number) => Command
+    setCellBackground: (color: string | null) => Command
+    setCellVerticalAlign: (align: CellVerticalAlign | null) => Command
   }
   interface QueryRegistry {
     inTable: () => boolean
+    cellStyle: () => CellStyle | null
   }
 }
 
 const FALLBACK_WIDTH = 120
+const VERTICAL: readonly unknown[] = ['middle', 'bottom']
+const PLAIN = new Set(['#ffffff', 'white'])
+
+function cellBackground(value: unknown): string | null {
+  const color = normalizeColor(value)
+  return color && !PLAIN.has(color) ? color : null
+}
+
+function cellVertical(value: unknown): CellVerticalAlign | null {
+  return VERTICAL.includes(value) ? (value as CellVerticalAlign) : null
+}
+
+function addStyle(attrs: Record<string, unknown>, declaration: string): void {
+  attrs.style = typeof attrs.style === 'string' ? `${attrs.style}; ${declaration}` : declaration
+}
+
+const CELL_ATTRIBUTES = {
+  background: {
+    default: null,
+    getFromDOM: (dom: HTMLElement) => cellBackground(dom.style.backgroundColor),
+    setDOMAttr: (value: unknown, attrs: Record<string, unknown>) => {
+      const color = cellBackground(value)
+      if (color) addStyle(attrs, `background-color: ${color}`)
+    },
+  },
+  verticalAlign: {
+    default: null,
+    getFromDOM: (dom: HTMLElement) =>
+      cellVertical(dom.style.verticalAlign || dom.getAttribute('valign')),
+    setDOMAttr: (value: unknown, attrs: Record<string, unknown>) => {
+      const align = cellVertical(value)
+      if (align) addStyle(attrs, `vertical-align: ${align}`)
+    },
+  },
+}
+
+function setCellStyle(name: keyof CellStyle, value: string | null): Command {
+  return (state, dispatch) => isInTable(state) && setCellAttr(name, value)(state, dispatch)
+}
 
 function count(value: unknown, fallback: number, max: number): number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 1
@@ -199,7 +250,11 @@ function resizeColumn(delta: number, cellMinWidth: number): Command {
 }
 
 function tableSpecs(cellMinWidth: number): Record<string, NodeSpec> {
-  const specs = tableNodes({ tableGroup: 'block', cellContent: 'block+', cellAttributes: {} })
+  const specs = tableNodes({
+    tableGroup: 'block',
+    cellContent: 'block+',
+    cellAttributes: CELL_ATTRIBUTES,
+  })
   return {
     table: {
       ...specs.table,
@@ -232,9 +287,25 @@ export const Table: Extension<TableOptions> = defineExtension({
     toggleHeaderRow: () => toggleHeaderRow,
     toggleHeaderColumn: () => toggleHeaderColumn,
     resizeColumn: (delta: number) => resizeColumn(delta, options.cellMinWidth),
+    setCellBackground: (color: string | null) => {
+      const value = cellBackground(color)
+      return color !== null && value === null ? () => false : setCellStyle('background', value)
+    },
+    setCellVerticalAlign: (align: CellVerticalAlign | null) => {
+      const value = cellVertical(align)
+      return align !== null && value === null ? () => false : setCellStyle('verticalAlign', value)
+    },
   }),
   queries: () => ({
     inTable: (state) => isInTable(state),
+    cellStyle: (state) => {
+      if (!isInTable(state)) return null
+      const attrs = selectionCell(state).nodeAfter?.attrs
+      return {
+        background: cellBackground(attrs?.background),
+        verticalAlign: cellVertical(attrs?.verticalAlign),
+      }
+    },
   }),
   keymap: () => ({
     Tab: (state, dispatch) => goToNextCell(1)(state, dispatch) || appendRow(state, dispatch),

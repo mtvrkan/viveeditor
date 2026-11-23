@@ -1,5 +1,6 @@
 import type { CommandAccess } from './commands.js'
 import { h, moveFocus } from './dom.js'
+import { icon } from './icons.js'
 import { format, type MessageKey, type Messages } from './messages.js'
 import type { Popover } from './popover.js'
 
@@ -16,6 +17,30 @@ interface TableAction {
   command: string
   args?: readonly unknown[]
 }
+
+interface CellStyle {
+  background: string | null
+  verticalAlign: string | null
+}
+
+const CELL_COLORS: readonly { value: string; name: MessageKey }[] = [
+  { value: '#fff2a8', name: 'colorYellow' },
+  { value: '#c8f2c2', name: 'colorGreen' },
+  { value: '#cde8ff', name: 'colorBlue' },
+  { value: '#ffd6e7', name: 'colorPink' },
+  { value: '#ffe0b2', name: 'colorOrange' },
+  { value: '#e6d9ff', name: 'colorPurple' },
+  { value: '#eceff1', name: 'colorGray' },
+]
+
+const VERTICAL: readonly { value: string | null; label: MessageKey }[] = [
+  { value: null, label: 'cellAlignTop' },
+  { value: 'middle', label: 'cellAlignMiddle' },
+  { value: 'bottom', label: 'cellAlignBottom' },
+]
+
+const isCellStyle = (value: unknown): value is CellStyle =>
+  typeof value === 'object' && value !== null && 'background' in value
 
 const COLUMNS = 6
 const ROWS = 6
@@ -88,11 +113,68 @@ export function createTablePanel(options: TablePanelOptions): Popover {
     ]),
   )
 
+  const styleButtons: { button: HTMLButtonElement; pressed: (style: CellStyle) => boolean }[] = []
+  const styleButton = (
+    attributes: Record<string, string>,
+    children: (Node | string)[],
+    command: string,
+    value: string | null,
+    pressed: (style: CellStyle) => boolean,
+  ): HTMLButtonElement => {
+    const button = h(
+      'button',
+      { type: 'button', tabindex: '-1', 'aria-pressed': 'false', ...attributes },
+      children,
+    )
+    button.addEventListener('click', () => run(command, [value]))
+    styleButtons.push({ button, pressed })
+    return button
+  }
+  const swatchButton = (value: string | null, name: string): HTMLButtonElement => {
+    const button = styleButton(
+      {
+        class: value ? 've-swatch' : 've-swatch ve-swatch-none',
+        'aria-label': name,
+        title: name,
+      },
+      [icon(value ? 'check' : 'clear')],
+      'setCellBackground',
+      value,
+      (style) => style.background === value,
+    )
+    if (value) button.style.setProperty('--ve-swatch', value)
+    return button
+  }
+  const colorLabel = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages.cellColor])
+  const colors = h(
+    'div',
+    { class: 've-swatch-grid', role: 'group', 'aria-label': messages.cellColor },
+    [
+      swatchButton(null, messages.cellColorNone),
+      ...CELL_COLORS.map((color) => swatchButton(color.value, messages[color.name])),
+    ],
+  )
+  const alignLabel = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages.cellAlign])
+  const aligns = h(
+    'div',
+    { class: 've-image-scale ve-cell-align', role: 'group', 'aria-label': messages.cellAlign },
+    VERTICAL.map((option) =>
+      styleButton(
+        { class: 've-quiet' },
+        [messages[option.label]],
+        'setCellVerticalAlign',
+        option.value,
+        (style) => style.verticalAlign === option.value,
+      ),
+    ),
+  )
+  const cellStyle = h('div', { class: 've-cell-style' }, [colorLabel, colors, alignLabel, aligns])
+
   const title = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' })
   const element = h(
     'div',
     { class: 've-panel ve-table-panel ve-glass ve-solid', role: 'dialog', hidden: '' },
-    [title, picker, list],
+    [title, picker, cellStyle, list],
   )
   let anchor: HTMLElement | null = null
 
@@ -125,6 +207,11 @@ export function createTablePanel(options: TablePanelOptions): Popover {
     element.setAttribute('aria-label', label)
     picker.hidden = inTable
     list.hidden = !inTable
+    const style = commands.query('cellStyle')
+    cellStyle.hidden = !inTable || !isCellStyle(style)
+    for (const { button, pressed } of styleButtons) {
+      button.setAttribute('aria-pressed', String(isCellStyle(style) && pressed(style)))
+    }
     for (const { action, button } of actions) {
       button.setAttribute(
         'aria-disabled',
@@ -166,9 +253,13 @@ export function createTablePanel(options: TablePanelOptions): Popover {
       if (!wraps && target >= 0 && target < cells.length) cells[target]?.focus()
       return
     }
-    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return
+    if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key))
+      return
     event.preventDefault()
-    const buttons = actions.map((entry) => entry.button)
+    const buttons = [
+      ...(cellStyle.hidden ? [] : styleButtons.map((entry) => entry.button)),
+      ...actions.map((entry) => entry.button),
+    ]
     buttons[
       moveFocus(buttons, buttons.indexOf(document.activeElement as HTMLButtonElement), event.key)
     ]?.focus()

@@ -12,4 +12,3 @@ export interface TaskListOptions {
 export declare const TaskItem: Extension<TaskListOptions>;
 export declare const TaskList: Extension<Record<string, never>>;
 export declare const taskListExtensions: readonly Extension[];
-//# sourceMappingURL=index.d.ts.map

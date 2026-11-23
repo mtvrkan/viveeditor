@@ -59,6 +59,7 @@ export class ImageView implements NodeView {
   private readonly image: HTMLImageElement
   private readonly handle: HTMLElement
   private readonly badge: HTMLElement
+  private readonly caption: HTMLElement
   private release: (() => void) | null = null
 
   constructor(
@@ -76,7 +77,12 @@ export class ImageView implements NodeView {
     this.badge = document.createElement('span')
     this.badge.className = 'vive-image-alt'
     this.badge.textContent = settings.missingAltLabel
-    this.dom.append(this.image, this.handle, this.badge)
+    this.caption = document.createElement('div')
+    this.caption.className = 'vive-image-caption'
+    const frame = document.createElement('div')
+    frame.className = 'vive-image-frame'
+    frame.append(this.image, this.handle, this.badge)
+    this.dom.append(frame, this.caption)
     this.handle.addEventListener('pointerdown', this.startResize)
     this.render()
   }
@@ -103,6 +109,11 @@ export class ImageView implements NodeView {
 
   private render(): void {
     setImageElement(this.image, imageAttributes(this.node.attrs, this.settings.policy))
+    const { caption, align } = cleanImage(this.node.attrs, this.settings.policy)
+    this.caption.textContent = caption
+    this.caption.hidden = !caption
+    if (align) this.dom.dataset.align = align
+    else delete this.dom.dataset.align
     const missing = this.settings.requireAlt !== 'off' && this.node.attrs.alt === null
     this.badge.hidden = !missing
     this.dom.classList.toggle('is-missing-alt', missing)

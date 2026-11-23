@@ -5,7 +5,7 @@ import { type Mark, type Node as ProseMirrorNode, Slice } from 'prosemirror-mode
 import { type EditorState, Plugin, TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 import { parseContent } from './content.js'
-import { defineExtension, type Extension } from './extension.js'
+import { defineExtension, type Extension, type FoundItem } from './extension.js'
 import { cleanPastedHtml } from './paste.js'
 import { getNodeType } from './schema-utils.js'
 
@@ -28,6 +28,64 @@ function readableText(doc: ProseMirrorNode, from: number, to: number): string {
     return true
   })
   return text
+}
+
+const FIND_LIMIT = 2000
+
+const nameSet = (names: unknown): ReadonlySet<string> =>
+  new Set(Array.isArray(names) ? names.filter((name) => typeof name === 'string') : [])
+
+function findNodes(doc: ProseMirrorNode, names: unknown): FoundItem[] {
+  const wanted = nameSet(names)
+  const found: FoundItem[] = []
+  if (wanted.size === 0) return found
+  doc.descendants((node, pos) => {
+    if (found.length >= FIND_LIMIT) return false
+    if (wanted.has(node.type.name)) {
+      found.push({
+        name: node.type.name,
+        attrs: { ...node.attrs },
+        text: node.textContent,
+        from: pos,
+        to: pos + node.nodeSize,
+      })
+    }
+    return true
+  })
+  return found
+}
+
+function findMarks(doc: ProseMirrorNode, names: unknown): FoundItem[] {
+  const wanted = nameSet(names)
+  const found: FoundItem[] = []
+  if (wanted.size === 0) return found
+  const open = new Map<string, { item: FoundItem; mark: Mark }>()
+  doc.descendants((node, pos) => {
+    if (found.length >= FIND_LIMIT) return false
+    if (!node.isInline) {
+      open.clear()
+      return true
+    }
+    const end = pos + node.nodeSize
+    for (const name of wanted) {
+      const mark = node.marks.find((candidate) => candidate.type.name === name)
+      const current = open.get(name)
+      if (!mark) {
+        open.delete(name)
+        continue
+      }
+      if (current && current.item.to === pos && current.mark.eq(mark)) {
+        current.item.to = end
+        current.item.text += node.textContent
+        continue
+      }
+      const item = { name, attrs: { ...mark.attrs }, text: node.textContent, from: pos, to: end }
+      found.push(item)
+      open.set(name, { item, mark })
+    }
+    return false
+  })
+  return found.slice(0, FIND_LIMIT)
 }
 
 function marksOfSelection(state: EditorState): readonly Mark[] {
@@ -149,6 +207,8 @@ export const Base: Extension<Record<string, never>> = defineExtension({
       const { from, to } = state.selection
       return readableText(state.doc, from, to)
     },
+    findNodes: (state, names) => findNodes(state.doc, names),
+    findMarks: (state, names) => findMarks(state.doc, names),
     textBetween: (state, from, to) => {
       const size = state.doc.content.size
       const start = Math.min(size, Math.max(0, Math.trunc(from) || 0))

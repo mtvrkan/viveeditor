@@ -52,4 +52,3 @@ interface ExportLimits {
 export declare const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 export declare function exportDocx(source: ExportSource, options?: ExportOptions): Promise<Blob>;
 export type { DocxErrorCode, DocxImport, ExportLimits, ExportOptions, ExportSource, ImportLimits, ImportOptions, ImportWarning, ImportWarningCode };
-//# sourceMappingURL=index.d.ts.map

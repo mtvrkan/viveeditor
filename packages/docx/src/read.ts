@@ -65,6 +65,18 @@ const REL = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships
 const REL_OFFICE_DOCUMENT = `${REL}/officeDocument`
 const REL_HYPERLINK = `${REL}/hyperlink`
 const REL_IMAGE = `${REL}/image`
+function cellStyleOf(tcPr: Element | null): string {
+  const fill = wAttr(child(tcPr, NS.w, 'shd'), 'fill') ?? ''
+  const vertical = wAttr(child(tcPr, NS.w, 'vAlign'), 'val')
+  return [
+    /^[0-9a-f]{6}$/i.test(fill) && !/^f{6}$/i.test(fill) ? `background-color: #${fill}` : '',
+    vertical === 'center' || vertical === 'bottom'
+      ? `vertical-align: ${vertical === 'center' ? 'middle' : vertical}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('; ')
+}
 const MAX_DEPTH = 64
 const MAX_TABLE_DEPTH = 3
 const MAX_COLUMNS = 100
@@ -140,6 +152,7 @@ interface RunFormat {
   highlight: string | null
   code: boolean
   hidden: boolean
+  script: 'sub' | 'sup' | null
 }
 
 interface ListLevel {
@@ -354,6 +367,10 @@ function readRunFormat(rPr: Element | null): Partial<RunFormat> {
       onOff(child(rPr, NS.w, name)),
     )
   }
+  const vertical = wAttr(child(rPr, NS.w, 'vertAlign'), 'val')
+  if (vertical) {
+    format.script = vertical === 'superscript' ? 'sup' : vertical === 'subscript' ? 'sub' : null
+  }
   const fill = wAttr(child(rPr, NS.w, 'shd'), 'fill')
   if (
     !format.highlight &&
@@ -557,6 +574,7 @@ class Reader {
     if (format.strike) wrap('s')
     if (format.underline) wrap('u')
     if (format.italic) wrap('em')
+    if (format.script) wrap(format.script)
     if (format.code) wrap('code')
     if (format.bold) wrap('strong')
     target.append(node)
@@ -643,6 +661,8 @@ class Reader {
         if (sized && cellWidths.length === span && cellWidths.every((width) => width > 0)) {
           tableCell.setAttribute('data-colwidth', cellWidths.join(','))
         }
+        const cellStyle = cellStyleOf(tcPr)
+        if (cellStyle) tableCell.setAttribute('style', cellStyle)
         for (let offset = 0; offset < span; offset++) {
           if (merge) origins.set(column + offset, tableCell)
           else origins.delete(column + offset)

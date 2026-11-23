@@ -157,6 +157,74 @@ describe('form integration', () => {
   })
 })
 
+describe('source view in a form', () => {
+  it('sends the HTML typed in the source view when a script submits the form', async () => {
+    render('<form><textarea name="body"><p>eski</p></textarea></form>')
+    const form = document.querySelector('form') as HTMLFormElement
+    const { ui } = await upgrade(field(), { ui: { locale: 'en' } })
+    ui?.toolbar.querySelector<HTMLButtonElement>('[data-tool="source"]')?.click()
+    const source = document.querySelector<HTMLTextAreaElement>('.ve-source') as HTMLTextAreaElement
+    source.value = '<p>yeni</p>'
+
+    submit(form)
+
+    expect(new FormData(form).get('body')).toBe('<p>yeni</p>')
+  })
+
+  it('leaves the editor alone when another form submits', async () => {
+    render('<form id="a"><textarea name="body"><p>eski</p></textarea></form><form id="b"></form>')
+    const { ui, editor } = await upgrade(field(), { ui: { locale: 'en' } })
+    ui?.toolbar.querySelector<HTMLButtonElement>('[data-tool="source"]')?.click()
+    const source = document.querySelector<HTMLTextAreaElement>('.ve-source') as HTMLTextAreaElement
+    source.value = '<p>yeni</p>'
+
+    submit(document.querySelector('#b') as HTMLFormElement)
+
+    expect(editor.getHTML()).toBe('<p>eski</p>')
+  })
+})
+
+describe('autosave from data-autosave', () => {
+  it('keeps a draft under the attribute key and clears it once the form is sent', async () => {
+    localStorage.clear()
+    render('<form><textarea name="body" data-autosave="post-9"><p>a</p></textarea></form>')
+    const form = document.querySelector('form') as HTMLFormElement
+    const { editor, ui } = await upgrade()
+    editor.commands.setTextSelection(1)
+    editor.commands.insertText('b')
+    await ui?.autosave?.flush()
+    const stored = localStorage.getItem('viveeditor:draft:post-9')
+
+    submit(form)
+
+    expect(stored).toContain('"version":1')
+    expect(localStorage.getItem('viveeditor:draft:post-9')).toBeNull()
+  })
+
+  it('keeps the draft when the submit is stopped', async () => {
+    localStorage.clear()
+    render('<form><textarea name="body" data-autosave="post-9"><p>a</p></textarea></form>')
+    const form = document.querySelector('form') as HTMLFormElement
+    form.addEventListener('submit', (event) => event.preventDefault())
+    const { editor, ui } = await upgrade()
+    editor.commands.setTextSelection(1)
+    editor.commands.insertText('b')
+    await ui?.autosave?.flush()
+
+    submit(form)
+
+    expect(localStorage.getItem('viveeditor:draft:post-9')).not.toBeNull()
+  })
+
+  it('does not autosave without the attribute', async () => {
+    render('<form><textarea name="body"><p>a</p></textarea></form>')
+
+    const { ui } = await upgrade()
+
+    expect(ui?.autosave).toBeNull()
+  })
+})
+
 describe('pending image uploads', () => {
   const settle = async (): Promise<void> => {
     for (let index = 0; index < 5; index++) await new Promise((resolve) => setTimeout(resolve, 0))

@@ -52,4 +52,3 @@ export declare const HorizontalRule: Extension<NoOptions>;
 export declare const HardBreak: Extension<NoOptions>;
 export declare const basicExtensions: readonly Extension[];
 export type { HeadingLevel, HeadingOptions, LinkAttributes, LinkOptions };
-//# sourceMappingURL=index.d.ts.map

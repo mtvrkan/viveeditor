@@ -35,7 +35,7 @@ export function createToolButton(tool: ToolSpec, messages: Messages): HTMLButton
   if (tool.popup) {
     button.setAttribute('aria-haspopup', tool.popup)
     button.setAttribute('aria-expanded', 'false')
-  } else if (tool.active) button.setAttribute('aria-pressed', 'false')
+  } else if (tool.active || tool.activeQuery) button.setAttribute('aria-pressed', 'false')
   return button
 }
 
@@ -45,9 +45,13 @@ export function syncToolButton(
   editor: Editor,
   commands: CommandAccess,
 ): void {
-  const active = tool.active ? editor.isActive(tool.active) : false
+  const active = tool.activeQuery
+    ? Boolean(commands.query(tool.activeQuery))
+    : tool.active
+      ? editor.isActive(tool.active)
+      : false
   if (tool.popup) button.classList.toggle('is-active', active)
-  else if (tool.active) button.setAttribute('aria-pressed', String(active))
+  else if (tool.active || tool.activeQuery) button.setAttribute('aria-pressed', String(active))
   button.setAttribute('aria-disabled', String(!toolEnabled(tool, commands)))
 }
 
@@ -66,6 +70,8 @@ export function syncToolButtons(
 export function markSourceState(buttons: readonly HTMLButtonElement[], sourceOpen: boolean): void {
   for (const button of buttons) {
     if (button.dataset.tool === 'source') button.setAttribute('aria-pressed', String(sourceOpen))
-    else if (sourceOpen) button.setAttribute('aria-disabled', 'true')
+    else if (sourceOpen && button.dataset.tool !== 'fullscreen') {
+      button.setAttribute('aria-disabled', 'true')
+    }
   }
 }

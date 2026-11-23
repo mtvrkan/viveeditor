@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineExtension, Editor, ViveEditorError } from '../src/index.js'
+import { defineExtension, Editor, SCHEMA_VERSION, ViveEditorError } from '../src/index.js'
 import { TestMarks } from './fixtures.js'
 
 let editors: Editor[] = []
@@ -41,7 +41,7 @@ describe('Editor.create', () => {
       ],
     }
     const editor = await mount({ content: json })
-    expect(editor.getJSON()).toEqual(json)
+    expect(editor.getJSON()).toEqual({ ...json, schemaVersion: SCHEMA_VERSION })
   })
 
   it('rejects JSON that does not match the schema', async () => {
@@ -56,6 +56,69 @@ describe('Editor.create', () => {
     expect(surface?.getAttribute('role')).toBe('textbox')
     expect(surface?.getAttribute('aria-label')).toBe('Makale içeriği')
     expect(editor.isEditable).toBe(true)
+  })
+})
+
+describe('schema version', () => {
+  const paragraph = { type: 'paragraph', content: [{ type: 'text', text: 'metin' }] }
+
+  it('writes the schema version at the root of getJSON', async () => {
+    const editor = await mount({ content: '<p>metin</p>' })
+
+    const json = editor.getJSON()
+
+    expect(json).toEqual({ type: 'doc', schemaVersion: SCHEMA_VERSION, content: [paragraph] })
+    expect(Object.keys(json)[1]).toBe('schemaVersion')
+  })
+
+  it('loads its own getJSON output again', async () => {
+    const editor = await mount({ content: '<p>metin</p>' })
+
+    const reloaded = await mount({ content: editor.getJSON() })
+
+    expect(reloaded.getJSON()).toEqual(editor.getJSON())
+  })
+
+  it('reads JSON without a version as content saved by 0.x', async () => {
+    const editor = await mount({ content: { type: 'doc', content: [paragraph] } })
+
+    expect(editor.getHTML()).toBe('<p>metin</p>')
+  })
+
+  it('reads JSON saved with version 0', async () => {
+    const editor = await mount({ content: { type: 'doc', schemaVersion: 0, content: [paragraph] } })
+
+    expect(editor.getHTML()).toBe('<p>metin</p>')
+  })
+
+  it('rejects JSON saved by a newer schema with SCHEMA_TOO_NEW', async () => {
+    const content = { type: 'doc', schemaVersion: SCHEMA_VERSION + 1, content: [paragraph] }
+
+    const created = mount({ content })
+
+    await expect(created).rejects.toMatchObject({ code: 'SCHEMA_TOO_NEW' })
+  })
+
+  it.each([-1, 1.5, '1', null, Number.NaN])(
+    'rejects schemaVersion %s with INVALID_CONTENT',
+    async (schemaVersion) => {
+      const content = { type: 'doc', schemaVersion, content: [paragraph] } as never
+
+      const created = mount({ content })
+
+      await expect(created).rejects.toMatchObject({ code: 'INVALID_CONTENT' })
+    },
+  )
+
+  it('returns false from replaceContent and setContent throws for a newer schema', async () => {
+    const editor = await mount({ content: '<p>eski</p>' })
+    const content = { type: 'doc', schemaVersion: SCHEMA_VERSION + 1, content: [paragraph] }
+
+    const replaced = editor.commands.replaceContent(content)
+
+    expect(replaced).toBe(false)
+    expect(() => editor.setContent(content)).toThrow(ViveEditorError)
+    expect(editor.getHTML()).toBe('<p>eski</p>')
   })
 })
 
@@ -270,6 +333,41 @@ describe('textBetween query', () => {
     const inside = editor.query.textBetween(7, 11)
 
     expect(inside).toBe('kayn')
+  })
+})
+
+describe('findNodes and findMarks queries', () => {
+  it('lists nodes by name with their text and range', async () => {
+    const editor = await mount({ content: '<p>bir</p><p>iki üç</p>' })
+
+    const found = editor.query.findNodes(['paragraph'])
+
+    expect(found).toEqual([
+      { name: 'paragraph', attrs: {}, text: 'bir', from: 0, to: 5 },
+      { name: 'paragraph', attrs: {}, text: 'iki üç', from: 5, to: 13 },
+    ])
+    expect(editor.query.textBetween(found[1]?.from ?? 0, found[1]?.to ?? 0)).toBe('iki üç')
+  })
+
+  it('joins neighbouring text with the same mark and splits at block edges', async () => {
+    const editor = await mount({
+      content: '<p>a <strong>kalın <em>ve</em> yazı</strong> b</p><p><strong>yeni</strong></p>',
+    })
+
+    const found = editor.query.findMarks(['bold'])
+
+    expect(found.map(({ text, from, to }) => ({ text, from, to }))).toEqual([
+      { text: 'kalın ve yazı', from: 3, to: 16 },
+      { text: 'yeni', from: 20, to: 24 },
+    ])
+  })
+
+  it('returns nothing for unknown or invalid names', async () => {
+    const editor = await mount({ content: '<p>a</p>' })
+
+    expect(editor.query.findNodes(['nope'])).toEqual([])
+    expect(editor.query.findMarks([])).toEqual([])
+    expect(editor.query.findNodes('paragraph' as unknown as string[])).toEqual([])
   })
 })
 

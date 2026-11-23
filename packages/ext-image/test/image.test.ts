@@ -221,6 +221,45 @@ describe('image commands', () => {
     })
   })
 
+  it('wraps a captioned or aligned image in a figure and reads it back', async () => {
+    const editor = await mount({}, { content: '<img src="https://a.example/1.png" alt="Bir">' })
+    selectNode(editor, 0)
+    editor.commands.setImageAttributes({ caption: '  Şekil 1\u0007 satışlar ', align: 'right' })
+    const html = editor.getHTML()
+    expect(html).toMatch(
+      /^<figure data-align="right"><img src="https:\/\/a\.example\/1\.png" alt="Bir"[^>]*><figcaption>Şekil 1 {2}satışlar<\/figcaption><\/figure>/,
+    )
+    const copy = await mount({}, { content: html })
+    expect(copy.getHTML()).toBe(html)
+    expect(editor.dom.querySelector('.vive-image')?.getAttribute('data-align')).toBe('right')
+    expect(editor.dom.querySelector('.vive-image-caption')?.textContent).toBe('Şekil 1  satışlar')
+  })
+
+  it('drops unknown alignments and empty captions and keeps a bare image', async () => {
+    const editor = await mount(
+      {},
+      {
+        content:
+          '<figure data-align="float"><img src="https://a.example/1.png"><figcaption> </figcaption></figure>',
+      },
+    )
+    expect(editor.getHTML()).toMatch(/^<img src="https:\/\/a\.example\/1\.png"/)
+    selectNode(editor, 0)
+    expect(editor.commands.setImageAttributes({ align: 'center' })).toBe(true)
+    expect(editor.getHTML()).toMatch(/^<figure data-align="center"><img [^>]*><\/figure>/)
+    editor.commands.setImageAttributes({ align: null })
+    expect(editor.query.selectedImage()).toMatchObject({ caption: null, align: null })
+    expect(editor.getHTML()).toMatch(/^<img /)
+  })
+
+  it('ignores a figure without an allowed image', async () => {
+    const editor = await mount(
+      {},
+      { content: '<figure><img src="javascript:alert(1)"><figcaption>x</figcaption></figure>' },
+    )
+    expect(editor.getHTML()).not.toContain('<img')
+  })
+
   it('scales the selected image to a share of the content width', async () => {
     const editor = await mount({}, { content: '<img src="https://a.example/1.png">' })
     Object.defineProperty(editor.dom, 'clientWidth', { configurable: true, value: 600 })

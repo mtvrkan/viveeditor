@@ -1,3 +1,7 @@
+import type { Slice } from 'prosemirror-model'
+import { Plugin } from 'prosemirror-state'
+import type { EditorView } from 'prosemirror-view'
+
 const DISCARDED_TAGS = ['style', 'meta', 'link', 'xml', 'o:p', 'title', 'script', 'template']
 
 function removeOfficeListMarkers(root: Node): void {
@@ -46,4 +50,92 @@ export function cleanPastedHtml(html: string): string {
   unwrapGoogleDocsWrapper(body)
   for (const element of body.querySelectorAll('br.Apple-interchange-newline')) element.remove()
   return body.innerHTML
+}
+
+function isPlainPasteShortcut(event: KeyboardEvent): boolean {
+  return (
+    (event.ctrlKey || event.metaKey) &&
+    event.shiftKey &&
+    !event.altKey &&
+    event.key.toLowerCase() === 'v'
+  )
+}
+
+function insertSlice(view: EditorView, slice: Slice): void {
+  const { content, openStart, openEnd } = slice
+  const single =
+    openStart === 0 && openEnd === 0 && content.childCount === 1 ? content.firstChild : null
+  const transaction = single
+    ? view.state.tr.replaceSelectionWith(single, true)
+    : view.state.tr.replaceSelection(slice)
+  view.dispatch(transaction.scrollIntoView().setMeta('paste', true).setMeta('uiEvent', 'paste'))
+}
+
+export function plainTextPaste(): Plugin {
+  let shift = false
+  let lastKey = ''
+  let forced = false
+  let pasted = false
+  let skipNative = false
+
+  const readClipboardLater = (view: EditorView): void => {
+    pasted = false
+    const clipboard = globalThis.navigator?.clipboard
+    if (typeof clipboard?.readText !== 'function') return
+    setTimeout(() => {
+      if (pasted || view.isDestroyed || !view.editable) return
+      clipboard.readText().then(
+        (text) => {
+          if (pasted || !text || view.isDestroyed || !view.editable || !view.hasFocus()) return
+          forced = true
+          try {
+            view.pasteText(text)
+          } finally {
+            forced = false
+          }
+          skipNative = true
+          setTimeout(() => {
+            skipNative = false
+          }, 1000)
+        },
+        () => undefined,
+      )
+    }, 0)
+  }
+
+  return new Plugin({
+    props: {
+      handleDOMEvents: {
+        keydown: (view, event) => {
+          shift = event.key === 'Shift' || event.shiftKey
+          lastKey = event.key
+          skipNative = false
+          if (isPlainPasteShortcut(event)) readClipboardLater(view)
+          return false
+        },
+        keyup: (_view, event) => {
+          if (event.key === 'Shift') shift = false
+          return false
+        },
+        blur: () => {
+          shift = false
+          return false
+        },
+        paste: (_view, event) => {
+          pasted = true
+          if (!skipNative) return false
+          skipNative = false
+          event.preventDefault()
+          return true
+        },
+      },
+      handlePaste: (view, event, slice) => {
+        const plain =
+          forced || (shift && lastKey !== 'Insert' && !!event.clipboardData?.getData('text/plain'))
+        if (!plain || slice.content.size === 0) return false
+        insertSlice(view, slice)
+        return true
+      },
+    },
+  })
 }

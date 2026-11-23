@@ -24,4 +24,3 @@ export type ViveEditorEmits = {
   error: (error: unknown) => boolean;
 };
 export declare const ViveEditor: DefineSetupFnComponent<ViveEditorProps, ViveEditorEmits>;
-//# sourceMappingURL=index.d.ts.map

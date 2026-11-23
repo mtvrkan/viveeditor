@@ -102,6 +102,7 @@ createUI(editor, {
     upload: demoUpload,
     fileName: 'Sürüm notları',
   },
+  ...(params.has('autosave') ? { autosave: { key: 'playground', wait: 300 } } : {}),
 })
 
 const render = (): void => {

@@ -6,7 +6,7 @@ import {
 } from 'prosemirror-model'
 import { type Command, EditorState, type Transaction } from 'prosemirror-state'
 import { EditorView } from 'prosemirror-view'
-import { parseContent } from './content.js'
+import { parseContent, SCHEMA_VERSION } from './content.js'
 import { ViveEditorError } from './errors.js'
 import { Emitter } from './events.js'
 import type {
@@ -19,6 +19,7 @@ import type {
   QueryRegistry,
 } from './extension.js'
 import { resolveExtensions } from './extension-manager.js'
+import { plainTextPaste } from './paste.js'
 import { withKeptSpaces } from './whitespace.js'
 
 export interface JSONMark {
@@ -28,6 +29,7 @@ export interface JSONMark {
 
 export interface JSONContent {
   type: string
+  schemaVersion?: number
   attrs?: Record<string, unknown>
   content?: JSONContent[]
   marks?: JSONMark[]
@@ -99,7 +101,7 @@ export class Editor {
     this.queryFactories = resolved.queries
     const state = EditorState.create({
       doc: parseContent(this.schema, options.content),
-      plugins: resolved.plugins,
+      plugins: [plainTextPaste(), ...resolved.plugins],
     })
     this.lastDoc = state.doc
     this.editable = options.editable ?? true
@@ -210,7 +212,8 @@ export class Editor {
   }
 
   getJSON(): JSONContent {
-    return this.currentDoc().toJSON() as JSONContent
+    const { type, ...rest } = this.currentDoc().toJSON() as JSONContent
+    return { type, schemaVersion: SCHEMA_VERSION, ...rest }
   }
 
   isActive(name: string, attrs: Record<string, unknown> = {}): boolean {

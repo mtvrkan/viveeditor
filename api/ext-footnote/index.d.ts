@@ -17,4 +17,3 @@ declare module "@viveeditor/core" {
 }
 export declare const Footnote: Extension<FootnoteOptions>;
 export type { FootnoteLabels };
-//# sourceMappingURL=index.d.ts.map

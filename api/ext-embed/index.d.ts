@@ -54,4 +54,3 @@ declare module "@viveeditor/core" {
 }
 export declare const Embed: Extension<EmbedOptions>;
 export type { EmbedAttributes, EmbedInput, EmbedProvider };
-//# sourceMappingURL=index.d.ts.map

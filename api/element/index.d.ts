@@ -28,4 +28,3 @@ declare global {
     "vive-editor": ViveEditorElement;
   }
 }
-//# sourceMappingURL=index.d.ts.map

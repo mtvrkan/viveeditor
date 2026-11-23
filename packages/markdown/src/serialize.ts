@@ -22,10 +22,29 @@ export interface ToMarkdownOptions {
   embedUrl?: (attrs: Record<string, unknown>) => string | null
 }
 
-const WATCH_URLS: Record<string, (id: string) => string> = {
-  youtube: (id) => `https://www.youtube.com/watch?v=${id}`,
-  vimeo: (id) => `https://vimeo.com/${id}`,
-  spotify: (id) => `https://open.spotify.com/${id.replace(':', '/')}`,
+interface WatchLink {
+  id: string
+  hash: string
+  start: number
+}
+
+const WATCH_URLS: Record<string, (link: WatchLink) => string> = {
+  youtube: ({ id, start }) => `https://www.youtube.com/watch?v=${id}${start ? `&t=${start}s` : ''}`,
+  vimeo: ({ id, hash, start }) =>
+    `https://vimeo.com/${id}${hash ? `/${hash}` : ''}${start ? `#t=${start}s` : ''}`,
+  spotify: ({ id }) => `https://open.spotify.com/${id.replace(':', '/')}`,
+}
+
+const VIMEO_HASH = /^[0-9a-f]{8,20}$/
+
+function watchLink(attrs: Record<string, unknown>): WatchLink | null {
+  if (typeof attrs.id !== 'string') return null
+  const hash = typeof attrs.hash === 'string' && VIMEO_HASH.test(attrs.hash) ? attrs.hash : ''
+  const start =
+    typeof attrs.start === 'number' && Number.isInteger(attrs.start) && attrs.start > 0
+      ? attrs.start
+      : 0
+  return { id: attrs.id, hash, start }
 }
 
 const defaults = defaultMarkdownSerializer.nodes as Record<string, NodeWriter>
@@ -129,7 +148,8 @@ function createSerializer(schema: Schema, options: ToMarkdownOptions): Serialize
     options.embedUrl ??
     ((attrs: Record<string, unknown>): string | null => {
       const watch = WATCH_URLS[String(attrs.provider)]
-      return watch && typeof attrs.id === 'string' ? watch(attrs.id) : null
+      const link = watchLink(attrs)
+      return watch && link ? watch(link) : null
     })
 
   const inlineText = (node: ProseMirrorNode): string =>
@@ -155,6 +175,12 @@ function createSerializer(schema: Schema, options: ToMarkdownOptions): Serialize
     hardBreak: defaults.hard_break as NodeWriter,
     image: (state, node, parent, index) => {
       defaults.image?.(state, node, parent, index)
+      state.closeBlock(node)
+      const caption: unknown = node.attrs.caption
+      if (typeof caption !== 'string' || caption === '') return
+      state.write('*')
+      state.text(caption)
+      state.write('*')
       state.closeBlock(node)
     },
     listItem: (state, node, parent, index) => {

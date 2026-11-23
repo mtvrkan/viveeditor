@@ -8,24 +8,27 @@ import { createLazyPopover, type PanelKit, type PanelSource } from './lazy-popov
 import { createMenu, type Menu, type MenuItem } from './menu.js'
 import type { Messages } from './messages.js'
 import type { Popover } from './popover.js'
+import { indentItems, textStyleItems } from './text-style.js'
 
 export interface FormatToolsOptions {
   editor: Editor
   commands: CommandAccess
   messages: Messages
+  locale: string
   pill: HTMLElement
   dock: HTMLElement
   closeFloating: () => void
   returnToEditor: () => void
   onClose: () => void
   panels: PanelSource
+  overrides: Readonly<Record<string, unknown>>
   report: (error: unknown) => void
 }
 
 export interface FormatTools {
   readonly menus: readonly Menu[]
   readonly popovers: ReadonlyMap<string, Popover>
-  readonly alignItems: readonly MenuItem[]
+  readonly menuItems: ReadonlyMap<string, readonly MenuItem[]>
   sync(): void
 }
 
@@ -71,19 +74,25 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
   }
 
   const align = createAlignControl(commands, messages)
-  const alignButton = button('align')
-  if (alignButton) {
+  const menuItems = new Map<string, readonly MenuItem[]>([
+    ['align', [...align.items, ...indentItems(commands, messages)]],
+    ['textStyle', textStyleItems(editor, commands, messages, options.locale)],
+  ])
+  for (const [id, items] of menuItems) {
+    const trigger = button(id)
+    if (!trigger) continue
     menus.push(
       createMenu({
-        label: messages.align,
-        trigger: alignButton,
-        items: align.items,
-        place: (element) => place(element, alignButton),
+        label: messages[id === 'align' ? 'align' : 'textStyle'],
+        trigger,
+        items,
+        place: (element) => place(element, trigger),
         onOpen: options.closeFloating,
         onDone: options.returnToEditor,
       }),
     )
   }
+  const alignButton = button('align')
 
   if (commands.has('setTextColor')) {
     lazy('textColor', (panels) =>
@@ -171,11 +180,42 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
     )
   }
 
+  if (commands.has('insertText')) {
+    lazy('specialCharacters', (panels) =>
+      panels.createCharPanel({
+        commands,
+        messages,
+        place,
+        returnToEditor: options.returnToEditor,
+        onClose: options.onClose,
+      }),
+    )
+  }
+
   if (commands.has('setSearch')) {
     lazy('search', (panels) =>
       panels.createSearchPanel({
         commands,
         messages,
+        place,
+        returnToEditor: options.returnToEditor,
+        onClose: options.onClose,
+      }),
+    )
+  }
+
+  const documentPanels = [
+    ['outline', 'createOutlinePanel'],
+    ['accessibility', 'createCheckPanel'],
+    ['shortcuts', 'createShortcutsPanel'],
+  ] as const
+  for (const [id, factory] of documentPanels) {
+    if (!button(id)) continue
+    lazy(id, (panels) =>
+      panels[factory]({
+        commands,
+        messages,
+        text: panels.documentMessages(options.locale, options.overrides),
         place,
         returnToEditor: options.returnToEditor,
         onClose: options.onClose,
@@ -201,5 +241,5 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
     }
   }
 
-  return { menus, popovers, alignItems: align.items, sync }
+  return { menus, popovers, menuItems, sync }
 }

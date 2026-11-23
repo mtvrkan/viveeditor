@@ -4,11 +4,14 @@
 }
 
 .vive-content .vive-image {
-  position: relative;
   width: fit-content;
   max-width: 100%;
   margin: 0 0 0.9em;
   line-height: 0;
+}
+
+.vive-content .vive-image-frame {
+  position: relative;
 }
 
 .vive-content .vive-image img {
@@ -16,6 +19,54 @@
   border-radius: 8px;
   -webkit-user-select: none;
   user-select: none;
+}
+
+.vive-content::after {
+  display: block;
+  clear: both;
+  content: "";
+}
+
+.vive-content figure {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 0 0.9em;
+}
+
+.vive-content :is(figure, .vive-image)[data-align="center"] {
+  margin-inline: auto;
+}
+
+.vive-content :is(figure, .vive-image)[data-align="left"] {
+  float: left;
+  max-width: 50%;
+  margin: 0.2em 1.25em 0.6em 0;
+}
+
+.vive-content :is(figure, .vive-image)[data-align="right"] {
+  float: right;
+  max-width: 50%;
+  margin: 0.2em 0 0.6em 1.25em;
+}
+
+.vive-content :is(figcaption, .vive-image-caption) {
+  width: 0;
+  min-width: 100%;
+  margin-top: 6px;
+  color: var(--ve-muted-fg, hsl(220 9% 40%));
+  font-size: 0.875em;
+  line-height: 1.45;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.vive-content .vive-image-caption {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.vive-content .vive-image-caption[hidden] {
+  display: none;
 }
 
 .vive-content .vive-image.ProseMirror-selectednode {
@@ -112,6 +163,15 @@
   border-style: solid;
   border-color: var(--ve-danger, hsl(0 72% 51%));
   color: var(--ve-danger, hsl(0 72% 42%));
+}
+
+@media (max-width: 480px) {
+  .vive-content :is(figure, .vive-image)[data-align="left"],
+  .vive-content :is(figure, .vive-image)[data-align="right"] {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 0.9em;
+  }
 }
 
 @media (pointer: coarse) {

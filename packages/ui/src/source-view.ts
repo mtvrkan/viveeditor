@@ -103,7 +103,12 @@ export function createSourceView(
     if (!editor.isDestroyed) editor.focus()
   }
 
+  const applyBeforeSubmit = (event: Event): void => {
+    if (event.target instanceof Node && event.target.contains(element)) apply()
+  }
+
   element.addEventListener('change', apply)
+  document.addEventListener('submit', applyBeforeSubmit, true)
 
   return {
     element,
@@ -113,6 +118,7 @@ export function createSourceView(
     apply,
     destroy: () => {
       apply()
+      document.removeEventListener('submit', applyBeforeSubmit, true)
       element.remove()
       delete root.dataset.source
     },

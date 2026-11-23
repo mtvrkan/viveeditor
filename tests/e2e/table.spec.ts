@@ -93,3 +93,25 @@ test('edits the table from the actions panel', async ({ page }) => {
 
   await expect(surface(page).locator('table')).toHaveCount(0)
 })
+
+test('colours a cell and centres it vertically from the actions panel', async ({ page }) => {
+  await insertFromGrid(page, 1, 1)
+  const actions = page.getByRole('dialog', { name: 'Tablo' })
+
+  await openTableTool(page)
+  await actions
+    .getByRole('group', { name: 'Hücre rengi' })
+    .getByRole('button', { name: 'Mavi' })
+    .click()
+  await expect(surface(page)).toBeFocused()
+  await openTableTool(page)
+  await expect(actions.getByRole('button', { name: 'Mavi' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await actions.getByRole('button', { name: 'Orta' }).click()
+
+  await expect(output(page)).toContainText(
+    /<th style="background-color: (#cde8ff|rgb\(205, 232, 255\)); vertical-align: middle;?">/,
+  )
+})

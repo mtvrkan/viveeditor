@@ -158,6 +158,16 @@ describe('toMarkdown', () => {
     expect(reloaded.getHTML()).toBe(editor.getHTML())
   })
 
+  it('keeps an image caption as an emphasized line below the image', async () => {
+    const editor = await editorWith(
+      '<figure data-align="right"><img src="https://example.com/a.png" alt="g"><figcaption>Şekil *1*</figcaption></figure><p>son</p>',
+    )
+
+    const markdown = toMarkdown(editor)
+
+    expect(markdown).toBe('![g](https://example.com/a.png)\n\n*Şekil \\*1\\**\n\nson')
+  })
+
   it('writes empty task items and list items that start with a block', async () => {
     const editor = await editorWith(
       '<ul data-type="taskList"><li data-type="taskItem" data-checked="true"><div><p></p></div></li></ul><ol><li><p></p><img src="https://example.com/a.png" alt="g"></li></ol>',
@@ -185,6 +195,16 @@ describe('toMarkdown', () => {
 
     expect(toMarkdown(editor)).toBe(
       'altı kırmızı\n\n[Tanıtım](https://www.youtube.com/watch?v=dQw4w9WgXcQ)',
+    )
+  })
+
+  it('keeps the Vimeo private link part and the start time in player links', async () => {
+    const editor = await editorWith(
+      '<div data-embed="youtube" data-id="dQw4w9WgXcQ" data-start="42"></div><div data-embed="vimeo" data-id="76979871" data-hash="abcdef12" data-start="90"></div>',
+    )
+
+    expect(toMarkdown(editor)).toBe(
+      '[https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s](https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s)\n\n[https://vimeo.com/76979871/abcdef12#t=90s](https://vimeo.com/76979871/abcdef12#t=90s)',
     )
   })
 

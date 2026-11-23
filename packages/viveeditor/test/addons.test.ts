@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { AddonError, type AddonLoaderOptions, createAddonLoader } from '../src/addons.js'
+import {
+  ADDON_MEMBERS,
+  AddonError,
+  type AddonLoaderOptions,
+  createAddonLoader,
+} from '../src/addons.js'
 
 const CDN = 'https://cdn.example.test/viveeditor@1.2.3/dist/'
 const hash = (letter: string): string => `sha384-${letter.repeat(64)}`
@@ -145,24 +150,40 @@ describe('createAddonLoader', () => {
 
     runAs(injected('viveeditor.panels.iife.js'), () =>
       addons.register('panels', '1.2.3', {
+        createCharPanel: factory,
+        createCheckPanel: factory,
         createEmbedPanel: factory,
         createImagePanel: factory,
+        createOutlinePanel: factory,
         createSearchPanel: factory,
+        createShortcutsPanel: factory,
         createSwatchPanel: factory,
         createTablePanel: factory,
+        documentMessages: factory,
         extra: factory,
       }),
     )
     const kit = await pending
 
     expect(Object.keys(kit).sort()).toEqual([
+      'createCharPanel',
+      'createCheckPanel',
       'createEmbedPanel',
       'createImagePanel',
+      'createOutlinePanel',
       'createSearchPanel',
+      'createShortcutsPanel',
       'createSwatchPanel',
       'createTablePanel',
+      'documentMessages',
     ])
     expect(injected('viveeditor.panels.iife.js').integrity).toBe(hash('P'))
+  })
+
+  it('lets through every factory the panel kit exports', async () => {
+    const kit = await import('@viveeditor/ui/panels')
+
+    expect([...ADDON_MEMBERS.panels].sort()).toEqual(Object.keys(kit).sort())
   })
 
   it('fails a script that loads without registering', async () => {

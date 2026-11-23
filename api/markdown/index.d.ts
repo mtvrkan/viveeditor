@@ -11,4 +11,3 @@ interface ToMarkdownOptions {
 }
 export declare function toMarkdown(source: MarkdownSource, options?: ToMarkdownOptions): string;
 export type { MarkdownSource, ToMarkdownOptions };
-//# sourceMappingURL=index.d.ts.map

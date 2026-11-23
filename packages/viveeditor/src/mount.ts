@@ -1,4 +1,4 @@
-import { Editor, type Extension } from '@viveeditor/core'
+import { Editor, type Extension, ViveEditorError } from '@viveeditor/core'
 import { createUI, type EditorUI, type UiOptions } from '@viveeditor/ui'
 import { classicPreset } from './presets.js'
 
@@ -26,9 +26,9 @@ export interface EditorMount {
   destroy(): void
 }
 
-export class MountDestroyedError extends Error {
+export class MountDestroyedError extends ViveEditorError {
   constructor() {
-    super('The editor was destroyed before it was ready.')
+    super('DESTROYED', 'The editor was destroyed before it was ready.')
     this.name = 'MountDestroyedError'
   }
 }

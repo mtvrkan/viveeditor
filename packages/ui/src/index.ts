@@ -1,4 +1,12 @@
 export {
+  type Autosave,
+  type AutosaveDraft,
+  type AutosaveOptions,
+  type AutosaveStatus,
+  createAutosave,
+} from './autosave.js'
+export type { DocumentMessages } from './doc-messages.js'
+export {
   type DocxModule,
   type FileImageUploader,
   type FileOptions,

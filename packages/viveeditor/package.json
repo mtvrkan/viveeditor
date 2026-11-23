@@ -67,6 +67,9 @@
   },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^14.3.0",
+    "@viveeditor/ext-footnote": "workspace:*",
+    "@viveeditor/ext-math": "workspace:*",
+    "@viveeditor/ext-mention": "workspace:*",
     "jsdom": "^30.1.3",
     "size-limit": "^14.3.0",
     "tsdown": "0.23.1",
@@ -76,7 +79,7 @@
     {
       "name": "viveeditor (CDN script, everything included)",
       "path": "dist/viveeditor.classic.iife.js",
-      "limit": "110 KB",
+      "limit": "119 KB",
       "rolldown": false
     },
     {
@@ -94,13 +97,13 @@
     {
       "name": "viveeditor.panels add-on (loaded on first panel open)",
       "path": "dist/viveeditor.panels.iife.js",
-      "limit": "5.5 KB",
+      "limit": "9.5 KB",
       "rolldown": false
     },
     {
       "name": "viveeditor.css",
       "path": "dist/viveeditor.css",
-      "limit": "6 KB",
+      "limit": "7 KB",
       "rolldown": false
     }
   ],

@@ -23,7 +23,14 @@ function restoreSpaces(text: string): string {
   })
 }
 
-function convertLine(line: ProseMirrorNode[], convert: Convert): ProseMirrorNode[] {
+function convertInline(node: ProseMirrorNode, convert: Convert): ProseMirrorNode {
+  if (node.isText || !node.inlineContent || node.type.spec.code) return node
+  if (node.type.spec.whitespace === 'pre') return node
+  return convertTextblock(node, convert)
+}
+
+function convertLine(original: ProseMirrorNode[], convert: Convert): ProseMirrorNode[] {
+  const line = original.map((node) => convertInline(node, convert))
   const joined = line.map((node) => (node.isText ? (node.text ?? '') : OPAQUE)).join('')
   const converted = convert(joined)
   if (converted === joined) return line

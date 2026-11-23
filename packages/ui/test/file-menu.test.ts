@@ -1,5 +1,6 @@
 import { Editor } from '@viveeditor/core'
 import { basicExtensions } from '@viveeditor/ext-basic'
+import { CleanDocument } from '@viveeditor/ext-format'
 import { listExtensions } from '@viveeditor/ext-list'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -16,13 +17,11 @@ let mounted: Array<{ editor: Editor; ui: EditorUI }> = []
 async function mount(
   options: UiOptions,
   content = '',
+  extensions = [...basicExtensions, ...listExtensions],
 ): Promise<{ editor: Editor; ui: EditorUI; root: HTMLElement }> {
   const root = document.createElement('div')
   document.body.append(root)
-  const editor = await Editor.create(root, {
-    extensions: [...basicExtensions, ...listExtensions],
-    content,
-  })
+  const editor = await Editor.create(root, { extensions, content })
   const ui = createUI(editor, { locale: 'tr', panels: panelKit, ...options })
   mounted.push({ editor, ui })
   return { editor, ui, root }
@@ -94,6 +93,30 @@ describe('file menu', () => {
 
     expect(labels).toEqual(['Dosya aç…', 'HTML olarak kaydet (.html)', 'Yazdır veya PDF'])
     expect(menuItems(rich.root)).toHaveLength(5)
+  })
+
+  it('tidies the document and reports what it removed', async () => {
+    const { editor, root } = await mount({}, '<p>&nbsp; a &nbsp;b</p><p></p><p></p><p>c<br></p>', [
+      ...basicExtensions,
+      CleanDocument,
+    ])
+
+    item(root, 'Belgeyi toparla').click()
+    const report = notice(root)?.textContent
+    item(root, 'Belgeyi toparla').click()
+
+    expect(editor.getHTML()).toBe('<p>a b</p><p></p><p>c</p>')
+    expect(report).toBe(
+      'Belge toparlandı. Fazla boşluk: 3 · Paragraf sonundaki satır sonu: 1 · Boş paragraf: 1',
+    )
+    expect(notice(root)?.textContent).toBe('Belge zaten derli toplu.')
+    expect(notice(root)?.querySelector('[data-tone="ok"]')).not.toBeNull()
+  })
+
+  it('has no tidy item without the clean-up extension', async () => {
+    const { root } = await mount({})
+
+    expect(menuItems(root).some((button) => button.textContent?.includes('toparla'))).toBe(false)
   })
 
   it('is left out when files is false', async () => {
