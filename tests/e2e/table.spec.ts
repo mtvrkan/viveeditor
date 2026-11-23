@@ -137,3 +137,101 @@ test('centres and stripes the table from the Tablo tab without leaving the panel
   expect(overflow).toBeLessThanOrEqual(0)
   await expect(output(page)).toContainText('<table data-align="center" data-striped="true">')
 })
+
+test('keeps the row height while the pointer is on a column border', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-safari', 'column resizing needs a mouse')
+  await page.goto('/ui.html')
+  const table = surface(page).locator('table').first()
+  await table.scrollIntoViewIfNeeded()
+  const row = table.locator('tr').nth(1)
+  const before = (await row.boundingBox())?.height ?? 0
+  const box = await table.locator('th').nth(1).boundingBox()
+  if (!box) throw new Error('header cell not found')
+
+  await page.mouse.move(box.x + box.width - 20, box.y + box.height / 2)
+  await page.mouse.move(box.x + box.width - 1, box.y + box.height / 2)
+
+  await expect(table.locator('.column-resize-handle').first()).toBeAttached()
+  expect((await row.boundingBox())?.height).toBe(before)
+})
+
+async function rowBorder(page: Page) {
+  const table = surface(page).locator('table').first()
+  await table.scrollIntoViewIfNeeded()
+  const row = table.locator('tr').nth(1)
+  await row.evaluate((element) => element.scrollIntoView({ block: 'center' }))
+  const cell = row.locator('td, th').first()
+  const box = await cell.boundingBox()
+  if (!box) throw new Error('body cell not found')
+  const x = box.x + box.width / 2
+  const y = box.y + box.height - 2
+  await page.mouse.move(x, y - 20)
+  await page.mouse.move(x, y)
+  await expect(table.locator('.row-resize-handle').first()).toBeAttached()
+  return { table, row, x, y, height: box.height }
+}
+
+const rowHeights = (page: Page) =>
+  surface(page)
+    .locator('table')
+    .first()
+    .evaluate((table: HTMLTableElement) =>
+      [...table.rows].map((row) => row.getBoundingClientRect().height),
+    )
+
+test('drags a row border to make the row taller and double-click resets it', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-safari', 'row resizing needs a mouse')
+  await page.goto('/ui.html')
+  const { row, x, y, height } = await rowBorder(page)
+
+  await page.mouse.down()
+  await page.mouse.move(x, y + 60, { steps: 6 })
+  const live = (await row.boundingBox())?.height ?? 0
+  await page.mouse.up()
+
+  expect(live).toBeGreaterThan(height + 50)
+  expect((await row.boundingBox())?.height).toBeGreaterThan(height + 50)
+  await expect(output(page)).toContainText(/<tr style="height: \d+px;?">/)
+
+  const taller = await rowBorder(page)
+  await page.mouse.dblclick(taller.x, taller.y)
+
+  await expect(output(page)).not.toContainText('<tr style="height')
+  expect(Math.abs(((await row.boundingBox())?.height ?? 0) - height)).toBeLessThanOrEqual(1)
+})
+
+test('never makes a row shorter than its content', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-safari', 'row resizing needs a mouse')
+  await page.goto('/ui.html')
+  const { row, x, y, height } = await rowBorder(page)
+
+  await page.mouse.down()
+  await page.mouse.move(x, y - 200, { steps: 6 })
+  await page.mouse.up()
+
+  await expect(output(page)).toContainText('<tr style="height: 24px')
+  expect((await row.boundingBox())?.height).toBeGreaterThanOrEqual(height - 1)
+})
+
+test('keeps every row height while the pointer is on a row border', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile-safari', 'row resizing needs a mouse')
+  await page.goto('/ui.html')
+  await surface(page).locator('table').first().scrollIntoViewIfNeeded()
+  const before = await rowHeights(page)
+
+  const { table } = await rowBorder(page)
+
+  await expect(surface(page)).toHaveClass(/row-resize-cursor/)
+  expect(await rowHeights(page)).toEqual(before)
+  expect(
+    await table.evaluate((element) => {
+      const wrapper = element.parentElement as HTMLElement
+      return [
+        wrapper.scrollWidth - wrapper.clientWidth,
+        wrapper.scrollHeight - wrapper.clientHeight,
+      ]
+    }),
+  ).toEqual([0, 0])
+})

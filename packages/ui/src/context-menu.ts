@@ -190,6 +190,9 @@ export function createContextMenu(options: ContextMenuOptions): ContextMenu {
         ...tableAction('deleteRow', 1),
         ...tableAction('selectRow', 2),
         ...tableAction('headerRow', 2),
+        ...tableAction('tallerRow', 3),
+        ...tableAction('shorterRow', 3),
+        ...tableAction('resetRowHeight', 3),
       ],
     },
     {

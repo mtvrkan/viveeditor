@@ -300,7 +300,8 @@ final class Values
             return self::findFamily($fonts, $value);
         }
         $number = preg_match(self::PIXELS, $value, $parts) === 1 ? (int) $parts[1] : 0;
-        return $number > 0 && $number <= Profile::limit('maxTableWidth') ? $number . 'px' : null;
+        $max = Profile::limit($property === 'height' ? 'maxRowHeight' : 'maxTableWidth');
+        return $number > 0 && $number <= $max ? $number . 'px' : null;
     }
 
     public static function cleanStyle(string $value, array $allowed, ?array $fonts = null): ?string

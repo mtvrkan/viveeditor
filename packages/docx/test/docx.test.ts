@@ -527,6 +527,47 @@ describe('Word formatting for the 1.0 tools', () => {
     expect(reloaded.getHTML()).toContain('data-striped="true"')
   })
 
+  it('writes row heights as an at-least trHeight in twips and reads them back', async () => {
+    const editor = await editorWith(
+      '<table><tbody><tr style="height: 48px"><th><p>h</p></th></tr><tr><td><p>1</p></td></tr><tr style="height: 100px"><td><p>2</p></td></tr></tbody></table><p>son</p>',
+    )
+
+    const blob = await exportDocx(editor)
+    const xml = (await partsOf(blob))['word/document.xml'] ?? ''
+    const reloaded = await editorWith((await importDocx(blob)).html)
+
+    expect(xml).toContain(
+      '<w:trPr><w:trHeight w:val="720" w:hRule="atLeast"/><w:tblHeader/></w:trPr>',
+    )
+    expect(xml).toContain('<w:trPr><w:trHeight w:val="1500" w:hRule="atLeast"/></w:trPr>')
+    expect(xml.match(/<w:trHeight/g)).toHaveLength(2)
+    expect(reloaded.getHTML()).toBe(editor.getHTML())
+  })
+
+  it('reads exact and at-least row heights, clamps them and ignores auto or missing values', async () => {
+    const row = (height: string): string =>
+      `<w:tr>${height ? `<w:trPr>${height}</w:trPr>` : ''}<w:tc><w:p>${run('x')}</w:p></w:tc></w:tr>`
+    const body = `<w:tbl>${[
+      row('<w:trHeight w:val="600" w:hRule="exact"/>'),
+      row('<w:trHeight w:val="90"/>'),
+      row('<w:trHeight w:val="999999"/>'),
+      row('<w:trHeight w:val="900" w:hRule="auto"/>'),
+      row('<w:trHeight w:val="abc"/>'),
+      row(''),
+    ].join('')}</w:tbl>`
+
+    const html = (await importDocx(docx(body))).html
+
+    expect(html.match(/<tr[^>]*>/g)).toEqual([
+      '<tr style="height: 40px">',
+      '<tr style="height: 24px">',
+      '<tr style="height: 2000px">',
+      '<tr>',
+      '<tr>',
+      '<tr>',
+    ])
+  })
+
   it('keeps a lone light grey cell as a cell background', async () => {
     const cell = (fill: string): string =>
       `<w:tc>${fill ? `<w:tcPr><w:shd w:val="clear" w:color="auto" w:fill="${fill}"/></w:tcPr>` : ''}<w:p>${run('x')}</w:p></w:tc>`

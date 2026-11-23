@@ -42,6 +42,8 @@ declare module "@viveeditor/core" {
     toggleHeaderRow: () => Command;
     toggleHeaderColumn: () => Command;
     resizeColumn: (delta: number) => Command;
+    setRowHeight: (height: number | null) => Command;
+    resizeRow: (delta: number) => Command;
     setCellBackground: (color: string | null) => Command;
     setCellVerticalAlign: (align: CellVerticalAlign | null) => Command;
     setCellTextAlign: (align: CellTextAlign | null) => Command;
@@ -59,6 +61,7 @@ declare module "@viveeditor/core" {
     inTable: () => boolean;
     cellStyle: () => CellStyle | null;
     tableStyle: () => TableStyle | null;
+    rowHeight: () => number | null;
   }
 }
 export declare const Table: Extension<TableOptions>;

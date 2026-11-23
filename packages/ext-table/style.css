@@ -28,7 +28,7 @@
   margin-top: 0;
 }
 
-.vive-content :is(td, th) > :last-child {
+.vive-content :is(td, th) > :nth-last-child(1 of :not(.column-resize-handle)) {
   margin-bottom: 0;
 }
 
@@ -53,6 +53,29 @@
 .vive-content.resize-cursor,
 .resize-cursor .vive-content {
   cursor: col-resize;
+}
+
+.vive-content .row-resize-handle::before {
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+  left: 0;
+  height: 4px;
+  background: var(--ve-primary, hsl(202 80% 36%));
+  content: "";
+  pointer-events: none;
+}
+
+.vive-content .row-resize-edge::before {
+  bottom: 0;
+}
+
+.vive-content.row-resize-cursor {
+  cursor: row-resize;
+}
+
+.vive-content tr.row-resizing {
+  height: var(--vive-row-height) !important;
 }
 
 .vive-content table[data-width="full"] {

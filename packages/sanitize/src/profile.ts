@@ -33,6 +33,7 @@ export interface SanitizeProfile {
     readonly maxImageSize: number
     readonly maxListStart: number
     readonly maxTableWidth: number
+    readonly maxRowHeight: number
     readonly maxEmbedStart: number
     readonly maxEmbedTitle: number
     readonly maxMentionId: number

@@ -70,6 +70,9 @@ interface Messages {
   headerRow: string;
   widenColumn: string;
   narrowColumn: string;
+  tallerRow: string;
+  shorterRow: string;
+  resetRowHeight: string;
   deleteRow: string;
   deleteColumn: string;
   deleteTable: string;

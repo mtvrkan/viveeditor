@@ -85,6 +85,8 @@ const MAX_DIMENSION = 10_000
 const MAX_TEXT = 1000
 const MAX_LINK = 2048
 const EMU_PER_PIXEL = 9525
+const MIN_ROW_HEIGHT = 24
+const MAX_ROW_HEIGHT = 2000
 const isControl = (code: number): boolean =>
   (code <= 0x1f && code !== 0x09 && code !== 0x0a && code !== 0x0d) || code === 0x7f
 const isInvisible = (code: number): boolean =>
@@ -221,6 +223,14 @@ function cleanLimits(input: Partial<ImportLimits> | undefined): ImportLimits {
     if (typeof value === 'number' && Number.isFinite(value) && value > 0) limits[key] = value
   }
   return limits
+}
+
+function rowHeightOf(trHeight: Element | null): number | null {
+  if (!trHeight || wAttr(trHeight, 'hRule') === 'auto') return null
+  const twips = clampInt(wAttr(trHeight, 'val'), 0, 100_000, 0)
+  return twips > 0
+    ? Math.min(MAX_ROW_HEIGHT, Math.max(MIN_ROW_HEIGHT, Math.round(twips / 15)))
+    : null
 }
 
 function clampInt(value: string | null, min: number, max: number, fallback: number): number {
@@ -834,8 +844,11 @@ class Reader {
     const stripes: { cell: HTMLTableCellElement; even: boolean; fill: string }[] = []
     rows.forEach((row, rowIndex) => {
       if (!this.visit(depth)) return
-      const header = onOff(child(child(row, NS.w, 'trPr'), NS.w, 'tblHeader'))
+      const trPr = child(row, NS.w, 'trPr')
+      const header = onOff(child(trPr, NS.w, 'tblHeader'))
       const tableRow = this.doc.createElement('tr')
+      const height = rowHeightOf(child(trPr, NS.w, 'trHeight'))
+      if (height) tableRow.setAttribute('style', `height: ${height}px`)
       let column = 0
       for (const cell of children(row, NS.w, 'tc')) {
         const tcPr = child(cell, NS.w, 'tcPr')

@@ -12,6 +12,7 @@
     "maxImageSize": 10000,
     "maxListStart": 99999,
     "maxTableWidth": 99999,
+    "maxRowHeight": 2000,
     "maxEmbedStart": 86400,
     "maxEmbedTitle": 200,
     "maxImageSrcLength": 1500000,
@@ -120,7 +121,9 @@
       "styles": ["width"]
     },
     "tbody": {},
-    "tr": {},
+    "tr": {
+      "styles": ["height"]
+    },
     "td": {
       "attributes": ["colspan", "rowspan", "data-colwidth"],
       "styles": ["background-color", "vertical-align", "text-align"]

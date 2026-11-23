@@ -219,7 +219,8 @@ function styleValue(property: string, value: string, fonts: FontFamilies): strin
   if (property === 'font-family') return findFamily(fonts, value)
   const pixels = PIXELS.exec(value)
   const number = pixels ? Number(pixels[1]) : 0
-  return number > 0 && number <= limits.maxTableWidth ? `${number}px` : null
+  const max = property === 'height' ? limits.maxRowHeight : limits.maxTableWidth
+  return number > 0 && number <= max ? `${number}px` : null
 }
 
 export function cleanStyle(

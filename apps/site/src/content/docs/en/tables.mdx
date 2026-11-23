@@ -1,7 +1,7 @@
 ---
 key: tables
 title: Tables
-description: Tables with merged cells, header rows, column widths you can drag, cell alignment and colour, table width, borders and striped rows, and the table panel.
+description: Tables with merged cells, header rows, column widths and row heights you can drag, cell alignment and colour, table width, borders, striped rows and the panel.
 updated: 2026-11-23
 faq:
   - q: Do column widths survive on the published page?
@@ -34,7 +34,7 @@ The one-script build already includes the table extension.
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `resizable` | `true` | Lets writers drag a column edge to set its width. |
+| `resizable` | `true` | Lets writers drag a column edge to set its width and a row's bottom edge to set its height. |
 | `cellMinWidth` | `48` | The smallest column width, in pixels. |
 | `maxSize` | `20` | The most rows and columns `insertTable` can add. |
 
@@ -53,7 +53,7 @@ While the cursor is inside a table, the table button in the toolbar opens the ta
 | Tab | Tools |
 | --- | --- |
 | Cell | Horizontal alignment (Align left, Center, Align right, Justify), Vertical alignment (Top, Middle, Bottom), Cell colour; Merge cells, Split cell, Select row, Select column; Insert row above, Insert row below, Insert column left, Insert column right; Delete row, Delete column; Header row, Header column |
-| Table | Width (Auto width, Full width), Table alignment (Align left, Center), Borders (All borders, Rows only, No borders), Striped rows, Border color; Distribute columns, Widen column, Narrow column, Select table; Delete table |
+| Table | Width (Auto width, Full width), Table alignment (Align left, Center), Borders (All borders, Rows only, No borders), Striped rows, Border color; Distribute columns, Widen column, Narrow column, Make row taller, Make row shorter, Reset row height, Select table; Delete table |
 
 The panel stays open while you work, so you can change several things in one go; every change applies at once and one undo takes it back. Tools that cannot run at that moment are shown as disabled. For example, "Merge cells" is not available while a single cell is selected. "Delete table" closes the panel. <kbd>←</kbd> and <kbd>→</kbd> move between the tabs, and <kbd>Esc</kbd> closes the panel.
 
@@ -99,7 +99,7 @@ The [server sanitizer](/en/docs/server-sanitizing/) keeps all of these values. I
 
 ## Right-click menu
 
-Right-clicking a table opens a menu with "Cell", "Row" and "Column" submenus, "Table properties…" (which opens the table panel) and "Delete table". The Cell submenu holds the horizontal and vertical alignment, merge and split; Row and Column hold insert, delete, select and the header toggle, and Column also "Distribute columns". From the keyboard, <kbd>Shift</kbd>+<kbd>F10</kbd> or the menu key opens the same menu. See [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/) for how the menu works.
+Right-clicking a table opens a menu with "Cell", "Row" and "Column" submenus, "Table properties…" (which opens the table panel) and "Delete table". The Cell submenu holds the horizontal and vertical alignment, merge and split; Row and Column hold insert, delete, select and the header toggle, Row also "Make row taller", "Make row shorter" and "Reset row height", and Column also "Distribute columns". From the keyboard, <kbd>Shift</kbd>+<kbd>F10</kbd> or the menu key opens the same menu. See [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/) for how the menu works.
 
 ## Merged cells
 
@@ -114,6 +114,12 @@ Drag with the mouse to select several cells, then choose "Merge cells" in the ta
 With `resizable` on, drag the right edge of a column to change its width. From the keyboard, "Widen column" and "Narrow column" in the table panel change the column at the cursor by 40 pixels. A column cannot be narrower than `cellMinWidth`.
 
 A table with set widths carries a `colgroup` and a `width` style per column in the saved HTML. The table itself gets the total width; if some columns have no width, or the table is full width, that total is used as a minimum width. Tables without any set width carry no style.
+
+## Row heights
+
+With `resizable` on, point at the bottom edge of a row: a horizontal handle appears. Drag it to make the row taller or shorter, and release the mouse to keep the height; one undo takes it back. Double-click the handle to go back to the automatic height. Near a column edge the column handle wins. Dragging needs a mouse; on touch screens, and from the keyboard, use "Make row taller" and "Make row shorter" in the table panel's Table tab or the Row submenu of the right-click menu. They change the rows at the cursor or the selected rows by 16 pixels; "Reset row height" clears the height.
+
+The height is a minimum height: a row never gets shorter than its content, and it grows when you type more. Heights are between 24 and 2000 pixels and are saved as a style on the row, such as `<tr style="height: 48px">`. The [server sanitizer](/en/docs/server-sanitizing/) keeps them, and Word saves them as an "at least" row height.
 
 ## Keyboard
 
@@ -133,6 +139,8 @@ A table with set widths carries a `colgroup` and a `width` style per column in t
 | `mergeCells()`, `splitCell()` | Merges or splits cells. |
 | `toggleHeaderRow()`, `toggleHeaderColumn()` | Turns the header row or column on or off. |
 | `resizeColumn(delta)` | Widens or narrows the column at the cursor, in pixels. |
+| `setRowHeight(height)` | Sets the minimum height of the rows at the cursor or in the selection, in pixels; `null` goes back to automatic. |
+| `resizeRow(delta)` | Makes those rows taller or shorter, in pixels, starting from their current height. |
 | `setCellBackground(color)` | Sets or clears (`null`) the background colour of the selected cells. |
 | `setCellVerticalAlign(align)` | Sets the vertical alignment of the selected cells: `'middle'`, `'bottom'` or `null` for top. |
 | `setCellTextAlign(align)` | Sets the horizontal alignment of the selected cells: `'center'`, `'right'`, `'justify'` or `null` for left. |
@@ -144,6 +152,6 @@ A table with set widths carries a `colgroup` and a `width` style per column in t
 | `selectRow()`, `selectColumn()`, `selectTable()` | Selects the row, column or every cell of the table. |
 | `distributeColumns()` | Gives every column the same width. |
 
-`editor.query.inTable()` returns `true` while the cursor is inside a table; `cellStyle()` and `tableStyle()` return the cell and table values, or `null` outside a table. To test a command first, use the `can` form, such as `editor.can.mergeCells()`.
+`editor.query.inTable()` returns `true` while the cursor is inside a table; `cellStyle()` and `tableStyle()` return the cell and table values, or `null` outside a table. `rowHeight()` returns the height of the selected rows, or `null` when they have none or different ones. To test a command first, use the `can` form, such as `editor.can.mergeCells()`.
 
-Tables are also saved to Markdown and Word files. Word keeps the cell alignment and colour, the table width, alignment, borders, border colour and striped rows; see [Open, save and print](/en/docs/open-save-print/).
+Tables are also saved to Markdown and Word files. Word keeps the cell alignment and colour, row heights, the table width, alignment, borders, border colour and striped rows; see [Open, save and print](/en/docs/open-save-print/).

@@ -69,6 +69,9 @@ export interface Messages {
   headerRow: string
   widenColumn: string
   narrowColumn: string
+  tallerRow: string
+  shorterRow: string
+  resetRowHeight: string
   deleteRow: string
   deleteColumn: string
   deleteTable: string
@@ -350,6 +353,9 @@ const tr: Messages = {
   headerRow: 'Başlık satırı',
   widenColumn: 'Sütunu genişlet',
   narrowColumn: 'Sütunu daralt',
+  tallerRow: 'Satırı yükselt',
+  shorterRow: 'Satırı alçalt',
+  resetRowHeight: 'Satır yüksekliğini sıfırla',
   deleteRow: 'Satırı sil',
   deleteColumn: 'Sütunu sil',
   deleteTable: 'Tabloyu sil',
@@ -628,6 +634,9 @@ const en: Messages = {
   headerRow: 'Header row',
   widenColumn: 'Widen column',
   narrowColumn: 'Narrow column',
+  tallerRow: 'Make row taller',
+  shorterRow: 'Make row shorter',
+  resetRowHeight: 'Reset row height',
   deleteRow: 'Delete row',
   deleteColumn: 'Delete column',
   deleteTable: 'Delete table',

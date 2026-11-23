@@ -373,6 +373,22 @@ describe('table panel tabs', () => {
     expect([pressedOnB, pressedOnA]).toEqual(['Sola', 'Ortala'])
   })
 
+  it('changes the row height from the Tablo tab and resets it', async () => {
+    const { editor, tabs, tabPanels, button } = await openInTable()
+    tabs[1]?.click()
+    const scope = tabPanels[1] as HTMLElement
+
+    button(scope, 'Satırı yükselt').click()
+    button(scope, 'Satırı yükselt').click()
+    button(scope, 'Satırı alçalt').click()
+    const resized = editor.getHTML()
+    button(scope, 'Satır yüksekliğini sıfırla').click()
+
+    expect(resized).toMatch(/<tr style="height: 48px;?">/)
+    expect(editor.getHTML()).not.toContain('<tr style')
+    expect(button(scope, 'Satır yüksekliğini sıfırla').getAttribute('aria-disabled')).toBe('true')
+  })
+
   it('deletes the table from the Tablo tab and closes the panel', async () => {
     const { editor, panel, tabs, tabPanels, button } = await openInTable()
 

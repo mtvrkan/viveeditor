@@ -13,6 +13,8 @@ export interface TableAction {
 
 export const RESIZE_STEP = 40
 
+export const ROW_RESIZE_STEP = 16
+
 export const TABLE_CELL_ACTIONS: readonly TableAction[] = [
   { id: 'mergeCells', label: 'mergeCells', command: 'mergeCells', group: 0 },
   { id: 'splitCell', label: 'splitCell', command: 'splitCell', group: 0 },
@@ -42,6 +44,27 @@ export const TABLE_ACTIONS: readonly TableAction[] = [
     label: 'narrowColumn',
     command: 'resizeColumn',
     args: [-RESIZE_STEP],
+    group: 4,
+  },
+  {
+    id: 'tallerRow',
+    label: 'tallerRow',
+    command: 'resizeRow',
+    args: [ROW_RESIZE_STEP],
+    group: 4,
+  },
+  {
+    id: 'shorterRow',
+    label: 'shorterRow',
+    command: 'resizeRow',
+    args: [-ROW_RESIZE_STEP],
+    group: 4,
+  },
+  {
+    id: 'resetRowHeight',
+    label: 'resetRowHeight',
+    command: 'setRowHeight',
+    args: [null],
     group: 4,
   },
   { id: 'selectTable', label: 'selectTable', command: 'selectTable', group: 4 },

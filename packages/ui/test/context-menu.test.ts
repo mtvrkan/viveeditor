@@ -193,6 +193,24 @@ describe('context menu', () => {
     expect(editor.getHTML().match(/<tr>/g)).toHaveLength(3)
   })
 
+  it('changes the row height from the Satır submenu', async () => {
+    const { editor, root } = await mount(TABLE)
+    const openRow = async () => {
+      rightClick(root.querySelector('td') as Element)
+      await settle()
+      item(contextMenu(root) as HTMLElement, 'Satır').click()
+    }
+
+    await openRow()
+    item(root, 'Satırı yükselt').click()
+    const taller = editor.getHTML()
+    await openRow()
+    item(root, 'Satır yüksekliğini sıfırla').click()
+
+    expect(taller).toMatch(/^<table><tbody><tr style="height: 48px;?"><td>/)
+    expect(editor.getHTML()).not.toContain('<tr style')
+  })
+
   it('leaves plain text to the browser in objects mode', async () => {
     const { root } = await mount('<p>Düz metin</p>')
 

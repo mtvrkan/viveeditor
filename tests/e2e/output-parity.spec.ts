@@ -1,5 +1,15 @@
 import { expect, type Page, test } from '@playwright/test'
-import { sanitizeHtml } from '../../packages/sanitize/dist/index.mjs'
+
+type Sanitize = (html: string) => string
+
+const SANITIZER = '../../packages/sanitize/dist/index.mjs'
+let sanitizeHtml: Sanitize = () => {
+  throw new Error('The sanitizer is not loaded yet.')
+}
+
+test.beforeAll(async () => {
+  sanitizeHtml = ((await import(SANITIZER)) as { sanitizeHtml: Sanitize }).sanitizeHtml
+})
 
 interface Step {
   select?: string

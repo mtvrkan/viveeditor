@@ -607,3 +607,105 @@ describe('tables with merged cells', () => {
     expect(selectedTexts(editor)).toHaveLength(7)
   })
 })
+
+describe('row height', () => {
+  const sized =
+    '<table><tbody><tr style="height: 48px"><td><p>a</p></td><td><p>b</p></td></tr><tr><td><p>c</p></td><td><p>d</p></td></tr></tbody></table>'
+
+  it('round trips the row height as an inline px style', async () => {
+    const editor = await mount({ content: sized })
+
+    const html = editor.getHTML()
+
+    expect(html).toMatch(/^<table><tbody><tr style="height: 48px;?"><td>/)
+    expect(html).toContain('</tr><tr><td><p>c</p>')
+  })
+
+  it('clamps parsed heights and ignores units other than px', async () => {
+    const editor = await mount({
+      content:
+        '<table><tbody><tr style="height: 5px"><td><p>a</p></td></tr><tr style="height: 9999px"><td><p>b</p></td></tr><tr style="height: 2em"><td><p>c</p></td></tr></tbody></table>',
+    })
+
+    const html = editor.getHTML()
+
+    expect(html.match(/<tr[^>]*>/g)).toEqual([
+      expect.stringMatching(/^<tr style="height: 24px;?">$/),
+      expect.stringMatching(/^<tr style="height: 2000px;?">$/),
+      '<tr>',
+    ])
+  })
+
+  it('sets the height of every row in a cell selection and reports it', async () => {
+    const editor = await mount({ content: grid })
+    selectCells(editor, 2, 19)
+
+    expect(editor.commands.setRowHeight(60.4)).toBe(true)
+
+    expect(editor.getHTML().match(/<tr style="height: 60px;?">/g)).toHaveLength(2)
+    expect(editor.query.rowHeight()).toBe(60)
+  })
+
+  it('reports null for mixed heights and outside a table', async () => {
+    const editor = await mount({ content: `${sized}<p>x</p>` })
+    selectCells(editor, 2, 19)
+
+    const mixed = editor.query.rowHeight()
+    placeCursor(editor, 4)
+    const single = editor.query.rowHeight()
+    placeCursor(editor, viewOf(editor).state.doc.content.size - 1)
+
+    expect([mixed, single, editor.query.rowHeight()]).toEqual([null, 48, null])
+  })
+
+  it('rejects invalid heights and a reset that changes nothing', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+
+    const results = [
+      editor.commands.setRowHeight(Number.NaN),
+      editor.commands.setRowHeight('tall' as unknown as number),
+      editor.commands.setRowHeight(null),
+      editor.commands.resizeRow(0),
+    ]
+
+    expect(results).toEqual([false, false, false, false])
+    expect(editor.getHTML()).not.toContain('height')
+  })
+
+  it('resizes from the stored or fallback height, clamps and resets', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+
+    editor.commands.resizeRow(16)
+    const grown = editor.query.rowHeight()
+    editor.commands.resizeRow(16)
+    const again = editor.query.rowHeight()
+    editor.commands.resizeRow(-5000)
+    const floor = editor.query.rowHeight()
+    editor.commands.setRowHeight(null)
+
+    expect([grown, again, floor, editor.query.rowHeight()]).toEqual([48, 64, 24, null])
+  })
+
+  it('undoes a resize of several rows in one step', async () => {
+    const editor = await mount({ content: grid })
+    selectCells(editor, 2, 19)
+    editor.commands.resizeRow(20)
+
+    expect(editor.commands.undo()).toBe(true)
+
+    expect(editor.getHTML()).toBe(grid)
+  })
+
+  it('keeps the commands but drops the drag handle without resizable', async () => {
+    const editor = await mount({
+      content: grid,
+      extensions: [Table.configure({ resizable: false })],
+    })
+    placeCursor(editor, 4)
+
+    expect(editor.commands.setRowHeight(40)).toBe(true)
+    expect(editor.dom.querySelector('.row-resize-handle')).toBeNull()
+  })
+})

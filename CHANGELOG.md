@@ -4,6 +4,7 @@
 
 ### Added
 
+- Table rows can be made taller or shorter by dragging their bottom border (double-click resets), from the table panel or the right-click menu; Word and both sanitizers keep the height. [2026-11-23]
 - Right-click menu for tables, images, links, code blocks, videos and formulas (`contextMenu` option); plain text keeps the browser menu. [2026-11-23]
 - Toolbar controls for font family, line height and list style; new-tab option for links and a link field for images. [2026-11-23]
 - Rich table properties: cell horizontal alignment, full-width and centred tables, row-only or no borders, striped rows, border colour, row/column/table selection and equal column widths. [2026-11-23]
@@ -144,6 +145,7 @@
 
 ### Fixed
 
+- Table rows no longer grow when the pointer reaches a column border. [2026-11-23]
 - Saved HTML writes font families the same way in every browser, and font size and font family show no value for a mixed selection. [2026-11-23]
 - Images opened from a Word file no longer come with an empty paragraph before them. [2026-11-23]
 - Opening a Word file from the File menu keeps the fonts of a custom font family list. [2026-11-23]

@@ -793,5 +793,20 @@
     "name": "linked image without image maps",
     "input": "<p><a href=\"https://example.com\"><img src=\"https://example.com/a.png\" alt=\"logo\" ismap usemap=\"#m\"></a></p><map name=\"m\"><area href=\"javascript:alert(1)\" alt=\"x\"></map>",
     "expected": "<p><a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\"><img src=\"https://example.com/a.png\" alt=\"logo\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"></a></p>"
+  },
+  {
+    "name": "row height kept on tr",
+    "input": "<table><tbody><tr style=\"height: 48px\"><td>a</td></tr><tr style=\"HEIGHT: 2000px; color: red\"><td>b</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr style=\"height: 48px\"><td>a</td></tr><tr style=\"height: 2000px\"><td>b</td></tr></tbody></table>"
+  },
+  {
+    "name": "row height out of range or not px",
+    "input": "<table><tbody><tr style=\"height: 2001px\"><td>a</td></tr><tr style=\"height: 0px\"><td>b</td></tr><tr style=\"height: 3em\"><td>c</td></tr><tr style=\"height: calc(10px)\"><td>d</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><td>a</td></tr><tr><td>b</td></tr><tr><td>c</td></tr><tr><td>d</td></tr></tbody></table>"
+  },
+  {
+    "name": "height style only on tr",
+    "input": "<table><tbody><tr><td style=\"height: 40px\">a</td></tr></tbody></table><p style=\"height: 40px\">b</p>",
+    "expected": "<table><tbody><tr><td>a</td></tr></tbody></table><p>b</p>"
   }
 ]

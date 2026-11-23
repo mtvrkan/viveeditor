@@ -37,6 +37,7 @@ const PAGE_WIDTH_TWIPS = 9360
 const MAX_IMAGE_PIXELS = 624
 const EMU_PER_PIXEL = 9525
 const TWIPS_PER_PIXEL = 15
+const MAX_ROW_HEIGHT = 2000
 const MAX_LEVEL = 8
 const STEP_HALF_POINTS: Readonly<Record<string, number>> = {
   tiny: 16,
@@ -665,7 +666,13 @@ class Writer {
       }
       while (pending.has(column)) continuation()
       gridColumns = Math.max(gridColumns, column)
-      rowXml += `<w:tr>${header ? '<w:trPr><w:tblHeader/></w:trPr>' : ''}${cells}</w:tr>`
+      const rowHeight = positiveInt(row.attrs.height)
+      const rowProperties = `${
+        rowHeight
+          ? `<w:trHeight w:val="${Math.min(MAX_ROW_HEIGHT, rowHeight) * TWIPS_PER_PIXEL}" w:hRule="atLeast"/>`
+          : ''
+      }${header ? '<w:tblHeader/>' : ''}`
+      rowXml += `<w:tr>${rowProperties ? `<w:trPr>${rowProperties}</w:trPr>` : ''}${cells}</w:tr>`
     }
     gridColumns = Math.max(1, gridColumns)
     const fallback = Math.round(PAGE_WIDTH_TWIPS / gridColumns)

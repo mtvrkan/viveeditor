@@ -90,6 +90,7 @@ const ADDED_ATTRIBUTES: Record<string, Record<string, null | boolean>> = {
   heading: { indent: null, lineHeight: null },
   image: { caption: null, align: null, href: null },
   table: { width: null, align: null, border: null, striped: false, borderColor: null },
+  tableRow: { height: null },
   tableCell: { background: null, verticalAlign: null, textAlign: null },
   tableHeader: { background: null, verticalAlign: null, textAlign: null },
   orderedList: { type: null },
