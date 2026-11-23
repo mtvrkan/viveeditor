@@ -1,5 +1,17 @@
 # @viveeditor/angular
 
+## 1.0.0-rc.0
+
+### Patch Changes
+
+- 319b968: The component marks its host for checking when the text changes and when it loses focus, so bindings such as `{{ form.value }}` or `[disabled]="form.invalid"` update while typing in zoneless and OnPush apps, which `ng new` creates by default in Angular 22. Before, a reactive form value shown in the template stopped updating after the first keystroke.
+- Updated dependencies [96ea657]
+- Updated dependencies [9f59c19]
+- Updated dependencies [96ea657]
+- Updated dependencies [bd7fb9c]
+- Updated dependencies [1a1a861]
+  - viveeditor@1.0.0-rc.0
+
 ## 0.1.0
 
 ### Minor Changes

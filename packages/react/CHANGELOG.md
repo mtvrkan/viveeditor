@@ -1,5 +1,16 @@
 # @viveeditor/react
 
+## 1.0.0-rc.0
+
+### Patch Changes
+
+- Updated dependencies [96ea657]
+- Updated dependencies [9f59c19]
+- Updated dependencies [96ea657]
+- Updated dependencies [bd7fb9c]
+- Updated dependencies [1a1a861]
+  - viveeditor@1.0.0-rc.0
+
 ## 0.1.0
 
 ### Minor Changes
