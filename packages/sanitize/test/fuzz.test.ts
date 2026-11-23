@@ -6,6 +6,7 @@ import { unsafeParts } from './safety.js'
 const RUNS = Number(process.env.FUZZ_RUNS ?? 200)
 const SEED = 20_261_031
 const TIMEOUT = 10_000 + RUNS * 100
+const TEMPLATE = /<template(?:[\t\n\f\r />]|$)/i
 
 const HOSTILE_TAGS = [
   ...VIVE_PROFILE.dropWithContent,
@@ -65,6 +66,15 @@ const VALUES = [
   'true',
   'color: red; background: url(javascript:alert(1))',
   'text-align: center',
+  'font-size: 1.25em',
+  'font-size: 999em; font-size: -1em',
+  'margin-inline-start: 4em',
+  'margin-inline-start: -40em',
+  'vertical-align: middle',
+  'background-color: #fff2a8; vertical-align: bottom',
+  'background-color: url(javascript:alert(1))',
+  'right',
+  'center',
   '"><img src=x onerror=alert(1)>',
   '</p><script>alert(1)</script>',
   'expression(alert(1))',
@@ -130,6 +140,12 @@ describe('sanitizeHtml on generated HTML', () => {
     () => {
       fc.assert(
         fc.property(html, options, (input, settings) => {
+          if (TEMPLATE.test(input)) {
+            expect(() => sanitizeHtml(input, settings)).toThrow(
+              expect.objectContaining({ code: 'TOO_COMPLEX' }),
+            )
+            return
+          }
           const clean = sanitizeHtml(input, settings)
 
           const again = sanitizeHtml(clean, settings)

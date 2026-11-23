@@ -85,6 +85,17 @@ final class Guard
         return false;
     }
 
+    public static function dismantle(Node $root): void
+    {
+        $stack = [$root];
+        while ($stack !== []) {
+            $node = array_pop($stack);
+            while ($node->lastChild !== null) {
+                $stack[] = $node->removeChild($node->lastChild);
+            }
+        }
+    }
+
     public static function tagCount(string $html): int
     {
         return substr_count($html, '<');

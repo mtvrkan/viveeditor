@@ -6,7 +6,7 @@ const HEX = /^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
 const RGB =
   /^rgba?\([\t\n\f\r ]*([0-9]{1,3})[\t\n\f\r ]*,[\t\n\f\r ]*([0-9]{1,3})[\t\n\f\r ]*,[\t\n\f\r ]*([0-9]{1,3})[\t\n\f\r ]*(?:,[\t\n\f\r ]*([0-9.]+%?)[\t\n\f\r ]*)?\)$/i
 const HSL =
-  /^hsla?\([\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?(?:deg)?[\t\n\f\r ]*,?[\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?%[\t\n\f\r ]*,?[\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?%[\t\n\f\r ]*(?:[,/][\t\n\f\r ]*[0-9.]+%?[\t\n\f\r ]*)?\)$/i
+  /^hsla?\([\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?(?:deg)?[\t\n\f\r ]*,?[\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?%[\t\n\f\r ]*,?[\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?%[\t\n\f\r ]*(?:[,/][\t\n\f\r ]*([0-9.]+%?)[\t\n\f\r ]*)?\)$/i
 const PIXELS = /^([0-9]{1,5})px$/
 const DIGITS = /^[0-9]{1,5}$/
 const LANGUAGE = /^[a-z0-9][a-z0-9+#.-]{0,31}$/i
@@ -134,7 +134,8 @@ export function cleanColor(input: string): string | null {
     const hex = `#${hexPair(red ?? 0)}${hexPair(green ?? 0)}${hexPair(blue ?? 0)}`
     return alpha >= 1 ? hex : `${hex}${hexPair(Math.round(alpha * 255))}`
   }
-  if (HSL.test(value)) return lower.replace(SPACE, ' ')
+  const hsl = HSL.exec(value)
+  if (hsl) return alphaOf(hsl[1]) > 0 ? lower.replace(SPACE, ' ') : null
   return NAMED_COLORS.has(lower) ? lower : null
 }
 
@@ -143,7 +144,16 @@ function styleValue(property: string, value: string): string | null {
     const align = lowerAscii(value)
     return VIVE_PROFILE.textAlign.includes(align) ? align : null
   }
+  if (property === 'vertical-align') {
+    const align = lowerAscii(value)
+    return VIVE_PROFILE.verticalAlign.includes(align) ? align : null
+  }
   if (property === 'color' || property === 'background-color') return cleanColor(value)
+  if (property === 'font-size' || property === 'margin-inline-start') {
+    const step = lowerAscii(value)
+    const allowed = property === 'font-size' ? VIVE_PROFILE.fontSizes : VIVE_PROFILE.indents
+    return allowed.includes(step) ? step : null
+  }
   const pixels = PIXELS.exec(value)
   const number = pixels ? Number(pixels[1]) : 0
   return number > 0 && number <= limits.maxTableWidth ? `${number}px` : null

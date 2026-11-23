@@ -195,9 +195,9 @@ final class Values
             $hex = '#' . self::hexPair((int) $parts[1]) . self::hexPair((int) $parts[2]) . self::hexPair((int) $parts[3]);
             return $alpha >= 1 ? $hex : $hex . self::hexPair((int) round($alpha * 255));
         }
-        $hsl = "/^hsla?\\({$space}*[0-9]{1,3}(?:\\.[0-9]+)?(?:deg)?{$space}*,?{$space}*[0-9]{1,3}(?:\\.[0-9]+)?%{$space}*,?{$space}*[0-9]{1,3}(?:\\.[0-9]+)?%{$space}*(?:[,\\/]{$space}*[0-9.]+%?{$space}*)?\\)\\z/i";
-        if (self::matches($hsl, $value)) {
-            return preg_replace("/{$space}+/", ' ', $lower);
+        $hsl = "/^hsla?\\({$space}*[0-9]{1,3}(?:\\.[0-9]+)?(?:deg)?{$space}*,?{$space}*[0-9]{1,3}(?:\\.[0-9]+)?%{$space}*,?{$space}*[0-9]{1,3}(?:\\.[0-9]+)?%{$space}*(?:[,\\/]{$space}*([0-9.]+%?){$space}*)?\\)\\z/i";
+        if (preg_match($hsl, $value, $parts) === 1) {
+            return self::alphaOf($parts[1] ?? null) > 0 ? preg_replace("/{$space}+/", ' ', $lower) : null;
         }
         return in_array($lower, Profile::get()['namedColors'], true) ? $lower : null;
     }
@@ -208,8 +208,17 @@ final class Values
             $align = self::lowerAscii($value);
             return in_array($align, Profile::get()['textAlign'], true) ? $align : null;
         }
+        if ($property === 'vertical-align') {
+            $align = self::lowerAscii($value);
+            return in_array($align, Profile::get()['verticalAlign'], true) ? $align : null;
+        }
         if ($property === 'color' || $property === 'background-color') {
             return self::cleanColor($value);
+        }
+        if ($property === 'font-size' || $property === 'margin-inline-start') {
+            $step = self::lowerAscii($value);
+            $allowed = Profile::get()[$property === 'font-size' ? 'fontSizes' : 'indents'];
+            return in_array($step, $allowed, true) ? $step : null;
         }
         $number = preg_match(self::PIXELS, $value, $parts) === 1 ? (int) $parts[1] : 0;
         return $number > 0 && $number <= Profile::limit('maxTableWidth') ? $number . 'px' : null;

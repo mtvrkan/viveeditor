@@ -21,7 +21,8 @@
     "maxFootnoteLength": 5000,
     "maxAttributes": 64,
     "maxNesting": 512,
-    "maxExtraElements": 2048
+    "maxExtraElements": 2048,
+    "maxTags": 100000
   },
   "dropWithContent": [
     "script",
@@ -48,25 +49,25 @@
   ],
   "elements": {
     "p": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "h1": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "h2": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "h3": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "h4": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "h5": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "h6": {
-      "styles": ["text-align"]
+      "styles": ["text-align", "margin-inline-start"]
     },
     "blockquote": {},
     "hr": {},
@@ -117,13 +118,15 @@
     "tbody": {},
     "tr": {},
     "td": {
-      "attributes": ["colspan", "rowspan", "data-colwidth"]
+      "attributes": ["colspan", "rowspan", "data-colwidth"],
+      "styles": ["background-color", "vertical-align"]
     },
     "th": {
-      "attributes": ["colspan", "rowspan", "data-colwidth"]
+      "attributes": ["colspan", "rowspan", "data-colwidth"],
+      "styles": ["background-color", "vertical-align"]
     },
     "span": {
-      "styles": ["color"],
+      "styles": ["color", "font-size"],
       "attributes": ["class", "data-mention", "data-math"]
     },
     "mark": {
@@ -141,6 +144,11 @@
         "referrerpolicy"
       ]
     },
+    "figure": {
+      "attributes": ["data-align"]
+    },
+    "figcaption": {},
+    "sub": {},
     "sup": {
       "attributes": ["data-footnote"]
     }
@@ -148,6 +156,10 @@
   "mentionClass": "vive-mention",
   "footnoteElements": ["strong", "em", "a"],
   "textAlign": ["left", "center", "right", "justify"],
+  "fontSizes": ["0.75em", "0.875em", "1.25em", "1.5em"],
+  "indents": ["2em", "4em", "6em", "8em", "10em", "12em", "14em", "16em"],
+  "imageAlign": ["left", "center", "right"],
+  "verticalAlign": ["middle", "bottom"],
   "linkProtocols": ["http", "https", "mailto", "tel"],
   "linkRel": "noopener noreferrer nofollow",
   "image": {

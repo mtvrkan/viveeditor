@@ -251,14 +251,14 @@ $clean = Sanitizer::sanitize($html, ['embeds' => true]);
 ```
 
 - Every element and attribute is rebuilt with a full HTML5 parser (`parse5` in Node, `Dom\HTMLDocument` in PHP), so the output reads the same way in every browser. Cleaning twice gives the same result.
-- Links keep `http`, `https`, `mailto`, `tel` and relative addresses, and always get `rel="noopener noreferrer nofollow"`. Images need `https` addresses; `allowBase64` and `allowRelativeImages` widen that.
+- Links keep `http`, `https`, `mailto`, `tel` and relative addresses, and always get `rel="noopener noreferrer nofollow"`. Images need `https` addresses; `allowBase64` and `allowRelativeImages` widen that. `figure` and `figcaption` are kept, with `data-align` only as `left`, `center` or `right`.
 - Video and audio embeds are removed unless you pass `embeds: true`; players are then rebuilt from the provider and id, never copied.
-- `style` keeps only text alignment, text and highlight colour, and table widths. `id`, `name`, `form` and event handlers never pass.
+- `style` keeps only text alignment, paragraph indent (2 em steps up to 16 em, on paragraphs and headings), the five editor font sizes (on `span`), text and highlight colour, table widths, and the background colour and vertical alignment (middle or bottom) of table cells. A font size inside another font size, and superscript or subscript inside another, are dropped so nesting cannot blow text up or hide it. `id`, `name`, `form` and event handlers never pass.
 - HTML larger than `maxBytes` (2 MB by default) throws a `TOO_LARGE` error instead of being cut.
-- HTML whose structure would make the parser slow or memory hungry throws a `TOO_COMPLEX` error: more than 64 attributes on one tag, nesting deeper than 512 levels, or far more elements than the input has tags. The editor never writes such HTML.
-- In PHP the parser cannot be stopped from inside, so some short hostile inputs (a few tens of KB of unclosed formatting tags) can reach PHP's `memory_limit` before the check runs. PHP then ends that request with a fatal error, which is safe but not a clean exception. Keep `memory_limit` and `max_execution_time` at their usual values for the endpoints that sanitize, and limit the request body size there.
+- HTML whose structure would make the parser slow or memory hungry throws a `TOO_COMPLEX` error: more than `maxTags` opening tags (100 000 by default), more than 64 attributes on one tag, nesting deeper than 512 levels, far more elements than the input has tags, or a `<template>` tag. The editor never writes such HTML.
+- In PHP the parser cannot be stopped from inside, so the PHP sanitizer checks the structure before it parses and refuses hostile input without building the document. What passes is limited by `maxTags`: give the endpoints that sanitize a `memory_limit` of 256 MB, or lower `maxBytes` and `maxTags`. Very long HTML with misnested formatting tags can be refused in PHP sooner than in Node.
 - Clean when you save, and print stored HTML through a cleaning helper too (`@viveHtml` in Laravel), so rows written before you added cleaning stay safe.
-- Mentions, formulas and footnotes are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text; footnotes keep only bold, italic and links.
+- Mentions, formulas and footnotes are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text; footnotes keep only bold, italic and links. A footnote placed inside a link is reduced to its text.
 
 ## Laravel
 

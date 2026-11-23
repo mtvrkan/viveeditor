@@ -8,7 +8,8 @@ interface Case {
   name: string
   input: string
   options?: SanitizeOptions
-  expected: string
+  expected?: string
+  error?: string
 }
 
 const FIXTURES = resolve(process.cwd(), '../../tests/fixtures/sanitize')
@@ -23,21 +24,34 @@ function seeded(seed: number): () => number {
 }
 
 describe('shared sanitizer cases', () => {
-  it.each(cases.map((item) => [item.name, item] as const))('%s', (_name, item) => {
-    const clean = sanitizeHtml(item.input, item.options)
+  it.each(cases.filter((item) => item.error).map((item) => [item.name, item] as const))(
+    '%s is refused',
+    (_name, item) => {
+      const attempt = () => sanitizeHtml(item.input, item.options)
 
-    const again = sanitizeHtml(clean, item.options)
+      expect(attempt).toThrow(expect.objectContaining({ code: item.error }))
+    },
+  )
 
-    expect(clean).toBe(item.expected)
-    expect(again).toBe(clean)
-    expect(unsafeParts(clean)).toEqual([])
-  })
+  it.each(cases.filter((item) => !item.error).map((item) => [item.name, item] as const))(
+    '%s',
+    (_name, item) => {
+      const clean = sanitizeHtml(item.input, item.options)
+
+      const again = sanitizeHtml(clean, item.options)
+
+      expect(clean).toBe(item.expected)
+      expect(again).toBe(clean)
+      expect(unsafeParts(clean)).toEqual([])
+    },
+  )
 })
 
 function parityCorpus(): Case[] {
   const random = seeded(20_261_101)
+  const usable = cases.filter((item) => !item.error)
   const pick = (): string => {
-    const item = cases[Math.floor(random() * cases.length)]?.input ?? ''
+    const item = usable[Math.floor(random() * usable.length)]?.input ?? ''
     const start = Math.floor(random() * item.length)
     return item.slice(start, start + Math.floor(random() * 200))
   }
@@ -112,6 +126,10 @@ describe('sanitizeHtml', () => {
     ['attributes hidden behind a quoted >', `<p a=">"${' b'.repeat(70)}>x</p>`],
     ['deep nesting', '<div>'.repeat(600)],
     ['nested unknown end tags', `${'<span>'.repeat(20_000)}${'</y>'.repeat(20_000)}`],
+    ['nesting deep enough to crash the PHP parser', '<div>'.repeat(99_000)],
+    ['tables nested in cells', '<table><td>'.repeat(49_000)],
+    ['more closing paragraphs than the element budget', '</p>'.repeat(110_000)],
+    ['a template', `<template>${'<p><b c=1>x</p>'.repeat(10)}`],
     [
       'formatting rebuilt in every paragraph',
       Array.from({ length: 20_000 }, (_, index) => `<p><b c=${index}>x</p>`).join(''),
@@ -125,6 +143,37 @@ describe('sanitizeHtml', () => {
     expect(performance.now() - started).toBeLessThan(1000)
   })
 
+  it('refuses more opening tags than maxTags and accepts exactly maxTags', () => {
+    const input = '<p>a</p>'.repeat(10)
+
+    const over = () => sanitizeHtml(input, { maxTags: 9 })
+    const exact = sanitizeHtml(input, { maxTags: 10 })
+
+    expect(over).toThrow(expect.objectContaining({ code: 'TOO_COMPLEX' }))
+    expect(exact).toBe(input)
+  })
+
+  it('refuses a template in any letter case and after removed NUL characters', () => {
+    const inputs = ['<TEMPLATE>x</TEMPLATE>', '<template\n>x', '<temp\0late>x', '<template']
+
+    const codes = inputs.map((input) => {
+      try {
+        sanitizeHtml(input)
+        return null
+      } catch (error) {
+        return (error as SanitizeError).code
+      }
+    })
+
+    expect(codes).toEqual(['TOO_COMPLEX', 'TOO_COMPLEX', 'TOO_COMPLEX', 'TOO_COMPLEX'])
+  })
+
+  it('keeps text that only mentions a template', () => {
+    const clean = sanitizeHtml('<p>&lt;template&gt; ve <code>templates</code></p><p>x</p>')
+
+    expect(clean).toBe('<p>&lt;template&gt; ve <code>templates</code></p><p>x</p>')
+  })
+
   it('accepts a tag with exactly 64 attributes', () => {
     const input = `<p${' a=1'.repeat(64)}>x</p>`
 
@@ -134,7 +183,8 @@ describe('sanitizeHtml', () => {
   })
 
   it.each([
-    ['<h6><sup><h2>x', '<h6></h6><h2>x</h2>'],
+    ['<h6><sup><h2>x', '<h6><sup><h2>x</h2></sup></h6>'],
+    ['<h6><font><h2>x', '<h6></h6><h2>x</h2>'],
     ['<p><applet><p>x</p></applet></p>', '<p></p><p>x</p><p></p>'],
   ])('returns markup that stays the same when sanitized again: %s', (input, expected) => {
     const clean = sanitizeHtml(input)

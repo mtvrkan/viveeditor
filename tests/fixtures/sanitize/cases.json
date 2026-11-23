@@ -132,7 +132,7 @@
   {
     "name": "template",
     "input": "<template><img src=x onerror=alert(1)></template><p>görünür</p>",
-    "expected": "<p>görünür</p>"
+    "error": "TOO_COMPLEX"
   },
   {
     "name": "iframe outside wrapper",
@@ -549,8 +549,143 @@
     "expected": "<p><sup data-footnote=\"\">şşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşşş<strong>kkkkkkkkkk</strong></sup></p>"
   },
   {
-    "name": "plain superscript is unwrapped",
+    "name": "plain superscript is kept",
     "input": "<p>x<sup>2</sup></p>",
-    "expected": "<p>x2</p>"
+    "expected": "<p>x<sup>2</sup></p>"
+  },
+  {
+    "name": "subscript is kept without attributes",
+    "input": "<p>H<sub onclick=\"alert(1)\" class=\"x\">2</sub>O</p>",
+    "expected": "<p>H<sub>2</sub>O</p>"
+  },
+  {
+    "name": "superscript drops foreign attributes",
+    "input": "<p>x<sup style=\"color: red\" title=\"t\">2</sup></p>",
+    "expected": "<p>x<sup>2</sup></p>"
+  },
+  {
+    "name": "superscript inside a footnote is unwrapped",
+    "input": "<p>a<sup data-footnote=\"\">not <sup>2</sup> <sub>3</sub></sup></p>",
+    "expected": "<p>a<sup data-footnote=\"\">not 2 3</sup></p>"
+  },
+  {
+    "name": "font size from the fixed steps",
+    "input": "<p><span style=\"font-size: 1.25EM\">a</span><span style=\"font-size:0.75em;color:#ff0000\">b</span></p>",
+    "expected": "<p><span style=\"font-size: 1.25em\">a</span><span style=\"font-size: 0.75em; color: #ff0000\">b</span></p>"
+  },
+  {
+    "name": "font size outside the fixed steps",
+    "input": "<p><span style=\"font-size: 99px\">a</span><span style=\"font-size: calc(1em + 1px)\">b</span><span style=\"font-size: 1.25em !important\">c</span></p>",
+    "expected": "<p><span>a</span><span>b</span><span>c</span></p>"
+  },
+  {
+    "name": "font size only on span",
+    "input": "<p style=\"font-size: 1.5em\">a</p>",
+    "expected": "<p>a</p>"
+  },
+  {
+    "name": "indent from the fixed steps",
+    "input": "<h2 style=\"text-align: center; margin-inline-start: 4em\">a</h2><p style=\"margin-inline-start:16EM\">b</p>",
+    "expected": "<h2 style=\"text-align: center; margin-inline-start: 4em\">a</h2><p style=\"margin-inline-start: 16em\">b</p>"
+  },
+  {
+    "name": "indent outside the fixed steps",
+    "input": "<p style=\"margin-inline-start: 3em\">a</p><p style=\"margin-inline-start: 18em\">b</p><p style=\"margin-inline-start: -2em\">c</p><p style=\"margin-left: 2em\">d</p>",
+    "expected": "<p>a</p><p>b</p><p>c</p><p>d</p>"
+  },
+  {
+    "name": "indent only on paragraphs and headings",
+    "input": "<blockquote style=\"margin-inline-start: 2em\"><p>a</p></blockquote><span style=\"margin-inline-start: 2em\">b</span>",
+    "expected": "<blockquote><p>a</p></blockquote><span>b</span>"
+  },
+  {
+    "name": "nested font size keeps only the outer size",
+    "input": "<p><span style=\"font-size:1.5em\"><span style=\"font-size:1.5em; color: #ff0000\">x</span></span></p>",
+    "expected": "<p><span style=\"font-size: 1.5em\"><span style=\"color: #ff0000\">x</span></span></p>"
+  },
+  {
+    "name": "nested superscript is unwrapped",
+    "input": "<p><sup><sup>x</sup></sup><sub><sup>y</sup></sub></p>",
+    "expected": "<p><sup>x</sup><sub>y</sub></p>"
+  },
+  {
+    "name": "forty superscripts become one",
+    "input": "<p><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup><sup>x</sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></sup></p>",
+    "expected": "<p><sup>x</sup></p>"
+  },
+  {
+    "name": "upper-case style names",
+    "input": "<p style=\"Margin-Inline-Start: 2em\"><span style=\"FONT-SIZE: 1.5em\">x</span></p>",
+    "expected": "<p style=\"margin-inline-start: 2em\"><span style=\"font-size: 1.5em\">x</span></p>"
+  },
+  {
+    "name": "font size tricks are dropped",
+    "input": "<p><span style=\"font-size:1.5\\65m\">a</span><span style=\"font-size:1.5em/**/\">b</span><span style=\"font-size:.75em\">c</span><span style=\"font-size:1.50em\">d</span><span style=\"font-size:+1.5em\">e</span><span style=\"font-size: 1.5em\">f</span></p>",
+    "expected": "<p><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span></p>"
+  },
+  {
+    "name": "first valid font size wins",
+    "input": "<p><span style=\"font-size:bad;font-size:0.75em\">a</span><span style=\"font-size:1.25em;font-size:1.5em\">b</span></p>",
+    "expected": "<p><span style=\"font-size: 0.75em\">a</span><span style=\"font-size: 1.25em\">b</span></p>"
+  },
+  {
+    "name": "footnotes next to superscripts",
+    "input": "<p><a href=\"https://example.com\"><sup data-footnote=\"\">f</sup><sup>s</sup></a><sup><sup data-footnote=\"\">g</sup></sup><sup data-footnote=\"x\" style=\"font-size:1.5em\">h</sup></p>",
+    "expected": "<p><a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\">f<sup>s</sup></a><sup><sup data-footnote=\"\">g</sup></sup><sup data-footnote=\"\">h</sup></p>"
+  },
+  {
+    "name": "indent dropped outside paragraphs and headings",
+    "input": "<ul><li style=\"margin-inline-start: 2em\"><p>a</p></li></ul><table><tbody><tr><td style=\"margin-inline-start: 2em\"><p>b</p></td></tr></tbody></table><pre style=\"margin-inline-start: 2em\"><code>c</code></pre>",
+    "expected": "<ul><li><p>a</p></li></ul><table><tbody><tr><td><p>b</p></td></tr></tbody></table><pre><code>c</code></pre>"
+  },
+  {
+    "name": "figure with caption and alignment",
+    "input": "<figure data-align=\"RIGHT\" class=\"x\" onclick=\"alert(1)\"><img src=\"https://example.com/a.png\" alt=\"a\"><figcaption>Şekil <b>1</b><script>alert(1)</script></figcaption></figure>",
+    "expected": "<figure data-align=\"right\"><img src=\"https://example.com/a.png\" alt=\"a\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"><figcaption>Şekil 1</figcaption></figure>"
+  },
+  {
+    "name": "figure alignment outside the list",
+    "input": "<figure data-align=\"float\" style=\"position:fixed\"><img src=\"https://example.com/a.png\"></figure><figure data-align=\"left center\"><figcaption>x</figcaption></figure>",
+    "expected": "<figure><img src=\"https://example.com/a.png\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"></figure><figure><figcaption>x</figcaption></figure>"
+  },
+  {
+    "name": "cell background and vertical alignment",
+    "input": "<table><tbody><tr><th style=\"background-color: #FFF2A8; vertical-align: MIDDLE\">a</th><td colspan=\"2\" style=\"vertical-align: bottom; background-color: rgb(205, 232, 255)\">b</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><th style=\"background-color: #fff2a8; vertical-align: middle\">a</th><td colspan=\"2\" style=\"vertical-align: bottom; background-color: #cde8ff\">b</td></tr></tbody></table>"
+  },
+  {
+    "name": "cell style tricks are dropped",
+    "input": "<table><tbody><tr><td style=\"background-color: url(https://x.example/a.png); vertical-align: top; position: absolute\">a</td><td style=\"background: red; vertical-align: -9999px\">b</td><td style=\"background-color: transparent; vertical-align: baseline\">c</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><td>a</td><td>b</td><td>c</td></tr></tbody></table>"
+  },
+  {
+    "name": "fully transparent hsl colours are dropped",
+    "input": "<p><span style=\"color:hsla(0,0%,0%,0)\">a</span><span style=\"color:hsl(0 0% 0% / 0)\">b</span></p>",
+    "expected": "<p><span>a</span><span>b</span></p>"
+  },
+  {
+    "name": "cell colour escape and entity tricks are dropped",
+    "input": "<table><tbody><tr><td style=\"background-color:\\75 rl(x)\">a</td><td style=\"background-color:&#x75;rl(x)\">b</td><td style=\"background-color:red/**/\">c</td><td style=\"background-color:red !important\">d</td><td style=\"background-color&#58;red\">e</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><td>a</td><td>b</td><td>c</td><td>d</td><td style=\"background-color: red\">e</td></tr></tbody></table>"
+  },
+  {
+    "name": "repeated cell declarations keep the first valid value",
+    "input": "<table><tbody><tr><td style=\"background-color:bad;background-color:red;background-color:blue\">a</td><td style=\"vertical-align:middle;vertical-align:bottom\">b</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><td style=\"background-color: red\">a</td><td style=\"vertical-align: middle\">b</td></tr></tbody></table>"
+  },
+  {
+    "name": "figure alignment tricks are dropped",
+    "input": "<figure data-align=\" center\">a</figure><figure data-align=\"left;float:right\">c</figure><figure data-align=\"&#99;enter\">d</figure><figure data-align=\"right\" data-align=\"x\">e</figure>",
+    "expected": "<figure>a</figure><figure>c</figure><figure data-align=\"center\">d</figure><figure data-align=\"right\">e</figure>"
+  },
+  {
+    "name": "a figure reopened out of a paragraph settles",
+    "input": "<p>a<marquee><figure data-align=left><figcaption>x</figcaption></figure></marquee>b</p>",
+    "expected": "<p>a</p><figure data-align=\"left\"><figcaption>x</figcaption></figure>b<p></p>"
+  },
+  {
+    "name": "a figure inside a footnote is reduced to text",
+    "input": "<sup data-footnote><figure data-align=left><figcaption>fn</figcaption></figure></sup>",
+    "expected": "<sup data-footnote=\"\">fn</sup>"
   }
 ]

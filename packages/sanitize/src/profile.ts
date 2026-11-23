@@ -41,12 +41,17 @@ export interface SanitizeProfile {
     readonly maxAttributes: number
     readonly maxNesting: number
     readonly maxExtraElements: number
+    readonly maxTags: number
   }
   readonly dropWithContent: readonly string[]
   readonly elements: Readonly<Record<string, ElementRule>>
   readonly mentionClass: string
   readonly footnoteElements: readonly string[]
   readonly textAlign: readonly string[]
+  readonly fontSizes: readonly string[]
+  readonly indents: readonly string[]
+  readonly imageAlign: readonly string[]
+  readonly verticalAlign: readonly string[]
   readonly linkProtocols: readonly string[]
   readonly linkRel: string
   readonly image: {

@@ -13,9 +13,10 @@ final class Sanitizer
 {
     private const HTML_NS = 'http://www.w3.org/1999/xhtml';
     private const MAX_ROUNDS = 3;
-    private const ROOT = ['parent' => '', 'taskList' => false, 'taskItem' => false, 'inLink' => false, 'footnote' => null];
+    private const ROOT = ['parent' => '', 'taskList' => false, 'taskItem' => false, 'inLink' => false, 'inScript' => false, 'inFontSize' => false, 'footnote' => null];
 
     private HTMLDocument $document;
+    private int $maxTags;
     private bool $embeds;
     private bool $allowBase64;
     private bool $allowRelative;
@@ -23,6 +24,7 @@ final class Sanitizer
     private function __construct(array $options)
     {
         $this->document = HTMLDocument::createEmpty();
+        $this->maxTags = $options['maxTags'] ?? Profile::limit('maxTags');
         $this->embeds = ($options['embeds'] ?? false) === true;
         $this->allowBase64 = ($options['allowBase64'] ?? false) === true;
         $this->allowRelative = ($options['allowRelativeImages'] ?? false) === true;
@@ -35,7 +37,14 @@ final class Sanitizer
             throw new SanitizeException(SanitizeException::TOO_LARGE, "HTML is larger than {$maxBytes} bytes.");
         }
         $sanitizer = new self($options);
-        $clean = $sanitizer->run(self::scrub($html));
+        $html = self::scrub($html);
+        if (FormattingGuard::hasTemplate($html)) {
+            self::tooComplex();
+        }
+        if (FormattingGuard::startTagCount($html) > $sanitizer->maxTags) {
+            throw new SanitizeException(SanitizeException::TOO_COMPLEX, "HTML has more than {$sanitizer->maxTags} tags.");
+        }
+        $clean = $sanitizer->run($html);
         for ($round = 1; $round < self::MAX_ROUNDS; $round++) {
             $again = $sanitizer->run($clean);
             if ($again === $clean) {
@@ -68,10 +77,14 @@ final class Sanitizer
         if (Guard::hasCrowdedTag($html, Profile::limit('maxAttributes'))) {
             self::tooComplex();
         }
+        if (FormattingGuard::exceeds($html, $this->maxTags, Profile::limit('maxNesting'))) {
+            self::tooComplex();
+        }
         $source = $this->document->createElement('body');
         $source->innerHTML = $html;
-        $maxElements = Guard::tagCount($html) + Profile::limit('maxExtraElements');
+        $maxElements = min(Guard::tagCount($html), $this->maxTags) + Profile::limit('maxExtraElements');
         if (Guard::exceedsTree($source, $maxElements, Profile::limit('maxNesting'))) {
+            Guard::dismantle($source);
             self::tooComplex();
         }
         $output = $this->document->createElement('body');
@@ -104,9 +117,22 @@ final class Sanitizer
         return $element;
     }
 
-    private function styleOf(string $tag, array $source): array
+    private static function hasStyle(?array $attributes, string $property): bool
+    {
+        foreach ($attributes ?? [] as [$name, $value]) {
+            if ($name === 'style' && str_contains($value, $property . ':')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function styleOf(string $tag, array $source, ?string $without = null): array
     {
         $allowed = Profile::get()['elements'][$tag]['styles'] ?? null;
+        if ($allowed !== null && $without !== null) {
+            $allowed = array_values(array_filter($allowed, fn (string $style): bool => $style !== $without));
+        }
         $style = $source['style'] ?? null;
         if ($allowed === null || $style === null) {
             return [];
@@ -158,7 +184,7 @@ final class Sanitizer
         return $result;
     }
 
-    private function cellAttributes(array $source): array
+    private function cellAttributes(string $tag, array $source): array
     {
         $result = [];
         foreach (['colspan', 'rowspan'] as $name) {
@@ -171,6 +197,7 @@ final class Sanitizer
         if ($widths !== null) {
             $result[] = ['data-colwidth', $widths];
         }
+        array_push($result, ...$this->styleOf($tag, $source));
         return $result;
     }
 
@@ -301,6 +328,8 @@ final class Sanitizer
             'taskList' => false,
             'taskItem' => false,
             'inLink' => $context['inLink'] || $tag === 'a',
+            'inScript' => $context['inScript'],
+            'inFontSize' => $context['inFontSize'],
             'footnote' => $context['footnote'],
         ];
         $attributes = null;
@@ -360,7 +389,9 @@ final class Sanitizer
                 $attributes = $context['inLink'] ? null : $this->linkAttributes($source);
                 break;
             case 'sup':
-                $attributes = null;
+            case 'sub':
+                $attributes = $context['inScript'] ? null : [];
+                $next['inScript'] = true;
                 break;
             case 'img':
                 $image = $this->imageAttributes($source);
@@ -370,10 +401,17 @@ final class Sanitizer
                 return;
             case 'td':
             case 'th':
-                $attributes = $this->cellAttributes($source);
+                $attributes = $this->cellAttributes($tag, $source);
+                break;
+            case 'figure':
+                $align = Values::lowerAscii($source['data-align'] ?? '');
+                $attributes = in_array($align, Profile::get()['imageAlign'], true) ? [['data-align', $align]] : [];
                 break;
             default:
-                $attributes = array_key_exists($tag, Profile::get()['elements']) ? $this->styleOf($tag, $source) : null;
+                $attributes = array_key_exists($tag, Profile::get()['elements'])
+                    ? $this->styleOf($tag, $source, $context['inFontSize'] ? 'font-size' : null)
+                    : null;
+                $next['inFontSize'] = $next['inFontSize'] || ($tag === 'span' && self::hasStyle($attributes, 'font-size'));
         }
 
         if ($attributes === null) {

@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { classicPreset, Editor, Embed } from 'viveeditor'
+import { classicPreset, Editor, type EditorContent, Embed } from 'viveeditor'
 import { sanitizeHtml } from '../src/index.js'
 
 const hex = (value: string): string => Number(value).toString(16).padStart(2, '0')
@@ -34,6 +34,7 @@ const SOURCE = [
   '<p><a href="https://example.com/a?b=1&amp;c=2" title="Örnek">bağlantı</a> <a href="/göreli">göreli</a> <a href="mailto:a@example.com">posta</a></p>',
   '<p><span style="color: #ff0000">kırmızı</span> <span style="color: rebeccapurple">mor</span> <mark style="background-color: #fff3a0">vurgu</mark></p>',
   '<p>satır<br>sonu</p>',
+  '<p style="margin-inline-start: 4em">H<sub>2</sub>O x<sup>2</sup> <span style="font-size: 1.25em">büyük</span> <span style="font-size: 0.75em">küçük</span></p>',
   '<ul><li><p>bir</p><ul><li><p>iç</p></li></ul></li></ul>',
   '<ol start="3"><li><p>üç</p></li></ol>',
   '<ul data-type="taskList"><li data-type="taskItem" data-checked="true"><p>bitti</p></li><li data-type="taskItem" data-checked="false"><p>bekliyor</p></li></ul>',
@@ -43,13 +44,15 @@ const SOURCE = [
   '<hr>',
   '<table><tbody><tr><th colspan="2" data-colwidth="120,80"><p>başlık</p></th></tr><tr><td><p>a</p></td><td rowspan="1"><p>b</p></td></tr></tbody></table>',
   '<img src="https://images.example.com/photo.jpg" alt="Fotoğraf" title="Başlık" width="640" height="480">',
+  '<table><tbody><tr><td style="background-color: #fff2a8; vertical-align: middle"><p>renkli</p></td><td style="vertical-align: bottom"><p>alt</p></td></tr></tbody></table>',
+  '<figure data-align="right"><img src="https://images.example.com/chart.png" alt="Grafik"><figcaption>Şekil 1: satışlar</figcaption></figure>',
   '<div class="vive-embed" data-embed="youtube" data-id="dQw4w9WgXcQ" data-start="42" data-title="Video"></div>',
   '<div class="vive-embed" data-embed="vimeo" data-id="76979871" data-hash="abcdef12"></div>',
   '<div class="vive-embed" data-embed="spotify" data-id="track:4uLU6hMCjMI75M1A2tKUQC"></div>',
   '<div class="vive-embed" data-embed="spotify" data-id="album:1DFixLWuPkv3KT3TnV35m3"></div>',
 ].join('')
 
-async function editorHtml(content: string, facade = false): Promise<string> {
+async function editorHtml(content: EditorContent, facade = false): Promise<string> {
   const host = document.createElement('div')
   document.body.append(host)
   const extensions = classicPreset('tr').map((extension) =>
@@ -70,6 +73,18 @@ describe('editor output', () => {
     const fixture = readFileSync(FIXTURE, 'utf8').trimEnd()
 
     expect(html).toBe(fixture)
+  })
+
+  it('keeps a cell background on the cell and a highlight on its text', async () => {
+    const source =
+      '<table><tbody><tr><td style="background-color: #cde8ff"><p>hücre <mark style="background-color: #fff2a8">vurgu</mark></p></td></tr></tbody></table>'
+
+    const html = await editorHtml(source)
+
+    expect(html.match(/<mark /g)).toHaveLength(1)
+    expect(html).toMatch(
+      /<td style="background-color: (#cde8ff|rgb\(205, 232, 255\));?"><p>hücre <mark/,
+    )
   })
 
   it('passes through the sanitizer unchanged when embeds are allowed', async () => {
@@ -105,6 +120,19 @@ describe('editor output', () => {
     const reloaded = await editorHtml(sanitizeHtml(html, { embeds: true }))
 
     expect(reloaded).toBe(html)
+  })
+
+  it('loads its own JSON back as the same document', async () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const editor = await Editor.create(host, { extensions: classicPreset('tr'), content: SOURCE })
+    const json = editor.getJSON()
+    editor.destroy()
+    host.remove()
+
+    const reloaded = await editorHtml(json)
+
+    expect(reloaded).toBe(await editorHtml(SOURCE))
   })
 
   it('drops only the embeds when embeds are not allowed', async () => {

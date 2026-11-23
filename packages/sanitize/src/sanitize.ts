@@ -21,6 +21,7 @@ import {
   cleanText,
   type ImagePolicy,
   isMentionId,
+  lowerAscii,
   takeCodePoints,
 } from './values.js'
 
@@ -32,6 +33,7 @@ export interface SanitizeOptions {
   allowBase64?: boolean
   allowRelativeImages?: boolean
   maxBytes?: number
+  maxTags?: number
 }
 
 export type SanitizeErrorCode = 'TOO_LARGE' | 'TOO_COMPLEX'
@@ -51,6 +53,8 @@ interface Context {
   taskList: boolean
   taskItem: boolean
   inLink: boolean
+  inScript: boolean
+  inFontSize: boolean
   footnote: { left: number } | null
 }
 
@@ -67,6 +71,8 @@ const ROOT: Context = {
   taskList: false,
   taskItem: false,
   inLink: false,
+  inScript: false,
+  inFontSize: false,
   footnote: null,
 }
 const BODY = tree.createElement('body', html.NS.HTML, [])
@@ -94,12 +100,22 @@ function append(target: ParentNode, tag: string, attributes: [string, string][])
   return element
 }
 
-function styleOf(tag: string, source: Map<string, string>): [string, string][] {
-  const allowed = VIVE_PROFILE.elements[tag]?.styles
+function styleOf(
+  tag: string,
+  source: Map<string, string>,
+  without: string | null = null,
+): [string, string][] {
+  const allowed = VIVE_PROFILE.elements[tag]?.styles?.filter((style) => style !== without)
   const style = source.get('style')
   if (!allowed || style === undefined) return []
   const clean = cleanStyle(style, allowed)
   return clean === null ? [] : [['style', clean]]
+}
+
+function hasStyle(attributes: [string, string][] | null, property: string): boolean {
+  return (
+    attributes?.some(([name, value]) => name === 'style' && value.includes(`${property}:`)) ?? false
+  )
 }
 
 function textAttribute(source: Map<string, string>, name: string): [string, string][] {
@@ -135,7 +151,7 @@ function imageAttributes(
   return result
 }
 
-function cellAttributes(source: Map<string, string>): [string, string][] {
+function cellAttributes(tag: string, source: Map<string, string>): [string, string][] {
   const result: [string, string][] = []
   for (const name of ['colspan', 'rowspan']) {
     const span = cleanInteger(source.get(name), 2, limits.maxSpan)
@@ -143,6 +159,7 @@ function cellAttributes(source: Map<string, string>): [string, string][] {
   }
   const widths = cleanColWidth(source.get('data-colwidth'))
   if (widths !== null) result.push(['data-colwidth', widths])
+  result.push(...styleOf(tag, source))
   return result
 }
 
@@ -290,6 +307,8 @@ function element(
     taskList: false,
     taskItem: false,
     inLink: context.inLink || tag === 'a',
+    inScript: context.inScript,
+    inFontSize: context.inFontSize,
     footnote: context.footnote,
   }
   let attributes: [string, string][] | null = null
@@ -344,7 +363,9 @@ function element(
       attributes = context.inLink ? null : linkAttributes(source)
       break
     case 'sup':
-      attributes = null
+    case 'sub':
+      attributes = context.inScript ? null : []
+      next.inScript = true
       break
     case 'img': {
       const image = imageAttributes(source, settings.image)
@@ -353,10 +374,18 @@ function element(
     }
     case 'td':
     case 'th':
-      attributes = cellAttributes(source)
+      attributes = cellAttributes(tag, source)
       break
+    case 'figure': {
+      const align = lowerAscii(source.get('data-align') ?? '')
+      attributes = VIVE_PROFILE.imageAlign.includes(align) ? [['data-align', align]] : []
+      break
+    }
     default:
-      attributes = Object.hasOwn(VIVE_PROFILE.elements, tag) ? styleOf(tag, source) : null
+      attributes = Object.hasOwn(VIVE_PROFILE.elements, tag)
+        ? styleOf(tag, source, context.inFontSize ? 'font-size' : null)
+        : null
+      next.inFontSize ||= tag === 'span' && hasStyle(attributes, 'font-size')
   }
 
   if (attributes === null) {
@@ -386,10 +415,17 @@ function tagCount(input: string): number {
   return count
 }
 
-function cleanOnce(input: string, settings: Settings): string {
+const TEMPLATE = /<template(?:[\t\n\f\r />]|$)/i
+const START_TAG = /<[A-Za-z]/g
+
+function startTagCount(input: string): number {
+  return input.match(START_TAG)?.length ?? 0
+}
+
+function cleanOnce(input: string, settings: Settings, maxTags: number): string {
   if (hasCrowdedTag(input, limits.maxAttributes)) tooComplex()
   const treeAdapter = guardedTreeAdapter(
-    tagCount(input) + limits.maxExtraElements,
+    Math.min(tagCount(input), maxTags) + limits.maxExtraElements,
     limits.maxNesting,
     tooComplex,
   )
@@ -414,9 +450,15 @@ export function sanitizeHtml(input: string, options: SanitizeOptions = {}): stri
       allowRelative: options.allowRelativeImages === true,
     },
   }
-  let clean = cleanOnce(scrub(input), settings)
+  const html = scrub(input)
+  const maxTags = options.maxTags ?? limits.maxTags
+  if (TEMPLATE.test(html)) tooComplex()
+  if (startTagCount(html) > maxTags) {
+    throw new SanitizeError('TOO_COMPLEX', `HTML has more than ${maxTags} tags.`)
+  }
+  let clean = cleanOnce(html, settings, maxTags)
   for (let round = 1; round < MAX_ROUNDS; round++) {
-    const again = cleanOnce(clean, settings)
+    const again = cleanOnce(clean, settings, maxTags)
     if (again === clean) break
     clean = again
   }
