@@ -174,3 +174,26 @@ test('adds a caption and floats the image so the text wraps beside it', async ({
     .evaluate((element) => getComputedStyle(element).float)
   expect(['left', 'none']).toContain(float)
 })
+
+test('links a selected image and removes the link again', async ({ page }) => {
+  await uploadSample(page)
+  await page.locator('.vive-image img').click()
+  await openImageTool(page)
+  const dialog = page.getByRole('dialog', { name: 'Görsel', exact: true })
+  const link = dialog.getByRole('textbox', { name: 'Bağlantı', exact: true })
+
+  await link.fill('javascript:alert(1)')
+  await dialog.getByRole('button', { name: 'Uygula' }).click()
+  await expect(link).toHaveAttribute('aria-invalid', 'true')
+  await link.fill('example.com/kedi')
+  await dialog.getByRole('button', { name: 'Uygula' }).click()
+  await expect(output(page)).toContainText(/<a [^>]*href="https:\/\/example\.com\/kedi"[^>]*><img /)
+
+  await page.locator('.vive-image img').click()
+  await openImageTool(page)
+  await expect(link).toHaveValue('https://example.com/kedi')
+  await link.fill('')
+  await dialog.getByRole('button', { name: 'Uygula' }).click()
+
+  await expect(output(page)).not.toContainText('<a ')
+})

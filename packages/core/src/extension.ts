@@ -13,6 +13,7 @@ export interface CommandRegistry {
   insertContent: (content: EditorContent) => Command
   insertText: (text: string) => Command
   setTextSelection: (from: number, to?: number) => Command
+  selectAt: (target: Node, point?: { left: number; top: number }) => Command
 }
 
 export type CommandName = keyof CommandRegistry

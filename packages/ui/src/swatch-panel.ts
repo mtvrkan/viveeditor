@@ -1,3 +1,4 @@
+import { createColorField } from './color-field.js'
 import { h } from './dom.js'
 import { icon } from './icons.js'
 import type { Messages } from './messages.js'
@@ -11,6 +12,9 @@ export interface SwatchPanelOptions {
   clearLabel: string
   current: () => string | null
   apply: (swatch: Swatch) => void
+  applyColor: (color: string) => void
+  recentKey: string
+  documentColors?: () => readonly string[]
   clear: () => void
   place: (element: HTMLElement, anchor: HTMLElement) => void
   onClose: () => void
@@ -37,6 +41,17 @@ export function createSwatchPanel(options: SwatchPanelOptions): Popover {
     })
     return button
   })
+  const field = createColorField({
+    messages,
+    recentKey: options.recentKey,
+    current: options.current,
+    exclude: options.swatches.map((swatch) => swatch.value),
+    ...(options.documentColors ? { documentColors: options.documentColors } : {}),
+    apply: (color) => {
+      options.applyColor(color)
+      close(false)
+    },
+  })
   const clear = h('button', { type: 'button', class: 've-item ve-clear' }, [
     h('span', { class: 've-item-icon' }, [icon('clear')]),
     h('span', { class: 've-item-label' }, [options.clearLabel]),
@@ -53,6 +68,7 @@ export function createSwatchPanel(options: SwatchPanelOptions): Popover {
     [
       h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [options.title]),
       h('div', { class: 've-swatch-grid' }, buttons),
+      field.element,
       clear,
     ],
   )
@@ -87,6 +103,7 @@ export function createSwatchPanel(options: SwatchPanelOptions): Popover {
       buttons[index]?.setAttribute('aria-pressed', String(pressed))
     })
     clear.hidden = current === null
+    field.sync()
     element.hidden = false
     target.setAttribute('aria-expanded', 'true')
     options.place(element, target)

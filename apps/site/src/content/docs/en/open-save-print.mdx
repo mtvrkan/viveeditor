@@ -2,7 +2,7 @@
 key: files
 title: Open, save and print
 description: Use the File menu to open Word, Markdown, HTML and text files, save as Word, Markdown or HTML, and print the document.
-updated: 2026-11-21
+updated: 2026-11-23
 faq:
   - q: How do I save as PDF?
     a: Choose "Print or PDF" from the File menu, then pick "Save as PDF" in the browser's print dialog.
@@ -98,13 +98,15 @@ Markdown has no form for text colour, highlight, underline and alignment, so the
 
 | Kept when opening and saving | Left out |
 | --- | --- |
-| Headings (a Word title opens as a level 1 heading), bold, italic, underline, strikethrough, text colour, highlight, alignment | Comments, footnotes, headers and footers, text boxes, equations |
-| Bullet, numbered and nested lists | Tracked deletions (insertions are kept), hidden text |
-| Links to web and mail addresses | Other links become plain text; field codes keep only their visible text |
-| Tables with merged cells and header rows, quotes, code | Code block language |
-| Images (opening needs your upload function or `allowBase64`) | Without one, images are dropped and the menu says how many |
+| Headings (a Word title opens as a level 1 heading), bold, italic, underline, strikethrough, text colour, highlight, alignment, font size in points, fonts from the editor's list, line spacing | Comments, footnotes, headers and footers, text boxes, equations |
+| Bullet, numbered and nested lists, numbering type (1, a, A, i, I), start number and bullet style | Tracked deletions (insertions are kept), hidden text |
+| Links to web and mail addresses, including links that open in a new tab | Other links become plain text; field codes keep only their visible text |
+| Tables with merged cells and header rows, cell colour and alignment, table width and alignment, borders, border colour and striped rows; quotes, code | Code block language |
+| Images and linked images (opening needs your upload function or `allowBase64`) | Without one, images are dropped and the menu says how many |
 
 Checklists are saved as ☐ and ☑ text and video players as links. The saved file uses A4 pages and carries no author.
+
+Font sizes are written in points, and the older relative sizes are turned into points on the way. Line spacing is kept for the four editor values (single, 1.15, 1.5 and double). A font in a Word file is kept only when it matches an entry of the editor's font list; Arial, Times New Roman and Courier New fall back to `sans-serif`, `serif` and `monospace` when the list has those but not the named font, and other fonts are dropped. If you set your own `fontFamilies` on `FontFamily`, pass the same list when you call `importDocx(file, { fontFamilies })` yourself. A table border colour is read back only when all the visible borders of the table share it.
 
 <Callout type="note" title="Images saved to Word">
 Images stored as data addresses are embedded in the file. Images at web addresses are downloaded and embedded only when you call `exportDocx` yourself with `fetchImages: true`; the File menu does not, and writes those images as links.

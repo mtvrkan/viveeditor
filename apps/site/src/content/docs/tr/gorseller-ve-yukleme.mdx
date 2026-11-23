@@ -2,7 +2,7 @@
 key: images
 title: Görseller ve yükleme
 description: Görsel eklentisini kurun, yükleme fonksiyonunu yazın, ilerleme ve iptali yönetin, sunucuyu güvene alın ve alternatif metni takip edin.
-updated: 2026-11-01
+updated: 2026-11-23
 faq:
   - q: Yükleme fonksiyonu vermezsem ne olur?
     a: Görseller yalnızca https adresiyle eklenebilir. Görsel panelindeki "Bilgisayardan seç" düğmesi görünmez; sürüklenen ya da yapıştırılan dosyalar yüklenmez.
@@ -185,7 +185,7 @@ img {
 
 ## Görsel paneli
 
-Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni, altyazıyı, yerleşimi ve boyutu değiştirmenizi sağlar.
+Araç çubuğundaki görsel düğmesi ya da `/` menüsündeki "Görsel" girişi paneli açar. Yükleme fonksiyonu varsa "Bilgisayardan seç" düğmesi görünür; görseli editöre sürükleyip bırakabilir ya da yapıştırabilirsiniz. Adres alanına `https` ile başlayan bir görsel adresi girin; kullanılamayan bir adreste panel uyarı gösterir. Seçili bir görselde panel alternatif metni, altyazıyı, yerleşimi, bağlantıyı ve boyutu değiştirmenizi sağlar. Görsele sağ tıklayınca "Görseli düzenle…", üç hizalama, "Görsel adresini kopyala" ve "Görseli sil" seçeneklerinden oluşan bir menü açılır; ayrıntılar [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
 
 ## Altyazı ve yerleşim
 
@@ -211,3 +211,15 @@ figcaption { width: 0; min-width: 100%; font-size: 0.875em; text-align: center; 
 ```
 
 Aynı değerler komutla da verilebilir: `editor.commands.setImageAttributes({ caption: 'Şekil 1', align: 'right' })`. `align` değeri `'left'`, `'center'`, `'right'` ya da `null` olabilir. Altyazı düz metindir; Word'e "Caption" (Resim Yazısı) paragrafı olarak, Markdown'a görselin altında italik bir satır olarak yazılır.
+
+## Bağlantılı görseller
+
+Görsel panelindeki "Bağlantı" alanı görseli bir bağlantıya çevirir. Alan, metin bağlantılarının kabul ettiği adresleri kabul eder ve yazdığınız adresin kullanılıp kullanılamayacağını söyler; `example.com` gibi yalın bir alan adının başına `https://` eklenir. Bağlantıyı kaldırmak için alanı boşaltın. Görsel bir `a` öğesinin içinde kaydedilir:
+
+```html
+<a rel="noopener noreferrer nofollow" href="https://example.com/rapor">
+  <img src="https://cdn.example.com/grafik.png" alt="Satış grafiği" width="640" height="360">
+</a>
+```
+
+Altyazısı ya da yerleşimi olan görselde bağlantı `figure` içindeki görseli sarar, altyazıyı kapsamaz. Kodda `editor.commands.setImageLink('https://example.com/rapor')` kullanın, bağlantıyı kaldırmak için `setImageLink(null)` verin; `editor.query.selectedImage()` bağlantıyı `href` olarak döndürür. Word dosyaları açılırken ve kaydedilirken bağlantılı görseller korunur.

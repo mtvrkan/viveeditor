@@ -1,18 +1,20 @@
 ---
 key: tables
 title: Tables
-description: Tables with merged cells, header rows, column widths you can drag, and the table tools in the toolbar.
-updated: 2026-11-01
+description: Tables with merged cells, header rows, column widths you can drag, cell alignment and colour, table width, borders and striped rows, and the table panel.
+updated: 2026-11-23
 faq:
   - q: Do column widths survive on the published page?
     a: Yes. Widths are written into the saved HTML as a colgroup and styles, so the table looks the same on any site. The server sanitizer keeps table widths.
   - q: Can I put a table inside a table?
-    a: No. While the cursor is inside a table, the insert command does nothing; the toolbar's table button opens the table tools instead.
+    a: No. While the cursor is inside a table, the insert command does nothing; the toolbar's table button opens the table panel instead.
   - q: How do I leave a table with the keyboard?
     a: Press Esc and then Tab. Tab alone moves between cells, so this order moves focus to the next element after the editor.
+  - q: Why do borders and striped rows look different on my site?
+    a: Width, alignment, borders and striped rows are saved as data attributes on the table, and the editor stylesheet draws them. Add the CSS rules from the "Table width, alignment and borders" section to the pages that show the content.
 ---
 
-`@viveeditor/ext-table` adds tables to the editor: merged cells, header rows, column widths set by dragging, and <kbd>Tab</kbd> to move between cells. The saved HTML carries the column widths, so a table looks the same on any site. This page covers setup, the table tools and keyboard use.
+`@viveeditor/ext-table` adds tables to the editor: merged cells, header rows, column widths set by dragging, cell alignment and colour, table width, borders and striped rows, and <kbd>Tab</kbd> to move between cells. The saved HTML carries the column widths, so a table looks the same on any site. This page covers setup, the table panel, the right-click menu and keyboard use.
 
 ## Setup
 
@@ -44,44 +46,81 @@ The one-script build already includes the table extension.
 
 A table inserted in an empty paragraph replaces that paragraph. You cannot insert a table inside another table.
 
-## Table tools
+## Table panel
 
-While the cursor is inside a table, the table button in the toolbar opens the table tools instead of the grid:
+While the cursor is inside a table, the table button in the toolbar opens the table panel instead of the grid. The panel has two tabs:
 
-| Group | Tools |
+| Tab | Tools |
 | --- | --- |
-| Cell | Cell colour, Vertical alignment (Top, Middle, Bottom) |
-| Insert | Insert row above, Insert row below, Insert column left, Insert column right |
-| Arrange | Merge cells, Split cell, Header row, Widen column, Narrow column |
-| Delete | Delete row, Delete column, Delete table |
+| Cell | Horizontal alignment (Align left, Center, Align right, Justify), Vertical alignment (Top, Middle, Bottom), Cell colour; Merge cells, Split cell, Select row, Select column; Insert row above, Insert row below, Insert column left, Insert column right; Delete row, Delete column; Header row, Header column |
+| Table | Width (Auto width, Full width), Table alignment (Align left, Center), Borders (All borders, Rows only, No borders), Striped rows, Border color; Distribute columns, Widen column, Narrow column, Select table; Delete table |
 
-Tools that cannot run at that moment are shown as disabled. For example, "Merge cells" is not available while a single cell is selected. <kbd>Esc</kbd> closes the panel.
+The panel stays open while you work, so you can change several things in one go; every change applies at once and one undo takes it back. Tools that cannot run at that moment are shown as disabled. For example, "Merge cells" is not available while a single cell is selected. "Delete table" closes the panel. <kbd>←</kbd> and <kbd>→</kbd> move between the tabs, and <kbd>Esc</kbd> closes the panel.
 
-## Cell colour and vertical alignment
+## Cell alignment and colour
 
-"Cell colour" gives the cells at the cursor, or the selected cells, one of seven light background colours; the crossed-out circle removes it. "Vertical alignment" places the cell content at the top, middle or bottom. Use the alignment menu in the toolbar for left, center or right alignment of the text itself.
+"Horizontal alignment" aligns the content of the whole cell left, centre, right or justified. "Vertical alignment" places it at the top, middle or bottom. The alignment menu in the toolbar still aligns single paragraphs inside a cell.
 
-The values are saved as a style on the cell, such as `<td style="background-color: #cde8ff; vertical-align: middle">`. Background colours pasted from Word and Google Docs are kept, except plain white. The commands are `setCellBackground(color)` and `setCellVerticalAlign('middle' | 'bottom' | null)`; pass `null` to clear. `editor.query.cellStyle()` returns the values of the cell at the cursor.
+"Cell colour" gives the cell one of seven light background colours; the crossed-out circle removes it. Below the palette you can pick any colour with the colour picker or type a colour code such as `#1a73e8`; colours you used recently are listed there.
+
+Every cell tool acts on the cell at the cursor, or on all selected cells. To select cells, drag with the mouse or use "Select row" and "Select column". The values are saved as a style on each cell, such as `<td style="text-align: center; background-color: #cde8ff; vertical-align: middle">`. Background colours pasted from Word and Google Docs are kept, except plain white.
+
+The commands are `setCellTextAlign('center' | 'right' | 'justify' | null)`, `setCellVerticalAlign('middle' | 'bottom' | null)` and `setCellBackground(color)`; `null` goes back to left, top and no colour. `editor.query.cellStyle()` returns `{ background, verticalAlign, textAlign }` for the cell at the cursor.
+
+## Table width, alignment and borders
+
+The "Table" tab sets properties of the whole table:
+
+- **Width**: "Auto width" keeps the column widths you set; "Full width" stretches the table across the text column.
+- **Table alignment**: tables sit on the left by default; "Center" centres a table that is narrower than the text column.
+- **Borders**: "All borders" (the default), "Rows only" (lines between rows, no lines between columns) or "No borders". In the editor a borderless table keeps a dashed guide so you can see the cells; it does not appear on the published page.
+- **Striped rows**: shades every second row. A cell with its own colour keeps it.
+- **Border color**: the colour of the table lines, from a short palette or any colour code. "Default" goes back to the stylesheet colour.
+- **Distribute columns** gives every column the same width. It works once at least one column has a width.
+
+The table carries these values as data attributes and the border colour as a CSS variable:
+
+```html
+<table data-width="full" data-align="center" data-border="rows" data-striped="true" style="--vive-table-border-color: #98a2b3">
+```
+
+The editor stylesheet already draws them. To show the same look on your own pages, add these rules there too:
+
+```css
+table[data-width="full"] { width: 100%; }
+table[data-align="center"] { margin-inline: auto; }
+td, th { border: 1px solid var(--vive-table-border-color, hsl(220 13% 85%)); }
+table[data-border="rows"] :is(td, th) { border-inline-width: 0; }
+table[data-border="none"] :is(td, th) { border-width: 0; }
+table[data-striped="true"] tr:nth-child(even) > td { background-color: hsl(220 14% 95%); }
+```
+
+The [server sanitizer](/en/docs/server-sanitizing/) keeps all of these values. In code, use `setTableWidth('full' | null)`, `setTableAlign('center' | null)`, `setTableBorder('rows' | 'none' | null)`, `setTableStriped(true | false)` and `setTableBorderColor(color | null)`; `editor.query.tableStyle()` returns `{ width, align, border, striped, borderColor }`.
+
+## Right-click menu
+
+Right-clicking a table opens a menu with "Cell", "Row" and "Column" submenus, "Table properties…" (which opens the table panel) and "Delete table". The Cell submenu holds the horizontal and vertical alignment, merge and split; Row and Column hold insert, delete, select and the header toggle, and Column also "Distribute columns". From the keyboard, <kbd>Shift</kbd>+<kbd>F10</kbd> or the menu key opens the same menu. See [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/) for how the menu works.
 
 ## Merged cells
 
-Drag with the mouse to select several cells, then choose "Merge cells". To undo a merge, click inside the merged cell and choose "Split cell". Merged cells are kept when you save as Word.
+Drag with the mouse to select several cells, then choose "Merge cells" in the table panel or the right-click menu. To undo a merge, click inside the merged cell and choose "Split cell". Merged cells are kept when you save as Word.
 
 ## Header row and column
 
-"Header row" turns the first row into header cells, or back. Header cells are written as `th` in the HTML, so screen readers can announce the column headings. The interface has no button for a header column; use the `editor.commands.toggleHeaderColumn()` command.
+"Header row" turns the first row into header cells, or back; "Header column" does the same for the first column. Header cells are written as `th` in the HTML, so screen readers can announce the row and column headings. In code, use `toggleHeaderRow()` and `toggleHeaderColumn()`.
 
 ## Column widths
 
-With `resizable` on, drag the right edge of a column to change its width. From the keyboard, "Widen column" and "Narrow column" in the table tools change the column at the cursor by 40 pixels. A column cannot be narrower than `cellMinWidth`.
+With `resizable` on, drag the right edge of a column to change its width. From the keyboard, "Widen column" and "Narrow column" in the table panel change the column at the cursor by 40 pixels. A column cannot be narrower than `cellMinWidth`.
 
-A table with set widths carries a `colgroup` and a `width` style per column in the saved HTML. The table itself gets the total width; if some columns have no width, that total is used as a minimum width. Tables without any set width carry no style.
+A table with set widths carries a `colgroup` and a `width` style per column in the saved HTML. The table itself gets the total width; if some columns have no width, or the table is full width, that total is used as a minimum width. Tables without any set width carry no style.
 
 ## Keyboard
 
 - <kbd>Tab</kbd> moves to the next cell. In the last cell it adds a new row.
 - <kbd>Shift</kbd>+<kbd>Tab</kbd> moves to the previous cell.
 - <kbd>Esc</kbd> and then <kbd>Tab</kbd> moves focus out of the table and the editor.
+- <kbd>Shift</kbd>+<kbd>F10</kbd> or the menu key opens the right-click menu for the table.
 
 ## Commands
 
@@ -96,7 +135,15 @@ A table with set widths carries a `colgroup` and a `width` style per column in t
 | `resizeColumn(delta)` | Widens or narrows the column at the cursor, in pixels. |
 | `setCellBackground(color)` | Sets or clears (`null`) the background colour of the selected cells. |
 | `setCellVerticalAlign(align)` | Sets the vertical alignment of the selected cells: `'middle'`, `'bottom'` or `null` for top. |
+| `setCellTextAlign(align)` | Sets the horizontal alignment of the selected cells: `'center'`, `'right'`, `'justify'` or `null` for left. |
+| `setTableWidth(width)` | `'full'` stretches the table across the text column; `null` goes back to auto width. |
+| `setTableAlign(align)` | `'center'` centres the table; `null` puts it back on the left. |
+| `setTableBorder(border)` | `'rows'` or `'none'`; `null` goes back to all borders. |
+| `setTableStriped(striped)` | Turns striped rows on (`true`) or off (`false`). |
+| `setTableBorderColor(color)` | Sets or clears (`null`) the border colour. |
+| `selectRow()`, `selectColumn()`, `selectTable()` | Selects the row, column or every cell of the table. |
+| `distributeColumns()` | Gives every column the same width. |
 
-`editor.query.inTable()` returns `true` while the cursor is inside a table. To test a command first, use the `can` form, such as `editor.can.mergeCells()`.
+`editor.query.inTable()` returns `true` while the cursor is inside a table; `cellStyle()` and `tableStyle()` return the cell and table values, or `null` outside a table. To test a command first, use the `can` form, such as `editor.can.mergeCells()`.
 
-Tables are also saved to Markdown and Word files; see [Open, save and print](/en/docs/open-save-print/).
+Tables are also saved to Markdown and Word files. Word keeps the cell alignment and colour, the table width, alignment, borders, border colour and striped rows; see [Open, save and print](/en/docs/open-save-print/).

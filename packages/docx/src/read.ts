@@ -1,5 +1,5 @@
 import { isAllowedUrl } from '@viveeditor/core'
-import { normalizeColor } from '@viveeditor/ext-format'
+import { DEFAULT_FONT_FAMILIES, normalizeColor } from '@viveeditor/ext-format'
 import {
   DEFAULT_SOURCE_POLICY,
   type ImageSourcePolicy,
@@ -30,6 +30,7 @@ export interface ImportOptions {
   imagePolicy?: Partial<ImageSourcePolicy>
   signal?: AbortSignal
   limits?: Partial<ImportLimits>
+  fontFamilies?: readonly string[]
 }
 
 export type ImportWarningCode =
@@ -119,6 +120,8 @@ const HIGHLIGHTS: Record<string, string> = {
   black: '#000000',
 }
 const CODE_CHARACTER_STYLES = new Set(['code char', 'html code', 'verbatim char', 'source text'])
+const MIN_HALF_POINTS = 12
+const MAX_HALF_POINTS = 192
 const ALIGNMENTS: Record<string, string> = {
   center: 'center',
   right: 'right',
@@ -126,6 +129,37 @@ const ALIGNMENTS: Record<string, string> = {
   both: 'justify',
   distribute: 'justify',
 }
+const STRIPE_FILL = 'F2F2F2'
+const LINE_HEIGHTS = new Map([
+  ['240', '1'],
+  ['276', '1.15'],
+  ['360', '1.5'],
+  ['480', '2'],
+])
+const GENERIC_FAMILIES = new Map([
+  ['times new roman', 'serif'],
+  ['arial', 'sans-serif'],
+  ['courier new', 'monospace'],
+])
+const NUMBER_FORMATS = new Map([
+  ['lowerLetter', 'a'],
+  ['upperLetter', 'A'],
+  ['lowerRoman', 'i'],
+  ['upperRoman', 'I'],
+])
+const BULLET_STYLES = new Map([
+  ['\u2022', 'disc'],
+  ['◦', 'circle'],
+  ['▪', 'square'],
+])
+const BORDER_EDGES: ReadonlyArray<readonly string[]> = [
+  ['top'],
+  ['left', 'start'],
+  ['bottom'],
+  ['right', 'end'],
+  ['insideH'],
+  ['insideV'],
+]
 
 interface Relationship {
   type: string
@@ -140,6 +174,7 @@ interface ParagraphStyle {
   listParagraph: boolean
   numId: string | null
   ilvl: number
+  size: number | null
   basedOn: string | null
 }
 
@@ -153,12 +188,18 @@ interface RunFormat {
   code: boolean
   hidden: boolean
   script: 'sub' | 'sup' | null
+  size: number | null
+  font: string | null
 }
 
 interface ListLevel {
   ordered: boolean
   start: number
+  type: string | null
+  bullet: string | null
 }
+
+type FontLookup = (font: string | null | undefined) => string | null
 
 interface ImageJob {
   element: HTMLImageElement
@@ -233,13 +274,37 @@ function readRelationships(doc: Document | null): Map<string, Relationship> {
   return relationships
 }
 
-function readStyles(doc: Document | null): {
+interface StyleSheet {
   paragraphs: Map<string, ParagraphStyle>
   runs: Map<string, Partial<RunFormat>>
-} {
+  defaultParagraph: string | null
+  defaultSize: number | null
+  defaultFont: string | null
+}
+
+function readSize(rPr: Element | null): number | null {
+  const value = wAttr(child(rPr, NS.w, 'sz'), 'val')
+  return value !== null && /^[0-9]{1,4}$/.test(value) ? Number(value) : null
+}
+
+function readStyles(doc: Document | null): StyleSheet {
   const paragraphs = new Map<string, ParagraphStyle>()
   const runs = new Map<string, Partial<RunFormat>>()
-  if (!doc) return { paragraphs, runs }
+  const sheet: StyleSheet = {
+    paragraphs,
+    runs,
+    defaultParagraph: null,
+    defaultSize: null,
+    defaultFont: null,
+  }
+  if (!doc) return sheet
+  const defaults = descendant(doc.documentElement, [
+    [NS.w, 'docDefaults'],
+    [NS.w, 'rPrDefault'],
+    [NS.w, 'rPr'],
+  ])
+  sheet.defaultSize = readSize(defaults)
+  sheet.defaultFont = wAttr(child(defaults, NS.w, 'rFonts'), 'ascii')
   for (const style of children(doc.documentElement, NS.w, 'style')) {
     const id = wAttr(style, 'styleId')
     if (!id) continue
@@ -257,6 +322,12 @@ function readStyles(doc: Document | null): {
       continue
     }
     if (type !== 'paragraph') continue
+    if (
+      sheet.defaultParagraph === null &&
+      ['1', 'true', 'on'].includes(wAttr(style, 'default') ?? '')
+    ) {
+      sheet.defaultParagraph = id
+    }
     const pPr = child(style, NS.w, 'pPr')
     const numPr = child(pPr, NS.w, 'numPr')
     const outline = wAttr(child(pPr, NS.w, 'outlineLvl'), 'val')
@@ -276,10 +347,11 @@ function readStyles(doc: Document | null): {
       listParagraph: name === 'list paragraph',
       numId: wAttr(child(numPr, NS.w, 'numId'), 'val'),
       ilvl: clampInt(wAttr(child(numPr, NS.w, 'ilvl'), 'val'), 0, 8, 0),
+      size: readSize(child(style, NS.w, 'rPr')),
       basedOn: wAttr(child(style, NS.w, 'basedOn'), 'val'),
     })
   }
-  return { paragraphs, runs }
+  return sheet
 }
 
 function resolveStyle(
@@ -295,6 +367,7 @@ function resolveStyle(
     result.quote ||= current.quote
     result.code ||= current.code
     result.listParagraph ||= current.listParagraph
+    result.size ??= current.size
     if (result.numId === null) {
       result.numId = current.numId
       result.ilvl = current.ilvl
@@ -309,13 +382,20 @@ function readNumbering(doc: Document | null): (numId: string, ilvl: number) => L
   if (doc) {
     for (const abstract of children(doc.documentElement, NS.w, 'abstractNum')) {
       const levels = new Map<number, ListLevel>()
+      const texts = new Set<string>()
       for (const level of children(abstract, NS.w, 'lvl')) {
         const format = wAttr(child(level, NS.w, 'numFmt'), 'val') ?? 'decimal'
+        const text = wAttr(child(level, NS.w, 'lvlText'), 'val') ?? ''
+        texts.add(text)
+        const ordered = format !== 'bullet' && format !== 'none'
         levels.set(clampInt(wAttr(level, 'ilvl'), 0, 8, 0), {
-          ordered: format !== 'bullet' && format !== 'none',
-          start: clampInt(wAttr(child(level, NS.w, 'start'), 'val'), 1, 9999, 1),
+          ordered,
+          start: clampInt(wAttr(child(level, NS.w, 'start'), 'val'), 0, 9999, 1),
+          type: ordered ? (NUMBER_FORMATS.get(format) ?? null) : null,
+          bullet: ordered ? null : (BULLET_STYLES.get(text) ?? null),
         })
       }
+      if (texts.size > 1) for (const level of levels.values()) level.bullet = null
       const id = wAttr(abstract, 'abstractNumId')
       if (id !== null) abstracts.set(id, levels)
     }
@@ -327,7 +407,7 @@ function readNumbering(doc: Document | null): (numId: string, ilvl: number) => L
       for (const override of children(num, NS.w, 'lvlOverride')) {
         const start = wAttr(child(override, NS.w, 'startOverride'), 'val')
         if (start !== null) {
-          starts.set(clampInt(wAttr(override, 'ilvl'), 0, 8, 0), clampInt(start, 1, 9999, 1))
+          starts.set(clampInt(wAttr(override, 'ilvl'), 0, 8, 0), clampInt(start, 0, 9999, 1))
         }
       }
       instances.set(id, { abstractId, starts })
@@ -339,8 +419,60 @@ function readNumbering(doc: Document | null): (numId: string, ilvl: number) => L
     return {
       ordered: level?.ordered ?? false,
       start: instance?.starts.get(ilvl) ?? level?.start ?? 1,
+      type: level?.type ?? null,
+      bullet: level?.bullet ?? null,
     }
   }
+}
+
+const firstFamily = (entry: string): string =>
+  (entry.split(',')[0] ?? '')
+    .trim()
+    .replace(/^(['"])(.*)\1$/, '$2')
+    .toLowerCase()
+
+function fontLookup(list: readonly string[]): FontLookup {
+  const named = new Map<string, string>()
+  for (const entry of list) {
+    if (typeof entry !== 'string') continue
+    const key = firstFamily(entry)
+    if (key && !named.has(key)) named.set(key, entry)
+  }
+  return (font) => {
+    const key = (font ?? '').trim().toLowerCase()
+    if (!key) return null
+    const generic = GENERIC_FAMILIES.get(key)
+    return named.get(key) ?? (generic ? named.get(generic) : undefined) ?? null
+  }
+}
+
+function readBorders(borders: Element | null): { border: string | null; color: string | null } {
+  if (!borders) return { border: null, color: null }
+  const edges = BORDER_EDGES.map((names) =>
+    names.reduce<Element | null>((found, name) => found ?? child(borders, NS.w, name), null),
+  )
+  const off = (edge: Element | null | undefined): boolean =>
+    !!edge && ['nil', 'none'].includes(wAttr(edge, 'val') ?? '')
+  const on = (edge: Element | null | undefined): boolean => !!edge && !off(edge)
+  const [top, left, bottom, right, insideH, insideV] = edges
+  const border = edges.every(off)
+    ? 'none'
+    : off(left) && off(right) && off(insideV) && on(top) && on(bottom) && on(insideH)
+      ? 'rows'
+      : null
+  const colors = new Set(
+    edges.filter(on).map((edge) => (wAttr(edge, 'color') ?? 'auto').toLowerCase()),
+  )
+  const [only] = colors
+  const color =
+    colors.size === 1 && only && /^[0-9a-f]{6}$/.test(only) ? normalizeColor(`#${only}`) : null
+  return { border, color }
+}
+
+function pointsOf(size: number | null | undefined, base: number | null): string | null {
+  if (size === null || size === undefined || size === base) return null
+  if (size < MIN_HALF_POINTS || size > MAX_HALF_POINTS) return null
+  return `${Math.floor(size / 2)}${size % 2 === 1 ? '.5' : ''}pt`
 }
 
 function readRunFormat(rPr: Element | null): Partial<RunFormat> {
@@ -371,6 +503,10 @@ function readRunFormat(rPr: Element | null): Partial<RunFormat> {
   if (vertical) {
     format.script = vertical === 'superscript' ? 'sup' : vertical === 'subscript' ? 'sub' : null
   }
+  const size = readSize(rPr)
+  if (size !== null) format.size = size
+  const font = wAttr(child(rPr, NS.w, 'rFonts'), 'ascii')
+  if (font) format.font = font
   const fill = wAttr(child(rPr, NS.w, 'shd'), 'fill')
   if (
     !format.highlight &&
@@ -391,15 +527,21 @@ class Reader {
   private cells = 0
   private fieldStack: ('instruction' | 'result')[] = []
   private instructions = 0
+  private paragraphSize: number | null = null
+  private readonly paragraphStyles: Map<string, ParagraphStyle>
+  private readonly runStyles: Map<string, Partial<RunFormat>>
 
   constructor(
     private readonly limits: ImportLimits,
     private readonly relationships: Map<string, Relationship>,
     private readonly media: Map<string, Uint8Array>,
-    private readonly paragraphStyles: Map<string, ParagraphStyle>,
-    private readonly runStyles: Map<string, Partial<RunFormat>>,
+    private readonly styles: StyleSheet,
     private readonly listLevel: (numId: string, ilvl: number) => ListLevel,
-  ) {}
+    private readonly fonts: FontLookup,
+  ) {
+    this.paragraphStyles = styles.paragraphs
+    this.runStyles = styles.runs
+  }
 
   warn(code: ImportWarningCode): void {
     this.warnings.set(code, (this.warnings.get(code) ?? 0) + 1)
@@ -443,6 +585,8 @@ class Reader {
       ? clampInt(wAttr(child(numPr, NS.w, 'ilvl'), 'val'), 0, 8, 0)
       : (style?.ilvl ?? 0)
     const content = this.doc.createElement('span')
+    const sized = style ?? resolveStyle(this.paragraphStyles, this.styles.defaultParagraph)
+    this.paragraphSize = sized?.size ?? this.styles.defaultSize
     this.inline(paragraph, content, {}, depth)
 
     if (style?.code) {
@@ -450,17 +594,52 @@ class Reader {
       return
     }
     const heading = style?.heading ?? null
-    const block = this.doc.createElement(heading ? `h${heading}` : 'p')
-    block.append(...content.childNodes)
     const jc = wAttr(child(pPr, NS.w, 'jc'), 'val') ?? ''
     const align = Object.hasOwn(ALIGNMENTS, jc) ? ALIGNMENTS[jc] : undefined
-    if (align) block.style.setProperty('text-align', align)
+    const spacing = child(pPr, NS.w, 'spacing')
+    const rule = wAttr(spacing, 'lineRule')
+    const lineHeight =
+      rule === null || rule === 'auto' ? LINE_HEIGHTS.get(wAttr(spacing, 'line') ?? '') : undefined
+    const text = (): HTMLElement => {
+      const block = this.doc.createElement(heading ? `h${heading}` : 'p')
+      if (align) block.style.setProperty('text-align', align)
+      if (lineHeight) block.style.setProperty('line-height', lineHeight)
+      return block
+    }
     if (numId && numId !== '0' && !heading) {
+      const block = text()
+      block.append(...content.childNodes)
       target.listItem(block, numId, ilvl, this.listLevel(numId, ilvl))
-    } else if (style?.listParagraph && !heading && target.continueItem(block)) {
       return
-    } else if (style?.quote) target.quote(block)
-    else target.block(block)
+    }
+    let blocks: HTMLElement[] = []
+    let open: HTMLElement | null = null
+    for (const node of [...content.childNodes]) {
+      if (isImage(node)) {
+        const figure = this.doc.createElement('figure')
+        if (align === 'center' || align === 'right') figure.setAttribute('data-align', align)
+        figure.append(node)
+        blocks.push(figure)
+        open = null
+      } else {
+        if (!open) {
+          open = text()
+          blocks.push(open)
+        }
+        open.append(node)
+      }
+    }
+    if (blocks.length === 0) blocks.push(text())
+    else if (blocks.some((block) => block.localName === 'figure')) {
+      blocks = blocks.filter(
+        (block) => block.localName === 'figure' || (block.textContent ?? '').trim(),
+      )
+    }
+    for (const block of blocks) {
+      if (style?.listParagraph && !heading && target.continueItem(block)) continue
+      if (style?.quote) target.quote(block)
+      else target.block(block)
+    }
   }
 
   private inline(
@@ -514,6 +693,9 @@ class Reader {
     }
     const anchor = this.doc.createElement('a')
     anchor.setAttribute('href', href)
+    if ((wAttr(link, 'tgtFrame') ?? '').toLowerCase() === '_blank') {
+      anchor.setAttribute('target', '_blank')
+    }
     this.inline(link, anchor, inherited, depth)
     target.append(anchor)
   }
@@ -571,6 +753,12 @@ class Reader {
     }
     if (format.highlight) wrap('mark', ['background-color', format.highlight])
     if (format.color) wrap('span', ['color', format.color])
+    const points = pointsOf(format.size, this.paragraphSize)
+    if (points) wrap('span', ['font-size', points])
+    const sameAsDefault =
+      !!format.font && format.font.toLowerCase() === this.styles.defaultFont?.toLowerCase()
+    const family = sameAsDefault ? null : this.fonts(format.font)
+    if (family) wrap('span', ['font-family', family])
     if (format.strike) wrap('s')
     if (format.underline) wrap('u')
     if (format.italic) wrap('em')
@@ -625,11 +813,25 @@ class Reader {
       Math.max(0, Math.round(clampInt(wAttr(column, 'w'), 0, 100_000, 0) / 15)),
     )
     const element = this.doc.createElement('table')
+    const tblPr = child(table, NS.w, 'tblPr')
+    const tableWidth = child(tblPr, NS.w, 'tblW')
+    if (
+      wAttr(tableWidth, 'type') === 'pct' &&
+      ['5000', '100%'].includes(wAttr(tableWidth, 'w') ?? '')
+    ) {
+      element.setAttribute('data-width', 'full')
+    }
+    if (wAttr(child(tblPr, NS.w, 'jc'), 'val') === 'center')
+      element.setAttribute('data-align', 'center')
+    const borders = readBorders(child(tblPr, NS.w, 'tblBorders'))
+    if (borders.border) element.setAttribute('data-border', borders.border)
+    if (borders.color) element.setAttribute('style', `--vive-table-border-color: ${borders.color}`)
     const body = this.doc.createElement('tbody')
     element.append(body)
     const origins = new Map<number, HTMLTableCellElement>()
     const rows = children(table, NS.w, 'tr').filter((row) => child(row, NS.w, 'tc'))
     let widest = 0
+    const stripes: { cell: HTMLTableCellElement; even: boolean; fill: string }[] = []
     rows.forEach((row, rowIndex) => {
       if (!this.visit(depth)) return
       const header = onOff(child(child(row, NS.w, 'trPr'), NS.w, 'tblHeader'))
@@ -662,6 +864,11 @@ class Reader {
           tableCell.setAttribute('data-colwidth', cellWidths.join(','))
         }
         const cellStyle = cellStyleOf(tcPr)
+        stripes.push({
+          cell: tableCell,
+          even: rowIndex % 2 === 1 && !header,
+          fill: (wAttr(child(tcPr, NS.w, 'shd'), 'fill') ?? '').toUpperCase(),
+        })
         if (cellStyle) tableCell.setAttribute('style', cellStyle)
         for (let offset = 0; offset < span; offset++) {
           if (merge) origins.set(column + offset, tableCell)
@@ -678,7 +885,28 @@ class Reader {
       }
       body.append(tableRow)
     })
+    this.stripes(element, stripes)
     target.block(element)
+  }
+
+  private stripes(
+    table: HTMLTableElement,
+    cells: { cell: HTMLTableCellElement; even: boolean; fill: string }[],
+  ): void {
+    const even = cells.filter((entry) => entry.even)
+    const stripe = (entry: { fill: string }): boolean => entry.fill === STRIPE_FILL
+    if (
+      !even.some(stripe) ||
+      !even.every((entry) => entry.fill !== '' && entry.fill !== 'AUTO') ||
+      cells.some((entry) => !entry.even && stripe(entry))
+    ) {
+      return
+    }
+    table.setAttribute('data-striped', 'true')
+    for (const { cell } of even.filter(stripe)) {
+      cell.style.removeProperty('background-color')
+      if (!cell.getAttribute('style')) cell.removeAttribute('style')
+    }
   }
 
   private flatten(container: Element, target: BlockWriter, depth: number): void {
@@ -760,6 +988,8 @@ class BlockWriter {
     if (!top || top.ilvl < ilvl) {
       const list = this.doc.createElement(level.ordered ? 'ol' : 'ul')
       if (level.ordered && level.start !== 1) list.setAttribute('start', String(level.start))
+      if (level.ordered && level.type) list.setAttribute('type', level.type)
+      if (!level.ordered && level.bullet) list.style.setProperty('list-style-type', level.bullet)
       ;(top?.lastItem ?? this.parent).append(list)
       top = { ilvl, numId, ordered: level.ordered, element: list, lastItem: null }
       this.lists.push(top)
@@ -769,6 +999,17 @@ class BlockWriter {
     top.element.append(item)
     top.lastItem = item
   }
+}
+
+function isImage(node: Node): node is Element {
+  if (!(node instanceof Element)) return false
+  if (node.localName === 'img') return true
+  return (
+    node.localName === 'a' &&
+    node.childElementCount === 1 &&
+    node.firstElementChild?.localName === 'img' &&
+    !(node.textContent ?? '').trim()
+  )
 }
 
 function base64(bytes: Uint8Array): string {
@@ -833,7 +1074,7 @@ async function resolveImages(
     }
     if (src) element.setAttribute('src', src)
     else {
-      element.remove()
+      ;(element.closest('figure') ?? element).remove()
       reader.warn('IMAGE_DROPPED')
     }
   }
@@ -891,9 +1132,9 @@ export async function importDocx(file: Blob, options: ImportOptions = {}): Promi
     limits,
     readRelationships(part(relsPath)),
     media,
-    styles.paragraphs,
-    styles.runs,
+    styles,
     readNumbering(part('word/numbering.xml')),
+    fontLookup(options.fontFamilies ?? DEFAULT_FONT_FAMILIES),
   )
   reader.blocks(body, new BlockWriter(reader.doc, reader.doc.body), 0, 0)
   await resolveImages(reader, options, limits)

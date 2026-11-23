@@ -96,3 +96,75 @@ describe('list commands', () => {
     expect(html).toBe('<ul><li><p>a</p></li></ul>')
   })
 })
+
+describe('list styles', () => {
+  it('writes start before type and omits the defaults', async () => {
+    const editor = await mount({ content: '<ol><li><p>x</p></li></ol>' })
+    editor.commands.setTextSelection(3)
+
+    const results = [editor.commands.setListStart(3), editor.commands.setListType('A')]
+
+    expect(results).toEqual([true, true])
+    expect(editor.getHTML()).toBe('<ol start="3" type="A"><li><p>x</p></li></ol>')
+    expect(editor.query.listStyle()).toEqual({ kind: 'ordered', type: 'A', start: 3 })
+  })
+
+  it('drops type 1 and start 1 and keeps start 0', async () => {
+    const editor = await mount({
+      content:
+        '<ol type="1" start="1"><li><p>a</p></li></ol><ol start="0" type="i"><li><p>b</p></li></ol>',
+    })
+
+    expect(editor.getHTML()).toBe(
+      '<ol><li><p>a</p></li></ol><ol start="0" type="i"><li><p>b</p></li></ol>',
+    )
+  })
+
+  it('reads the list style type of pasted lists and drops unknown values', async () => {
+    const editor = await mount({
+      content:
+        '<ol style="list-style-type: upper-roman"><li><p>a</p></li></ol><ol type="x" start="-2"><li><p>b</p></li></ol><ul style="list-style-type: SQUARE"><li><p>c</p></li></ul><ul style="list-style-type: lower-greek"><li><p>d</p></li></ul>',
+    })
+
+    expect(editor.getHTML()).toBe(
+      '<ol type="I"><li><p>a</p></li></ol><ol><li><p>b</p></li></ol><ul style="list-style-type: square;"><li><p>c</p></li></ul><ul><li><p>d</p></li></ul>',
+    )
+  })
+
+  it('sets and removes the bullet style', async () => {
+    const editor = await mount({ content: '<ul><li><p>x</p></li></ul>' })
+    editor.commands.setTextSelection(3)
+
+    editor.commands.setBulletStyle('circle')
+    const styled = editor.getHTML()
+    const query = editor.query.listStyle()
+    editor.commands.setBulletStyle(null)
+
+    expect(styled).toBe('<ul style="list-style-type: circle;"><li><p>x</p></li></ul>')
+    expect(query).toEqual({ kind: 'bullet', style: 'circle' })
+    expect(editor.getHTML()).toBe('<ul><li><p>x</p></li></ul>')
+  })
+
+  it('refuses invalid values and commands for the other list kind', async () => {
+    const editor = await mount({ content: '<ul><li><p>x</p></li></ul><p>y</p>' })
+    editor.commands.setTextSelection(3)
+
+    const results = [
+      editor.commands.setListType('a'),
+      editor.commands.setListStart(2),
+      editor.commands.setBulletStyle('dash' as 'disc'),
+    ]
+    editor.commands.setTextSelection(8)
+    const outside = [editor.commands.setBulletStyle('square'), editor.query.listStyle()]
+
+    expect(results).toEqual([false, false, false])
+    expect(outside).toEqual([false, null])
+  })
+
+  it.each([-1, 1.5, Number.NaN, 100000])('refuses the start %s', async (start) => {
+    const editor = await mount({ content: '<ol><li><p>x</p></li></ol>' })
+    editor.commands.setTextSelection(3)
+
+    expect(editor.commands.setListStart(start)).toBe(false)
+  })
+})

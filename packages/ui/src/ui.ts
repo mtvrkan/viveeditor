@@ -3,6 +3,7 @@ import { createAutosave } from './autosave.js'
 import { createBlockControl } from './blocks.js'
 import { createBubble } from './bubble.js'
 import { commandAccess } from './commands.js'
+import { bindContextMenu } from './context-trigger.js'
 import { createCountControl } from './count-control.js'
 import { createDockMenus } from './dock-menus.js'
 import { h, placeInDock } from './dom.js'
@@ -111,6 +112,30 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     report,
   })
 
+  const contextMenu = bindContextMenu({
+    mode: options.contextMenu ?? 'objects',
+    editor,
+    commands,
+    listen,
+    load: formatTools.loadKit,
+    create: (kit, container) =>
+      kit.createContextMenu({
+        editor,
+        commands,
+        messages,
+        container,
+        announce: host.announce,
+        openPanel: (id) => panels.openPanel(id),
+        openLink: () => panels.openLink(null),
+        onOpen: () => {
+          closeFloating()
+          bubble.hide()
+        },
+        returnToEditor,
+      }),
+    report,
+  })
+
   const fileButton = pill.querySelector<HTMLButtonElement>('[data-tool="file"]')
   const fileMenu = createFileMenu(
     editor,
@@ -204,6 +229,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     link.close(false)
     pasteOptions?.menu.close(false)
     count.close(false)
+    contextMenu.close(false)
     fileMenu.hideNotice()
   }
 
@@ -213,7 +239,15 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     count.panel,
     fileMenu.notice,
   )
-  root.append(bubble.element, ...pasteParts, slash.element, link.element, dock, status)
+  root.append(
+    bubble.element,
+    ...pasteParts,
+    slash.element,
+    link.element,
+    contextMenu.element,
+    dock,
+    status,
+  )
 
   const autosave = options.autosave
     ? createAutosave(editor, { onError: report, ...options.autosave })
@@ -284,7 +318,7 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
 
   const pointer = trackPointer({
     editorDom: editor.dom,
-    floating: [dock, link.element, ...pasteParts],
+    floating: [dock, link.element, contextMenu.element, ...pasteParts],
     listen,
     hideBubble: () => bubble.hide(),
     closeFloating,
@@ -326,7 +360,14 @@ export function createUI(editor: Editor, options: UiOptions = {}): EditorUI {
     plugins.destroy()
     source.destroy()
     fileMenu.destroy()
-    for (const element of [bubble.element, ...pasteParts, link.element, dock, status]) {
+    for (const element of [
+      bubble.element,
+      ...pasteParts,
+      link.element,
+      contextMenu.element,
+      dock,
+      status,
+    ]) {
       element.remove()
     }
     root.classList.remove('ve-root')

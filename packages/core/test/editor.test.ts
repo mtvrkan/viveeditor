@@ -287,6 +287,33 @@ describe('setTextSelection command', () => {
   })
 })
 
+describe('selectAt command', () => {
+  it('puts the cursor at the clicked element', async () => {
+    const editor = await mount({ content: '<p>bir</p><p>iki</p>' })
+    const second = editor.dom.querySelectorAll('p')[1] as Element
+
+    const handled = editor.commands.selectAt(second)
+
+    expect(handled).toBe(true)
+    expect(editor.getSelection()).toEqual({ from: 6, to: 6, empty: true })
+  })
+
+  it('keeps a selection that already holds the clicked position', async () => {
+    const editor = await mount({ content: '<p>merhaba dünya</p>' })
+    editor.commands.setTextSelection(1, 14)
+
+    editor.commands.selectAt(editor.dom.querySelector('p') as Element)
+
+    expect(editor.getSelection()).toEqual({ from: 1, to: 14, empty: false })
+  })
+
+  it('refuses a target outside the editor', async () => {
+    const editor = await mount({ content: '<p>a</p>' })
+
+    expect(editor.commands.selectAt(document.createElement('p'))).toBe(false)
+  })
+})
+
 const InlineNote = defineExtension({
   name: 'test-note',
   defaultOptions: {},

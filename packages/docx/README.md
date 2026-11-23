@@ -21,6 +21,8 @@ editor.commands.replaceContent(html)
 const blob = await exportDocx(editor, { title: 'Report' })
 ```
 
+Word fonts are kept only when they match an entry of the editor's font list. If you configured `FontFamily` with your own `fontFamilies`, pass the same list to `importDocx(file, { fontFamilies })`.
+
 Files over 20 MB, password-protected files and files that unpack too large or too deep are refused with a `DocxError`. See [Word (.docx)](https://github.com/mtvrkan/viveeditor#word-docx) for what is kept.
 
 ## License

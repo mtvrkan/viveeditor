@@ -7,6 +7,7 @@ const ALLOWED_TAGS = new Set([...Object.keys(VIVE_PROFILE.elements), 'iframe'])
 const EMBED_HOSTS = Object.values(VIVE_PROFILE.embedProviders).map(
   (rule) => `https://${rule.host}/`,
 )
+const UNSAFE_STYLE = /url\(|var\(|attr\(|env\(|expression|\\/i
 const UNSAFE_URL = /^\s*(?:javascript|vbscript|data:(?!image\/(?:png|jpeg|gif|webp|avif);))/i
 
 export function unsafeParts(html: string): string[] {
@@ -22,6 +23,15 @@ export function unsafeParts(html: string): string[] {
       }
       for (const { name, value } of child.attrs) {
         if ((name === 'href' || name === 'src') && UNSAFE_URL.test(value)) problems.push(value)
+        if (name === 'style' && UNSAFE_STYLE.test(value)) problems.push(`style ${value}`)
+        if (name === 'ismap' || name === 'usemap') problems.push(`image map on ${child.tagName}`)
+      }
+      if (child.tagName === 'a') {
+        const attribute = (wanted: string) =>
+          child.attrs.find((entry) => entry.name === wanted)?.value
+        const target = attribute('target')
+        if (target !== undefined && target !== '_blank') problems.push(`target ${target}`)
+        if (!(attribute('rel') ?? '').split(' ').includes('noopener')) problems.push('link rel')
       }
       if (child.tagName === 'iframe') {
         const src = child.attrs.find((attribute) => attribute.name === 'src')?.value ?? ''

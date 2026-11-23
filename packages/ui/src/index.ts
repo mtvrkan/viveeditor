@@ -26,4 +26,4 @@ export { type Locale, MESSAGES, type MessageKey, type Messages, resolveLocale } 
 export type { SlashEntry, UiPlugin, UiPluginHost, UiPluginInstance } from './plugins.js'
 export { type PrintOptions, printableHtml, printDocument } from './print.js'
 export { createUI } from './ui.js'
-export type { EditorUI, UiOptions, UiTheme } from './ui-options.js'
+export type { ContextMenuMode, EditorUI, UiOptions, UiTheme } from './ui-options.js'

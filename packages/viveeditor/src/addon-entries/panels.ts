@@ -1,8 +1,11 @@
 import {
   createCharPanel,
   createCheckPanel,
+  createContextMenu,
   createEmbedPanel,
+  createFontSizePanel,
   createImagePanel,
+  createListStylePanel,
   createOutlinePanel,
   createSearchPanel,
   createShortcutsPanel,
@@ -20,8 +23,11 @@ if (typeof register === 'function') {
   register('panels', __VIVE_VERSION__, {
     createCharPanel,
     createCheckPanel,
+    createContextMenu,
     createEmbedPanel,
+    createFontSizePanel,
     createImagePanel,
+    createListStylePanel,
     createOutlinePanel,
     createSearchPanel,
     createShortcutsPanel,

@@ -8,6 +8,9 @@ const RGB =
 const HSL =
   /^hsla?\([\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?(?:deg)?[\t\n\f\r ]*,?[\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?%[\t\n\f\r ]*,?[\t\n\f\r ]*[0-9]{1,3}(?:\.[0-9]+)?%[\t\n\f\r ]*(?:[,/][\t\n\f\r ]*([0-9.]+%?)[\t\n\f\r ]*)?\)$/i
 const PIXELS = /^([0-9]{1,5})px$/
+const POINTS = /^([0-9]{1,2})(?:\.([05]))?pt$/
+const FAMILY_PART = /^(?:'[A-Za-z][A-Za-z0-9 -]*'|[A-Za-z][A-Za-z0-9 -]*)$/
+const MAX_FAMILY_BYTES = 64
 const DIGITS = /^[0-9]{1,5}$/
 const LANGUAGE = /^[a-z0-9][a-z0-9+#.-]{0,31}$/i
 const HTTPS_URL =
@@ -139,7 +142,45 @@ export function cleanColor(input: string): string | null {
   return NAMED_COLORS.has(lower) ? lower : null
 }
 
-function styleValue(property: string, value: string): string | null {
+export type FontFamilies = ReadonlyMap<string, string>
+
+const familyKey = (value: string): string =>
+  lowerAscii(value)
+    .replace(/["']/g, '')
+    .split(',')
+    .map((part) => trimAscii(part).replace(SPACE, ' '))
+    .join(',')
+
+export function fontFamilyMap(list: readonly string[]): FontFamilies {
+  const map = new Map<string, string>()
+  for (const entry of list) {
+    const parts = typeof entry === 'string' ? entry.split(',').map(trimAscii) : []
+    if (
+      parts.length === 0 ||
+      byteLength(entry) > MAX_FAMILY_BYTES ||
+      !parts.every((part) => FAMILY_PART.test(part))
+    ) {
+      throw new TypeError('Each font family must be a comma-separated list of plain family names.')
+    }
+    const canonical = parts.join(', ')
+    map.set(familyKey(canonical), canonical)
+  }
+  return map
+}
+
+export const DEFAULT_FONT_FAMILIES: FontFamilies = fontFamilyMap(VIVE_PROFILE.fontFamilies)
+
+export function cleanFontSize(value: string): string | null {
+  const step = lowerAscii(value)
+  if (VIVE_PROFILE.fontSizes.includes(step)) return step
+  const points = POINTS.exec(step)
+  if (!points) return null
+  const halves = Number(points[1]) * 2 + (points[2] === '5' ? 1 : 0)
+  if (halves < limits.minFontSizePt * 2 || halves > limits.maxFontSizePt * 2) return null
+  return `${Math.floor(halves / 2)}${halves % 2 === 1 ? '.5' : ''}pt`
+}
+
+function styleValue(property: string, value: string, fonts: FontFamilies): string | null {
   if (property === 'text-align') {
     const align = lowerAscii(value)
     return VIVE_PROFILE.textAlign.includes(align) ? align : null
@@ -148,18 +189,34 @@ function styleValue(property: string, value: string): string | null {
     const align = lowerAscii(value)
     return VIVE_PROFILE.verticalAlign.includes(align) ? align : null
   }
-  if (property === 'color' || property === 'background-color') return cleanColor(value)
-  if (property === 'font-size' || property === 'margin-inline-start') {
-    const step = lowerAscii(value)
-    const allowed = property === 'font-size' ? VIVE_PROFILE.fontSizes : VIVE_PROFILE.indents
-    return allowed.includes(step) ? step : null
+  if (
+    property === 'color' ||
+    property === 'background-color' ||
+    property === '--vive-table-border-color'
+  ) {
+    return cleanColor(value)
   }
+  if (property === 'font-size') return cleanFontSize(value)
+  if (property === 'margin-inline-start') {
+    const step = lowerAscii(value)
+    return VIVE_PROFILE.indents.includes(step) ? step : null
+  }
+  if (property === 'line-height') return VIVE_PROFILE.lineHeights.includes(value) ? value : null
+  if (property === 'list-style-type') {
+    const style = lowerAscii(value)
+    return VIVE_PROFILE.bulletStyles.includes(style) ? style : null
+  }
+  if (property === 'font-family') return fonts.get(familyKey(value)) ?? null
   const pixels = PIXELS.exec(value)
   const number = pixels ? Number(pixels[1]) : 0
   return number > 0 && number <= limits.maxTableWidth ? `${number}px` : null
 }
 
-export function cleanStyle(value: string, allowed: readonly string[]): string | null {
+export function cleanStyle(
+  value: string,
+  allowed: readonly string[],
+  fonts: FontFamilies = DEFAULT_FONT_FAMILIES,
+): string | null {
   if (byteLength(value) > allowed.length * (limits.maxStyleValueLength + 32)) return null
   const lower = lowerAscii(value)
   if (BANNED_STYLE.some((banned) => lower.includes(banned))) return null
@@ -171,7 +228,7 @@ export function cleanStyle(value: string, allowed: readonly string[]): string | 
     const raw = trimAscii(declaration.slice(colon + 1))
     if (!allowed.includes(property) || result.has(property)) continue
     if (byteLength(raw) > limits.maxStyleValueLength) continue
-    const clean = styleValue(property, raw)
+    const clean = styleValue(property, raw, fonts)
     if (clean !== null) result.set(property, clean)
   }
   return result.size > 0

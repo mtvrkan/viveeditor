@@ -1,3 +1,5 @@
+import { isAllowedUrl } from '@viveeditor/core'
+
 export interface ImageSourcePolicy {
   allowBase64: boolean
   maxBase64Length: number
@@ -15,6 +17,7 @@ export interface ImageAttributes {
   height?: number | null
   caption?: string | null
   align?: ImageAlign | null
+  href?: string | null
 }
 
 export interface CleanImage {
@@ -25,6 +28,7 @@ export interface CleanImage {
   height: number | null
   caption: string | null
   align: ImageAlign | null
+  href: string | null
 }
 
 const ALIGNS: readonly unknown[] = ['left', 'center', 'right']
@@ -118,6 +122,12 @@ export function cleanText(value: unknown): string | null {
     .slice(0, MAX_TEXT_LENGTH)
 }
 
+export function cleanImageHref(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const href = value.trim()
+  return href.length <= MAX_URL_LENGTH && isAllowedUrl(href) ? href : null
+}
+
 export function cleanDimension(value: unknown): number | null {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? Math.min(MAX_DIMENSION, Math.max(1, Math.round(value))) : null
@@ -139,5 +149,6 @@ export function cleanImage(attrs: Record<string, unknown>, policy: ImageSourcePo
     height: cleanDimension(attrs.height),
     caption: cleanText(attrs.caption) || null,
     align: cleanAlign(attrs.align),
+    href: cleanImageHref(attrs.href),
   }
 }

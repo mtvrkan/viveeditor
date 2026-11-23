@@ -12,54 +12,106 @@ export const FONT_SIZES: Readonly<Record<FontSizeStep, string>> = {
   huge: '1.5em',
 }
 
-const STEPS: readonly (FontSizeStep | null)[] = ['tiny', 'small', null, 'big', 'huge']
+export const MIN_FONT_POINTS = 6
+export const MAX_FONT_POINTS = 96
+export const FONT_POINT_PRESETS: readonly number[] = [
+  8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72,
+]
+
+const STEP_POINTS: Readonly<Record<FontSizeStep, number>> = {
+  tiny: 9,
+  small: 10.5,
+  big: 15,
+  huge: 18,
+}
+const BASE_POINTS = 12
+const POINTS = /^([0-9]{1,2})(?:\.([05]))?pt$/
 
 declare module '@viveeditor/core' {
   interface CommandRegistry {
-    setFontSize: (size: FontSizeStep) => Command
+    setFontSize: (size: FontSizeStep | number | string) => Command
     unsetFontSize: () => Command
     stepFontSize: (direction: 1 | -1) => Command
   }
   interface QueryRegistry {
-    fontSize: () => FontSizeStep | null
+    fontSize: () => string | null
+    fontSizePoints: () => number | null
   }
 }
+
+const lowerAscii = (value: string): string =>
+  value.replace(/[A-Z]/g, (letter) => letter.toLowerCase())
+
+const trimAscii = (value: string): string => value.replace(/^[\t\n\f\r ]+|[\t\n\f\r ]+$/g, '')
 
 const isFontSize = (value: unknown): value is FontSizeStep =>
   typeof value === 'string' && Object.hasOwn(FONT_SIZES, value)
 
-function sizeOf(value: string): FontSizeStep | false {
-  const clean = value.trim().toLowerCase()
-  const match = Object.entries(FONT_SIZES).find(([, em]) => em === clean)
-  return match ? (match[0] as FontSizeStep) : false
+const pointString = (halves: number): string =>
+  `${Math.floor(halves / 2)}${halves % 2 === 1 ? '.5' : ''}pt`
+
+const inRange = (halves: number): boolean =>
+  halves >= MIN_FONT_POINTS * 2 && halves <= MAX_FONT_POINTS * 2
+
+export function parseFontPoints(value: string): string | null {
+  const match = POINTS.exec(lowerAscii(trimAscii(value)))
+  if (!match) return null
+  const halves = Number(match[1]) * 2 + (match[2] === '5' ? 1 : 0)
+  return inRange(halves) ? pointString(halves) : null
 }
 
-function currentSize(state: EditorState, type: MarkType): FontSizeStep | null {
+function pointsFromNumber(value: number): string | null {
+  if (!Number.isFinite(value)) return null
+  const halves = Math.round(value * 2)
+  return inRange(halves) ? pointString(halves) : null
+}
+
+function sizeOf(value: string): string | false {
+  const clean = lowerAscii(trimAscii(value))
+  const step = Object.entries(FONT_SIZES).find(([, em]) => em === clean)
+  if (step) return step[0]
+  return parseFontPoints(value) ?? false
+}
+
+function normalizeSize(size: unknown): string | null {
+  if (typeof size === 'number') return pointsFromNumber(size)
+  if (typeof size !== 'string') return null
+  if (isFontSize(size)) return size
+  return parseFontPoints(size)
+}
+
+function pointsOf(size: unknown): number | null {
+  if (isFontSize(size)) return STEP_POINTS[size]
+  if (typeof size !== 'string') return null
+  const canonical = parseFontPoints(size)
+  return canonical === null ? null : Number(canonical.slice(0, -2))
+}
+
+function currentSize(state: EditorState, type: MarkType): string | null {
   const { empty, $from, from, to } = state.selection
   if (empty) {
-    const size = type.isInSet(state.storedMarks ?? $from.marks())?.attrs.size
-    return isFontSize(size) ? size : null
+    return normalizeSize(type.isInSet(state.storedMarks ?? $from.marks())?.attrs.size)
   }
-  let found: FontSizeStep | null = null
+  let found: string | null = null
   let seen = false
   state.doc.nodesBetween(from, to, (node) => {
     if (seen || !node.isText) return !seen
     seen = true
-    const size = type.isInSet(node.marks)?.attrs.size
-    found = isFontSize(size) ? size : null
+    found = normalizeSize(type.isInSet(node.marks)?.attrs.size)
     return false
   })
   return found
 }
 
-function apply(type: MarkType, size: FontSizeStep | null): Command {
-  return size ? setMark(type, { size }) : unsetMark(type)
-}
-
 function step(type: MarkType, direction: 1 | -1): Command {
   return (state, dispatch) => {
-    const next = STEPS[STEPS.indexOf(currentSize(state, type)) + direction]
-    return next === undefined ? false : apply(type, next)(state, dispatch)
+    const current = pointsOf(currentSize(state, type)) ?? BASE_POINTS
+    const next =
+      direction === 1
+        ? FONT_POINT_PRESETS.find((points) => points > current)
+        : [...FONT_POINT_PRESETS].reverse().find((points) => points < current)
+    const size = next === undefined ? null : pointsFromNumber(next)
+    return size === null ? false : setMark(type, { size })(state, dispatch)
   }
 }
 
@@ -79,21 +131,26 @@ export const FontSize: Extension<Record<string, never>> = defineExtension({
         },
       ],
       toDOM: (mark) => {
-        const em = isFontSize(mark.attrs.size) ? FONT_SIZES[mark.attrs.size] : null
-        return ['span', em ? { style: `font-size: ${em}` } : {}, 0]
+        const size = normalizeSize(mark.attrs.size)
+        const css = size === null ? null : isFontSize(size) ? FONT_SIZES[size] : size
+        return ['span', css ? { style: `font-size: ${css}` } : {}, 0]
       },
     },
   }),
   commands: ({ schema }) => {
     const type = getMarkType(schema, 'fontSize')
     return {
-      setFontSize: (size: FontSizeStep) => (isFontSize(size) ? apply(type, size) : () => false),
+      setFontSize: (size: FontSizeStep | number | string) => {
+        const normalized = normalizeSize(size)
+        return normalized === null ? () => false : setMark(type, { size: normalized })
+      },
       unsetFontSize: () => unsetMark(type),
       stepFontSize: (direction: 1 | -1) => step(type, direction),
     }
   },
   queries: ({ schema }) => ({
     fontSize: (state) => currentSize(state, getMarkType(schema, 'fontSize')),
+    fontSizePoints: (state) => pointsOf(currentSize(state, getMarkType(schema, 'fontSize'))),
   }),
   keymap: ({ schema }) => {
     const type = getMarkType(schema, 'fontSize')

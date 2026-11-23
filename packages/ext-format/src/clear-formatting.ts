@@ -63,7 +63,7 @@ function clearFormatting(options: ClearFormattingOptions): Command {
 
 export const ClearFormatting: Extension<ClearFormattingOptions> = defineExtension({
   name: 'clearFormatting',
-  defaultOptions: { keepMarks: ['link'], blockAttributes: ['textAlign', 'indent'] },
+  defaultOptions: { keepMarks: ['link'], blockAttributes: ['textAlign', 'indent', 'lineHeight'] },
   commands: ({ options }) => ({
     clearFormatting: () => clearFormatting(options),
   }),

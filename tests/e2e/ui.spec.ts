@@ -66,6 +66,27 @@ test('closes the slash menu on Escape and keeps the typed text', async ({ page }
   await expect(output(page)).toHaveText('<p>/</p>')
 })
 
+test('opens a link in a new tab and turns it off again', async ({ page }) => {
+  await openEmpty(page)
+  await page.keyboard.type('kurulum')
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.press('ControlOrMeta+k')
+  const dialog = page.getByRole('dialog', { name: 'Bağlantıyı düzenle' })
+
+  await dialog.getByRole('textbox', { name: 'Bağlantı adresi' }).fill('viveeditor.dev')
+  await dialog.getByRole('checkbox', { name: 'Yeni sekmede aç' }).check()
+  await dialog.getByRole('button', { name: 'Uygula' }).click()
+  await expect(output(page)).toContainText('target="_blank"')
+
+  await page.keyboard.press('ControlOrMeta+k')
+  await expect(dialog.getByRole('checkbox', { name: 'Yeni sekmede aç' })).toBeChecked()
+  await dialog.getByRole('checkbox', { name: 'Yeni sekmede aç' }).uncheck()
+  await dialog.getByRole('button', { name: 'Uygula' }).click()
+
+  await expect(output(page)).toContainText('href="https://viveeditor.dev"')
+  await expect(output(page)).not.toContainText('target=')
+})
+
 test('refuses a javascript: link and accepts a bare domain', async ({ page }) => {
   await openEmpty(page)
   await page.keyboard.type('kurulum')
@@ -93,6 +114,13 @@ test('moves focus into the toolbar with Alt+F10 and back with Escape', async ({ 
   const first = toolbar(page).locator('button[tabindex="0"]')
   await expect(first).toBeFocused()
   await page.keyboard.press('ArrowRight')
+  for (const name of [/^Yazı tipi/, /^Yazı boyutu/]) {
+    const control = toolbar(page).getByRole('button', { name })
+    if (await control.isVisible()) {
+      await expect(control).toBeFocused()
+      await page.keyboard.press('ArrowRight')
+    }
+  }
   await expect(toolbar(page).getByRole('button', { name: /^Kalın/ })).toBeFocused()
   await page.keyboard.press('Escape')
 
@@ -157,4 +185,47 @@ test('edits the HTML source, drops unsafe markup and undoes the change in one st
   await expect(output(page)).toHaveText('<h2>Başlık</h2><p>yeni</p>')
   await page.keyboard.press('ControlOrMeta+z')
   await expect(output(page)).toHaveText('<p>ilk metin</p>')
+})
+
+async function selectAllSettled(page: Page): Promise<void> {
+  await page.keyboard.press('ControlOrMeta+a')
+  await expect(toolbar(page).locator('[data-tool="table"]')).toHaveAttribute(
+    'aria-disabled',
+    'true',
+  )
+}
+
+test('opens every toolbar popup without a horizontal scrollbar', async ({ page }) => {
+  test.setTimeout(90_000)
+  await openEmpty(page)
+  await page.keyboard.type('taşma denetimi')
+  await selectAllSettled(page)
+  const tools = await toolbar(page)
+    .locator('[aria-haspopup][data-tool]:not([aria-disabled="true"])')
+    .evaluateAll((elements) =>
+      elements
+        .filter((element) => (element as HTMLElement).offsetParent !== null)
+        .map((element) => element.getAttribute('data-tool') ?? ''),
+    )
+  expect(tools.length).toBeGreaterThan(0)
+
+  for (const tool of tools) {
+    await test.step(tool, async () => {
+      const trigger = toolbar(page).locator(`[data-tool="${tool}"]`)
+      if ((await trigger.getAttribute('aria-disabled')) === 'true') return
+      await trigger.click({ timeout: 10_000 })
+      const popup = page.locator('.ve-menu:visible, .ve-panel:visible').first()
+      await expect(popup).toBeVisible()
+      const overflow = await popup.evaluate(
+        (element) => element.scrollWidth - element.clientWidth,
+        undefined,
+        { timeout: 10_000 },
+      )
+      expect(overflow).toBeLessThanOrEqual(0)
+      await page.keyboard.press('Escape')
+      await expect(popup).toBeHidden()
+      await surface(page).click({ timeout: 10_000 })
+      await selectAllSettled(page)
+    })
+  }
 })

@@ -444,3 +444,88 @@ describe('remote images on paste', () => {
     )
   })
 })
+
+describe('linked image', () => {
+  const img =
+    '<img src="https://cdn.example.com/a.png" alt="Cat" loading="lazy" decoding="async" referrerpolicy="no-referrer">'
+
+  it('wraps a plain image in a link with the fixed rel', async () => {
+    const editor = await mount(
+      {},
+      { content: `<img src="https://cdn.example.com/a.png" alt="Cat">` },
+    )
+    selectNode(editor, 0)
+
+    const set = editor.commands.setImageLink('https://example.com')
+
+    expect(set).toBe(true)
+    expect(editor.getHTML()).toBe(
+      `<a rel="noopener noreferrer nofollow" href="https://example.com">${img}</a>`,
+    )
+    expect(editor.query.selectedImage()?.href).toBe('https://example.com')
+  })
+
+  it('puts the link inside the figure before the caption', async () => {
+    const html = `<figure data-align="center"><a rel="noopener noreferrer nofollow" href="/about">${img}</a><figcaption>Kedi</figcaption></figure>`
+
+    const editor = await mount({}, { content: html })
+
+    expect(editor.getHTML()).toBe(html)
+  })
+
+  it('reads a linked image and removes the link with null', async () => {
+    const editor = await mount(
+      {},
+      {
+        content: `<a href="mailto:a@example.com" target="_blank"> <img src="https://cdn.example.com/a.png" alt="Cat"> </a>`,
+      },
+    )
+    const parsed = editor.getHTML()
+    selectNode(editor, 0)
+
+    editor.commands.setImageLink(null)
+
+    expect(parsed).toBe(
+      `<a rel="noopener noreferrer nofollow" href="mailto:a@example.com">${img}</a>`,
+    )
+    expect(editor.getHTML()).toBe(img)
+  })
+
+  it('drops a dangerous link but keeps the image', async () => {
+    const editor = await mount(
+      {},
+      {
+        content:
+          '<a href="javascript:alert(1)"><img src="https://cdn.example.com/a.png" alt="Cat"></a>',
+      },
+    )
+
+    expect(editor.getHTML()).toBe(img)
+  })
+
+  it('refuses a dangerous link and a missing image selection', async () => {
+    const editor = await mount(
+      {},
+      { content: `<p>a</p><img src="https://cdn.example.com/a.png" alt="Cat">` },
+    )
+    const withoutImage = editor.commands.setImageLink('https://example.com')
+    selectNode(editor, 3)
+
+    const dangerous = editor.commands.setImageLink('javascript:alert(1)')
+
+    expect([withoutImage, dangerous]).toEqual([false, false])
+    expect(editor.getHTML()).toBe(`<p>a</p>${img}`)
+  })
+
+  it('keeps the editor view free of a navigating anchor', async () => {
+    const editor = await mount(
+      {},
+      {
+        content: `<a href="https://example.com"><img src="https://cdn.example.com/a.png" alt="Cat"></a>`,
+      },
+    )
+
+    expect(editor.dom.querySelector('.vive-image img')).not.toBeNull()
+    expect(editor.dom.querySelector('a')).toBeNull()
+  })
+})

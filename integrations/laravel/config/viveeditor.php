@@ -8,6 +8,7 @@ return [
         'embeds' => false,
         'allowBase64' => false,
         'allowRelativeImages' => false,
+        'fontFamilies' => null,
     ],
 
 ];

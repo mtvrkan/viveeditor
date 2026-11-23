@@ -687,5 +687,106 @@
     "name": "a figure inside a footnote is reduced to text",
     "input": "<sup data-footnote><figure data-align=left><figcaption>fn</figcaption></figure></sup>",
     "expected": "<sup data-footnote=\"\">fn</sup>"
+  },
+  {
+    "name": "font size in points",
+    "input": "<p><span style=\"font-size: 14pt\">a</span></p>",
+    "expected": "<p><span style=\"font-size: 14pt\">a</span></p>"
+  },
+  {
+    "name": "font size in half points",
+    "input": "<p><span style=\"font-size: 10.5pt\">a</span></p>",
+    "expected": "<p><span style=\"font-size: 10.5pt\">a</span></p>"
+  },
+  {
+    "name": "font size in points canonical form",
+    "input": "<p><span style=\"font-size: 06.0PT\">a</span></p>",
+    "expected": "<p><span style=\"font-size: 6pt\">a</span></p>"
+  },
+  {
+    "name": "font size points at the limits",
+    "input": "<p><span style=\"font-size: 6pt\">a</span><span style=\"font-size: 96pt\">b</span></p>",
+    "expected": "<p><span style=\"font-size: 6pt\">a</span><span style=\"font-size: 96pt\">b</span></p>"
+  },
+  {
+    "name": "font size points out of range or malformed",
+    "input": "<p><span style=\"font-size: 5.5pt\">a</span><span style=\"font-size: 96.5pt\">b</span><span style=\"font-size: 12.25pt\">c</span><span style=\"font-size: 1e1pt\">d</span><span style=\"font-size: １２pt\">e</span><span style=\"font-size: .5pt\">f</span><span style=\"font-size: +12pt\">g</span><span style=\"font-size: 12 pt\">h</span><span style=\"font-size: 12px\">i</span></p>",
+    "expected": "<p><span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span><span>i</span></p>"
+  },
+  {
+    "name": "nested point font size",
+    "input": "<p><span style=\"font-size: 14pt\">a<span style=\"font-size: 20pt\">b</span></span></p>",
+    "expected": "<p><span style=\"font-size: 14pt\">a<span>b</span></span></p>"
+  },
+  {
+    "name": "cell horizontal alignment",
+    "input": "<table><tbody><tr><td style=\"text-align: Center; background-color: #fff\">a</td><th style=\"text-align: start\">b</th><td style=\"text-align: -webkit-center\">c</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><td style=\"text-align: center; background-color: #ffffff\">a</td><th>b</th><td>c</td></tr></tbody></table>"
+  },
+  {
+    "name": "table properties",
+    "input": "<table data-width=\"FULL\" data-align=\"center\" data-border=\"rows\" data-striped=\"true\" style=\"width: 500px; min-width: 100px; --vive-table-border-color: #ABC\"><tbody><tr><td>a</td></tr></tbody></table>",
+    "expected": "<table data-width=\"full\" data-align=\"center\" data-border=\"rows\" data-striped=\"true\" style=\"min-width: 100px; --vive-table-border-color: #aabbcc\"><tbody><tr><td>a</td></tr></tbody></table>"
+  },
+  {
+    "name": "table properties defaults and bad values",
+    "input": "<table data-width=\"auto\" data-align=\"left\" data-border=\"none\" data-striped=\"false\" style=\"width: 300px; --vive-table-border-color: transparent\"><tbody><tr><td>a</td></tr></tbody></table>",
+    "expected": "<table data-border=\"none\" style=\"width: 300px\"><tbody><tr><td>a</td></tr></tbody></table>"
+  },
+  {
+    "name": "table border colour injection",
+    "input": "<table style=\"--vive-table-border-color: var(--x)\"><tbody><tr><td>a</td></tr></tbody></table><table style=\"--vive-table-border-color: red; --other: url(x)\"><tbody><tr><td>b</td></tr></tbody></table><table style=\"--vive-table-border-color: red; --vive-other: blue\"><tbody><tr><td>c</td></tr></tbody></table>",
+    "expected": "<table><tbody><tr><td>a</td></tr></tbody></table><table><tbody><tr><td>b</td></tr></tbody></table><table style=\"--vive-table-border-color: red\"><tbody><tr><td>c</td></tr></tbody></table>"
+  },
+  {
+    "name": "ordered list types",
+    "input": "<ol type=\"A\" start=\"3\"><li>a</li></ol><ol type=\"a\"><li>b</li></ol><ol type=\"I\"><li>c</li></ol><ol type=\"1\"><li>d</li></ol><ol type=\"x\"><li>e</li></ol>",
+    "expected": "<ol start=\"3\" type=\"A\"><li>a</li></ol><ol type=\"a\"><li>b</li></ol><ol type=\"I\"><li>c</li></ol><ol><li>d</li></ol><ol><li>e</li></ol>"
+  },
+  {
+    "name": "bullet styles",
+    "input": "<ul style=\"list-style-type: Circle\"><li>a</li></ul><ul style=\"list-style-type: '★'\"><li>b</li></ul><ul style=\"list-style-type: symbols(cyclic '*')\"><li>c</li></ul><ul type=\"square\"><li>d</li></ul>",
+    "expected": "<ul style=\"list-style-type: circle\"><li>a</li></ul><ul><li>b</li></ul><ul><li>c</li></ul><ul><li>d</li></ul>"
+  },
+  {
+    "name": "bullet style on a task list",
+    "input": "<ul data-type=\"taskList\" style=\"list-style-type: square\"><li data-type=\"taskItem\" data-checked=\"false\"><p>a</p></li></ul>",
+    "expected": "<ul data-type=\"taskList\"><li data-type=\"taskItem\" data-checked=\"false\"><p>a</p></li></ul>"
+  },
+  {
+    "name": "line height",
+    "input": "<p style=\"line-height: 1.5\">a</p><h2 style=\"text-align: center; line-height: 1.15\">b</h2><p style=\"line-height: 0\">c</p><p style=\"line-height: 1.0\">d</p><p style=\"line-height: 150%\">e</p><p style=\"line-height: normal\">f</p>",
+    "expected": "<p style=\"line-height: 1.5\">a</p><h2 style=\"text-align: center; line-height: 1.15\">b</h2><p>c</p><p>d</p><p>e</p><p>f</p>"
+  },
+  {
+    "name": "font family from the default list",
+    "input": "<p><span style=\"font-family: &quot;Times New Roman&quot;,   times , SERIF\">a</span><span style=\"font-family: georgia, serif\">b</span><span style=\"font-family: monospace\">c</span></p>",
+    "expected": "<p><span style=\"font-family: 'Times New Roman', Times, serif\">a</span><span style=\"font-family: Georgia, serif\">b</span><span style=\"font-family: monospace\">c</span></p>"
+  },
+  {
+    "name": "font family outside the list",
+    "input": "<p><span style=\"font-family: 'Material Icons'\">a</span><span style=\"font-family: Georgia\">b</span><span style=\"font-family: Arial, sans-serif\">c</span></p>",
+    "expected": "<p><span>a</span><span>b</span><span>c</span></p>"
+  },
+  {
+    "name": "font family from a host list",
+    "input": "<p><span style=\"font-family: inter,sans-serif\">a</span><span style=\"font-family: Georgia, serif\">b</span></p>",
+    "options": {
+      "fontFamilies": [
+        "Inter, sans-serif",
+        "'Fira Code', monospace"
+      ]
+    },
+    "expected": "<p><span style=\"font-family: Inter, sans-serif\">a</span><span>b</span></p>"
+  },
+  {
+    "name": "link target other than a new tab",
+    "input": "<p><a href=\"https://example.com\" target=\"_top\" rel=\"opener\">a</a><a href=\"https://example.com\" target=\"_blank\">b</a></p>",
+    "expected": "<p><a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\">a</a><a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\" target=\"_blank\">b</a></p>"
+  },
+  {
+    "name": "linked image without image maps",
+    "input": "<p><a href=\"https://example.com\"><img src=\"https://example.com/a.png\" alt=\"logo\" ismap usemap=\"#m\"></a></p><map name=\"m\"><area href=\"javascript:alert(1)\" alt=\"x\"></map>",
+    "expected": "<p><a rel=\"noopener noreferrer nofollow\" href=\"https://example.com\"><img src=\"https://example.com/a.png\" alt=\"logo\" loading=\"lazy\" decoding=\"async\" referrerpolicy=\"no-referrer\"></a></p>"
   }
 ]

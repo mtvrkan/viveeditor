@@ -22,6 +22,7 @@ interface ImportOptions {
   imagePolicy?: Partial<ImageSourcePolicy>;
   signal?: AbortSignal;
   limits?: Partial<ImportLimits>;
+  fontFamilies?: readonly string[];
 }
 type ImportWarningCode = "HIDDEN_TEXT" | "IMAGE_DROPPED" | "LINK_DROPPED" | "OBJECT_DROPPED" | "NESTING_FLATTENED";
 interface ImportWarning {

@@ -216,7 +216,7 @@ const panels: { name: string; wide?: boolean; open(page: Page): Promise<Locator>
 for (const { name, wide, open } of panels) {
   for (const theme of ['light', 'dark']) {
     test(`${name} has no WCAG violations in the ${theme} theme`, async ({ page }) => {
-      if (wide) await page.setViewportSize({ width: 1600, height: 900 })
+      if (wide) await page.setViewportSize({ width: 1920, height: 900 })
       await page.goto(`/ui.html?theme=${theme}`)
       if (wide) await page.addStyleTag({ content: '.page { max-width: none }' })
       await expect(toolbar(page)).toBeVisible()
@@ -269,7 +269,7 @@ test('reaches every scrolled slash menu option from the keyboard', async ({ page
 })
 
 async function openWide(page: Page): Promise<void> {
-  await page.setViewportSize({ width: 1600, height: 900 })
+  await page.setViewportSize({ width: 1920, height: 900 })
   await page.goto('/ui.html')
   await page.addStyleTag({ content: '.page { max-width: none }' })
   await expect(toolbar(page)).toBeVisible()

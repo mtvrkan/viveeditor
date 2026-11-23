@@ -90,6 +90,26 @@ final class SanitizerTest extends TestCase
         $this->assertSame($clean, Sanitizer::sanitize($clean, ['embeds' => true]));
     }
 
+    public static function badFontFamilies(): array
+    {
+        return [
+            'markup' => [['Arial</style>']],
+            'a CSS function' => [['var(--font)']],
+            'an empty entry' => [['']],
+            'a name with a double quote' => [['"Inter", sans-serif']],
+            'an entry longer than 64 bytes' => [[str_repeat('A', 70) . ', serif']],
+            'a value that is not a string' => [[12]],
+        ];
+    }
+
+    #[DataProvider('badFontFamilies')]
+    public function testRefusesAHostFontFamilyListItCannotRead(array $fontFamilies): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        Sanitizer::sanitize('<p>a</p>', ['fontFamilies' => $fontFamilies]);
+    }
+
     public function testThrowsTooLargeAboveTheByteLimit(): void
     {
         $input = str_repeat('<p>ğ</p>', 10);

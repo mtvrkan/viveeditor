@@ -1,8 +1,8 @@
 ---
 key: toolbar
 title: Toolbar and shortcuts
-description: The floating toolbar, selection bubble, / menu, block menu, outline, accessibility check, full screen, word count, readability score and every keyboard shortcut.
-updated: 2026-11-21
+description: The toolbar, font, size and line spacing controls, list style, right-click menu, / menu, block menu, outline, accessibility check, word count and every keyboard shortcut.
+updated: 2026-11-23
 faq:
   - q: Can I turn the toolbar off completely?
     a: Yes. Pass ui false to the framework components or mountEditor; with the npm packages, do not call createUI. Keyboard shortcuts come from the extensions, so they still work without the toolbar.
@@ -10,9 +10,11 @@ faq:
     a: The score needs at least 10 words. For shorter text the panel says "Write at least 10 words for a score." Words, sentences and reading time are still shown.
   - q: Why is a tool missing?
     a: The toolbar only shows tools whose commands are registered. Without the table extension there is no table button, for example. In narrow spaces some tools move to the More tools menu.
+  - q: Why does right-clicking plain text show the browser's menu?
+    a: So the browser's spelling suggestions stay available. The editor's own menu opens only on tables, images, links, code blocks, videos and formulas. Set contextMenu to 'always' to use it on plain text too.
 ---
 
-The viveEditor interface comes from `@viveeditor/ui`: a floating toolbar below the text, a small bubble when you select text, a block menu that opens with `/`, and a word count. This page explains what each part does, how to turn it off and which keyboard shortcuts exist. The one-script build and the framework components show the toolbar already; with the npm packages you call `createUI` yourself.
+The viveEditor interface comes from `@viveeditor/ui`: a floating toolbar below the text, a small bubble when you select text, a right-click menu for tables, images and other objects, a block menu that opens with `/`, and a word count. This page explains what each part does, how to turn it off and which keyboard shortcuts exist. The one-script build and the framework components show the toolbar already; with the npm packages you call `createUI` yourself.
 
 ## Set up the interface
 
@@ -33,6 +35,7 @@ const ui = createUI(editor, { locale: 'en', theme: 'auto' })
 | `readability` | `'atesman'`, `'flesch'` or `false`. The default follows the language. |
 | `bubble` | `false` turns off the selection bubble. |
 | `slash` | `false` turns off the `/` menu. |
+| `contextMenu` | `'objects'` (default) opens the editor's menu when you right-click a table, image, link, code block, video or formula; `'always'` opens it on plain text too; `false` keeps the browser menu everywhere. See [Right-click menu](#right-click-menu). |
 | `source` | `false` removes the HTML source button. |
 | `files` | The File menu; `false` hides it. See [Open, save and print](/en/docs/open-save-print/). |
 | `exclude` | Tool names to leave out, such as `['fullscreen', 'shortcuts']`. |
@@ -44,11 +47,51 @@ const ui = createUI(editor, { locale: 'en', theme: 'auto' })
 
 The toolbar sits below the text and stays at the bottom of the screen while you scroll a long article. On phones it moves above the on-screen keyboard.
 
-From left to right: the block type button; bold, italic, underline, strikethrough, inline code, clear formatting and format painter; text colour, highlight and text style (size, superscript, subscript, letter case); bulleted list, numbered list, task list, quote, table, image, video and special characters; alignment and indent; link and find and replace; undo, redo, File and HTML source; outline, accessibility check, keyboard shortcuts and full screen. The word count sits at the end.
+From left to right: the block type button; font and font size; bold, italic, underline, strikethrough, inline code, clear formatting and format painter; text colour, highlight and text style (superscript, subscript, letter case); bulleted list, numbered list, list style, task list, quote, table, image, video and special characters; alignment and indent, and line spacing; link and find and replace; undo, redo, File and HTML source; outline, accessibility check, keyboard shortcuts and full screen. The word count sits at the end.
 
 Below 560 pixels only bold, italic and link stay in place, and the other tools move to the "More tools" menu. In wider spaces, tools that do not fit move into that menu in a fixed order; the menu shows only the tools that moved.
 
 The HTML source button opens the document's HTML in an editable text area. While it is open the other tools are disabled; when you close it, your changes are applied to the editor.
+
+## Font, size and line spacing
+
+**Font** opens a list of fonts, each shown in its own face; "Default font" removes the font from the selection. The default list has eight families: `serif`, `sans-serif`, `monospace`, `Arial, Helvetica, sans-serif`, `Georgia, serif`, `'Times New Roman', Times, serif`, `'Courier New', Courier, monospace` and `Verdana, Geneva, sans-serif`. To offer your own fonts, configure `FontFamily` from `@viveeditor/ext-format` with `fontFamilies`:
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { FontFamily, formatExtensions } from '@viveeditor/ext-format'
+
+const fontFamilies = ['Inter, sans-serif', 'Georgia, serif', "'Fira Code', monospace"]
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    ...formatExtensions.filter((extension) => extension.name !== 'fontFamily'),
+    FontFamily.configure({ fontFamilies }),
+  ],
+})
+```
+
+Each entry is a comma-separated list of plain family names, such as `Inter, sans-serif` or `'Fira Code', monospace`; an entry with anything else throws a `TypeError` when the editor starts. Only fonts from the list are applied: pasted or loaded text keeps its font only when it matches an entry, and other fonts are dropped.
+
+<Callout type="warn" title="Give the server the same list">
+The server sanitizer keeps only the fonts in its own `fontFamilies` option, which has the same eight families by default. If you change the list in the editor, pass exactly the same list to the sanitizer, or the fonts disappear when the content is saved. See [Server sanitizing](/en/docs/server-sanitizing/).
+</Callout>
+
+In code, `setFontFamily(family)` applies an entry of the list, `unsetFontFamily()` removes the font, `editor.query.fontFamily()` returns the entry at the cursor and `editor.query.fontFamilies()` the configured list.
+
+**Font size** shows the size at the cursor in points. Its panel has a field where you type a size from 6 to 96 pt (half points such as 10.5 work), − and + buttons that step through the common sizes, a grid of common sizes from 8 to 72 pt and "Default size", which removes the size. <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> step up and down from the text; text without a size counts as 12 pt.
+
+Sizes are saved in points, such as `<span style="font-size: 10.5pt">`. In code, `setFontSize(14)` takes a number from 6 to 96 and rounds it to the nearest half point; `stepFontSize(1)` and `stepFontSize(-1)` move through `FONT_POINT_PRESETS` (8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48 and 72); `unsetFontSize()` removes the size and `editor.query.fontSizePoints()` returns it as a number, or `null`. The older steps `'tiny'`, `'small'`, `'big'` and `'huge'` still work with `setFontSize`, and documents saved with them load unchanged.
+
+**Line spacing** sets the line height of the selected paragraphs and headings: Single (1), 1.15, 1.5, Double (2), or Default, which removes it. It is saved as `line-height` on the paragraph or heading. In code, use `setLineHeight('1' | '1.15' | '1.5' | '2' | null)`; `editor.query.lineHeight()` returns the value at the cursor.
+
+Leave any of these out with `exclude: ['fontFamily', 'fontSize', 'lineHeight']`.
+
+## List style and links
+
+**List style** opens a panel while the cursor is in a list. In a bulleted list it sets the bullet: Filled circle, Hollow circle or Square. In a numbered list it sets the numbering (1, 2, 3; a, b, c; A, B, C; i, ii, iii; I, II, III) and the start number, from 0 to 99999. The group that does not fit the list is disabled. The values are saved as `list-style-type` on `ul` and as `type` and `start` on `ol`. In code, use `setBulletStyle('disc' | 'circle' | 'square' | null)`, `setListType('1' | 'a' | 'A' | 'i' | 'I')` and `setListStart(5)`; `editor.query.listStyle()` returns `{ kind: 'bullet', style }` or `{ kind: 'ordered', type, start }`, or `null` outside a list. `exclude: ['listStyle']` removes the button.
+
+**Link** has an "Open in a new tab" checkbox. Such a link is saved with `target="_blank"`, and every link carries `rel="noopener noreferrer nofollow"`. In code, use `setLink({ href, title, newTab: true })`; `editor.query.link()` returns `{ href, title, newTab }` for the link at the cursor, or `null`.
 
 ## Outline, accessibility check and full screen
 
@@ -73,6 +116,27 @@ Leave out any of these with `exclude: ['outline', 'accessibility', 'shortcuts', 
 ## Selection bubble
 
 When you select text, a small toolbar opens just above the selection. On touch screens it opens below the selection, so your finger does not cover it. It holds bold, italic, link, inline code and clear formatting; plugins such as the [AI assistant](/en/docs/ai-assistant/) add their own buttons. The bubble does not open while an image is selected. <kbd>Esc</kbd> closes it, and `bubble: false` removes it.
+
+## Right-click menu
+
+Right-clicking an object in the text opens a menu with the actions for that object. The editor selects the object first, so the actions apply to what you clicked.
+
+| Object | Menu |
+| --- | --- |
+| Table | "Cell", "Row" and "Column" submenus, "Table properties…" and "Delete table"; see [Tables](/en/docs/tables/) |
+| Image | "Edit image…", Align left, Align center, Align right, "Copy image address", "Delete image" |
+| Link | "Open link" (in a new tab), "Edit link…", "Copy link address", "Remove link" |
+| Code block | "Language" submenu, "Copy code", "Delete code block" |
+| Video | "Edit video…", "Copy link", "Delete" |
+| Formula | "Edit formula…", "Delete" |
+
+- Plain text keeps the browser's own menu, so spelling suggestions stay. With `contextMenu: 'always'` plain text gets the editor's menu as well: Cut, Copy, Bold, Italic, Link and Clear formatting.
+- <kbd>Shift</kbd>+right-click always shows the browser's menu.
+- From the keyboard, <kbd>Shift</kbd>+<kbd>F10</kbd> or the menu key opens the menu for the object at the cursor. <kbd>↑</kbd> and <kbd>↓</kbd> move, <kbd>→</kbd> opens a submenu, <kbd>←</kbd> closes it and <kbd>Esc</kbd> closes the menu.
+- On touch screens the editor leaves the long press to the browser.
+- In a read-only editor only the items that copy or open something appear; tables and formulas keep the browser's menu.
+
+`contextMenu: false` turns the menu off.
 
 ## The / menu
 
@@ -135,8 +199,8 @@ On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd> and <kbd>⌥</kbd> inste
 | Justify | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>J</kbd> |
 | Superscript | <kbd>Ctrl</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>.</kbd> |
 | Subscript | <kbd>Ctrl</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>,</kbd> |
-| Bigger text | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd> |
-| Smaller text | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>,</kbd> |
+| Increase font size (next common size) | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd> |
+| Decrease font size | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>,</kbd> |
 | Increase indent | <kbd>Ctrl</kbd>+<kbd>]</kbd> | <kbd>⌘</kbd>+<kbd>]</kbd> |
 | Decrease indent | <kbd>Ctrl</kbd>+<kbd>[</kbd> | <kbd>⌘</kbd>+<kbd>[</kbd> |
 | Change letter case | <kbd>Shift</kbd>+<kbd>F3</kbd> | <kbd>⇧</kbd>+<kbd>F3</kbd> |
@@ -146,16 +210,17 @@ On a Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd> and <kbd>⌥</kbd> inste
 | Redo | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> or <kbd>Ctrl</kbd>+<kbd>Y</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> or <kbd>⌘</kbd>+<kbd>Y</kbd> |
 | New line in the same paragraph | <kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>⇧</kbd>+<kbd>Enter</kbd> |
 | Move to the toolbar | <kbd>Alt</kbd>+<kbd>F10</kbd> | <kbd>⌥</kbd>+<kbd>F10</kbd> |
+| Open the right-click menu | <kbd>Shift</kbd>+<kbd>F10</kbd> or the menu key | <kbd>⇧</kbd>+<kbd>F10</kbd> |
 | Keyboard shortcut list | <kbd>Alt</kbd>+<kbd>0</kbd> | <kbd>⌥</kbd>+<kbd>0</kbd> |
 | AI assistant | <kbd>Ctrl</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>J</kbd> |
 
-Clear formatting removes bold, italic, underline, strikethrough, inline code, text colour and highlight from the selection and resets the alignment of the selected paragraphs and headings. Links and block types such as headings and lists stay. With only a cursor, the text you type next is plain. `ClearFormatting.configure({ keepMarks: ['link', 'code'] })` from `@viveeditor/ext-format` keeps more marks; the command is `editor.commands.clearFormatting()`.
+Clear formatting removes bold, italic, underline, strikethrough, inline code, text colour, highlight, font, font size, superscript and subscript from the selection and resets the alignment and line spacing of the selected paragraphs and headings. Links and block types such as headings and lists stay. With only a cursor, the text you type next is plain. `ClearFormatting.configure({ keepMarks: ['link', 'code'] })` from `@viveeditor/ext-format` keeps more marks; the command is `editor.commands.clearFormatting()`.
 
 The format painter copies the formatting of the text under the cursor or the start of the selection. Then select other text with the mouse, or with <kbd>Shift</kbd> and the arrow keys, and the formatting is applied as soon as you let go: the target gets the same bold, italic, underline, strikethrough, inline code, colour and highlight, and links stay. The pointer shows a copy cursor while the painter is on; <kbd>Esc</kbd> or a second click on the button turns it off. In code the commands are `copyFormat()`, `applyFormat()` and `cancelFormat()`, and `editor.query.isPaintingFormat()` tells whether it is on.
 
 Paste as plain text drops all formatting from the clipboard and takes the style of the text around the cursor; each line becomes a paragraph. Pasted links do not turn into video embeds and Markdown is not converted. Safari has no built-in <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd>, so the editor reads the clipboard itself and Safari shows a small Paste button to confirm; <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> pastes without that step.
 
-The text style menu sets one of five sizes (very small, small, normal, big, very big), superscript or subscript, and letter case. Sizes are relative (`em`), so they follow the font of the page you publish on. Case change follows the language of the text: Turkish text turns `i` into `İ` and `I` into `ı`. With only a cursor, case change and <kbd>Shift</kbd>+<kbd>F3</kbd> act on the word under the cursor; pressing it again cycles UPPER, lower and Title Case.
+The text style menu sets superscript or subscript and letter case. Font size has its own control (see [Font, size and line spacing](#font-size-and-line-spacing)), so the menu no longer lists sizes and the `fontTiny`, `fontSmall`, `fontNormal`, `fontBig` and `fontHuge` keys of `messages` are gone. Case change follows the language of the text: Turkish text turns `i` into `İ` and `I` into `ı`. With only a cursor, case change and <kbd>Shift</kbd>+<kbd>F3</kbd> act on the word under the cursor; pressing it again cycles UPPER, lower and Title Case.
 
 Indent moves paragraphs and headings in by 2 em steps, up to eight levels; inside lists <kbd>Tab</kbd> still nests the list. Clear formatting resets the indent too.
 

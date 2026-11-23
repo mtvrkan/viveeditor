@@ -201,7 +201,9 @@ async function pickFromMenu(
   await page.locator('[role="menu"]:not([hidden])').getByRole(role, { name: item }).click()
 }
 
-test('makes the selection superscript and bigger from the text style menu', async ({ page }) => {
+test('makes the selection superscript from the text style menu and bigger from the size control', async ({
+  page,
+}) => {
   await page.goto('/ui.html?empty')
   await surface(page).click()
   await page.keyboard.type('E=mc2')
@@ -209,12 +211,34 @@ test('makes the selection superscript and bigger from the text style menu', asyn
 
   await pickFromMenu(page, 'Yazı biçimi', 'menuitemcheckbox', /^Üst simge/)
   await page.keyboard.press('ControlOrMeta+a')
-  await pickFromMenu(page, 'Yazı biçimi', 'menuitemradio', /^Büyük$/)
+  await openTool(page, /^Yazı boyutu/)
+  await page
+    .getByRole('dialog', { name: 'Yazı boyutu' })
+    .getByRole('button', { name: 'Yazı boyutu: 16 pt' })
+    .click()
 
   await expect(output(page)).toHaveText(
-    /^<p><span style="font-size: 1\.25em;?">E=mc<\/span><sup><span style="font-size: 1\.25em;?">2<\/span><\/sup><\/p>$|^<p><span style="font-size: 1\.25em;?">E=mc<sup>2<\/sup><\/span><\/p>$/,
+    /^<p><span style="font-size: 16pt;?">E=mc<\/span><sup><span style="font-size: 16pt;?">2<\/span><\/sup><\/p>$|^<p><span style="font-size: 16pt;?">E=mc<sup>2<\/sup><\/span><\/p>$/,
   )
   await expect(surface(page)).toBeFocused()
+})
+
+test('sets a typed font size in points', async ({ page }) => {
+  await typeAndSelect(page, 'iri yazı')
+
+  await openTool(page, /^Yazı boyutu/)
+  const field = page.getByRole('dialog', { name: 'Yazı boyutu' }).getByLabel('Punto')
+  await expect(field).toBeFocused()
+  await field.fill('18')
+  await field.press('Enter')
+
+  await expect(output(page)).toHaveText(
+    /^<p><span style="font-size: 18pt;?">iri yazı<\/span><\/p>$/,
+  )
+  await expect(toolbar(page).locator('[data-tool="fontSize"]')).toHaveAttribute(
+    'aria-label',
+    'Yazı boyutu: 18 pt',
+  )
 })
 
 test('indents a paragraph with the keyboard and from the alignment menu', async ({ page }) => {
@@ -264,4 +288,63 @@ test('inserts a special character from the panel with the keyboard', async ({ pa
   await expect(output(page)).toHaveText('<p>fiyat ₺</p>')
   await expect(panel).toBeHidden()
   await expect(surface(page)).toBeFocused()
+})
+
+async function openMenuTool(page: Page, name: RegExp): Promise<void> {
+  const button = toolbar(page).getByRole('button', { name })
+  if (await button.isVisible()) await button.click()
+  else await toolbar(page).getByRole('button', { name: 'Diğer araçlar' }).click()
+}
+
+test('changes the font family from the font menu', async ({ page }) => {
+  await typeAndSelect(page, 'yazı tipi')
+
+  await openMenuTool(page, /^Yazı tipi/)
+  await page.getByRole('menuitemradio', { name: 'Georgia' }).click()
+
+  await expect(output(page)).toHaveText(
+    /^<p><span style="font-family: Georgia, serif;?">yazı tipi<\/span><\/p>$/,
+  )
+  const button = toolbar(page).getByRole('button', { name: /^Yazı tipi/ })
+  if (await button.isVisible()) await expect(button).toHaveAccessibleName('Yazı tipi: Georgia')
+})
+
+test('sets the line spacing from the line spacing menu', async ({ page }) => {
+  await typeAndSelect(page, 'satır aralığı')
+
+  await openMenuTool(page, /^Satır aralığı/)
+  await page.getByRole('menuitemradio', { name: '1,5' }).click()
+
+  await expect(output(page)).toHaveText(/^<p style="line-height: 1\.5;?">satır aralığı<\/p>$/)
+})
+
+test('styles bulleted and numbered lists from the list style panel', async ({ page }) => {
+  await page.goto('/ui.html?empty')
+  await surface(page).click()
+  await page.keyboard.type('- madde')
+
+  await openTool(page, /^Liste stili/)
+  await page
+    .getByRole('dialog', { name: 'Liste stili' })
+    .getByRole('button', { name: 'Kare' })
+    .click()
+  await expect(output(page)).toHaveText(
+    /^<ul style="list-style-type: square;?"><li><p>madde<\/p><\/li><\/ul>$/,
+  )
+
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.press('Backspace')
+  await page.keyboard.press('Backspace')
+  await page.keyboard.type('1. sıra')
+  await openTool(page, /^Liste stili/)
+  const panel = page.getByRole('dialog', { name: 'Liste stili' })
+  await panel.getByRole('button', { name: 'A, B, C', exact: true }).click()
+  await openTool(page, /^Liste stili/)
+  await panel.getByLabel('Başlangıç numarası').fill('x')
+  await page.keyboard.press('Enter')
+  await expect(panel.getByLabel('Başlangıç numarası')).toHaveAttribute('aria-invalid', 'true')
+  await panel.getByLabel('Başlangıç numarası').fill('3')
+  await page.keyboard.press('Enter')
+
+  await expect(output(page)).toHaveText('<ol start="3" type="A"><li><p>sıra</p></li></ol>')
 })

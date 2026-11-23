@@ -198,7 +198,11 @@ describe('cell style', () => {
     placeCursor(editor, 4)
     expect(editor.commands.setCellBackground('rgb(255, 242, 168)')).toBe(true)
     expect(editor.commands.setCellVerticalAlign('middle')).toBe(true)
-    expect(editor.query.cellStyle()).toEqual({ background: '#fff2a8', verticalAlign: 'middle' })
+    expect(editor.query.cellStyle()).toEqual({
+      background: '#fff2a8',
+      verticalAlign: 'middle',
+      textAlign: null,
+    })
     expect(editor.getHTML()).toMatch(
       /<td style="background-color: (#fff2a8|rgb\(255, 242, 168\)); vertical-align: middle;?"><p>a<\/p><\/td>/,
     )
@@ -213,7 +217,11 @@ describe('cell style', () => {
     expect(editor.can.setCellVerticalAlign('baseline' as 'middle')).toBe(false)
     editor.commands.setCellBackground('#cde8ff')
     editor.commands.setCellBackground(null)
-    expect(editor.query.cellStyle()).toEqual({ background: null, verticalAlign: null })
+    expect(editor.query.cellStyle()).toEqual({
+      background: null,
+      verticalAlign: null,
+      textAlign: null,
+    })
     placeCursor(editor, viewOf(editor).state.doc.content.size - 2)
     expect(editor.can.setCellBackground('#cde8ff')).toBe(false)
     expect(editor.query.cellStyle()).toBeNull()
@@ -227,5 +235,253 @@ describe('cell style', () => {
     const html = editor.getHTML()
     expect(html).toMatch(/<td style="background-color: yellow; vertical-align: bottom;?">/)
     expect(html).toContain('<td><p>b</p></td>')
+  })
+})
+
+const hex = (part: string): string => Number(part).toString(16).padStart(2, '0')
+
+const clean = (html: string): string =>
+  html
+    .replace(
+      /rgb\((\d+), (\d+), (\d+)\)/g,
+      (_match, red, green, blue) => `#${hex(red)}${hex(green)}${hex(blue)}`,
+    )
+    .replace(/;"/g, '"')
+
+function selectCells(editor: Editor, anchor: number, head: number): void {
+  const view = viewOf(editor)
+  view.dispatch(view.state.tr.setSelection(CellSelection.create(view.state.doc, anchor, head)))
+}
+
+function selectedCells(editor: Editor): number[] {
+  const { selection } = viewOf(editor).state
+  if (!(selection instanceof CellSelection)) return []
+  const cells: number[] = []
+  selection.forEachCell((_node, position) => {
+    cells.push(position)
+  })
+  return cells
+}
+
+describe('cell text alignment', () => {
+  it('round trips text-align before the other cell styles', async () => {
+    const html =
+      '<table><tbody><tr><td style="text-align: center; background-color: #ffffff"><p>a</p></td><td style="text-align: right; background-color: #aabbcc; vertical-align: middle"><p>b</p></td><td style="text-align: justify"><p>c</p></td></tr></tbody></table>'
+    const editor = await mount({ content: html })
+
+    expect(clean(editor.getHTML())).toBe(
+      '<table><tbody><tr><td style="text-align: center"><p>a</p></td><td style="text-align: right; background-color: #aabbcc; vertical-align: middle"><p>b</p></td><td style="text-align: justify"><p>c</p></td></tr></tbody></table>',
+    )
+  })
+
+  it('reads the align attribute and never writes left or start', async () => {
+    const editor = await mount({
+      content:
+        '<table><tr><td align="right">a</td><td style="text-align: left">b</td><td style="text-align: start">c</td></tr></table>',
+    })
+
+    expect(clean(editor.getHTML())).toBe(
+      '<table><tbody><tr><td style="text-align: right"><p>a</p></td><td><p>b</p></td><td><p>c</p></td></tr></tbody></table>',
+    )
+  })
+
+  it('aligns every cell of a cell selection and reports it in cellStyle', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+    editor.commands.setCellTextAlign('center')
+    selectCells(editor, 2, 19)
+
+    expect(editor.commands.setCellTextAlign('center')).toBe(true)
+    expect(clean(editor.getHTML()).match(/<td style="text-align: center">/g)).toHaveLength(4)
+    expect(editor.query.cellStyle()).toEqual({
+      background: null,
+      verticalAlign: null,
+      textAlign: 'center',
+    })
+  })
+
+  it('colours every cell of a cell selection', async () => {
+    const editor = await mount({ content: grid })
+    selectCells(editor, 2, 7)
+
+    editor.commands.setCellBackground('#CDE8FF')
+
+    expect(clean(editor.getHTML()).match(/background-color: #cde8ff/g)).toHaveLength(2)
+  })
+
+  it('rejects left and unknown alignments', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+
+    expect(editor.can.setCellTextAlign('left' as 'center')).toBe(false)
+    expect(editor.can.setCellTextAlign('javascript:' as 'center')).toBe(false)
+  })
+
+  it('loads old cell styles unchanged', async () => {
+    const html =
+      '<table><tbody><tr><td style="background-color: #fff2a8; vertical-align: bottom"><p>a</p></td></tr></tbody></table>'
+    const editor = await mount({ content: html })
+
+    expect(clean(editor.getHTML())).toBe(html)
+  })
+})
+
+describe('table style', () => {
+  const styled =
+    '<table data-width="full" data-align="center" data-border="rows" data-striped="true" style="min-width: 300px; --vive-table-border-color: #aabbcc"><colgroup><col style="width: 200px"><col style="width: 100px"></colgroup><tbody><tr><td data-colwidth="200"><p>a</p></td><td data-colwidth="100"><p>b</p></td></tr></tbody></table>'
+
+  it('round trips every table attribute in the sanitizer order', async () => {
+    const editor = await mount({ content: styled })
+
+    expect(clean(editor.getHTML())).toBe(styled)
+    placeCursor(editor, 4)
+    expect(editor.query.tableStyle()).toEqual({
+      width: 'full',
+      align: 'center',
+      border: 'rows',
+      striped: true,
+      borderColor: '#aabbcc',
+    })
+  })
+
+  it('writes a fixed width only when the table is not full width', async () => {
+    const editor = await mount({ content: styled })
+    placeCursor(editor, 4)
+
+    editor.commands.setTableWidth(null)
+
+    expect(clean(editor.getHTML())).toContain(
+      'data-striped="true" style="width: 300px; --vive-table-border-color: #aabbcc">',
+    )
+  })
+
+  it('writes nothing for defaults and keeps old tables unchanged', async () => {
+    const editor = await mount({
+      content:
+        '<table data-width="auto" data-align="left" data-border="all" data-striped="false"><tr><td>a</td></tr></table>',
+    })
+    const old =
+      '<table style="width: 160px"><colgroup><col style="width: 160px"></colgroup><tbody><tr><td data-colwidth="160"><p>a</p></td></tr></tbody></table>'
+    const reloaded = await mount({ content: old })
+
+    expect(clean(editor.getHTML())).toBe('<table><tbody><tr><td><p>a</p></td></tr></tbody></table>')
+    expect(clean(reloaded.getHTML())).toBe(old)
+  })
+
+  it('sets each attribute through commands and clears it again', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+
+    editor.commands.setTableWidth('full')
+    editor.commands.setTableAlign('center')
+    editor.commands.setTableBorder('none')
+    editor.commands.setTableStriped(true)
+    editor.commands.setTableBorderColor('#ABC')
+    const set = clean(editor.getHTML())
+    editor.commands.setTableWidth(null)
+    editor.commands.setTableAlign(null)
+    editor.commands.setTableBorder(null)
+    editor.commands.setTableStriped(false)
+    editor.commands.setTableBorderColor(null)
+
+    expect(set).toMatch(
+      /^<table data-width="full" data-align="center" data-border="none" data-striped="true" style="--vive-table-border-color: #aabbcc"><tbody>/,
+    )
+    expect(clean(editor.getHTML())).toBe(grid)
+  })
+
+  it('rejects invalid values', async () => {
+    const editor = await mount({
+      content:
+        '<table data-border="dashed" style="--vive-table-border-color: var(--x)"><tr><td>a</td></tr></table>',
+    })
+    placeCursor(editor, 4)
+
+    expect(clean(editor.getHTML())).toBe('<table><tbody><tr><td><p>a</p></td></tr></tbody></table>')
+    expect(editor.can.setTableBorderColor('javascript:alert(1)')).toBe(false)
+    expect(editor.can.setTableBorderColor('var(--x)')).toBe(false)
+    expect(editor.can.setTableBorder('dashed' as 'rows')).toBe(false)
+    expect(editor.can.setTableAlign('left' as 'center')).toBe(false)
+    expect(editor.can.setTableWidth('auto' as 'full')).toBe(false)
+    expect(editor.can.setTableStriped('yes' as unknown as boolean)).toBe(false)
+  })
+
+  it('stays off outside a table', async () => {
+    const editor = await mount({ content: `${grid}<p>dışarı</p>` })
+    placeCursor(editor, viewOf(editor).state.doc.content.size - 2)
+
+    expect(editor.can.setTableWidth('full')).toBe(false)
+    expect(editor.can.setTableAlign('center')).toBe(false)
+    expect(editor.can.setTableBorder('rows')).toBe(false)
+    expect(editor.can.setTableStriped(true)).toBe(false)
+    expect(editor.can.setTableBorderColor('#aabbcc')).toBe(false)
+    expect(editor.can.selectTable()).toBe(false)
+    expect(editor.can.distributeColumns()).toBe(false)
+    expect(editor.query.tableStyle()).toBeNull()
+  })
+
+  it.each([true, false])(
+    'reflects the attributes on the live table (resizable %s)',
+    async (resizable) => {
+      const editor = await mount({ extensions: [Table.configure({ resizable })], content: grid })
+      placeCursor(editor, 4)
+
+      editor.commands.setTableWidth('full')
+      editor.commands.setTableBorder('rows')
+      editor.commands.setTableStriped(true)
+      editor.commands.setTableBorderColor('#aabbcc')
+      const table = editor.dom.querySelector('table')
+      const live = {
+        width: table?.getAttribute('data-width'),
+        border: table?.getAttribute('data-border'),
+        striped: table?.getAttribute('data-striped'),
+        color: table?.style.getPropertyValue('--vive-table-border-color'),
+      }
+      editor.commands.setTableBorder(null)
+
+      expect(live).toEqual({ width: 'full', border: 'rows', striped: 'true', color: '#aabbcc' })
+      expect(table?.hasAttribute('data-border')).toBe(false)
+      expect(table?.getAttribute('data-width')).toBe('full')
+    },
+  )
+})
+
+describe('table selection', () => {
+  it('selects the row, the column and the whole table', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 9)
+
+    editor.commands.selectRow()
+    const row = selectedCells(editor)
+    placeCursor(editor, 9)
+    editor.commands.selectColumn()
+    const column = selectedCells(editor)
+    editor.commands.selectTable()
+
+    expect(row).toEqual([2, 7])
+    expect(column).toEqual([7, 19])
+    expect(selectedCells(editor)).toEqual([2, 7, 14, 19])
+  })
+})
+
+describe('distributeColumns', () => {
+  it('gives every column the same width and keeps the total', async () => {
+    const editor = await mount({
+      content:
+        '<table><tr><td data-colwidth="200">a</td><td data-colwidth="101">b</td></tr><tr><td colspan="2">c</td></tr></table>',
+    })
+    placeCursor(editor, 4)
+
+    expect(editor.commands.distributeColumns()).toBe(true)
+    expect(clean(editor.getHTML())).toBe(
+      '<table style="width: 301px"><colgroup><col style="width: 151px"><col style="width: 150px"></colgroup><tbody><tr><td data-colwidth="151"><p>a</p></td><td data-colwidth="150"><p>b</p></td></tr><tr><td colspan="2" data-colwidth="151,150"><p>c</p></td></tr></tbody></table>',
+    )
+  })
+
+  it('does nothing when no column has a width', async () => {
+    const editor = await mount({ content: grid })
+    placeCursor(editor, 4)
+
+    expect(editor.commands.distributeColumns()).toBe(false)
   })
 })

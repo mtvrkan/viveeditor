@@ -1,4 +1,4 @@
-import { d as DocumentMessages, t as panel_kit_d_exports } from "./panel-kit.chunk.js";
+import { m as DocumentMessages, t as panel_kit_d_exports } from "./panel-kit.chunk.js";
 import { a as Messages, i as MessageKey, n as Locale, o as resolveLocale, r as MESSAGES } from "./commands.chunk.js";
 import { i as UiPluginInstance, n as UiPlugin, r as UiPluginHost, t as SlashEntry } from "./plugins.chunk.js";
 import { Editor } from "@viveeditor/core";
@@ -38,6 +38,7 @@ interface DocxModule {
     upload?: FileImageUploader;
     allowBase64?: boolean;
     signal?: AbortSignal;
+    fontFamilies?: readonly string[];
   }): Promise<DocxImportResult>;
   exportDocx(editor: Editor, options?: {
     title?: string;
@@ -92,6 +93,7 @@ interface PrintOptions {
 export declare function printableHtml(editor: Editor, options?: PrintOptions): string;
 export declare function printDocument(editor: Editor, options?: PrintOptions): Promise<void>;
 type UiTheme = "light" | "dark" | "auto";
+type ContextMenuMode = "objects" | "always" | false;
 interface UiOptions {
   locale?: string;
   messages?: Partial<Messages & DocumentMessages>;
@@ -99,6 +101,7 @@ interface UiOptions {
   readability?: ReadabilityFormula | false;
   bubble?: boolean;
   slash?: boolean;
+  contextMenu?: ContextMenuMode;
   source?: boolean;
   files?: FileOptions | false;
   plugins?: readonly UiPlugin[];
@@ -115,4 +118,4 @@ interface EditorUI {
   destroy(): void;
 }
 export declare function createUI(editor: Editor, options?: UiOptions): EditorUI;
-export { type Autosave, type AutosaveDraft, type AutosaveOptions, type AutosaveStatus, type DocumentMessages, type DocxModule, type EditorUI, type FileImageUploader, type FileOptions, type Locale, MESSAGES, type MarkdownModule, type MessageKey, type Messages, type PanelKit, type PanelKitLoader, type PanelSource, type PrintOptions, type ReadabilityBand, type ReadabilityFormula, type SlashEntry, type TextMeasure, type UiOptions, type UiPlugin, type UiPluginHost, type UiPluginInstance, type UiTheme, resolveLocale };
+export { type Autosave, type AutosaveDraft, type AutosaveOptions, type AutosaveStatus, type ContextMenuMode, type DocumentMessages, type DocxModule, type EditorUI, type FileImageUploader, type FileOptions, type Locale, MESSAGES, type MarkdownModule, type MessageKey, type Messages, type PanelKit, type PanelKitLoader, type PanelSource, type PrintOptions, type ReadabilityBand, type ReadabilityFormula, type SlashEntry, type TextMeasure, type UiOptions, type UiPlugin, type UiPluginHost, type UiPluginInstance, type UiTheme, resolveLocale };

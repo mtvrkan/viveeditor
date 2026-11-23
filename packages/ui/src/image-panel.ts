@@ -1,6 +1,8 @@
+import { isAllowedUrl } from '@viveeditor/core'
 import type { CommandAccess } from './commands.js'
 import { h, uniqueId } from './dom.js'
 import { icon } from './icons.js'
+import { normalizeHref } from './link-panel.js'
 import type { MessageKey, Messages } from './messages.js'
 import type { Popover } from './popover.js'
 
@@ -16,6 +18,7 @@ interface SelectedImage {
   alt: string | null
   caption?: string | null
   align?: string | null
+  href?: string | null
 }
 
 const ACCEPT = 'image/png,image/jpeg,image/gif,image/webp,image/avif'
@@ -73,6 +76,23 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     type: 'text',
     autocomplete: 'off',
   })
+  const linkHintId = `${id}-link-hint`
+  const link = h('input', {
+    id: `${id}-link`,
+    class: 've-input',
+    type: 'text',
+    inputmode: 'url',
+    autocomplete: 'url',
+    spellcheck: 'false',
+    placeholder: 'https://',
+    'aria-describedby': linkHintId,
+  })
+  const linkHint = h('p', { id: linkHintId, class: 've-hint' })
+  const linkBlock = h('div', { class: 've-image-link' }, [
+    h('label', { class: 've-eyebrow', for: `${id}-link` }, [messages.imageLink]),
+    link,
+    linkHint,
+  ])
   const alignButtons = ALIGNS.map((option) => {
     const button = h('button', { type: 'button', class: 've-quiet', 'aria-pressed': 'false' }, [
       messages[option.label],
@@ -131,6 +151,7 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
       ]),
       h('label', { class: 've-eyebrow', for: `${id}-caption` }, [messages.imageCaption]),
       caption,
+      linkBlock,
       aligns,
       sizes,
       hint,
@@ -165,6 +186,25 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     else url.removeAttribute('aria-invalid')
   }
 
+  const validateLink = (): boolean => {
+    linkHint.replaceChildren()
+    const href = normalizeHref(link.value)
+    if (href === '') {
+      link.removeAttribute('aria-invalid')
+      linkHint.dataset.tone = ''
+      return true
+    }
+    const allowed = isAllowedUrl(href)
+    if (allowed) link.removeAttribute('aria-invalid')
+    else link.setAttribute('aria-invalid', 'true')
+    linkHint.append(
+      icon(allowed ? 'check' : 'alert'),
+      allowed ? messages.linkSafe : messages.linkUnsafe,
+    )
+    linkHint.dataset.tone = allowed ? 'ok' : 'error'
+    return allowed
+  }
+
   const isOpen = (): boolean => !element.hidden
 
   const close = (returnFocus: boolean): void => {
@@ -182,7 +222,13 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
 
   const apply = (): void => {
     if (editing) {
+      if (!validateLink()) {
+        link.focus()
+        return
+      }
       commands.run('setImageAttributes', { alt: altValue(), caption: caption.value })
+      const href = normalizeHref(link.value)
+      commands.run('setImageLink', href === '' ? null : href)
       finish()
       return
     }
@@ -207,6 +253,9 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
     urlBlock.hidden = editing
     sizes.hidden = !editing || !commands.can('scaleImage', 100)
     aligns.hidden = !editing
+    linkBlock.hidden = !editing || !commands.has('setImageLink')
+    link.value = (isSelectedImage(selected) ? selected.href : null) ?? ''
+    validateLink()
     submit.textContent = editing ? messages.imageApply : messages.imageAdd
     url.value = ''
     const current = isSelectedImage(selected) ? selected.alt : null
@@ -234,6 +283,7 @@ export function createImagePanel(options: ImagePanelOptions): Popover {
   })
   decorative.addEventListener('change', syncDecorative)
   url.addEventListener('input', () => setHint(''))
+  link.addEventListener('input', validateLink)
   submit.addEventListener('click', apply)
   element.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {

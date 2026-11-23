@@ -54,6 +54,7 @@ declare module '@viveeditor/core' {
   }
   interface QueryRegistry {
     selectedEmbed: () => EmbedAttributes | null
+    selectedEmbedUrl: () => string | null
     embedProviders: () => string[]
   }
 }
@@ -213,6 +214,11 @@ export const Embed: Extension<EmbedOptions> = defineExtension({
     selectedEmbed: (state) => {
       const selection = selectedEmbed(state, schema.nodes.embed as NodeType)
       return selection ? cleanEmbed(selection.node.attrs, options.providers) : null
+    },
+    selectedEmbedUrl: (state) => {
+      const selection = selectedEmbed(state, schema.nodes.embed as NodeType)
+      const embed = selection && cleanEmbed(selection.node.attrs, options.providers)
+      return embed ? (embedProvider(embed.provider)?.watch(embed) ?? null) : null
     },
     embedProviders: () => options.providers.flatMap((name) => embedProvider(name)?.label ?? []),
   }),

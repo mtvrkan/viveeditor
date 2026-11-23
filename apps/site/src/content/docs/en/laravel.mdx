@@ -111,12 +111,13 @@ return [
         'embeds' => false,
         'allowBase64' => false,
         'allowRelativeImages' => false,
+        'fontFamilies' => null,
     ],
 
 ];
 ```
 
-If you enable video embeds in the editor, set `embeds` to `true` here, or they are removed when the HTML is cleaned.
+If you enable video embeds in the editor, set `embeds` to `true` here, or they are removed when the HTML is cleaned. If you give the editor your own font list, put the same list in `fontFamilies`; `null` keeps the default list.
 
 ## Content Security Policy
 

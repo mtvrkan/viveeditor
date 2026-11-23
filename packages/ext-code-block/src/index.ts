@@ -14,6 +14,8 @@ export interface CodeBlockOptions {
   languages: readonly CodeLanguage[]
   languageLabel: string
   plainTextLabel: string
+  copyLabel: string
+  copiedLabel: string
   tabSize: number
 }
 
@@ -186,11 +188,16 @@ function indent(outdent: boolean, tabSize: number): Command {
   }
 }
 
+const COPIED_MS = 1500
+
 class CodeBlockView implements NodeView {
   readonly dom: HTMLElement
   readonly contentDOM: HTMLElement
   private readonly header: HTMLElement
   private readonly select: HTMLSelectElement
+  private readonly copyButton: HTMLButtonElement
+  private readonly status: HTMLElement
+  private copiedTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(
     private node: ProseMirrorNode,
@@ -206,7 +213,16 @@ class CodeBlockView implements NodeView {
     this.select = document.createElement('select')
     this.select.setAttribute('aria-label', options.languageLabel)
     this.select.addEventListener('change', () => this.choose())
-    this.header.append(this.select)
+    this.copyButton = document.createElement('button')
+    this.copyButton.type = 'button'
+    this.copyButton.className = 'vive-code-copy'
+    this.copyButton.textContent = options.copyLabel
+    this.copyButton.addEventListener('click', () => void this.copy())
+    this.status = document.createElement('span')
+    this.status.className = 'vive-code-status'
+    this.status.setAttribute('role', 'status')
+    this.status.setAttribute('aria-live', 'polite')
+    this.header.append(this.select, this.copyButton, this.status)
     const pre = document.createElement('pre')
     this.contentDOM = document.createElement('code')
     pre.append(this.contentDOM)
@@ -229,6 +245,52 @@ class CodeBlockView implements NodeView {
     if (mutation.type === 'selection') return false
     if (mutation.type === 'attributes' && mutation.target === this.dom) return true
     return this.header.contains(mutation.target)
+  }
+
+  destroy(): void {
+    if (this.copiedTimer !== null) clearTimeout(this.copiedTimer)
+  }
+
+  private async copy(): Promise<void> {
+    const text = this.node.textContent
+    let copied = false
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+        copied = true
+      }
+    } catch {
+      copied = false
+    }
+    if (!copied) copied = this.copyBySelection()
+    if (copied) this.showCopied()
+  }
+
+  private copyBySelection(): boolean {
+    const selection = this.dom.ownerDocument.getSelection()
+    if (!selection) return false
+    const range = this.dom.ownerDocument.createRange()
+    range.selectNodeContents(this.contentDOM)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    try {
+      return this.dom.ownerDocument.execCommand('copy')
+    } catch {
+      return false
+    }
+  }
+
+  private showCopied(): void {
+    if (this.copiedTimer !== null) clearTimeout(this.copiedTimer)
+    this.copyButton.textContent = this.options.copiedLabel
+    this.copyButton.dataset.copied = 'true'
+    this.status.textContent = this.options.copiedLabel
+    this.copiedTimer = setTimeout(() => {
+      this.copiedTimer = null
+      this.copyButton.textContent = this.options.copyLabel
+      delete this.copyButton.dataset.copied
+      this.status.textContent = ''
+    }, COPIED_MS)
   }
 
   private render(): void {
@@ -279,6 +341,8 @@ export const CodeBlock: Extension<CodeBlockOptions> = defineExtension({
     languages: DEFAULT_LANGUAGES,
     languageLabel: 'Language',
     plainTextLabel: 'Plain text',
+    copyLabel: 'Copy code',
+    copiedLabel: 'Copied',
     tabSize: 2,
   },
   nodes: () => ({

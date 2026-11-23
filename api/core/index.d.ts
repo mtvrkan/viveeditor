@@ -106,6 +106,10 @@ interface CommandRegistry {
   insertContent: (content: EditorContent) => Command;
   insertText: (text: string) => Command;
   setTextSelection: (from: number, to?: number) => Command;
+  selectAt: (target: Node, point?: {
+    left: number;
+    top: number;
+  }) => Command;
 }
 type CommandName = keyof CommandRegistry;
 type CommandFactory = (...args: never[]) => Command;

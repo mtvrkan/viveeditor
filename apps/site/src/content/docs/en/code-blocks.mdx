@@ -1,8 +1,8 @@
 ---
 key: code
 title: Code blocks
-description: Code blocks with a language picker, the default language list and optional Shiki syntax colouring, including a setup without WebAssembly.
-updated: 2026-11-01
+description: Code blocks with a language picker, a Copy button, the default language list and optional Shiki syntax colouring, including a setup without WebAssembly.
+updated: 2026-11-23
 faq:
   - q: Do the colours end up in the saved HTML?
     a: No. Colouring is shown only inside the editor. The saved HTML carries the language, not the colours.
@@ -12,7 +12,7 @@ faq:
     a: Yes. CodeHighlight is optional. The code block in the one-script build also comes without a highlighter.
 ---
 
-`@viveeditor/ext-code-block` adds code blocks with a language picker. Syntax colouring is optional: `CodeHighlight` loads the highlighter you give it only when the page has code, and colours never enter the saved HTML. This page covers the code block, the language list and colouring with Shiki.
+`@viveeditor/ext-code-block` adds code blocks with a language picker and a Copy button. Syntax colouring is optional: `CodeHighlight` loads the highlighter you give it only when the page has code, and colours never enter the saved HTML. This page covers the code block, the language list and colouring with Shiki.
 
 ## Setup
 
@@ -37,6 +37,8 @@ The one-script build already includes the code block, without a highlighter.
 | `languages` | `DEFAULT_LANGUAGES` | The languages in the picker. |
 | `languageLabel` | `'Language'` | The accessible name of the picker. |
 | `plainTextLabel` | `'Plain text'` | The option name for a block without a language. |
+| `copyLabel` | `'Copy code'` | The text of the Copy button. |
+| `copiedLabel` | `'Copied'` | The text the button shows for a moment after copying; screen readers announce it too. |
 | `tabSize` | `2` | How many spaces <kbd>Tab</kbd> inserts. |
 
 ## Add a code block
@@ -72,6 +74,12 @@ const codeBlock = CodeBlock.configure({
   languages: [...DEFAULT_LANGUAGES, { value: 'dart', label: 'Dart' }],
 })
 ```
+
+## Copy button
+
+Next to the language picker, each block has a Copy button. It copies the code of the block as plain text, without colours, and shows "Copied" for a moment. The button belongs to the editor view only and never enters the saved HTML. The one-script build and the framework components pass Turkish or English labels to match the interface language; with npm, set `copyLabel` and `copiedLabel` yourself.
+
+The code block also appears in the [right-click menu](/en/docs/toolbar-and-shortcuts/) with "Language", "Copy code" and "Delete code block".
 
 ## Keyboard in a code block
 

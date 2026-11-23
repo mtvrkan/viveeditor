@@ -53,6 +53,7 @@ Every element and attribute is rebuilt with a full HTML5 parser (`parse5` in Nod
 | `embeds` | `false` | Keeps video and audio embeds. Players are rebuilt from the provider and id, never copied. |
 | `allowBase64` | `false` | Allows images stored as `data:` addresses (PNG, JPEG, GIF, WebP, AVIF). |
 | `allowRelativeImages` | `false` | Allows relative image addresses. |
+| `fontFamilies` | 8 common families | Replaces the list of font families that may appear on `span`. Each entry is a comma-separated family list of plain names, such as `Inter, sans-serif` or `'Fira Code', monospace`; an entry with anything else throws an error when the sanitizer starts. The default is `serif`, `sans-serif`, `monospace`, `Arial, Helvetica, sans-serif`, `Georgia, serif`, `'Times New Roman', Times, serif`, `'Courier New', Courier, monospace` and `Verdana, Geneva, sans-serif`. Pass the same list you give the editor. |
 | `maxBytes` | 2 MB | HTML larger than this throws `TOO_LARGE`. |
 | `maxTags` | 100 000 | HTML with more opening tags than this throws `TOO_COMPLEX`. 2 MB of normal content has about 20 000 to 40 000. |
 
@@ -102,7 +103,9 @@ try {
 - **Images** need `https` addresses. `allowBase64` and `allowRelativeImages` widen that.
 - **Embeds** are removed unless you pass `embeds: true`.
 - **Figures** keep `figure` and `figcaption`; `data-align` survives only as `left`, `center` or `right`.
-- **`style`** keeps only text alignment, paragraph indent (2 em steps up to 16 em, on paragraphs and headings), the five editor font sizes (on `span`), text and highlight colour, table widths, and the background colour and vertical alignment (middle or bottom) of table cells. A font size inside another font size, and superscript or subscript inside another, are dropped so nesting cannot blow text up or hide it.
+- **Tables** keep `data-width="full"`, `data-align="center"`, `data-border` (`rows` or `none`) and `data-striped="true"`. A full-width table drops its fixed width.
+- **Numbered lists** keep `start` and a `type` of `a`, `A`, `i` or `I`.
+- **`style`** keeps only text alignment, paragraph indent (2 em steps up to 16 em, on paragraphs and headings), line height (1, 1.15, 1.5 or 2, on paragraphs and headings), font sizes on `span` (the editor's steps, or 6 to 96 pt in half points), font families from the `fontFamilies` list, text and highlight colour, table widths and border colour, the bullet style of a list (disc, circle or square), and the background colour, horizontal alignment and vertical alignment (middle or bottom) of table cells. A font size inside another font size, and superscript or subscript inside another, are dropped so nesting cannot blow text up or hide it.
 - **`id`, `name`, `form` and event handlers** never pass.
 - **Scripts, styles, frames, SVG and similar elements** are removed together with their content.
 - **Mentions, formulas and footnotes** are kept in exactly the form the editor writes them. A mention id or formula that fails its check, or one placed inside a link or a footnote, is reduced to its text. Footnotes keep only bold, italic and links. A footnote placed inside a link is reduced to its text.

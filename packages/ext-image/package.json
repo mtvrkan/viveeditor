@@ -72,7 +72,7 @@
         "prosemirror-transform",
         "prosemirror-view"
       ],
-      "limit": "6.5 KB"
+      "limit": "7 KB"
     }
   ],
   "engines": {

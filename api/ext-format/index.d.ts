@@ -35,18 +35,38 @@ declare module "@viveeditor/core" {
   }
 }
 export declare const ClearFormatting: Extension<ClearFormattingOptions>;
-type FontSizeStep = "tiny" | "small" | "big" | "huge";
-export declare const FONT_SIZES: Readonly<Record<FontSizeStep, string>>;
+interface FontFamilyOptions {
+  fontFamilies: readonly string[];
+}
 declare module "@viveeditor/core" {
   interface CommandRegistry {
-    setFontSize: (size: FontSizeStep) => Command;
+    setFontFamily: (family: string) => Command;
+    unsetFontFamily: () => Command;
+  }
+  interface QueryRegistry {
+    fontFamily: () => string | null;
+    fontFamilies: () => readonly string[];
+  }
+}
+export declare const DEFAULT_FONT_FAMILIES: readonly string[];
+export declare const FontFamily: Extension<FontFamilyOptions>;
+type FontSizeStep = "tiny" | "small" | "big" | "huge";
+export declare const FONT_SIZES: Readonly<Record<FontSizeStep, string>>;
+export declare const MIN_FONT_POINTS = 6;
+export declare const MAX_FONT_POINTS = 96;
+export declare const FONT_POINT_PRESETS: readonly number[];
+declare module "@viveeditor/core" {
+  interface CommandRegistry {
+    setFontSize: (size: FontSizeStep | number | string) => Command;
     unsetFontSize: () => Command;
     stepFontSize: (direction: 1 | -1) => Command;
   }
   interface QueryRegistry {
-    fontSize: () => FontSizeStep | null;
+    fontSize: () => string | null;
+    fontSizePoints: () => number | null;
   }
 }
+export declare function parseFontPoints(value: string): string | null;
 export declare const FontSize: Extension<Record<string, never>>;
 interface FormatPainterOptions {
   keepMarks: readonly string[];
@@ -77,6 +97,20 @@ declare module "@viveeditor/core" {
   }
 }
 export declare const Indent: Extension<IndentOptions>;
+type LineHeightValue = "1" | "1.15" | "1.5" | "2";
+interface LineHeightOptions {
+  types: readonly string[];
+}
+declare module "@viveeditor/core" {
+  interface CommandRegistry {
+    setLineHeight: (value: LineHeightValue | null) => Command;
+  }
+  interface QueryRegistry {
+    lineHeight: () => LineHeightValue | null;
+  }
+}
+export declare const LINE_HEIGHTS: readonly LineHeightValue[];
+export declare const LineHeight: Extension<LineHeightOptions>;
 type PasteMode = "keep" | "clean" | "plain";
 interface PasteOptionsSettings {
   keepMarks: readonly string[];
@@ -143,4 +177,4 @@ interface TypographyOptions {
 }
 export declare const Typography: Extension<TypographyOptions>;
 export declare const formatExtensions: readonly Extension[];
-export { type ChangeCaseOptions, type ClearFormattingOptions, type ColorOptions, type DocumentCleanup, type FontSizeStep, type FormatPainterOptions, type IndentOptions, type LastPaste, type PasteMode, type PasteOptionsSettings, type TextAlignOptions, type TextAlignment, type TextCase, type TypographyOptions, normalizeColor };
+export { type ChangeCaseOptions, type ClearFormattingOptions, type ColorOptions, type DocumentCleanup, type FontFamilyOptions, type FontSizeStep, type FormatPainterOptions, type IndentOptions, type LastPaste, type LineHeightOptions, type LineHeightValue, type PasteMode, type PasteOptionsSettings, type TextAlignOptions, type TextAlignment, type TextCase, type TypographyOptions, normalizeColor };

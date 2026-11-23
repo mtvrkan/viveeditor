@@ -61,3 +61,23 @@ test('changes the language from the labelled select', async ({ page }) => {
 
   await expect(output(page)).toContainText('<pre data-language="python">')
 })
+
+test('draws the language picker at the same height in every browser', async ({ page }) => {
+  await page.goto('/ui.html')
+  const picker = page.locator('.vive-code-header select').first()
+
+  const box = await picker.boundingBox()
+  const style = await picker.evaluate((element) => getComputedStyle(element).appearance)
+
+  expect(style).toBe('none')
+  expect(Math.round(box?.height ?? 0)).toBe(
+    (await page.evaluate(() => matchMedia('(pointer: coarse)').matches)) ? 36 : 28,
+  )
+})
+
+test('labels the copy button in Turkish', async ({ page }) => {
+  await startCodeBlock(page)
+  await page.keyboard.type('const a = 1')
+
+  await expect(page.getByRole('button', { name: 'Kodu kopyala' })).toBeVisible()
+})

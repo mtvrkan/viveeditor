@@ -38,6 +38,22 @@ const MAX_IMAGE_PIXELS = 624
 const EMU_PER_PIXEL = 9525
 const TWIPS_PER_PIXEL = 15
 const MAX_LEVEL = 8
+const STEP_HALF_POINTS: Readonly<Record<string, number>> = {
+  tiny: 16,
+  small: 19,
+  big: 28,
+  huge: 33,
+}
+const POINT_SIZE = /^([0-9]{1,2})(?:\.([05]))?pt$/
+
+function halfPoints(size: unknown): number | null {
+  if (typeof size !== 'string') return null
+  if (Object.hasOwn(STEP_HALF_POINTS, size)) return STEP_HALF_POINTS[size] ?? null
+  const match = POINT_SIZE.exec(size)
+  if (!match) return null
+  const halves = Number(match[1]) * 2 + (match[2] === '5' ? 1 : 0)
+  return halves >= 12 && halves <= 192 ? halves : null
+}
 const WATCH_URLS: Record<string, (id: string) => string> = {
   youtube: (id) => `https://www.youtube.com/watch?v=${id}`,
   vimeo: (id) => `https://vimeo.com/${id}`,
@@ -50,6 +66,22 @@ const IMAGE_EXTENSIONS: Record<string, string> = {
 }
 const MAX_DIMENSION = 10_000
 const ALIGNMENTS: Record<string, string> = { center: 'center', right: 'right', justify: 'both' }
+const LINE_TWIPS: Record<string, number> = { '1': 240, '1.15': 276, '1.5': 360, '2': 480 }
+const GENERIC_FONTS: Record<string, string> = {
+  serif: 'Times New Roman',
+  'sans-serif': 'Arial',
+  monospace: 'Courier New',
+}
+const FONT_NAME = /^[A-Za-z][A-Za-z0-9 -]{0,63}$/
+const ORDERED_FORMATS: Record<string, string> = {
+  a: 'lowerLetter',
+  A: 'upperLetter',
+  i: 'lowerRoman',
+  I: 'upperRoman',
+}
+const BULLET_TEXTS: Record<string, string> = { disc: '\u2022', circle: '◦', square: '▪' }
+const DEFAULT_BULLETS = ['\u2022', '◦', '▪']
+const STRIPE_FILL = 'F2F2F2'
 const MAX_CONVERT_PIXELS = 50_000_000
 const EMBEDDABLE = new Set(Object.keys(IMAGE_EXTENSIONS))
 const CONVERTIBLE = new Set(['image/webp', 'image/avif'])
@@ -98,6 +130,25 @@ function cleanLimits(input: Partial<ExportLimits> | undefined): ExportLimits {
 const hexColor = (value: unknown): string | null => {
   const match = typeof value === 'string' ? /^#([0-9a-f]{6})(?:[0-9a-f]{2})?$/i.exec(value) : null
   return match?.[1] ? match[1].toUpperCase() : null
+}
+
+function wordFont(family: unknown): string | null {
+  if (typeof family !== 'string') return null
+  const first = (family.split(',')[0] ?? '').trim().replace(/^(['"])(.*)\1$/, '$2')
+  const generic = first.toLowerCase()
+  if (Object.hasOwn(GENERIC_FONTS, generic)) return GENERIC_FONTS[generic] ?? null
+  return FONT_NAME.test(first) ? first : null
+}
+
+function tableBorders(border: unknown, color: string | null): string {
+  if (border !== 'rows' && border !== 'none' && !color) return ''
+  const edge = (name: string, shown: boolean): string =>
+    shown
+      ? `<w:${name} w:val="single" w:sz="4" w:space="0" w:color="${color ?? 'auto'}"/>`
+      : `<w:${name} w:val="nil"/>`
+  const lines = border !== 'none'
+  const grid = lines && border !== 'rows'
+  return `<w:tblBorders>${edge('top', lines)}${edge('left', grid)}${edge('bottom', lines)}${edge('right', grid)}${edge('insideH', lines)}${edge('insideV', grid)}</w:tblBorders>`
 }
 
 const positiveInt = (value: unknown): number | null => {
@@ -183,6 +234,8 @@ class Writer {
   private imageAttempts = 0
   private drawingCount = 0
   private readonly notes: ProseMirrorNode[] = []
+  private readonly abstracts = new Map<string, number>()
+  private cellAlign: string | null = null
 
   constructor(
     private readonly options: ExportOptions,
@@ -217,23 +270,46 @@ class Writer {
   }
 
   numberingXml(): string {
-    const levels = (ordered: boolean): string =>
-      Array.from({ length: MAX_LEVEL + 1 }, (_, level) => {
-        const format = ordered ? 'decimal' : 'bullet'
-        const text = ordered ? `%${level + 1}.` : ['\u2022', '◦', '▪'][level % 3]
-        const indent = 720 * (level + 1)
-        return `<w:lvl w:ilvl="${level}"><w:start w:val="1"/><w:numFmt w:val="${format}"/><w:lvlText w:val="${text}"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="${indent}" w:hanging="360"/></w:pPr></w:lvl>`
-      }).join('')
-    return `${DECLARATION}<w:numbering xmlns:w="${W}"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="hybridMultilevel"/>${levels(false)}</w:abstractNum><w:abstractNum w:abstractNumId="1"><w:multiLevelType w:val="hybridMultilevel"/>${levels(true)}</w:abstractNum>${this.numbering.join('')}</w:numbering>`
+    const abstract = (id: number, format: string, text: (level: number) => string): string =>
+      `<w:abstractNum w:abstractNumId="${id}"><w:multiLevelType w:val="hybridMultilevel"/>${Array.from(
+        { length: MAX_LEVEL + 1 },
+        (_, level) =>
+          `<w:lvl w:ilvl="${level}"><w:start w:val="1"/><w:numFmt w:val="${format}"/><w:lvlText w:val="${text(level)}"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="${720 * (level + 1)}" w:hanging="360"/></w:pPr></w:lvl>`,
+      ).join('')}</w:abstractNum>`
+    const numbered = (level: number): string => `%${level + 1}.`
+    let abstracts =
+      abstract(0, 'bullet', (level) => DEFAULT_BULLETS[level % 3] ?? '') +
+      abstract(1, 'decimal', numbered)
+    for (const [key, id] of this.abstracts) {
+      const value = key.slice(1)
+      abstracts += key.startsWith('o')
+        ? abstract(id, ORDERED_FORMATS[value] ?? 'decimal', numbered)
+        : abstract(id, 'bullet', () => BULLET_TEXTS[value] ?? '')
+    }
+    return `${DECLARATION}<w:numbering xmlns:w="${W}">${abstracts}${this.numbering.join('')}</w:numbering>`
   }
 
-  private newList(ordered: boolean, level: number, start: number): number {
+  private abstractFor(node: ProseMirrorNode, ordered: boolean): number {
+    const value = String(ordered ? node.attrs.type : node.attrs.bulletStyle)
+    if (!Object.hasOwn(ordered ? ORDERED_FORMATS : BULLET_TEXTS, value)) return ordered ? 1 : 0
+    const key = `${ordered ? 'o' : 'b'}${value}`
+    let id = this.abstracts.get(key)
+    if (id === undefined) {
+      id = this.abstracts.size + 2
+      this.abstracts.set(key, id)
+    }
+    return id
+  }
+
+  private newList(node: ProseMirrorNode, ordered: boolean, level: number): number {
     this.numCount += 1
+    const start = Number(node.attrs.start)
+    const first = Number.isInteger(start) ? Math.min(9999, Math.max(0, start)) : 1
     const override = ordered
-      ? `<w:lvlOverride w:ilvl="${level}"><w:startOverride w:val="${Math.min(9999, Math.max(1, start))}"/></w:lvlOverride>`
+      ? `<w:lvlOverride w:ilvl="${level}"><w:startOverride w:val="${first}"/></w:lvlOverride>`
       : ''
     this.numbering.push(
-      `<w:num w:numId="${this.numCount}"><w:abstractNumId w:val="${ordered ? 1 : 0}"/>${override}</w:num>`,
+      `<w:num w:numId="${this.numCount}"><w:abstractNumId w:val="${this.abstractFor(node, ordered)}"/>${override}</w:num>`,
     )
     return this.numCount
   }
@@ -303,8 +379,11 @@ class Writer {
     let properties = style ? `<w:pStyle w:val="${style}"/>` : ''
     if (list)
       properties += `<w:numPr><w:ilvl w:val="${list[1]}"/><w:numId w:val="${list[0]}"/></w:numPr>`
+    const lineHeight = String(node.attrs.lineHeight)
+    const line = Object.hasOwn(LINE_TWIPS, lineHeight) ? LINE_TWIPS[lineHeight] : undefined
+    if (line) properties += `<w:spacing w:line="${line}" w:lineRule="auto"/>`
     const textAlign = String(node.attrs.textAlign)
-    const align = Object.hasOwn(ALIGNMENTS, textAlign) ? ALIGNMENTS[textAlign] : undefined
+    const align = Object.hasOwn(ALIGNMENTS, textAlign) ? ALIGNMENTS[textAlign] : this.cellAlign
     if (align) properties += `<w:jc w:val="${align}"/>`
     return properties ? `<w:pPr>${properties}</w:pPr>` : ''
   }
@@ -321,7 +400,7 @@ class Writer {
   private async list(node: ProseMirrorNode, level: number): Promise<string> {
     const ordered = node.type.name === 'orderedList'
     const depth = Math.min(MAX_LEVEL, level)
-    const numId = this.newList(ordered, depth, Number(node.attrs.start) || 1)
+    const numId = this.newList(node, ordered, depth)
     let xml = ''
     for (let index = 0; index < node.childCount; index++) {
       const item = node.child(index)
@@ -345,19 +424,23 @@ class Writer {
 
   private inline(node: ProseMirrorNode): string {
     let xml = ''
-    let link: { href: string; id: string } | null = null
+    let link: { key: string; id: string; blank: boolean } | null = null
     let linkRuns = ''
     const flush = (): void => {
-      if (link) xml += `<w:hyperlink r:id="${link.id}">${linkRuns}</w:hyperlink>`
+      if (link) {
+        xml += `<w:hyperlink r:id="${link.id}"${link.blank ? ' w:tgtFrame="_blank"' : ''}>${linkRuns}</w:hyperlink>`
+      }
       link = null
       linkRuns = ''
     }
     node.forEach((child) => {
       const linkMark = child.marks.find((mark) => mark.type.name === 'link')
       const href = linkMark ? cleanLink(String(linkMark.attrs.href ?? '')) : null
-      if (link?.href !== href) {
+      const blank = linkMark?.attrs.target === '_blank'
+      const key = href ? `${blank ? 'blank' : 'self'} ${href}` : null
+      if ((link?.key ?? null) !== key) {
         flush()
-        if (href) link = { href, id: this.relationship('hyperlink', href, true) }
+        if (href && key) link = { key, id: this.relationship('hyperlink', href, true), blank }
       }
       const properties = this.runProperties(child.marks, href !== null)
       const run = child.isText
@@ -390,11 +473,15 @@ class Writer {
     let properties = linked ? '<w:rStyle w:val="Hyperlink"/>' : ''
     const names = new Set(marks.map((mark) => mark.type.name))
     if (names.has('code') && !linked) properties += '<w:rStyle w:val="CodeChar"/>'
+    const font = wordFont(marks.find((mark) => mark.type.name === 'fontFamily')?.attrs.family)
+    if (font) properties += `<w:rFonts w:ascii="${font}" w:hAnsi="${font}" w:cs="${font}"/>`
     if (names.has('bold')) properties += '<w:b/>'
     if (names.has('italic')) properties += '<w:i/>'
     if (names.has('strike')) properties += '<w:strike/>'
     const color = hexColor(marks.find((mark) => mark.type.name === 'textColor')?.attrs.color)
     if (color) properties += `<w:color w:val="${color}"/>`
+    const size = halfPoints(marks.find((mark) => mark.type.name === 'fontSize')?.attrs.size)
+    if (size !== null) properties += `<w:sz w:val="${size}"/>`
     if (names.has('underline')) properties += '<w:u w:val="single"/>'
     const fill = hexColor(marks.find((mark) => mark.type.name === 'highlight')?.attrs.color)
     if (names.has('highlight')) {
@@ -492,7 +579,10 @@ class Writer {
     const cx = image.width * EMU_PER_PIXEL
     const cy = image.height * EMU_PER_PIXEL
     const number = this.drawingCount
-    return `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${number}" name="Picture ${number}" descr="${escapeXml(alt)}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${number}" name="${name}" descr="${escapeXml(alt)}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${id}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`
+    const href = typeof node.attrs.href === 'string' ? cleanLink(node.attrs.href) : null
+    const run = `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${number}" name="Picture ${number}" descr="${escapeXml(alt)}"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${number}" name="${name}" descr="${escapeXml(alt)}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${id}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`
+    if (!href) return run
+    return `<w:hyperlink r:id="${this.relationship('hyperlink', href, true)}">${run}</w:hyperlink>`
   }
 
   private async figure(node: ProseMirrorNode): Promise<string> {
@@ -520,7 +610,9 @@ class Writer {
     })
     let rowXml = ''
     let gridColumns = 0
-    for (const row of rows) {
+    const outerAlign = this.cellAlign
+    const striped = node.attrs.striped === true
+    for (const [rowIndex, row] of rows.entries()) {
       let column = 0
       let cellIndex = 0
       let cells = ''
@@ -553,12 +645,20 @@ class Writer {
           pending.set(column, { left: rowspan - 1, span })
         }
         const shade = hexColor(cell.attrs.background)
-        if (shade) properties += `<w:shd w:val="clear" w:color="auto" w:fill="${shade}"/>`
+        const stripe =
+          striped && rowIndex % 2 === 1 && cell.type.name === 'tableCell' ? STRIPE_FILL : null
+        const fill = shade ?? stripe
+        if (fill) properties += `<w:shd w:val="clear" w:color="auto" w:fill="${fill}"/>`
         const vertical = cell.attrs.verticalAlign
         if (vertical === 'middle' || vertical === 'bottom') {
           properties += `<w:vAlign w:val="${vertical === 'middle' ? 'center' : vertical}"/>`
         }
+        const cellAlign = String(cell.attrs.textAlign)
+        this.cellAlign = Object.hasOwn(ALIGNMENTS, cellAlign)
+          ? (ALIGNMENTS[cellAlign] ?? null)
+          : null
         let content = await this.blocks(cell, 0, false)
+        this.cellAlign = outerAlign
         if (!content.endsWith('</w:p>')) content += '<w:p/>'
         cells += `<w:tc>${properties ? `<w:tcPr>${properties}</w:tcPr>` : ''}${content}</w:tc>`
         column += span
@@ -573,7 +673,13 @@ class Writer {
       const width = firstWidths[index]
       return `<w:gridCol w:w="${width ? width * TWIPS_PER_PIXEL : fallback}"/>`
     }).join('')
-    return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/><w:tblW w:w="0" w:type="auto"/><w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${rowXml}</w:tbl>`
+    const tableWidth =
+      node.attrs.width === 'full'
+        ? '<w:tblW w:w="5000" w:type="pct"/>'
+        : '<w:tblW w:w="0" w:type="auto"/>'
+    const tableAlign = node.attrs.align === 'center' ? '<w:jc w:val="center"/>' : ''
+    const borders = tableBorders(node.attrs.border, hexColor(node.attrs.borderColor))
+    return `<w:tbl><w:tblPr><w:tblStyle w:val="TableGrid"/>${tableWidth}${tableAlign}${borders}<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/></w:tblPr><w:tblGrid>${grid}</w:tblGrid>${rowXml}</w:tbl>`
   }
 }
 

@@ -1,7 +1,7 @@
 import { Editor, type EditorOptions } from '@viveeditor/core'
 import { TextSelection } from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CodeHighlight, type Highlighter, shikiHighlighter } from '../src/highlight.js'
 import { CodeBlock } from '../src/index.js'
 
@@ -207,5 +207,82 @@ describe('CodeHighlight', () => {
     const tokens = await highlight('x', 'js')
 
     expect(tokens).toEqual([])
+  })
+})
+
+describe('code block copy button', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  it('copies the block text, announces it and resets after 1.5 s', async () => {
+    const writeText = vi.fn(async () => {})
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    const html =
+      '<pre data-language="js"><code class="language-js">const a = 1\nconst b = 2</code></pre>'
+    const editor = await mount({ content: html })
+    const button = editor.dom.querySelector<HTMLButtonElement>('button.vive-code-copy')
+    const status = editor.dom.querySelector('.vive-code-status')
+    vi.useFakeTimers()
+
+    button?.click()
+    await vi.advanceTimersByTimeAsync(0)
+    const copied = [button?.textContent, status?.textContent, status?.getAttribute('aria-live')]
+    await vi.advanceTimersByTimeAsync(1500)
+
+    expect(writeText).toHaveBeenCalledWith('const a = 1\nconst b = 2')
+    expect(copied).toEqual(['Copied', 'Copied', 'polite'])
+    expect([button?.textContent, status?.textContent]).toEqual(['Copy code', ''])
+    expect(editor.getHTML()).toBe(html)
+  })
+
+  it('falls back to selecting the code and the copy command', async () => {
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText: vi.fn(async () => Promise.reject(new Error('denied'))) },
+    })
+    const execCommand = vi.fn(() => true)
+    Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true })
+    const editor = await mount({ content: '<pre><code>kod</code></pre>' })
+    const button = editor.dom.querySelector<HTMLButtonElement>('button.vive-code-copy')
+
+    button?.click()
+    await wait(0)
+
+    expect(execCommand).toHaveBeenCalledWith('copy')
+    expect(document.getSelection()?.toString()).toBe('kod')
+    expect(button?.textContent).toBe('Copied')
+  })
+
+  it('uses host labels and works when the editor is read-only', async () => {
+    const writeText = vi.fn(async () => {})
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    const editor = await mount({
+      extensions: [CodeBlock.configure({ copyLabel: 'Kodu kopyala', copiedLabel: 'Kopyalandı' })],
+      content: '<pre><code>kod</code></pre>',
+      editable: false,
+    })
+    const button = editor.dom.querySelector<HTMLButtonElement>('button.vive-code-copy')
+    const label = button?.textContent
+
+    button?.click()
+    await wait(0)
+
+    expect([label, button?.type, button?.disabled]).toEqual(['Kodu kopyala', 'button', false])
+    expect(writeText).toHaveBeenCalledWith('kod')
+    expect(button?.textContent).toBe('Kopyalandı')
+  })
+
+  it('stays silent when no copy method works', async () => {
+    vi.stubGlobal('navigator', {})
+    Object.defineProperty(document, 'execCommand', { value: () => false, configurable: true })
+    const editor = await mount({ content: '<pre><code>kod</code></pre>' })
+    const button = editor.dom.querySelector<HTMLButtonElement>('button.vive-code-copy')
+
+    button?.click()
+    await wait(0)
+
+    expect(button?.textContent).toBe('Copy code')
+    expect(editor.dom.querySelector('.vive-code-status')?.textContent).toBe('')
   })
 })

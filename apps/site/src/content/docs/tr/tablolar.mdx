@@ -1,18 +1,20 @@
 ---
 key: tables
 title: Tablolar
-description: Tablo eklentisiyle birleştirilmiş hücreler, başlık satırları, sürüklenebilir sütun genişlikleri ve araç çubuğundaki tablo araçları.
-updated: 2026-11-01
+description: Birleştirilmiş hücreler, başlık satırları, sütun genişlikleri, hücre hizası ve rengi, tablo genişliği, kenarlıklar, renkli satırlar ve tablo paneli.
+updated: 2026-11-23
 faq:
   - q: Sütun genişlikleri yayın sayfasında korunur mu?
     a: Evet. Genişlikler kaydedilen HTML'e colgroup ve stil olarak yazılır, bu yüzden içerik hangi sitede gösterilirse gösterilsin aynı kalır. Sunucu temizleyicisi tablo genişliklerini korur.
   - q: Tablonun içine tablo eklenebilir mi?
-    a: Hayır. İmleç bir tablonun içindeyken tablo ekleme komutu çalışmaz; araç çubuğundaki tablo düğmesi o sırada tablo araçlarını açar.
+    a: Hayır. İmleç bir tablonun içindeyken tablo ekleme komutu çalışmaz; araç çubuğundaki tablo düğmesi o sırada tablo panelini açar.
   - q: Klavyeyle tablodan nasıl çıkarım?
     a: Önce Esc, sonra Tab tuşuna basın. Tab tek başına hücreler arasında gezdiği için bu sıra odağı editörden sonraki öğeye taşır.
+  - q: Kenarlıklar ve renkli satırlar sitemde neden farklı görünüyor?
+    a: Genişlik, hiza, kenarlık ve renkli satır bilgisi tabloya data öznitelikleri olarak yazılır; bunları editörün stil dosyası çizer. İçeriği gösteren sayfalara "Tablo genişliği, hizası ve kenarlıkları" bölümündeki CSS kurallarını ekleyin.
 ---
 
-`@viveeditor/ext-table` editöre tablo ekler: hücreleri birleştirme, başlık satırları, sürükleyerek sütun genişliği ayarlama ve hücreler arasında <kbd>Tab</kbd> ile gezinme. Kaydedilen HTML sütun genişliklerini taşır, böylece tablo her sitede aynı görünür. Bu sayfa eklentiyi kurmayı, tablo araçlarını ve klavye kullanımını anlatır.
+`@viveeditor/ext-table` editöre tablo ekler: hücreleri birleştirme, başlık satırları, sürükleyerek sütun genişliği ayarlama, hücre hizası ve rengi, tablo genişliği, kenarlıklar, renkli satırlar ve hücreler arasında <kbd>Tab</kbd> ile gezinme. Kaydedilen HTML sütun genişliklerini taşır, böylece tablo her sitede aynı görünür. Bu sayfa eklentiyi kurmayı, tablo panelini, sağ tık menüsünü ve klavye kullanımını anlatır.
 
 ## Kurulum
 
@@ -44,44 +46,81 @@ Tek betikli kurulumda tablo eklentisi zaten yüklüdür.
 
 Boş bir paragrafta eklenen tablo o paragrafın yerini alır. Tablonun içine ikinci bir tablo eklenemez.
 
-## Tablo araçları
+## Tablo paneli
 
-İmleç bir tablonun içindeyken araç çubuğundaki tablo düğmesi ızgara yerine tablo araçlarını açar:
+İmleç bir tablonun içindeyken araç çubuğundaki tablo düğmesi ızgara yerine tablo panelini açar. Panelde iki sekme vardır:
 
-| Grup | Araçlar |
+| Sekme | Araçlar |
 | --- | --- |
-| Hücre | Hücre rengi, Dikey hizalama (Üst, Orta, Alt) |
-| Ekle | Üste satır ekle, Alta satır ekle, Sola sütun ekle, Sağa sütun ekle |
-| Düzen | Hücreleri birleştir, Hücreyi böl, Başlık satırı, Sütunu genişlet, Sütunu daralt |
-| Sil | Satırı sil, Sütunu sil, Tabloyu sil |
+| Hücre | Yatay hizalama (Sola, Ortala, Sağa, İki yana), Dikey hizalama (Üst, Orta, Alt), Hücre rengi; Hücreleri birleştir, Hücreyi böl, Satırı seç, Sütunu seç; Üste satır ekle, Alta satır ekle, Sola sütun ekle, Sağa sütun ekle; Satırı sil, Sütunu sil; Başlık satırı, Başlık sütunu |
+| Tablo | Genişlik (Otomatik, Tam genişlik), Tablo hizası (Sola, Ortala), Kenarlıklar (Tüm kenarlıklar, Yalnızca satırlar, Kenarlıksız), Satırları renklendir, Kenarlık rengi; Sütunları eşitle, Sütunu genişlet, Sütunu daralt, Tabloyu seç; Tabloyu sil |
 
-O an uygulanamayan araçlar devre dışı görünür. Örneğin tek bir hücre seçiliyken "Hücreleri birleştir" kullanılamaz. Panel <kbd>Esc</kbd> ile kapanır.
+Panel siz çalışırken açık kalır, böylece birkaç şeyi art arda değiştirebilirsiniz; her değişiklik hemen uygulanır ve tek bir geri alma onu geri getirir. O an uygulanamayan araçlar devre dışı görünür. Örneğin tek bir hücre seçiliyken "Hücreleri birleştir" kullanılamaz. "Tabloyu sil" paneli kapatır. Sekmeler arasında <kbd>←</kbd> ve <kbd>→</kbd> ile geçilir, panel <kbd>Esc</kbd> ile kapanır.
 
-## Hücre rengi ve dikey hizalama
+## Hücre hizası ve rengi
 
-"Hücre rengi" imlecin bulunduğu hücreye ya da seçili hücrelere yedi açık arka plan renginden birini verir; üstü çizili daire rengi kaldırır. "Dikey hizalama" hücre içeriğini üste, ortaya ya da alta yerleştirir. Metni sola, ortaya ya da sağa hizalamak için araç çubuğundaki hizalama menüsünü kullanın.
+"Yatay hizalama" hücrenin tüm içeriğini sola, ortaya, sağa ya da iki yana yaslar. "Dikey hizalama" içeriği üste, ortaya ya da alta yerleştirir. Araç çubuğundaki hizalama menüsü hücre içindeki tek tek paragrafları hizalamaya devam eder.
 
-Değerler hücrede stil olarak kaydedilir: `<td style="background-color: #cde8ff; vertical-align: middle">`. Word ve Google Dokümanlar'dan yapıştırılan arka plan renkleri, düz beyaz dışında korunur. Komutlar `setCellBackground(color)` ve `setCellVerticalAlign('middle' | 'bottom' | null)`; kaldırmak için `null` verin. `editor.query.cellStyle()` imlecin bulunduğu hücrenin değerlerini döndürür.
+"Hücre rengi" hücreye yedi açık arka plan renginden birini verir; üstü çizili daire rengi kaldırır. Paletin altından renk seçiciyle istediğiniz rengi seçebilir ya da `#1a73e8` gibi bir renk kodu yazabilirsiniz; son kullandığınız renkler de orada listelenir.
+
+Hücre araçlarının hepsi imlecin bulunduğu hücreye ya da seçili hücrelerin tümüne uygulanır. Hücre seçmek için fareyle sürükleyin ya da "Satırı seç" ve "Sütunu seç" seçeneklerini kullanın. Değerler her hücrede stil olarak kaydedilir: `<td style="text-align: center; background-color: #cde8ff; vertical-align: middle">`. Word ve Google Dokümanlar'dan yapıştırılan arka plan renkleri, düz beyaz dışında korunur.
+
+Komutlar `setCellTextAlign('center' | 'right' | 'justify' | null)`, `setCellVerticalAlign('middle' | 'bottom' | null)` ve `setCellBackground(color)`; `null` sırasıyla sola, üste ve renksiz hale döndürür. `editor.query.cellStyle()` imlecin bulunduğu hücre için `{ background, verticalAlign, textAlign }` döndürür.
+
+## Tablo genişliği, hizası ve kenarlıkları
+
+"Tablo" sekmesi tablonun bütününe ait ayarları içerir:
+
+- **Genişlik**: "Otomatik" verdiğiniz sütun genişliklerini korur; "Tam genişlik" tabloyu metin sütunu boyunca uzatır.
+- **Tablo hizası**: tablolar varsayılan olarak solda durur; "Ortala" metin sütunundan dar bir tabloyu ortaya alır.
+- **Kenarlıklar**: "Tüm kenarlıklar" (varsayılan), "Yalnızca satırlar" (satırlar arasında çizgi var, sütunlar arasında yok) ya da "Kenarlıksız". Kenarlıksız tablo, hücreler görünsün diye editörde kesik çizgili bir kılavuz taşır; bu kılavuz yayın sayfasında çıkmaz.
+- **Satırları renklendir**: satırları birer atlayarak gölgeler. Kendi rengi olan hücre rengini korur.
+- **Kenarlık rengi**: tablo çizgilerinin rengi; kısa bir paletten ya da herhangi bir renk koduyla verilir. "Varsayılan" stil dosyasındaki renge döner.
+- **Sütunları eşitle** bütün sütunlara aynı genişliği verir. En az bir sütunun genişliği verilmişse çalışır.
+
+Tablo bu değerleri data öznitelikleri olarak, kenarlık rengini de bir CSS değişkeni olarak taşır:
+
+```html
+<table data-width="full" data-align="center" data-border="rows" data-striped="true" style="--vive-table-border-color: #98a2b3">
+```
+
+Editörün stil dosyası bunları zaten çizer. Aynı görünümü kendi sayfalarınızda göstermek için şu kuralları oraya da ekleyin:
+
+```css
+table[data-width="full"] { width: 100%; }
+table[data-align="center"] { margin-inline: auto; }
+td, th { border: 1px solid var(--vive-table-border-color, hsl(220 13% 85%)); }
+table[data-border="rows"] :is(td, th) { border-inline-width: 0; }
+table[data-border="none"] :is(td, th) { border-width: 0; }
+table[data-striped="true"] tr:nth-child(even) > td { background-color: hsl(220 14% 95%); }
+```
+
+[Sunucu temizleyicisi](/dokumantasyon/sunucuda-temizleme/) bu değerlerin hepsini korur. Kodda `setTableWidth('full' | null)`, `setTableAlign('center' | null)`, `setTableBorder('rows' | 'none' | null)`, `setTableStriped(true | false)` ve `setTableBorderColor(color | null)` kullanın; `editor.query.tableStyle()` `{ width, align, border, striped, borderColor }` döndürür.
+
+## Sağ tık menüsü
+
+Bir tabloya sağ tıklayınca "Hücre", "Satır" ve "Sütun" alt menüleri, tablo panelini açan "Tablo özellikleri…" ve "Tabloyu sil" seçeneklerinden oluşan bir menü açılır. Hücre alt menüsünde yatay ve dikey hizalama, birleştirme ve bölme; Satır ve Sütun alt menülerinde ekleme, silme, seçme ve başlık yapma bulunur, Sütun menüsünde ayrıca "Sütunları eşitle" vardır. Klavyeden <kbd>Shift</kbd>+<kbd>F10</kbd> ya da menü tuşu aynı menüyü açar. Menünün nasıl çalıştığı [Araç çubuğu ve kısayollar](/dokumantasyon/arac-cubugu-ve-kisayollar/) sayfasında.
 
 ## Birleştirilmiş hücreler
 
-Fareyle sürükleyerek birden fazla hücre seçin ve "Hücreleri birleştir" seçeneğine basın. Birleşik bir hücreyi eski haline getirmek için içine tıklayıp "Hücreyi böl" seçeneğini kullanın. Birleştirilmiş hücreler Word dosyasına kaydedilirken de korunur.
+Fareyle sürükleyerek birden fazla hücre seçin ve tablo panelinden ya da sağ tık menüsünden "Hücreleri birleştir" seçeneğine basın. Birleşik bir hücreyi eski haline getirmek için içine tıklayıp "Hücreyi böl" seçeneğini kullanın. Birleştirilmiş hücreler Word dosyasına kaydedilirken de korunur.
 
 ## Başlık satırı ve sütunu
 
-"Başlık satırı" ilk satırı başlık hücrelerine çevirir ya da geri alır. Başlık hücreleri HTML'de `th` olarak yazılır, ekran okuyucular bu sayede sütun başlıklarını duyurur. İlk sütunu başlık yapmak için arayüzde düğme yoktur; `editor.commands.toggleHeaderColumn()` komutunu kullanın.
+"Başlık satırı" ilk satırı başlık hücrelerine çevirir ya da geri alır; "Başlık sütunu" aynısını ilk sütun için yapar. Başlık hücreleri HTML'de `th` olarak yazılır, ekran okuyucular bu sayede satır ve sütun başlıklarını duyurur. Kodda `toggleHeaderRow()` ve `toggleHeaderColumn()` komutlarını kullanın.
 
 ## Sütun genişlikleri
 
-`resizable` açıkken bir sütunun sağ kenarını sürükleyerek genişliğini değiştirin. Klavyeyle çalışıyorsanız tablo araçlarındaki "Sütunu genişlet" ve "Sütunu daralt" imlecin bulunduğu sütunu 40 piksel değiştirir. Sütun `cellMinWidth` değerinden daha dar olamaz.
+`resizable` açıkken bir sütunun sağ kenarını sürükleyerek genişliğini değiştirin. Klavyeyle çalışıyorsanız tablo panelindeki "Sütunu genişlet" ve "Sütunu daralt" imlecin bulunduğu sütunu 40 piksel değiştirir. Sütun `cellMinWidth` değerinden daha dar olamaz.
 
-Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başına `width` stili taşır. Tablonun kendisine de toplam genişlik yazılır; bazı sütunların genişliği yoksa bu değer en küçük genişlik olarak kullanılır. Hiç genişlik verilmemiş tablolar stil taşımaz.
+Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başına `width` stili taşır. Tablonun kendisine de toplam genişlik yazılır; bazı sütunların genişliği yoksa ya da tablo tam genişlikteyse bu değer en küçük genişlik olarak kullanılır. Hiç genişlik verilmemiş tablolar stil taşımaz.
 
 ## Klavye
 
 - <kbd>Tab</kbd> sonraki hücreye geçer. Son hücrede yeni bir satır ekler.
 - <kbd>Shift</kbd>+<kbd>Tab</kbd> önceki hücreye döner.
 - <kbd>Esc</kbd> ve ardından <kbd>Tab</kbd> odağı tablodan ve editörden çıkarır.
+- <kbd>Shift</kbd>+<kbd>F10</kbd> ya da menü tuşu tablonun sağ tık menüsünü açar.
 
 ## Komutlar
 
@@ -96,7 +135,15 @@ Genişlik verilmiş tablolar kaydedilen HTML'de bir `colgroup` ve sütun başın
 | `resizeColumn(delta)` | İmlecin bulunduğu sütunu piksel olarak genişletir ya da daraltır. |
 | `setCellBackground(color)` | Seçili hücrelerin arka plan rengini verir ya da (`null` ile) kaldırır. |
 | `setCellVerticalAlign(align)` | Seçili hücrelerin dikey hizasını verir: `'middle'`, `'bottom'` ya da üst için `null`. |
+| `setCellTextAlign(align)` | Seçili hücrelerin yatay hizasını verir: `'center'`, `'right'`, `'justify'` ya da sol için `null`. |
+| `setTableWidth(width)` | `'full'` tabloyu metin sütunu boyunca uzatır; `null` otomatik genişliğe döner. |
+| `setTableAlign(align)` | `'center'` tabloyu ortalar; `null` sola geri alır. |
+| `setTableBorder(border)` | `'rows'` ya da `'none'`; `null` tüm kenarlıklara döner. |
+| `setTableStriped(striped)` | Renkli satırları açar (`true`) ya da kapatır (`false`). |
+| `setTableBorderColor(color)` | Kenarlık rengini verir ya da (`null` ile) kaldırır. |
+| `selectRow()`, `selectColumn()`, `selectTable()` | Satırı, sütunu ya da tablonun bütün hücrelerini seçer. |
+| `distributeColumns()` | Bütün sütunlara aynı genişliği verir. |
 
-`editor.query.inTable()` imleç bir tablonun içindeyse `true` döner. Komutları önce denemek için `editor.can.mergeCells()` gibi `can` biçimini kullanın.
+`editor.query.inTable()` imleç bir tablonun içindeyse `true` döner; `cellStyle()` ve `tableStyle()` hücrenin ve tablonun değerlerini, tablo dışında `null` döndürür. Komutları önce denemek için `editor.can.mergeCells()` gibi `can` biçimini kullanın.
 
-Tablolar Markdown ve Word dosyalarına da kaydedilir; ayrıntılar [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.
+Tablolar Markdown ve Word dosyalarına da kaydedilir. Word hücre hizasını ve rengini, tablo genişliğini, hizasını, kenarlıklarını, kenarlık rengini ve renkli satırları korur; ayrıntılar [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında.

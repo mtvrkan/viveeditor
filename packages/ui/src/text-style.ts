@@ -5,14 +5,6 @@ import type { MenuItem } from './menu.js'
 import type { MessageKey, Messages } from './messages.js'
 import { displayShortcut } from './tools.js'
 
-const SIZES: readonly { value: string | null; label: MessageKey }[] = [
-  { value: 'tiny', label: 'fontTiny' },
-  { value: 'small', label: 'fontSmall' },
-  { value: null, label: 'fontNormal' },
-  { value: 'big', label: 'fontBig' },
-  { value: 'huge', label: 'fontHuge' },
-]
-
 const SCRIPTS: readonly {
   mark: string
   command: string
@@ -56,26 +48,6 @@ export function textStyleItems(
   locale: string,
 ): MenuItem[] {
   const items: MenuItem[] = []
-  if (commands.has('setFontSize')) {
-    for (const size of SIZES) {
-      items.push({
-        id: `font-${size.value ?? 'normal'}`,
-        label: messages[size.label],
-        glyph: 'A',
-        role: 'menuitemradio',
-        group: 0,
-        checked: () => (commands.query('fontSize') ?? null) === size.value,
-        disabled: () =>
-          size.value === null
-            ? !commands.can('unsetFontSize')
-            : !commands.can('setFontSize', size.value),
-        action: () => {
-          if (size.value === null) commands.run('unsetFontSize')
-          else commands.run('setFontSize', size.value)
-        },
-      })
-    }
-  }
   for (const script of SCRIPTS) {
     if (!commands.has(script.command)) continue
     items.push({

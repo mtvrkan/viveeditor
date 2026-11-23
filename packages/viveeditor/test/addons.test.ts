@@ -152,8 +152,11 @@ describe('createAddonLoader', () => {
       addons.register('panels', '1.2.3', {
         createCharPanel: factory,
         createCheckPanel: factory,
+        createContextMenu: factory,
         createEmbedPanel: factory,
+        createFontSizePanel: factory,
         createImagePanel: factory,
+        createListStylePanel: factory,
         createOutlinePanel: factory,
         createSearchPanel: factory,
         createShortcutsPanel: factory,
@@ -168,8 +171,11 @@ describe('createAddonLoader', () => {
     expect(Object.keys(kit).sort()).toEqual([
       'createCharPanel',
       'createCheckPanel',
+      'createContextMenu',
       'createEmbedPanel',
+      'createFontSizePanel',
       'createImagePanel',
+      'createListStylePanel',
       'createOutlinePanel',
       'createSearchPanel',
       'createShortcutsPanel',

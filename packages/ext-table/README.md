@@ -27,6 +27,12 @@ editor.commands.insertTable({ rows: 3, cols: 3, headerRow: true })
 
 Merged cells, header rows, column widths by dragging, and Tab to the next cell. Saved HTML keeps column widths on any site.
 
+Table properties: `setTableWidth('full' | null)`, `setTableAlign('center' | null)`, `setTableBorder('rows' | 'none' | null)`, `setTableStriped(boolean)` and `setTableBorderColor(color | null)`, read back with `editor.query.tableStyle()`. Cell properties apply to every selected cell: `setCellBackground`, `setCellVerticalAlign` and `setCellTextAlign('center' | 'right' | 'justify' | null)`, read back with `editor.query.cellStyle()`. `selectRow`, `selectColumn` and `selectTable` select cells; `distributeColumns` gives every column the same width.
+
+```html
+<table data-width="full" data-align="center" data-border="rows" data-striped="true" style="--vive-table-border-color: #aabbcc">
+```
+
 ## License
 
 MIT

@@ -2,7 +2,7 @@
 key: images
 title: Images and uploads
 description: Set up the image extension, write the upload function, handle progress and abort, secure your server and track alt text.
-updated: 2026-11-01
+updated: 2026-11-23
 faq:
   - q: What happens if I do not pass an upload function?
     a: Images can only be added by https address. The "Choose from device" button in the image panel is hidden, and dropped or pasted files are not uploaded.
@@ -184,7 +184,7 @@ img {
 
 ## Image panel
 
-The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text, caption, position and size.
+The image button in the toolbar or the "Image" entry in the `/` menu opens the panel. With an upload function, a "Choose from device" button appears, and you can also drag and drop or paste an image into the editor. Enter an image address that starts with `https`; the panel warns about an address it cannot use. With an image selected, the panel lets you change its alt text, caption, position, link and size. Right-clicking an image opens a menu with "Edit image…", the three alignments, "Copy image address" and "Delete image"; see [Toolbar and shortcuts](/en/docs/toolbar-and-shortcuts/).
 
 ## Caption and position
 
@@ -210,3 +210,15 @@ figcaption { width: 0; min-width: 100%; font-size: 0.875em; text-align: center; 
 ```
 
 The same values are available as commands: `editor.commands.setImageAttributes({ caption: 'Figure 1', align: 'right' })`. `align` accepts `'left'`, `'center'`, `'right'` or `null`. A caption is plain text; it is written to Word as a "Caption" paragraph and to Markdown as an italic line under the image.
+
+## Linked images
+
+The "Link" field in the image panel turns the image into a link. It accepts the same addresses as a text link and says whether it can use the one you typed; a bare domain such as `example.com` gets `https://`. Empty the field to remove the link. The image is saved inside an `a` element:
+
+```html
+<a rel="noopener noreferrer nofollow" href="https://example.com/report">
+  <img src="https://cdn.example.com/chart.png" alt="Sales chart" width="640" height="360">
+</a>
+```
+
+With a caption or a position, the link wraps only the image inside the `figure`, not the caption. In code, use `editor.commands.setImageLink('https://example.com/report')`, or `setImageLink(null)` to remove the link; `editor.query.selectedImage()` returns it as `href`. Word files keep linked images when opening and saving.

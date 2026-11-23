@@ -2,7 +2,13 @@ import { selectAll, setBlockType } from 'prosemirror-commands'
 import { closeHistory, history, redo, undo } from 'prosemirror-history'
 import { undoInputRule } from 'prosemirror-inputrules'
 import { type Mark, type Node as ProseMirrorNode, Slice } from 'prosemirror-model'
-import { type EditorState, Plugin, TextSelection } from 'prosemirror-state'
+import {
+  type EditorState,
+  NodeSelection,
+  Plugin,
+  type Selection,
+  TextSelection,
+} from 'prosemirror-state'
 import type { EditorView } from 'prosemirror-view'
 import { parseContent } from './content.js'
 import { defineExtension, type Extension, type FoundItem } from './extension.js'
@@ -34,6 +40,34 @@ const FIND_LIMIT = 2000
 
 const nameSet = (names: unknown): ReadonlySet<string> =>
   new Set(Array.isArray(names) ? names.filter((name) => typeof name === 'string') : [])
+
+function pointPosition(
+  view: EditorView,
+  point: { left: number; top: number } | undefined,
+): { pos: number; inside: number } | null {
+  if (!point || !Number.isFinite(point.left) || !Number.isFinite(point.top)) return null
+  try {
+    return view.posAtCoords(point)
+  } catch {
+    return null
+  }
+}
+
+function domPosition(view: EditorView, target: Node): number {
+  try {
+    return view.posAtDOM(target, 0)
+  } catch {
+    return -1
+  }
+}
+
+function isClickedAtom(view: EditorView, at: number, target: Node): boolean {
+  if (at < 0 || at >= view.state.doc.content.size) return false
+  const node = view.state.doc.nodeAt(at)
+  if (!node?.isAtom || !NodeSelection.isSelectable(node)) return false
+  const dom = view.nodeDOM(at)
+  return dom instanceof Node && dom.contains(target)
+}
 
 function findNodes(doc: ProseMirrorNode, names: unknown): FoundItem[] {
   const wanted = nameSet(names)
@@ -201,6 +235,21 @@ export const Base: Extension<Record<string, never>> = defineExtension({
         dispatch?.(state.tr.setSelection(selection).scrollIntoView())
         return true
       },
+    selectAt: (target: Node, point?: { left: number; top: number }) => (state, dispatch, view) => {
+      if (!view || !(target instanceof Node) || !view.dom.contains(target)) return false
+      const found = pointPosition(view, point) ?? { pos: domPosition(view, target), inside: -1 }
+      const { doc, selection } = state
+      const { pos } = found
+      if (pos < 0 || pos > doc.content.size) return false
+      const atom = [found.inside, pos, pos - 1].find((at) => isClickedAtom(view, at, target))
+      let next: Selection | null = null
+      if (atom !== undefined) next = NodeSelection.create(doc, atom)
+      else if (!selection.ranges.some(({ $from, $to }) => pos >= $from.pos && pos <= $to.pos)) {
+        next = TextSelection.near(doc.resolve(pos))
+      }
+      if (next && !next.eq(selection)) dispatch?.(state.tr.setSelection(next))
+      return true
+    },
   }),
   queries: () => ({
     selectedText: (state) => {

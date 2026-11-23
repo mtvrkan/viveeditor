@@ -3,7 +3,7 @@ import { basicExtensions } from '@viveeditor/ext-basic'
 import { CharacterCount } from '@viveeditor/ext-character-count'
 import { CodeBlock } from '@viveeditor/ext-code-block'
 import { Embed } from '@viveeditor/ext-embed'
-import { formatExtensions } from '@viveeditor/ext-format'
+import { FontFamily, formatExtensions } from '@viveeditor/ext-format'
 import { Image } from '@viveeditor/ext-image'
 import { listExtensions } from '@viveeditor/ext-list'
 import { Search } from '@viveeditor/ext-search'
@@ -208,8 +208,8 @@ describe('table cell style', () => {
       return panel
     }
 
-    open().querySelector<HTMLButtonElement>('[aria-label="Mavi"]')?.click()
     const panel = open()
+    panel.querySelector<HTMLButtonElement>('[aria-label="Mavi"]')?.click()
     const middle = [...panel.querySelectorAll<HTMLButtonElement>('.ve-cell-align button')].find(
       (button) => button.textContent === 'Orta',
     )
@@ -217,7 +217,11 @@ describe('table cell style', () => {
     middle?.click()
 
     expect(blue).toBe('true')
-    expect(editor.query.cellStyle()).toEqual({ background: '#cde8ff', verticalAlign: 'middle' })
+    expect(editor.query.cellStyle()).toEqual({
+      background: '#cde8ff',
+      verticalAlign: 'middle',
+      textAlign: null,
+    })
   })
 
   it('hides the cell style section outside a table', async () => {
@@ -225,7 +229,133 @@ describe('table cell style', () => {
 
     tool(root, 'table').click()
 
-    expect(root.querySelector<HTMLElement>('.ve-cell-style')?.hidden).toBe(true)
+    expect(root.querySelector<HTMLElement>('.ve-table-edit')?.hidden).toBe(true)
+  })
+})
+
+describe('table panel tabs', () => {
+  const TWO_CELLS =
+    '<table><tbody><tr><td style="text-align: center"><p>a</p></td><td><p>b</p></td></tr></tbody></table><p></p>'
+  const toHex = (part: string): string => Number(part).toString(16).padStart(2, '0')
+  const clean = (html: string): string =>
+    html
+      .replace(
+        /rgb\((\d+), (\d+), (\d+)\)/g,
+        (_match, red, green, blue) => `#${toHex(red)}${toHex(green)}${toHex(blue)}`,
+      )
+      .replace(/;"/g, '"')
+
+  async function openInTable(content = TWO_CELLS, cursor = 9) {
+    const mounted = await mount(content, { locale: 'tr' }, [...basicExtensions, Table])
+    mounted.editor.commands.setTextSelection(cursor)
+    mounted.ui.refresh()
+    tool(mounted.root, 'table').click()
+    const panel = mounted.root.querySelector<HTMLElement>('.ve-table-panel')
+    if (!panel) throw new Error('Missing table panel')
+    const tabs = [...panel.querySelectorAll<HTMLButtonElement>('[role="tab"]')]
+    const tabPanels = [...panel.querySelectorAll<HTMLElement>('[role="tabpanel"]')]
+    const button = (scope: HTMLElement, name: string) => {
+      const found = [...scope.querySelectorAll<HTMLButtonElement>('button')].find(
+        (candidate) =>
+          candidate.getAttribute('aria-label') === name || candidate.textContent === name,
+      )
+      if (!found) throw new Error(`Missing button ${name}`)
+      return found
+    }
+    return { ...mounted, panel, tabs, tabPanels, button }
+  }
+
+  it('switches tabs with the arrow keys and links each tab to its panel', async () => {
+    const { panel, tabs, tabPanels } = await openInTable()
+    const tablist = panel.querySelector<HTMLElement>('[role="tablist"]')
+
+    tablist?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+
+    expect(tabs.map((tab) => tab.textContent)).toEqual(['Hücre', 'Tablo'])
+    expect(tabs.map((tab) => tab.getAttribute('aria-selected'))).toEqual(['false', 'true'])
+    expect(document.activeElement).toBe(tabs[1])
+    expect(tabs[1]?.getAttribute('aria-controls')).toBe(tabPanels[1]?.id)
+    expect(tabPanels[1]?.getAttribute('aria-labelledby')).toBe(tabs[1]?.id)
+    expect(tabPanels.map((tabPanel) => tabPanel.hidden)).toEqual([true, false])
+  })
+
+  it('wraps from the first tab to the last one with ArrowLeft', async () => {
+    const { panel, tabs } = await openInTable()
+
+    panel
+      .querySelector('[role="tablist"]')
+      ?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
+
+    expect(tabs[1]?.tabIndex).toBe(0)
+  })
+
+  it('centres the cell text horizontally and keeps the panel open', async () => {
+    const { editor, panel, button } = await openInTable()
+    const group = panel.querySelector<HTMLElement>('.ve-cell-text-align')
+    if (!group) throw new Error('Missing text align group')
+
+    button(group, 'Ortala').click()
+
+    expect(editor.getHTML()).toMatch(/<td style="text-align: center;?"><p>b<\/p><\/td>/)
+    expect(panel.hidden).toBe(false)
+    expect(button(group, 'Ortala').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('applies a custom cell colour typed into the colour code field', async () => {
+    const { editor, tabPanels } = await openInTable()
+    const code = tabPanels[0]?.querySelector<HTMLInputElement>('.ve-color-code')
+    if (!code) throw new Error('Missing colour code field')
+
+    code.value = '#123456'
+    code.form?.requestSubmit()
+
+    expect(clean(editor.getHTML())).toContain('<td style="background-color: #123456"><p>b</p></td>')
+  })
+
+  it('writes width, alignment, borders, stripes and border colour on the table', async () => {
+    const { editor, panel, tabs, tabPanels, button } = await openInTable()
+    const tablePanel = tabPanels[1]
+    if (!tablePanel) throw new Error('Missing table tab panel')
+
+    tabs[1]?.click()
+    button(tablePanel, 'Tam genişlik').click()
+    button(tablePanel, 'Ortala').click()
+    button(tablePanel, 'Yalnızca satırlar').click()
+    tablePanel.querySelector<HTMLInputElement>('[role="switch"]')?.click()
+    button(tablePanel, 'Koyu gri').click()
+
+    expect(clean(editor.getHTML())).toContain(
+      '<table data-width="full" data-align="center" data-border="rows" data-striped="true" style="--vive-table-border-color: #475467">',
+    )
+    expect(panel.hidden).toBe(false)
+    expect(tabs[1]?.getAttribute('aria-selected')).toBe('true')
+    expect(button(tablePanel, 'Koyu gri').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('reflects the alignment of the cell under the cursor', async () => {
+    const left = await openInTable(TWO_CELLS, 9)
+    const leftGroup = left.panel.querySelector<HTMLElement>('.ve-cell-text-align')
+    const pressedOnB = leftGroup?.querySelector('[aria-pressed="true"]')?.getAttribute('aria-label')
+    left.panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+
+    left.editor.commands.setTextSelection(4)
+    left.ui.refresh()
+    tool(left.root, 'table').click()
+    const pressedOnA = leftGroup?.querySelector('[aria-pressed="true"]')?.getAttribute('aria-label')
+
+    expect([pressedOnB, pressedOnA]).toEqual(['Sola', 'Ortala'])
+  })
+
+  it('deletes the table from the Tablo tab and closes the panel', async () => {
+    const { editor, panel, tabs, tabPanels, button } = await openInTable()
+
+    tabs[1]?.click()
+    const remove = button(tabPanels[1] as HTMLElement, 'Tabloyu sil')
+    remove.click()
+
+    expect(remove.className).toContain('ve-table-danger')
+    expect(editor.getHTML()).not.toContain('<table')
+    expect(panel.hidden).toBe(true)
   })
 })
 
@@ -944,6 +1074,46 @@ describe('format tools', () => {
     expect(tool(root, 'textColor').getAttribute('aria-expanded')).toBe('false')
   })
 
+  it('applies a typed colour code and lists it under recent colours next time', async () => {
+    const { editor, root } = await mount('<p>renk</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'textColor').click()
+    const code = root.querySelector<HTMLInputElement>(
+      '.ve-swatches[aria-label="Yazı rengi"] .ve-color-code',
+    )
+    if (!code) throw new Error('Missing colour code field')
+
+    code.value = '1A73E8'
+    code.form?.requestSubmit()
+    tool(root, 'textColor').click()
+
+    expect(editor.getAttributes('textColor').color).toBe('#1a73e8')
+    expect(
+      root
+        .querySelector(
+          '.ve-swatches[aria-label="Yazı rengi"] .ve-recent-colors [aria-label="#1a73e8"]',
+        )
+        ?.getAttribute('aria-pressed'),
+    ).toBe('true')
+  })
+
+  it('keeps the panel open and flags an invalid colour code', async () => {
+    const { editor, root } = await mount('<p>renk</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'highlight').click()
+    const code = root.querySelector<HTMLInputElement>(
+      '.ve-swatches[aria-label="Vurgu"] .ve-color-code',
+    )
+    if (!code) throw new Error('Missing colour code field')
+
+    code.value = 'url(x)'
+    code.form?.requestSubmit()
+
+    expect(code.getAttribute('aria-invalid')).toBe('true')
+    expect(tool(root, 'highlight').getAttribute('aria-expanded')).toBe('true')
+    expect(editor.getHTML()).toBe('<p>renk</p>')
+  })
+
   it('marks the current highlight and removes it', async () => {
     const { editor, root } = await mount('<p><mark>vurgu</mark></p>', { locale: 'tr' }, extensions)
     editor.commands.selectAll()
@@ -1063,14 +1233,16 @@ describe('text style and indent menus', () => {
     return found
   }
 
-  it('sets the size, superscript and case of the selection from the text style menu', async () => {
+  it('sets the size, superscript and case of the selection from the size control and text style menu', async () => {
     const { editor, root } = await mount('<p>istanbul su</p>', { locale: 'tr' }, extensions)
     editor.commands.setTextSelection(1, 9)
 
+    tool(root, 'fontSize').click()
+    root
+      .querySelector<HTMLButtonElement>('.ve-font-size [aria-label="Yazı boyutu: 18 pt"]')
+      ?.click()
     tool(root, 'textStyle').click()
     const menu = menuNamed(root, 'Yazı biçimi')
-    item(menu, 'Büyük').click()
-    tool(root, 'textStyle').click()
     item(menu, 'BÜYÜK HARF').click()
     editor.commands.setTextSelection(11, 12)
     tool(root, 'textStyle').click()
@@ -1081,9 +1253,9 @@ describe('text style and indent menus', () => {
     )
 
     expect(editor.getHTML().replace(/;"/g, '"')).toBe(
-      '<p><span style="font-size: 1.25em">İSTANBUL</span> s<sub>u</sub></p>',
+      '<p><span style="font-size: 18pt">İSTANBUL</span> s<sub>u</sub></p>',
     )
-    expect(checked).toEqual(['Normal boyut', 'Alt simge'])
+    expect(checked).toEqual(['Alt simge'])
   })
 
   it('indents and outdents from the alignment menu', async () => {
@@ -1131,6 +1303,160 @@ describe('text style and indent menus', () => {
     const { root } = await mount('<p>a</p>', { locale: 'tr' })
 
     expect(root.querySelector('[data-tool="textStyle"]')).toBeNull()
+  })
+})
+
+describe('font size control', () => {
+  const extensions = [...basicExtensions, ...listExtensions, ...formatExtensions]
+  const panel = (root: HTMLElement): HTMLElement => {
+    const found = root.querySelector<HTMLElement>('[role="dialog"][aria-label="Yazı boyutu"]')
+    if (!found) throw new Error('Missing font size panel')
+    return found
+  }
+  const field = (root: HTMLElement): HTMLInputElement => {
+    const found = panel(root).querySelector<HTMLInputElement>('.ve-size-field')
+    if (!found) throw new Error('Missing font size field')
+    return found
+  }
+  const submit = (root: HTMLElement, value: string): void => {
+    field(root).value = value
+    field(root).form?.requestSubmit()
+  }
+  const html = (editor: Editor): string => editor.getHTML().replace(/;"/g, '"')
+
+  it('shows the current size in points on its button', async () => {
+    const { editor, ui, root } = await mount(
+      '<p>düz <span style="font-size: 10.5pt">küçük</span></p>',
+      { locale: 'tr' },
+      extensions,
+    )
+    const plain = [tool(root, 'fontSize').textContent, tool(root, 'fontSize').ariaLabel]
+    editor.commands.setTextSelection(7)
+
+    ui.refresh()
+
+    expect(plain).toEqual(['12', 'Yazı boyutu: 12 pt'])
+    expect(tool(root, 'fontSize').textContent).toBe('10,5')
+    expect(tool(root, 'fontSize').getAttribute('aria-label')).toBe('Yazı boyutu: 10,5 pt')
+  })
+
+  it('applies a typed size, closes and returns to the editor', async () => {
+    const { editor, root } = await mount('<p>boyut</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'fontSize').click()
+    const focused = document.activeElement
+
+    submit(root, '18')
+
+    expect(focused).toBe(field(root))
+    expect(html(editor)).toBe('<p><span style="font-size: 18pt">boyut</span></p>')
+    expect(panel(root).hidden).toBe(true)
+    expect(tool(root, 'fontSize').getAttribute('aria-expanded')).toBe('false')
+  })
+
+  it.each([
+    ['12,5', '12.5pt'],
+    ['12.5', '12.5pt'],
+    ['12pt', '12pt'],
+    ['13,3', '13.5pt'],
+  ])('reads %s as %s', async (typed, size) => {
+    const { editor, root } = await mount('<p>boyut</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'fontSize').click()
+
+    submit(root, typed)
+
+    expect(html(editor)).toBe(`<p><span style="font-size: ${size}">boyut</span></p>`)
+  })
+
+  it.each(['abc', '120', '5', ''])('flags %j and keeps the panel open', async (typed) => {
+    const { editor, root } = await mount('<p>boyut</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'fontSize').click()
+
+    submit(root, typed)
+
+    expect(field(root).getAttribute('aria-invalid')).toBe('true')
+    expect(panel(root).querySelector('.ve-hint')?.textContent).toContain('6 ile 96 arasında')
+    expect(panel(root).hidden).toBe(false)
+    expect(html(editor)).toBe('<p>boyut</p>')
+  })
+
+  it('steps through the presets with − and + and keeps the panel open', async () => {
+    const { editor, root } = await mount('<p>boyut</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'fontSize').click()
+    const larger = panel(root).querySelector<HTMLButtonElement>('[aria-label="Yazıyı büyüt"]')
+    const smaller = panel(root).querySelector<HTMLButtonElement>('[aria-label="Yazıyı küçült"]')
+
+    larger?.click()
+    larger?.click()
+    const grown = [editor.query.fontSize(), field(root).value]
+    smaller?.click()
+
+    expect(grown).toEqual(['16pt', '16'])
+    expect(editor.query.fontSize()).toBe('14pt')
+    expect(panel(root).querySelector('.ve-size-preset[aria-pressed="true"]')?.textContent).toBe(
+      '14',
+    )
+    expect(panel(root).hidden).toBe(false)
+  })
+
+  it('goes back to the default size', async () => {
+    const { editor, root } = await mount(
+      '<p><span style="font-size: 20pt">boyut</span></p>',
+      { locale: 'tr' },
+      extensions,
+    )
+    editor.commands.selectAll()
+    tool(root, 'fontSize').click()
+
+    panel(root).querySelector<HTMLButtonElement>('.ve-clear')?.click()
+
+    expect(html(editor)).toBe('<p>boyut</p>')
+    expect(panel(root).hidden).toBe(true)
+  })
+
+  it('moves through the presets with the arrow keys and closes with Escape', async () => {
+    const { root } = await mount('<p>boyut</p>', { locale: 'tr' }, extensions)
+    const button = tool(root, 'fontSize')
+    button.click()
+    const pressed = panel(root).querySelector<HTMLButtonElement>('.ve-size-preset[tabindex="0"]')
+    pressed?.focus()
+
+    pressed?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    const right = document.activeElement?.textContent
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }),
+    )
+    const down = document.activeElement?.textContent
+    document.activeElement?.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),
+    )
+
+    expect([pressed?.textContent, right, down]).toEqual(['12', '14', '28'])
+    expect(panel(root).hidden).toBe(true)
+    expect(document.activeElement).toBe(button)
+  })
+
+  it('opens from the overflow menu when the toolbar is narrow', async () => {
+    const { editor, root } = await mount('<p>boyut</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+    tool(root, 'fontSize').hidden = true
+    root.querySelector<HTMLButtonElement>('.ve-more')?.click()
+
+    ;[...root.querySelectorAll<HTMLButtonElement>('[role="menu"] .ve-item')]
+      .find((entry) => entry.textContent?.includes('Yazı boyutu'))
+      ?.click()
+    submit(root, '24')
+
+    expect(html(editor)).toBe('<p><span style="font-size: 24pt">boyut</span></p>')
+  })
+
+  it('leaves the size control out without the extension', async () => {
+    const { root } = await mount('<p>a</p>', { locale: 'tr' })
+
+    expect(root.querySelector('[data-tool="fontSize"]')).toBeNull()
   })
 })
 
@@ -1246,5 +1572,296 @@ describe('panels loaded on first use', () => {
     expect(loading?.hidden).toBe(true)
     expect(tool(root, 'textColor').getAttribute('aria-expanded')).toBe('false')
     expect(document.activeElement).toBe(tool(root, 'textColor'))
+  })
+})
+
+describe('font family menu', () => {
+  const extensions = [...basicExtensions, ...listExtensions, ...formatExtensions]
+  const menuOf = (root: HTMLElement): HTMLElement => {
+    const menu = root.querySelector<HTMLElement>('.ve-menu[aria-label="Yazı tipi"]')
+    if (!menu) throw new Error('Missing font family menu')
+    return menu
+  }
+  const labels = (menu: HTMLElement): string[] =>
+    [...menu.querySelectorAll('.ve-item-label')].map((label) => label.textContent ?? '')
+
+  it('applies a family from the menu and shows its name on the button', async () => {
+    const { editor, ui, root } = await mount('<p>yazı</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+
+    tool(root, 'fontFamily').click()
+    const arial = menuOf(root).querySelector<HTMLButtonElement>('[data-item="fontFamily-3"]')
+    arial?.click()
+    ui.refresh()
+
+    expect(arial?.querySelector<HTMLElement>('.ve-item-label')?.style.fontFamily).toContain('Arial')
+    expect(editor.getHTML()).toMatch(
+      /^<p><span style="font-family: Arial, Helvetica, sans-serif;?">yazı<\/span><\/p>$/,
+    )
+    expect(tool(root, 'fontFamily').textContent).toBe('Arial')
+    expect(tool(root, 'fontFamily').getAttribute('aria-label')).toBe('Yazı tipi: Arial')
+  })
+
+  it('translates generic names, checks the current one and unsets it with the default item', async () => {
+    const { editor, ui, root } = await mount(
+      '<p><span style="font-family: serif">yazı</span></p>',
+      { locale: 'tr' },
+      extensions,
+    )
+    editor.commands.selectAll()
+    ui.refresh()
+    const shown = tool(root, 'fontFamily').textContent
+
+    tool(root, 'fontFamily').click()
+    const menu = menuOf(root)
+    const checked = menu.querySelector('[aria-checked="true"]')?.textContent
+    menu.querySelector<HTMLButtonElement>('[data-item="fontFamily-default"]')?.click()
+    ui.refresh()
+
+    expect(shown).toBe('Tırnaklı')
+    expect(checked).toBe('Tırnaklı')
+    expect(labels(menu).slice(0, 4)).toEqual([
+      'Varsayılan yazı tipi',
+      'Tırnaklı',
+      'Tırnaksız',
+      'Eş aralıklı',
+    ])
+    expect(editor.getHTML()).toBe('<p>yazı</p>')
+    expect(tool(root, 'fontFamily').textContent).toBe('Varsayılan')
+  })
+
+  it('lists only the families the host configured', async () => {
+    const { root } = await mount('<p>yazı</p>', { locale: 'en' }, [
+      ...basicExtensions,
+      ...formatExtensions.filter((extension) => extension.name !== 'fontFamily'),
+      FontFamily.configure({ fontFamilies: ["'Open Sans', sans-serif", 'monospace'] }),
+    ])
+
+    tool(root, 'fontFamily').click()
+
+    expect(labels(root.querySelector<HTMLElement>('.ve-menu[aria-label="Font"]') ?? root)).toEqual([
+      'Default font',
+      'Open Sans',
+      'Monospace',
+    ])
+  })
+})
+
+describe('line height menu', () => {
+  const extensions = [...basicExtensions, ...formatExtensions]
+  const menuOf = (root: HTMLElement): HTMLElement => {
+    const menu = root.querySelector<HTMLElement>('.ve-menu[aria-label="Satır aralığı"]')
+    if (!menu) throw new Error('Missing line height menu')
+    return menu
+  }
+
+  it('sets the spacing and checks it the next time the menu opens', async () => {
+    const { editor, ui, root } = await mount('<p>satır</p>', { locale: 'tr' }, extensions)
+    editor.commands.selectAll()
+
+    tool(root, 'lineHeight').click()
+    menuOf(root).querySelector<HTMLButtonElement>('[data-item="lineHeight-1.5"]')?.click()
+    ui.refresh()
+    tool(root, 'lineHeight').click()
+
+    expect(editor.getHTML()).toMatch(/^<p style="line-height: 1\.5;?">satır<\/p>$/)
+    expect(
+      menuOf(root).querySelector('[data-item="lineHeight-1.5"]')?.getAttribute('aria-checked'),
+    ).toBe('true')
+  })
+
+  it('writes the values with the locale decimal separator', async () => {
+    const { root } = await mount('<p>satır</p>', { locale: 'tr' }, extensions)
+
+    tool(root, 'lineHeight').click()
+
+    expect(
+      [...menuOf(root).querySelectorAll('.ve-item-label')].map((label) => label.textContent),
+    ).toEqual(['Tek (1)', '1,15', '1,5', 'Çift (2)', 'Varsayılan'])
+  })
+
+  it('removes the spacing with the default item', async () => {
+    const { editor, root } = await mount(
+      '<p style="line-height: 2">satır</p>',
+      { locale: 'tr' },
+      extensions,
+    )
+    editor.commands.selectAll()
+
+    tool(root, 'lineHeight').click()
+    menuOf(root).querySelector<HTMLButtonElement>('[data-item="lineHeight-default"]')?.click()
+
+    expect(editor.getHTML()).toBe('<p>satır</p>')
+  })
+})
+
+describe('list style panel', () => {
+  const panelOf = (root: HTMLElement): HTMLElement => {
+    const panel = root.querySelector<HTMLElement>('.ve-list-style')
+    if (!panel) throw new Error('Missing list style panel')
+    return panel
+  }
+  const choice = (root: HTMLElement, label: string): HTMLButtonElement => {
+    const button = panelOf(root).querySelector<HTMLButtonElement>(`[aria-label="${label}"]`)
+    if (!button) throw new Error(`Missing choice ${label}`)
+    return button
+  }
+  const startField = (root: HTMLElement): HTMLInputElement => {
+    const field = panelOf(root).querySelector<HTMLInputElement>('.ve-list-start')
+    if (!field) throw new Error('Missing start field')
+    return field
+  }
+
+  it('gives a bulleted list square bullets and keeps numbering choices disabled', async () => {
+    const { editor, ui, root } = await mount('<ul><li><p>a</p></li></ul>')
+    editor.commands.setTextSelection(3)
+    ui.refresh()
+
+    tool(root, 'listStyle').click()
+    const numbering = choice(root, 'A, B, C').getAttribute('aria-disabled')
+    const start = startField(root).disabled
+    choice(root, 'Kare').click()
+
+    expect(numbering).toBe('true')
+    expect(start).toBe(true)
+    expect(editor.getHTML()).toMatch(
+      /^<ul style="list-style-type: square;?"><li><p>a<\/p><\/li><\/ul>$/,
+    )
+  })
+
+  it('sets the numbering type and the start number of a numbered list', async () => {
+    const { editor, ui, root } = await mount('<ol><li><p>a</p></li></ol>')
+    editor.commands.setTextSelection(3)
+    ui.refresh()
+
+    tool(root, 'listStyle').click()
+    choice(root, 'A, B, C').click()
+    ui.refresh()
+    tool(root, 'listStyle').click()
+    const pressed = choice(root, 'A, B, C').getAttribute('aria-pressed')
+    startField(root).value = '3'
+    startField(root).form?.requestSubmit()
+
+    expect(pressed).toBe('true')
+    expect(editor.getHTML()).toBe('<ol start="3" type="A"><li><p>a</p></li></ol>')
+  })
+
+  it('keeps an invalid start number flagged and the list unchanged', async () => {
+    const { editor, ui, root } = await mount('<ol><li><p>a</p></li></ol>')
+    editor.commands.setTextSelection(3)
+    ui.refresh()
+
+    tool(root, 'listStyle').click()
+    startField(root).value = '-2'
+    startField(root).form?.requestSubmit()
+
+    expect(startField(root).getAttribute('aria-invalid')).toBe('true')
+    expect(panelOf(root).querySelector<HTMLElement>('.ve-hint')?.hidden).toBe(false)
+    expect(panelOf(root).hidden).toBe(false)
+    expect(editor.getHTML()).toBe('<ol><li><p>a</p></li></ol>')
+  })
+
+  it('is disabled outside a list', async () => {
+    const { ui, root } = await mount('<p>a</p>')
+    ui.refresh()
+
+    expect(tool(root, 'listStyle').getAttribute('aria-disabled')).toBe('true')
+  })
+})
+
+describe('link panel new tab option', () => {
+  const checkbox = (root: HTMLElement): HTMLInputElement => {
+    const box = root.querySelector<HTMLInputElement>('.ve-link input[type="checkbox"]')
+    if (!box) throw new Error('Missing new tab checkbox')
+    return box
+  }
+
+  it('opens the link in a new tab and drops the target when unchecked', async () => {
+    const { editor, root } = await mount()
+    editor.commands.selectAll()
+    tool(root, 'link').click()
+    const input = root.querySelector<HTMLInputElement>('.ve-link input[type="text"]')
+    if (!input) throw new Error('Missing link input')
+
+    input.value = 'https://viveeditor.dev'
+    checkbox(root).checked = true
+    root.querySelector<HTMLButtonElement>('.ve-link .ve-primary')?.click()
+    const opened = editor.getHTML()
+    tool(root, 'link').click()
+    const reflected = checkbox(root).checked
+    checkbox(root).checked = false
+    root.querySelector<HTMLButtonElement>('.ve-link .ve-primary')?.click()
+
+    expect(opened).toContain('target="_blank"')
+    expect(reflected).toBe(true)
+    expect(editor.getHTML()).not.toContain('target=')
+    expect(editor.getHTML()).toContain('href="https://viveeditor.dev"')
+  })
+
+  it('starts unchecked for a new link', async () => {
+    const { editor, root } = await mount()
+    editor.commands.selectAll()
+
+    tool(root, 'link').click()
+
+    expect(checkbox(root).checked).toBe(false)
+    expect(root.querySelector('.ve-link .ve-checkbox')?.textContent).toBe('Yeni sekmede aç')
+  })
+})
+
+describe('image link field', () => {
+  const selectImage = async (content: string) => {
+    const mounted = await mount(content, { locale: 'tr' }, [...basicExtensions, Image])
+    mounted.editor.focus()
+    mounted.editor.dom.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }),
+    )
+    tool(mounted.root, 'image').click()
+    const panel = mounted.root.querySelector<HTMLElement>('.ve-image-panel')
+    const link = panel?.querySelector<HTMLInputElement>('input[id$="-link"]')
+    if (!panel || !link) throw new Error('Missing image link field')
+    return { ...mounted, panel, link }
+  }
+  const apply = (panel: HTMLElement): void => {
+    panel.querySelector<HTMLButtonElement>('.ve-image-actions .ve-primary')?.click()
+  }
+
+  it('links the selected image', async () => {
+    const { editor, panel, link } = await selectImage(
+      '<img src="https://cdn.example.com/a.png" alt="Grafik"><p>Alt</p>',
+    )
+
+    link.value = 'example.com/sayfa'
+    apply(panel)
+
+    expect(editor.getHTML()).toMatch(/^<a [^>]*href="https:\/\/example\.com\/sayfa"[^>]*><img /)
+  })
+
+  it('removes the link when the field is emptied', async () => {
+    const { editor, panel, link } = await selectImage(
+      '<a href="https://example.com/"><img src="https://cdn.example.com/a.png" alt="Grafik"></a><p>Alt</p>',
+    )
+    const shown = link.value
+
+    link.value = ''
+    apply(panel)
+
+    expect(shown).toBe('https://example.com/')
+    expect(editor.getHTML()).not.toContain('<a ')
+  })
+
+  it('refuses an unsafe address and keeps the panel open', async () => {
+    const { editor, panel, link } = await selectImage(
+      '<img src="https://cdn.example.com/a.png" alt="Grafik"><p>Alt</p>',
+    )
+
+    link.value = 'javascript:alert(1)'
+    link.dispatchEvent(new Event('input'))
+    apply(panel)
+
+    expect(link.getAttribute('aria-invalid')).toBe('true')
+    expect(panel.querySelector('.ve-image-link .ve-hint')?.textContent).toContain('kabul edilmez')
+    expect(panel.hidden).toBe(false)
+    expect(editor.getHTML()).not.toContain('<a ')
   })
 })

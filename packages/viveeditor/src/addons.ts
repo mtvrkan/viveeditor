@@ -64,8 +64,11 @@ export const ADDON_MEMBERS: {
   panels: [
     'createCharPanel',
     'createCheckPanel',
+    'createContextMenu',
     'createEmbedPanel',
+    'createFontSizePanel',
     'createImagePanel',
+    'createListStylePanel',
     'createOutlinePanel',
     'createSearchPanel',
     'createShortcutsPanel',

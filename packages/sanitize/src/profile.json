@@ -6,6 +6,8 @@
     "maxAttributeLength": 2048,
     "maxTextAttributeLength": 1000,
     "maxStyleValueLength": 64,
+    "minFontSizePt": 6,
+    "maxFontSizePt": 96,
     "maxSpan": 100,
     "maxImageSize": 10000,
     "maxListStart": 99999,
@@ -49,25 +51,25 @@
   ],
   "elements": {
     "p": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "h1": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "h2": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "h3": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "h4": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "h5": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "h6": {
-      "styles": ["text-align", "margin-inline-start"]
+      "styles": ["text-align", "margin-inline-start", "line-height"]
     },
     "blockquote": {},
     "hr": {},
@@ -83,10 +85,11 @@
       "attributes": ["href", "title", "target"]
     },
     "ul": {
-      "attributes": ["data-type"]
+      "attributes": ["data-type"],
+      "styles": ["list-style-type"]
     },
     "ol": {
-      "attributes": ["start"]
+      "attributes": ["start", "type"]
     },
     "li": {
       "attributes": ["data-type", "data-checked"]
@@ -109,7 +112,8 @@
       "attributes": ["data-language"]
     },
     "table": {
-      "styles": ["width", "min-width"]
+      "styles": ["width", "min-width", "--vive-table-border-color"],
+      "attributes": ["data-width", "data-align", "data-border", "data-striped"]
     },
     "colgroup": {},
     "col": {
@@ -119,14 +123,14 @@
     "tr": {},
     "td": {
       "attributes": ["colspan", "rowspan", "data-colwidth"],
-      "styles": ["background-color", "vertical-align"]
+      "styles": ["background-color", "vertical-align", "text-align"]
     },
     "th": {
       "attributes": ["colspan", "rowspan", "data-colwidth"],
-      "styles": ["background-color", "vertical-align"]
+      "styles": ["background-color", "vertical-align", "text-align"]
     },
     "span": {
-      "styles": ["color", "font-size"],
+      "styles": ["color", "font-size", "font-family"],
       "attributes": ["class", "data-mention", "data-math"]
     },
     "mark": {
@@ -160,6 +164,22 @@
   "indents": ["2em", "4em", "6em", "8em", "10em", "12em", "14em", "16em"],
   "imageAlign": ["left", "center", "right"],
   "verticalAlign": ["middle", "bottom"],
+  "lineHeights": ["1", "1.15", "1.5", "2"],
+  "orderedListTypes": ["a", "A", "i", "I"],
+  "bulletStyles": ["disc", "circle", "square"],
+  "tableWidths": ["full"],
+  "tableAlign": ["center"],
+  "tableBorders": ["rows", "none"],
+  "fontFamilies": [
+    "serif",
+    "sans-serif",
+    "monospace",
+    "Arial, Helvetica, sans-serif",
+    "Georgia, serif",
+    "'Times New Roman', Times, serif",
+    "'Courier New', Courier, monospace",
+    "Verdana, Geneva, sans-serif"
+  ],
   "linkProtocols": ["http", "https", "mailto", "tel"],
   "linkRel": "noopener noreferrer nofollow",
   "image": {

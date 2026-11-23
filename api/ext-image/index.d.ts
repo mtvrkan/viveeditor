@@ -17,10 +17,12 @@ interface ImageAttributes {
   height?: number | null;
   caption?: string | null;
   align?: ImageAlign | null;
+  href?: string | null;
 }
 export declare const DEFAULT_SOURCE_POLICY: ImageSourcePolicy;
 export declare function normalizeImageSrc(value: unknown, policy?: ImageSourcePolicy): string | null;
 export declare function isAllowedImageSrc(value: unknown, policy?: ImageSourcePolicy): boolean;
+export declare function cleanImageHref(value: unknown): string | null;
 export declare function cleanDimension(value: unknown): number | null;
 type ImageErrorCode = "TYPE" | "SIZE" | "COUNT" | "TIMEOUT" | "UPLOAD" | "SOURCE";
 interface ImageError {
@@ -75,6 +77,7 @@ export interface SelectedImage {
   height: number | null;
   caption: string | null;
   align: ImageAlign | null;
+  href: string | null;
 }
 export interface PendingUploads {
   uploading: number;
@@ -87,6 +90,7 @@ declare module "@viveeditor/core" {
     setImageAttributes: (changes: ImageChanges) => Command;
     scaleImage: (percent: number) => Command;
     uploadImages: (files: readonly File[]) => Command;
+    setImageLink: (href: string | null) => Command;
   }
   interface QueryRegistry {
     selectedImage: () => SelectedImage | null;

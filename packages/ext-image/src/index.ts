@@ -11,6 +11,7 @@ import {
   cleanAlign,
   cleanDimension,
   cleanImage,
+  cleanImageHref,
   cleanText,
   type ImageAlign,
   type ImageAttributes,
@@ -30,6 +31,7 @@ import { contentWidth, ImageView, imageAttributes, scaledHeight } from './view.j
 export { type ImageSize, imageSize, sniffImageType } from './sniff.js'
 export {
   cleanDimension,
+  cleanImageHref,
   DEFAULT_SOURCE_POLICY,
   type ImageAlign,
   type ImageAttributes,
@@ -79,6 +81,7 @@ export interface SelectedImage {
   height: number | null
   caption: string | null
   align: ImageAlign | null
+  href: string | null
 }
 
 export interface PendingUploads {
@@ -94,6 +97,7 @@ declare module '@viveeditor/core' {
     setImageAttributes: (changes: ImageChanges) => Command
     scaleImage: (percent: number) => Command
     uploadImages: (files: readonly File[]) => Command
+    setImageLink: (href: string | null) => Command
   }
   interface QueryRegistry {
     selectedImage: () => SelectedImage | null
@@ -123,6 +127,7 @@ function imageSpec(policy: ImageSourcePolicy): NodeSpec {
       height: { default: null },
       caption: { default: null },
       align: { default: null },
+      href: { default: null },
     },
     parseDOM: [
       {
@@ -133,20 +138,41 @@ function imageSpec(policy: ImageSourcePolicy): NodeSpec {
             ? parseImage(image, policy, {
                 caption: dom.querySelector('figcaption')?.textContent ?? null,
                 align: dom.getAttribute('data-align'),
+                href: anchorHref(image),
               })
             : false
+        },
+      },
+      {
+        tag: 'a[href]',
+        priority: 60,
+        getAttrs: (dom) => {
+          const image = dom.firstElementChild
+          const alone =
+            dom.childElementCount === 1 &&
+            image?.matches('img[src]') === true &&
+            (dom.textContent ?? '').trim() === ''
+          return alone ? parseImage(image, policy, { href: dom.getAttribute('href') }) : false
         },
       },
       { tag: 'img[src]', getAttrs: (dom) => parseImage(dom, policy, {}) },
     ],
     toDOM: (node) => {
-      const image: DOMOutputSpec = ['img', imageAttributes(node.attrs, policy)]
-      const { caption, align } = cleanImage(node.attrs, policy)
+      const { caption, align, href } = cleanImage(node.attrs, policy)
+      const img: DOMOutputSpec = ['img', imageAttributes(node.attrs, policy)]
+      const image: DOMOutputSpec = href ? ['a', { rel: LINK_REL, href }, img] : img
       if (!caption && !align) return image
       const figure: DOMOutputSpec[] = caption ? [image, ['figcaption', caption]] : [image]
       return ['figure', align ? { 'data-align': align } : {}, ...figure]
     },
   }
+}
+
+const LINK_REL = 'noopener noreferrer nofollow'
+
+function anchorHref(image: Element): string | null {
+  const parent = image.parentElement
+  return parent?.tagName === 'A' ? parent.getAttribute('href') : null
 }
 
 function parseImage(
@@ -203,6 +229,7 @@ function setImageAttributes(type: NodeType): (changes: ImageChanges) => Command 
       if ('caption' in changes) next.caption = cleanText(changes.caption) || null
       if ('align' in changes) next.align = cleanAlign(changes.align)
       if ('height' in changes) next.height = cleanDimension(changes.height)
+      if ('href' in changes) next.href = cleanImageHref(changes.href)
       if ('width' in changes) {
         next.width = cleanDimension(changes.width)
         if (!('height' in changes) && typeof next.width === 'number') {
@@ -214,6 +241,14 @@ function setImageAttributes(type: NodeType): (changes: ImageChanges) => Command 
       dispatch(transaction)
     }
     return true
+  }
+}
+
+function setImageLink(type: NodeType): (href: string | null) => Command {
+  return (href) => (state, dispatch, view) => {
+    const clean = href === null ? null : cleanImageHref(href)
+    if (href !== null && clean === null) return false
+    return setImageAttributes(type)({ href: clean })(state, dispatch, view)
   }
 }
 
@@ -268,6 +303,7 @@ export const Image: Extension<ImageOptions> = defineExtension({
       insertImage: insertImage(schema, type, policyOf(options)),
       setImageAttributes: setImageAttributes(type),
       scaleImage: scaleImage(type),
+      setImageLink: setImageLink(type),
       uploadImages:
         (files: readonly File[]): Command =>
         (state, dispatch, view) => {

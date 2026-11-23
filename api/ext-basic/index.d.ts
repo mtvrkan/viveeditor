@@ -3,6 +3,12 @@ import { Command } from "prosemirror-state";
 interface LinkAttributes {
   href: string;
   title?: string | null;
+  newTab?: boolean;
+}
+interface CurrentLink {
+  href: string;
+  title: string | null;
+  newTab: boolean;
 }
 interface LinkOptions {
   protocols: readonly string[];
@@ -13,6 +19,9 @@ declare module "@viveeditor/core" {
   interface CommandRegistry {
     setLink: (attributes: LinkAttributes) => Command;
     unsetLink: () => Command;
+  }
+  interface QueryRegistry {
+    link: () => CurrentLink | null;
   }
 }
 export declare const Link: Extension<LinkOptions>;
@@ -51,4 +60,4 @@ export declare const Blockquote: Extension<NoOptions>;
 export declare const HorizontalRule: Extension<NoOptions>;
 export declare const HardBreak: Extension<NoOptions>;
 export declare const basicExtensions: readonly Extension[];
-export type { HeadingLevel, HeadingOptions, LinkAttributes, LinkOptions };
+export type { CurrentLink, HeadingLevel, HeadingOptions, LinkAttributes, LinkOptions };

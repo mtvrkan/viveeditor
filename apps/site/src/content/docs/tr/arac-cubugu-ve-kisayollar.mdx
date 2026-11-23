@@ -1,8 +1,8 @@
 ---
 key: toolbar
 title: Araç çubuğu ve kısayollar
-description: Yüzen araç çubuğu, seçim balonu, / menüsü, blok menüsü, kelime sayacı, okunabilirlik ölçümü ve tüm klavye kısayolları.
-updated: 2026-11-21
+description: Araç çubuğu, yazı tipi, boyut ve satır aralığı, liste stili, sağ tık menüsü, / menüsü, blok menüsü, kelime sayacı ve tüm klavye kısayolları.
+updated: 2026-11-23
 faq:
   - q: Araç çubuğunu tamamen kapatabilir miyim?
     a: Evet. Çerçeve bileşenlerinde ve mountEditor ile ui false verin; npm ile kendiniz kuruyorsanız createUI çağırmayın. Klavye kısayolları eklentilerden geldiği için araç çubuğu olmadan da çalışır.
@@ -10,9 +10,11 @@ faq:
     a: Puan en az 10 kelimeden sonra hesaplanır. Daha kısa metinlerde panel "Puan için en az 10 kelime yazın." der; kelime, cümle ve okuma süresi yine gösterilir.
   - q: Bir aracı neden göremiyorum?
     a: Araç çubuğu yalnızca komutu kayıtlı araçları gösterir. Örneğin tablo eklentisi yüklü değilse tablo düğmesi de çıkmaz. Dar alanlarda bazı araçlar Diğer araçlar menüsüne taşınır.
+  - q: Düz metne sağ tıklayınca neden tarayıcının menüsü açılıyor?
+    a: Tarayıcının yazım önerileri kaybolmasın diye. Editörün kendi menüsü yalnızca tablo, görsel, bağlantı, kod bloğu, video ve formülde açılır. Düz metinde de açılmasını istiyorsanız contextMenu değerini 'always' yapın.
 ---
 
-viveEditor'ün arayüzü `@viveeditor/ui` paketinden gelir: metnin altında duran yüzen bir araç çubuğu, metin seçince açılan küçük bir balon, `/` ile açılan blok menüsü ve kelime sayacı. Bu sayfa her parçanın ne yaptığını, nasıl kapatılacağını ve klavye kısayollarını anlatır. Tek betikli kurulumda ve çerçeve bileşenlerinde araç çubuğu zaten açıktır; npm paketleriyle kendiniz kuruyorsanız `createUI` çağırırsınız.
+viveEditor'ün arayüzü `@viveeditor/ui` paketinden gelir: metnin altında duran yüzen bir araç çubuğu, metin seçince açılan küçük bir balon, tablo, görsel gibi nesnelerde açılan sağ tık menüsü, `/` ile açılan blok menüsü ve kelime sayacı. Bu sayfa her parçanın ne yaptığını, nasıl kapatılacağını ve klavye kısayollarını anlatır. Tek betikli kurulumda ve çerçeve bileşenlerinde araç çubuğu zaten açıktır; npm paketleriyle kendiniz kuruyorsanız `createUI` çağırırsınız.
 
 ## Arayüzü kurmak
 
@@ -33,6 +35,7 @@ const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
 | `readability` | `'atesman'`, `'flesch'` ya da `false`. Varsayılan dile göre seçilir. |
 | `bubble` | `false` seçim balonunu kapatır. |
 | `slash` | `false` `/` menüsünü kapatır. |
+| `contextMenu` | `'objects'` (varsayılan) tabloya, görsele, bağlantıya, kod bloğuna, videoya ya da formüle sağ tıklayınca editörün menüsünü açar; `'always'` düz metinde de açar; `false` her yerde tarayıcının menüsünü bırakır. Ayrıntılar [Sağ tık menüsü](#sağ-tık-menüsü) bölümünde. |
 | `source` | `false` HTML kaynağı düğmesini kaldırır. |
 | `files` | Dosya menüsü; `false` gizler. Ayrıntılar [Dosya aç, kaydet, yazdır](/dokumantasyon/dosya-ac-kaydet-yazdir/) sayfasında. |
 | `exclude` | Gösterilmeyecek araçların adları, örneğin `['fullscreen', 'shortcuts']`. |
@@ -44,11 +47,51 @@ const ui = createUI(editor, { locale: 'tr', theme: 'auto' })
 
 Araç çubuğu yazı alanının altında durur ve uzun bir yazıda aşağı kaydırırken ekranın altında kalır. Telefonda ekran klavyesi açılınca onun üstüne çıkar.
 
-Soldan sağa şunlar vardır: blok türü düğmesi; kalın, italik, altı çizili, üstü çizili, satır içi kod, biçimi temizle ve biçim boyacısı; yazı rengi, vurgu ve yazı biçimi (boyut, üst simge, alt simge, büyük/küçük harf); madde işaretli liste, numaralı liste, görev listesi, alıntı, tablo, görsel, video ve özel karakter; hizalama ve girinti; bağlantı ile bul ve değiştir; geri al, yinele, Dosya ve HTML kaynağı; ana hat, erişilebilirlik denetimi, klavye kısayolları ve tam ekran. En sonda kelime sayacı durur.
+Soldan sağa şunlar vardır: blok türü düğmesi; yazı tipi ve yazı boyutu; kalın, italik, altı çizili, üstü çizili, satır içi kod, biçimi temizle ve biçim boyacısı; yazı rengi, vurgu ve yazı biçimi (üst simge, alt simge, büyük/küçük harf); madde işaretli liste, numaralı liste, liste stili, görev listesi, alıntı, tablo, görsel, video ve özel karakter; hizalama ve girinti ile satır aralığı; bağlantı ile bul ve değiştir; geri al, yinele, Dosya ve HTML kaynağı; ana hat, erişilebilirlik denetimi, klavye kısayolları ve tam ekran. En sonda kelime sayacı durur.
 
 Alan 560 pikselden darsa yalnızca kalın, italik ve bağlantı yerinde kalır, diğer araçlar "Diğer araçlar" menüsüne geçer. Daha geniş alanlarda sığmayan araçlar belirli bir sırayla bu menüye taşınır; menü yalnızca taşınan araçları gösterir.
 
 HTML kaynağı düğmesi belgenin HTML'ini düzenlenebilir bir metin alanında açar. Kaynak açıkken diğer araçlar devre dışıdır; kapattığınızda değişiklikler editöre uygulanır.
+
+## Yazı tipi, boyut ve satır aralığı
+
+**Yazı tipi** her yazı tipini kendi görünümüyle gösteren bir liste açar; "Varsayılan yazı tipi" seçimdeki yazı tipini kaldırır. Varsayılan listede sekiz aile vardır: `serif`, `sans-serif`, `monospace`, `Arial, Helvetica, sans-serif`, `Georgia, serif`, `'Times New Roman', Times, serif`, `'Courier New', Courier, monospace` ve `Verdana, Geneva, sans-serif`. Kendi yazı tiplerinizi sunmak için `@viveeditor/ext-format` paketindeki `FontFamily` eklentisine `fontFamilies` verin:
+
+```ts
+import { Editor } from '@viveeditor/core'
+import { FontFamily, formatExtensions } from '@viveeditor/ext-format'
+
+const fontFamilies = ['Inter, sans-serif', 'Georgia, serif', "'Fira Code', monospace"]
+
+const editor = await Editor.create(document.querySelector('#editor'), {
+  extensions: [
+    ...formatExtensions.filter((extension) => extension.name !== 'fontFamily'),
+    FontFamily.configure({ fontFamilies }),
+  ],
+})
+```
+
+Her girdi, düz adlardan oluşan ve virgülle ayrılan bir aile listesidir: `Inter, sans-serif` ya da `'Fira Code', monospace` gibi. Başka bir şey içeren girdi editör başlarken `TypeError` fırlatır. Yalnızca listedeki yazı tipleri uygulanır: yapıştırılan ya da yüklenen metin yazı tipini ancak listedeki bir girdiyle eşleşirse korur, diğerleri atılır.
+
+<Callout type="warn" title="Sunucuya aynı listeyi verin">
+Sunucu temizleyicisi yalnızca kendi `fontFamilies` seçeneğindeki yazı tiplerini tutar; varsayılan olarak aynı sekiz aile tanımlıdır. Editördeki listeyi değiştirirseniz temizleyiciye de birebir aynı listeyi verin, yoksa içerik kaydedilirken yazı tipleri kaybolur. Ayrıntılar [Sunucuda temizleme](/dokumantasyon/sunucuda-temizleme/) sayfasında.
+</Callout>
+
+Kodda `setFontFamily(family)` listedeki bir girdiyi uygular, `unsetFontFamily()` yazı tipini kaldırır; `editor.query.fontFamily()` imlecin bulunduğu yerdeki girdiyi, `editor.query.fontFamilies()` ise tanımlı listeyi döndürür.
+
+**Yazı boyutu** imlecin bulunduğu yerdeki boyutu punto olarak gösterir. Panelinde 6 ile 96 punto arasında bir boyut yazabileceğiniz bir alan (10,5 gibi yarım puntolar da olur), yaygın boyutlar arasında adım adım ilerleyen − ve + düğmeleri, 8 ile 72 punto arasındaki hazır boyutlar ve boyutu kaldıran "Varsayılan boyut" bulunur. Metindeyken <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> ve <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> boyutu bir adım büyütür ya da küçültür; boyutu verilmemiş metin 12 punto sayılır.
+
+Boyutlar punto olarak kaydedilir: `<span style="font-size: 10.5pt">`. Kodda `setFontSize(14)` 6 ile 96 arasında bir sayı alır ve en yakın yarım puntoya yuvarlar; `stepFontSize(1)` ve `stepFontSize(-1)` `FONT_POINT_PRESETS` listesinde (8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48 ve 72) ilerler; `unsetFontSize()` boyutu kaldırır, `editor.query.fontSizePoints()` boyutu sayı olarak ya da `null` döndürür. Eski `'tiny'`, `'small'`, `'big'` ve `'huge'` adımları `setFontSize` ile hâlâ çalışır, bunlarla kaydedilmiş belgeler de olduğu gibi açılır.
+
+**Satır aralığı** seçili paragraf ve başlıkların satır yüksekliğini ayarlar: Tek (1), 1,15, 1,5, Çift (2) ya da aralığı kaldıran Varsayılan. Değer paragrafa ya da başlığa `line-height` olarak yazılır. Kodda `setLineHeight('1' | '1.15' | '1.5' | '2' | null)` kullanın; `editor.query.lineHeight()` imlecin bulunduğu yerdeki değeri döndürür.
+
+Bunlardan istemediklerinizi `exclude: ['fontFamily', 'fontSize', 'lineHeight']` ile kaldırabilirsiniz.
+
+## Liste stili ve bağlantılar
+
+**Liste stili** imleç bir listenin içindeyken bir panel açar. Madde işaretli listede işaretin biçimini seçersiniz: Dolu daire, Boş daire ya da Kare. Numaralı listede numaralandırmayı (1, 2, 3; a, b, c; A, B, C; i, ii, iii; I, II, III) ve 0 ile 99999 arasında bir başlangıç numarasını ayarlarsınız. Listeye uymayan grup devre dışı kalır. Değerler `ul` üzerinde `list-style-type`, `ol` üzerinde `type` ve `start` olarak kaydedilir. Kodda `setBulletStyle('disc' | 'circle' | 'square' | null)`, `setListType('1' | 'a' | 'A' | 'i' | 'I')` ve `setListStart(5)` kullanın; `editor.query.listStyle()` `{ kind: 'bullet', style }` ya da `{ kind: 'ordered', type, start }`, liste dışında `null` döndürür. `exclude: ['listStyle']` düğmeyi kaldırır.
+
+**Bağlantı** panelinde "Yeni sekmede aç" kutusu vardır. İşaretlenen bağlantı `target="_blank"` ile kaydedilir; her bağlantı ayrıca `rel="noopener noreferrer nofollow"` taşır. Kodda `setLink({ href, title, newTab: true })` kullanın; `editor.query.link()` imlecin bulunduğu bağlantı için `{ href, title, newTab }`, bağlantı yoksa `null` döndürür.
 
 ## Ana hat, erişilebilirlik denetimi ve tam ekran
 
@@ -73,6 +116,27 @@ Bunlardan istemediklerinizi `exclude: ['outline', 'accessibility', 'shortcuts', 
 ## Seçim balonu
 
 Metin seçince seçimin hemen üstünde küçük bir araç çubuğu açılır. Dokunmatik ekranlarda, parmağınızın altında kalmaması için seçimin altında açılır. İçinde kalın, italik, bağlantı, satır içi kod ve biçimi temizle düğmeleri bulunur; [yapay zeka asistanı](/dokumantasyon/yapay-zeka/) gibi eklentiler kendi düğmelerini buraya ekler. Bir görsel seçiliyken balon açılmaz. <kbd>Esc</kbd> balonu kapatır, `bubble: false` tamamen kaldırır.
+
+## Sağ tık menüsü
+
+Metindeki bir nesneye sağ tıklayınca o nesneye ait işlemleri içeren bir menü açılır. Editör önce nesneyi seçer, böylece işlemler tıkladığınız şeye uygulanır.
+
+| Nesne | Menü |
+| --- | --- |
+| Tablo | "Hücre", "Satır" ve "Sütun" alt menüleri, "Tablo özellikleri…" ve "Tabloyu sil"; ayrıntılar [Tablolar](/dokumantasyon/tablolar/) sayfasında |
+| Görsel | "Görseli düzenle…", Sola hizala, Ortala, Sağa hizala, "Görsel adresini kopyala", "Görseli sil" |
+| Bağlantı | "Bağlantıyı aç" (yeni sekmede), "Bağlantıyı düzenle…", "Bağlantı adresini kopyala", "Bağlantıyı kaldır" |
+| Kod bloğu | "Dil" alt menüsü, "Kodu kopyala", "Kod bloğunu sil" |
+| Video | "Videoyu düzenle…", "Bağlantıyı kopyala", "Sil" |
+| Formül | "Formülü düzenle…", "Sil" |
+
+- Düz metinde tarayıcının kendi menüsü açılır, böylece yazım önerileri kaybolmaz. `contextMenu: 'always'` ile düz metinde de editörün menüsü açılır: Kes, Kopyala, Kalın, İtalik, Bağlantı ve Biçimi temizle.
+- <kbd>Shift</kbd> basılıyken sağ tıklamak her zaman tarayıcının menüsünü gösterir.
+- Klavyeden <kbd>Shift</kbd>+<kbd>F10</kbd> ya da menü tuşu, imlecin bulunduğu nesnenin menüsünü açar. <kbd>↑</kbd> ve <kbd>↓</kbd> ile gezinilir, <kbd>→</kbd> alt menüyü açar, <kbd>←</kbd> kapatır, <kbd>Esc</kbd> menüyü kapatır.
+- Dokunmatik ekranlarda editör uzun basmaya karışmaz, onu tarayıcıya bırakır.
+- Salt okunur editörde yalnızca kopyalayan ya da açan seçenekler görünür; tablo ve formülde tarayıcının menüsü açılır.
+
+`contextMenu: false` menüyü kapatır.
 
 ## / menüsü
 
@@ -136,7 +200,7 @@ Mac'te <kbd>Ctrl</kbd> yerine <kbd>⌘</kbd>, <kbd>Alt</kbd> yerine <kbd>⌥</kb
 | Bağlantı | <kbd>Ctrl</kbd>+<kbd>K</kbd> | <kbd>⌘</kbd>+<kbd>K</kbd> |
 | Üst simge | <kbd>Ctrl</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>.</kbd> |
 | Alt simge | <kbd>Ctrl</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>,</kbd> |
-| Yazıyı büyüt | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd> |
+| Yazıyı büyüt (bir sonraki hazır boyut) | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>.</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>.</kbd> |
 | Yazıyı küçült | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>,</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>,</kbd> |
 | Girintiyi artır | <kbd>Ctrl</kbd>+<kbd>]</kbd> | <kbd>⌘</kbd>+<kbd>]</kbd> |
 | Girintiyi azalt | <kbd>Ctrl</kbd>+<kbd>[</kbd> | <kbd>⌘</kbd>+<kbd>[</kbd> |
@@ -146,16 +210,17 @@ Mac'te <kbd>Ctrl</kbd> yerine <kbd>⌘</kbd>, <kbd>Alt</kbd> yerine <kbd>⌥</kb
 | Yinele | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> ya da <kbd>Ctrl</kbd>+<kbd>Y</kbd> | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd> ya da <kbd>⌘</kbd>+<kbd>Y</kbd> |
 | Aynı paragrafta yeni satır | <kbd>Shift</kbd>+<kbd>Enter</kbd> | <kbd>⇧</kbd>+<kbd>Enter</kbd> |
 | Araç çubuğuna geç | <kbd>Alt</kbd>+<kbd>F10</kbd> | <kbd>⌥</kbd>+<kbd>F10</kbd> |
+| Sağ tık menüsünü aç | <kbd>Shift</kbd>+<kbd>F10</kbd> ya da menü tuşu | <kbd>⇧</kbd>+<kbd>F10</kbd> |
 | Klavye kısayolları listesi | <kbd>Alt</kbd>+<kbd>0</kbd> | <kbd>⌥</kbd>+<kbd>0</kbd> |
 | Yapay zeka asistanı | <kbd>Ctrl</kbd>+<kbd>J</kbd> | <kbd>⌘</kbd>+<kbd>J</kbd> |
 
-Biçimi temizle; seçimdeki kalın, italik, altı çizili, üstü çizili, satır içi kod, yazı rengi ve vurguyu kaldırır, seçili paragraf ve başlıkların hizalamasını sıfırlar. Bağlantılar ve başlık, liste gibi blok türleri olduğu gibi kalır. Yalnızca imleç varsa, sonra yazdığınız metin düz olur. `@viveeditor/ext-format` paketindeki `ClearFormatting.configure({ keepMarks: ['link', 'code'] })` daha fazla biçimi korur; komutu `editor.commands.clearFormatting()`.
+Biçimi temizle; seçimdeki kalın, italik, altı çizili, üstü çizili, satır içi kod, yazı rengi, vurgu, yazı tipi, yazı boyutu, üst ve alt simgeyi kaldırır, seçili paragraf ve başlıkların hizalamasını ve satır aralığını sıfırlar. Bağlantılar ve başlık, liste gibi blok türleri olduğu gibi kalır. Yalnızca imleç varsa, sonra yazdığınız metin düz olur. `@viveeditor/ext-format` paketindeki `ClearFormatting.configure({ keepMarks: ['link', 'code'] })` daha fazla biçimi korur; komutu `editor.commands.clearFormatting()`.
 
 Biçim boyacısı, imlecin bulunduğu ya da seçimin başındaki metnin biçimini kopyalar. Ardından başka bir metni fareyle ya da <kbd>Shift</kbd> ve ok tuşlarıyla seçin; bıraktığınız anda biçim uygulanır. Hedef metin aynı kalın, italik, altı çizili, üstü çizili, satır içi kod, renk ve vurguyu alır, bağlantılar korunur. Boyacı açıkken imleç kopyalama imlecine döner; <kbd>Esc</kbd> ya da düğmeye ikinci kez tıklamak boyacıyı kapatır. Kodda komutları `copyFormat()`, `applyFormat()` ve `cancelFormat()`; açık olup olmadığını `editor.query.isPaintingFormat()` söyler.
 
 Düz metin olarak yapıştır, panodaki tüm biçimi atar ve imlecin bulunduğu yerdeki metnin biçimini alır; her satır bir paragraf olur. Yapıştırılan bağlantılar video gömmeye dönüşmez, Markdown da çevrilmez. Safari'de <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> kendiliğinden çalışmadığı için editör panoyu kendisi okur ve Safari onay için küçük bir Yapıştır düğmesi gösterir; <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd> bu adım olmadan yapıştırır.
 
-Yazı biçimi menüsü beş boyuttan birini (çok küçük, küçük, normal, büyük, çok büyük), üst ya da alt simgeyi ve harf düzenini ayarlar. Boyutlar göreli (`em`) olduğu için yayınladığınız sayfanın yazı tipine uyar. Harf değiştirme metnin diline göre çalışır: Türkçe metinde `i` harfi `İ`, `I` harfi `ı` olur. Yalnızca imleç varsa harf değiştirme ve <kbd>Shift</kbd>+<kbd>F3</kbd> imlecin bulunduğu kelimeye uygulanır; kısayola yeniden basmak BÜYÜK HARF, küçük harf ve Her Kelimenin İlk Harfi Büyük arasında döner.
+Yazı biçimi menüsü üst ya da alt simgeyi ve harf düzenini ayarlar. Yazı boyutunun artık kendi denetimi var (bkz. [Yazı tipi, boyut ve satır aralığı](#yazı-tipi-boyut-ve-satır-aralığı)); bu yüzden menüde boyutlar yer almaz ve `messages` içindeki `fontTiny`, `fontSmall`, `fontNormal`, `fontBig` ve `fontHuge` anahtarları kaldırıldı. Harf değiştirme metnin diline göre çalışır: Türkçe metinde `i` harfi `İ`, `I` harfi `ı` olur. Yalnızca imleç varsa harf değiştirme ve <kbd>Shift</kbd>+<kbd>F3</kbd> imlecin bulunduğu kelimeye uygulanır; kısayola yeniden basmak BÜYÜK HARF, küçük harf ve Her Kelimenin İlk Harfi Büyük arasında döner.
 
 Girinti, paragraf ve başlıkları 2 em adımlarla, en çok sekiz düzey içeri alır; listelerde <kbd>Tab</kbd> yine listeyi iç içe sokar. Biçimi temizle girintiyi de sıfırlar.
 

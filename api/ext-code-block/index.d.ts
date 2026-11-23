@@ -8,6 +8,8 @@ export interface CodeBlockOptions {
   languages: readonly CodeLanguage[];
   languageLabel: string;
   plainTextLabel: string;
+  copyLabel: string;
+  copiedLabel: string;
   tabSize: number;
 }
 declare module "@viveeditor/core" {

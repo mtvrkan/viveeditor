@@ -85,10 +85,9 @@ test('edits the table from the actions panel', async ({ page }) => {
   )
   await actions.getByRole('button', { name: 'Alta satır ekle' }).click()
   await expect(surface(page).locator('tr')).toHaveCount(3)
-  await openTableTool(page)
+  await actions.getByRole('tab', { name: 'Tablo' }).click()
   await actions.getByRole('button', { name: 'Sütunu genişlet' }).click()
   await expect(output(page)).toContainText('data-colwidth="')
-  await openTableTool(page)
   await actions.getByRole('button', { name: 'Tabloyu sil' }).click()
 
   await expect(surface(page).locator('table')).toHaveCount(0)
@@ -103,15 +102,38 @@ test('colours a cell and centres it vertically from the actions panel', async ({
     .getByRole('group', { name: 'Hücre rengi' })
     .getByRole('button', { name: 'Mavi' })
     .click()
-  await expect(surface(page)).toBeFocused()
-  await openTableTool(page)
+  await expect(actions).toBeVisible()
   await expect(actions.getByRole('button', { name: 'Mavi' })).toHaveAttribute(
     'aria-pressed',
     'true',
   )
-  await actions.getByRole('button', { name: 'Orta' }).click()
+  await actions.getByRole('button', { name: 'Orta', exact: true }).click()
 
   await expect(output(page)).toContainText(
     /<th style="background-color: (#cde8ff|rgb\(205, 232, 255\)); vertical-align: middle;?">/,
   )
+})
+
+test('centres and stripes the table from the Tablo tab without leaving the panel', async ({
+  page,
+}) => {
+  await insertFromGrid(page, 1, 1)
+  const actions = page.getByRole('dialog', { name: 'Tablo' })
+
+  await openTableTool(page)
+  await expect(actions.getByRole('tab', { name: 'Hücre' })).toBeFocused()
+  await page.keyboard.press('ArrowRight')
+  const tab = actions.getByRole('tab', { name: 'Tablo' })
+  await expect(tab).toHaveAttribute('aria-selected', 'true')
+  const tablePanel = actions.getByRole('tabpanel', { name: 'Tablo' })
+  await tablePanel.getByRole('button', { name: 'Ortala' }).click()
+  await tablePanel.getByRole('switch', { name: 'Satırları renklendir' }).check()
+  await expect(tablePanel.getByRole('button', { name: 'Ortala' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  const overflow = await actions.evaluate((element) => element.scrollWidth - element.clientWidth)
+
+  expect(overflow).toBeLessThanOrEqual(0)
+  await expect(output(page)).toContainText('<table data-align="center" data-striped="true">')
 })

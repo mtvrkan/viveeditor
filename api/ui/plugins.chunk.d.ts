@@ -1,6 +1,6 @@
 import { a as Messages, n as Locale, t as CommandAccess } from "./commands.chunk.js";
 import { Editor } from "@viveeditor/core";
-type IconName = "strike" | "code" | "bulletList" | "orderedList" | "blockquote" | "link" | "undo" | "redo" | "more" | "paragraph" | "heading" | "horizontalRule" | "chevron" | "check" | "alert" | "video" | "unlink" | "alignLeft" | "alignCenter" | "alignRight" | "alignJustify" | "textColor" | "outline" | "accessibility" | "keyboard" | "fullscreen" | "highlight" | "clear" | "clearFormatting" | "formatPainter" | "tidy" | "paste" | "textStyle" | "specialCharacters" | "indent" | "outdent" | "taskList" | "codeBlock" | "table" | "search" | "arrowUp" | "arrowDown" | "image" | "upload" | "source" | "file" | "folder" | "download" | "print";
+type IconName = "strike" | "code" | "bulletList" | "orderedList" | "blockquote" | "link" | "undo" | "redo" | "more" | "paragraph" | "heading" | "horizontalRule" | "chevron" | "check" | "alert" | "video" | "unlink" | "alignLeft" | "alignCenter" | "alignRight" | "alignJustify" | "textColor" | "outline" | "accessibility" | "keyboard" | "fullscreen" | "highlight" | "clear" | "clearFormatting" | "formatPainter" | "tidy" | "paste" | "textStyle" | "specialCharacters" | "indent" | "outdent" | "taskList" | "codeBlock" | "table" | "search" | "arrowUp" | "arrowDown" | "image" | "upload" | "source" | "file" | "folder" | "download" | "print" | "lineHeight" | "listStyle";
 interface SlashEntry {
   id: string;
   label: string;

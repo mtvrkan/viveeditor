@@ -71,7 +71,7 @@
         "@viveeditor/ext-image",
         "prosemirror-model"
       ],
-      "limit": "17 KB"
+      "limit": "19 KB"
     }
   ],
   "dependencies": {

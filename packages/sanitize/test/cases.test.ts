@@ -112,6 +112,18 @@ describe('sanitizeHtml', () => {
     expect(failures).toEqual([])
   })
 
+  it.each([
+    ['markup', ['Arial</style>']],
+    ['a CSS function', ['var(--font)']],
+    ['an empty entry', ['']],
+    ['a name with a double quote', ['"Inter", sans-serif']],
+    ['an entry longer than 64 bytes', [`${'A'.repeat(70)}, serif`]],
+  ])('refuses a host font family list with %s', (_name, fontFamilies) => {
+    const run = () => sanitizeHtml('<p>a</p>', { fontFamilies })
+
+    expect(run).toThrow(TypeError)
+  })
+
   it('throws TOO_LARGE above the byte limit', () => {
     const input = '<p>ğ</p>'.repeat(10)
 

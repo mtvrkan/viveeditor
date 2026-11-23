@@ -1,5 +1,5 @@
 import { a as Messages, i as MessageKey, t as CommandAccess } from "./commands.chunk.js";
-import "@viveeditor/core";
+import { Editor } from "@viveeditor/core";
 interface DocumentMessages {
   outlineEmpty: string;
   outlineUntitled: string;
@@ -47,6 +47,28 @@ interface CharPanelOptions {
   onClose: () => void;
 }
 declare function createCharPanel(options: CharPanelOptions): Popover;
+type ContextKind = "table" | "image" | "link" | "code" | "embed" | "math" | "text";
+interface ContextPoint {
+  x: number;
+  y: number;
+}
+interface ContextMenuOptions {
+  editor: Editor;
+  commands: CommandAccess;
+  messages: Messages;
+  container: HTMLElement;
+  announce: (text: string) => void;
+  openPanel: (id: string) => void;
+  openLink: () => void;
+  onOpen: () => void;
+  returnToEditor: () => void;
+}
+interface ContextMenu {
+  open(kind: ContextKind, target: Element | null, point: ContextPoint): void;
+  close(returnFocus: boolean): void;
+  isOpen(): boolean;
+}
+declare function createContextMenu(options: ContextMenuOptions): ContextMenu;
 interface DocumentPanelOptions {
   commands: CommandAccess;
   messages: Messages;
@@ -66,6 +88,15 @@ interface EmbedPanelOptions {
   onClose: () => void;
 }
 declare function createEmbedPanel(options: EmbedPanelOptions): Popover;
+interface FontSizePanelOptions {
+  commands: CommandAccess;
+  messages: Messages;
+  locale: string;
+  place: (element: HTMLElement, anchor: HTMLElement) => void;
+  returnToEditor: () => void;
+  onClose: () => void;
+}
+declare function createFontSizePanel(options: FontSizePanelOptions): Popover;
 interface ImagePanelOptions {
   commands: CommandAccess;
   messages: Messages;
@@ -74,6 +105,14 @@ interface ImagePanelOptions {
   onClose: () => void;
 }
 declare function createImagePanel(options: ImagePanelOptions): Popover;
+interface ListStylePanelOptions {
+  commands: CommandAccess;
+  messages: Messages;
+  place: (element: HTMLElement, anchor: HTMLElement) => void;
+  returnToEditor: () => void;
+  onClose: () => void;
+}
+declare function createListStylePanel(options: ListStylePanelOptions): Popover;
 interface SearchPanelOptions {
   commands: CommandAccess;
   messages: Messages;
@@ -90,6 +129,9 @@ interface SwatchPanelOptions {
   clearLabel: string;
   current: () => string | null;
   apply: (swatch: Swatch) => void;
+  applyColor: (color: string) => void;
+  recentKey: string;
+  documentColors?: () => readonly string[];
   clear: () => void;
   place: (element: HTMLElement, anchor: HTMLElement) => void;
   onClose: () => void;
@@ -104,6 +146,6 @@ interface TablePanelOptions {
 }
 declare function createTablePanel(options: TablePanelOptions): Popover;
 declare namespace panel_kit_d_exports {
-  export { createCharPanel, createCheckPanel, createEmbedPanel, createImagePanel, createOutlinePanel, createSearchPanel, createShortcutsPanel, createSwatchPanel, createTablePanel, documentMessages };
+  export { createCharPanel, createCheckPanel, createContextMenu, createEmbedPanel, createFontSizePanel, createImagePanel, createListStylePanel, createOutlinePanel, createSearchPanel, createShortcutsPanel, createSwatchPanel, createTablePanel, documentMessages };
 }
-export { createImagePanel as a, createOutlinePanel as c, DocumentMessages as d, documentMessages as f, createSearchPanel as i, createShortcutsPanel as l, createTablePanel as n, createEmbedPanel as o, createSwatchPanel as r, createCheckPanel as s, panel_kit_d_exports as t, createCharPanel as u };
+export { createListStylePanel as a, createEmbedPanel as c, createShortcutsPanel as d, createContextMenu as f, documentMessages as h, createSearchPanel as i, createCheckPanel as l, DocumentMessages as m, createTablePanel as n, createImagePanel as o, createCharPanel as p, createSwatchPanel as r, createFontSizePanel as s, panel_kit_d_exports as t, createOutlinePanel as u };

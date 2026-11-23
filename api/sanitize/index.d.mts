@@ -23,6 +23,8 @@ interface SanitizeProfile {
     readonly maxUrlLength: number;
     readonly maxTextAttributeLength: number;
     readonly maxStyleValueLength: number;
+    readonly minFontSizePt: number;
+    readonly maxFontSizePt: number;
     readonly maxSpan: number;
     readonly maxImageSize: number;
     readonly maxListStart: number;
@@ -48,6 +50,13 @@ interface SanitizeProfile {
   readonly indents: readonly string[];
   readonly imageAlign: readonly string[];
   readonly verticalAlign: readonly string[];
+  readonly lineHeights: readonly string[];
+  readonly orderedListTypes: readonly string[];
+  readonly bulletStyles: readonly string[];
+  readonly tableWidths: readonly string[];
+  readonly tableAlign: readonly string[];
+  readonly tableBorders: readonly string[];
+  readonly fontFamilies: readonly string[];
   readonly linkProtocols: readonly string[];
   readonly linkRel: string;
   readonly image: {
@@ -68,6 +77,7 @@ interface SanitizeOptions {
   allowRelativeImages?: boolean;
   maxBytes?: number;
   maxTags?: number;
+  fontFamilies?: readonly string[];
 }
 type SanitizeErrorCode = "TOO_LARGE" | "TOO_COMPLEX";
 export declare class SanitizeError extends Error {

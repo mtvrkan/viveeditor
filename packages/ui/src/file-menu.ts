@@ -14,7 +14,12 @@ export interface DocxImportResult {
 export interface DocxModule {
   importDocx(
     file: Blob,
-    options?: { upload?: FileImageUploader; allowBase64?: boolean; signal?: AbortSignal },
+    options?: {
+      upload?: FileImageUploader
+      allowBase64?: boolean
+      signal?: AbortSignal
+      fontFamilies?: readonly string[]
+    },
   ): Promise<DocxImportResult>
   exportDocx(editor: Editor, options?: { title?: string; signal?: AbortSignal }): Promise<Blob>
 }
@@ -217,8 +222,12 @@ export function createFileMenu(
       const module = await load(options.docx)
       if (!module) return null
       controller = new AbortController()
+      const fontFamilies = commands.has('setFontFamily')
+        ? commands.query('fontFamilies')
+        : undefined
       const result = await module.importDocx(file, {
         signal: controller.signal,
+        ...(Array.isArray(fontFamilies) ? { fontFamilies } : {}),
         ...(options.upload ? { upload: options.upload } : {}),
         ...(options.allowBase64 ? { allowBase64: true } : {}),
       })

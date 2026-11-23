@@ -85,19 +85,37 @@ function baselineJson(): JSONContent {
   return JSON.parse(baseline('json')) as JSONContent
 }
 
-const ADDED_ATTRIBUTES: Record<string, Record<string, null>> = {
-  paragraph: { indent: null },
-  heading: { indent: null },
-  image: { caption: null, align: null },
-  tableCell: { background: null, verticalAlign: null },
-  tableHeader: { background: null, verticalAlign: null },
+const ADDED_ATTRIBUTES: Record<string, Record<string, null | boolean>> = {
+  paragraph: { indent: null, lineHeight: null },
+  heading: { indent: null, lineHeight: null },
+  image: { caption: null, align: null, href: null },
+  table: { width: null, align: null, border: null, striped: false, borderColor: null },
+  tableCell: { background: null, verticalAlign: null, textAlign: null },
+  tableHeader: { background: null, verticalAlign: null, textAlign: null },
+  orderedList: { type: null },
+  bulletList: { bulletStyle: null },
+}
+
+const ADDED_MARK_ATTRIBUTES: Record<string, Record<string, null>> = {
+  link: { target: null },
+}
+
+function withAdded<T extends { type?: string; attrs?: Record<string, unknown> }>(
+  item: T,
+  table: Record<string, Record<string, null | boolean>>,
+): T {
+  const added = item.type ? table[item.type] : undefined
+  return added ? { ...item, attrs: { ...item.attrs, ...added } } : item
 }
 
 function withAddedAttributes(node: JSONContent): JSONContent {
   const content = node.content?.map(withAddedAttributes)
-  const added = node.type ? ADDED_ATTRIBUTES[node.type] : undefined
-  const attrs = added ? { ...node.attrs, ...added } : node.attrs
-  return { ...node, ...(attrs && { attrs }), ...(content && { content }) }
+  const marks = node.marks?.map((mark) => withAdded(mark, ADDED_MARK_ATTRIBUTES))
+  return {
+    ...withAdded(node, ADDED_ATTRIBUTES),
+    ...(marks && { marks }),
+    ...(content && { content }),
+  }
 }
 
 function currentJson(): JSONContent {

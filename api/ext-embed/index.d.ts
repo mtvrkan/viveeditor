@@ -49,6 +49,7 @@ declare module "@viveeditor/core" {
   }
   interface QueryRegistry {
     selectedEmbed: () => EmbedAttributes | null;
+    selectedEmbedUrl: () => string | null;
     embedProviders: () => string[];
   }
 }

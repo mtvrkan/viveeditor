@@ -1,12 +1,13 @@
 import { defineExtension, type Extension, normalizeColor } from '@viveeditor/core'
 import type { DOMOutputSpec, NodeSpec, Node as ProseMirrorNode, Schema } from 'prosemirror-model'
-import { type Command, Plugin, TextSelection } from 'prosemirror-state'
+import { type Command, type EditorState, Plugin, TextSelection } from 'prosemirror-state'
 import {
   addColumnAfter,
   addColumnBefore,
   addRow,
   addRowAfter,
   addRowBefore,
+  CellSelection,
   columnResizing,
   deleteColumn,
   deleteRow,
@@ -16,7 +17,6 @@ import {
   mergeCells,
   selectedRect,
   selectionCell,
-  setCellAttr,
   splitCell,
   TableMap,
   TableView,
@@ -35,9 +35,26 @@ export interface TableOptions {
 
 export type CellVerticalAlign = 'middle' | 'bottom'
 
+export type CellTextAlign = 'center' | 'right' | 'justify'
+
 export interface CellStyle {
   background: string | null
   verticalAlign: CellVerticalAlign | null
+  textAlign: CellTextAlign | null
+}
+
+export type TableWidth = 'full'
+
+export type TableAlign = 'center'
+
+export type TableBorder = 'rows' | 'none'
+
+export interface TableStyle {
+  width: TableWidth | null
+  align: TableAlign | null
+  border: TableBorder | null
+  striped: boolean
+  borderColor: string | null
 }
 
 export interface InsertTableOptions {
@@ -63,16 +80,31 @@ declare module '@viveeditor/core' {
     resizeColumn: (delta: number) => Command
     setCellBackground: (color: string | null) => Command
     setCellVerticalAlign: (align: CellVerticalAlign | null) => Command
+    setCellTextAlign: (align: CellTextAlign | null) => Command
+    setTableWidth: (width: TableWidth | null) => Command
+    setTableAlign: (align: TableAlign | null) => Command
+    setTableBorder: (border: TableBorder | null) => Command
+    setTableStriped: (striped: boolean) => Command
+    setTableBorderColor: (color: string | null) => Command
+    selectRow: () => Command
+    selectColumn: () => Command
+    selectTable: () => Command
+    distributeColumns: () => Command
   }
   interface QueryRegistry {
     inTable: () => boolean
     cellStyle: () => CellStyle | null
+    tableStyle: () => TableStyle | null
   }
 }
 
 const FALLBACK_WIDTH = 120
 const VERTICAL: readonly unknown[] = ['middle', 'bottom']
+const TEXT_ALIGN: readonly unknown[] = ['center', 'right', 'justify']
+const BORDERS: readonly unknown[] = ['rows', 'none']
 const PLAIN = new Set(['#ffffff', 'white'])
+const BORDER_COLOR = '--vive-table-border-color'
+const BORDER_COLOR_DECLARATION = /--vive-table-border-color\s*:\s*([^;]*)/i
 
 function cellBackground(value: unknown): string | null {
   const color = normalizeColor(value)
@@ -83,11 +115,39 @@ function cellVertical(value: unknown): CellVerticalAlign | null {
   return VERTICAL.includes(value) ? (value as CellVerticalAlign) : null
 }
 
+function cellTextAlign(value: unknown): CellTextAlign | null {
+  const align = typeof value === 'string' ? value.trim().toLowerCase() : value
+  return TEXT_ALIGN.includes(align) ? (align as CellTextAlign) : null
+}
+
+function tableBorder(value: unknown): TableBorder | null {
+  return BORDERS.includes(value) ? (value as TableBorder) : null
+}
+
+function tableStyleOf(node: ProseMirrorNode): TableStyle {
+  return {
+    width: node.attrs.width === 'full' ? 'full' : null,
+    align: node.attrs.align === 'center' ? 'center' : null,
+    border: tableBorder(node.attrs.border),
+    striped: node.attrs.striped === true,
+    borderColor: normalizeColor(node.attrs.borderColor),
+  }
+}
+
 function addStyle(attrs: Record<string, unknown>, declaration: string): void {
   attrs.style = typeof attrs.style === 'string' ? `${attrs.style}; ${declaration}` : declaration
 }
 
 const CELL_ATTRIBUTES = {
+  textAlign: {
+    default: null,
+    getFromDOM: (dom: HTMLElement) =>
+      cellTextAlign(dom.style.textAlign || dom.getAttribute('align')),
+    setDOMAttr: (value: unknown, attrs: Record<string, unknown>) => {
+      const align = cellTextAlign(value)
+      if (align) addStyle(attrs, `text-align: ${align}`)
+    },
+  },
   background: {
     default: null,
     getFromDOM: (dom: HTMLElement) => cellBackground(dom.style.backgroundColor),
@@ -108,7 +168,29 @@ const CELL_ATTRIBUTES = {
 }
 
 function setCellStyle(name: keyof CellStyle, value: string | null): Command {
-  return (state, dispatch) => isInTable(state) && setCellAttr(name, value)(state, dispatch)
+  return (state, dispatch) => {
+    if (!isInTable(state)) return false
+    const cells: Array<{ node: ProseMirrorNode; position: number }> = []
+    const { selection } = state
+    if (selection instanceof CellSelection) {
+      selection.forEachCell((node, position) => {
+        cells.push({ node, position })
+      })
+    } else {
+      const $cell = selectionCell(state)
+      if ($cell.nodeAfter) cells.push({ node: $cell.nodeAfter, position: $cell.pos })
+    }
+    const changed = cells.filter(({ node }) => node.attrs[name] !== value)
+    if (changed.length === 0) return false
+    if (dispatch) {
+      const transaction = state.tr
+      for (const { node, position } of changed) {
+        transaction.setNodeMarkup(position, undefined, { ...node.attrs, [name]: value })
+      }
+      dispatch(transaction)
+    }
+    return true
+  }
 }
 
 function count(value: unknown, fallback: number, max: number): number {
@@ -129,17 +211,144 @@ function columnWidths(table: ProseMirrorNode): Array<number | null> {
   return widths
 }
 
+function tableAttributes(style: TableStyle): Record<string, string> {
+  const attrs: Record<string, string> = {}
+  if (style.width) attrs['data-width'] = style.width
+  if (style.align) attrs['data-align'] = style.align
+  if (style.border) attrs['data-border'] = style.border
+  if (style.striped) attrs['data-striped'] = 'true'
+  return attrs
+}
+
+function parseTable(dom: HTMLElement): Record<string, unknown> {
+  const declaration = BORDER_COLOR_DECLARATION.exec(dom.getAttribute('style') ?? '')
+  return {
+    width: dom.getAttribute('data-width') === 'full' ? 'full' : null,
+    align: dom.getAttribute('data-align') === 'center' ? 'center' : null,
+    border: tableBorder(dom.getAttribute('data-border')),
+    striped: dom.getAttribute('data-striped') === 'true',
+    borderColor: normalizeColor(declaration?.[1]),
+  }
+}
+
 function renderTable(node: ProseMirrorNode, cellMinWidth: number): DOMOutputSpec {
+  const style = tableStyleOf(node)
+  const attrs: Record<string, string> = tableAttributes(style)
   const widths = columnWidths(node)
-  if (widths.every((width) => width === null)) return ['table', ['tbody', 0]]
-  const total = widths.reduce<number>((sum, width) => sum + (width ?? cellMinWidth), 0)
-  const property = widths.includes(null) ? 'min-width' : 'width'
+  const sized = !widths.every((width) => width === null)
+  const declarations: string[] = []
+  if (sized) {
+    const total = widths.reduce<number>((sum, width) => sum + (width ?? cellMinWidth), 0)
+    const property = widths.includes(null) || style.width === 'full' ? 'min-width' : 'width'
+    declarations.push(`${property}: ${total}px`)
+  }
+  if (style.borderColor) declarations.push(`${BORDER_COLOR}: ${style.borderColor}`)
+  if (declarations.length > 0) attrs.style = declarations.join('; ')
+  if (!sized) return ['table', attrs, ['tbody', 0]]
   return [
     'table',
-    { style: `${property}: ${total}px` },
+    attrs,
     ['colgroup', ...widths.map((width) => ['col', width ? { style: `width: ${width}px` } : {}])],
     ['tbody', 0],
   ]
+}
+
+function syncTable(table: HTMLTableElement, node: ProseMirrorNode): void {
+  const style = tableStyleOf(node)
+  const attrs = tableAttributes(style)
+  for (const name of ['data-width', 'data-align', 'data-border', 'data-striped']) {
+    const value = attrs[name]
+    if (value === undefined) table.removeAttribute(name)
+    else if (table.getAttribute(name) !== value) table.setAttribute(name, value)
+  }
+  if (style.borderColor) table.style.setProperty(BORDER_COLOR, style.borderColor)
+  else table.style.removeProperty(BORDER_COLOR)
+  if (style.width === 'full' && table.style.width) {
+    table.style.minWidth = table.style.width
+    table.style.width = ''
+  }
+}
+
+class StyledTableView extends TableView {
+  constructor(node: ProseMirrorNode, cellMinWidth: number) {
+    super(node, cellMinWidth)
+    syncTable(this.table, node)
+  }
+
+  override update(node: ProseMirrorNode): boolean {
+    if (!super.update(node)) return false
+    syncTable(this.table, this.node)
+    return true
+  }
+}
+
+function tablePosition(state: EditorState): number | null {
+  if (!isInTable(state)) return null
+  return selectedRect(state).tableStart - 1
+}
+
+function setTableAttr(name: keyof TableStyle, value: unknown): Command {
+  return (state, dispatch) => {
+    const position = tablePosition(state)
+    const table = position === null ? null : state.doc.nodeAt(position)
+    if (position === null || !table) return false
+    if (dispatch) {
+      dispatch(state.tr.setNodeMarkup(position, undefined, { ...table.attrs, [name]: value }))
+    }
+    return true
+  }
+}
+
+function selectCells(kind: 'row' | 'column' | 'table'): Command {
+  return (state, dispatch) => {
+    if (!isInTable(state)) return false
+    if (dispatch) {
+      const { selection } = state
+      const $anchor =
+        selection instanceof CellSelection ? selection.$anchorCell : selectionCell(state)
+      const $head = selection instanceof CellSelection ? selection.$headCell : $anchor
+      let next: CellSelection
+      if (kind === 'row') next = CellSelection.rowSelection($anchor, $head)
+      else if (kind === 'column') next = CellSelection.colSelection($anchor, $head)
+      else {
+        const { map, tableStart } = selectedRect(state)
+        const first = map.map[0] ?? 0
+        const last = map.map[map.map.length - 1] ?? first
+        next = CellSelection.create(state.doc, tableStart + first, tableStart + last)
+      }
+      dispatch(state.tr.setSelection(next))
+    }
+    return true
+  }
+}
+
+function distributeColumns(cellMinWidth: number): Command {
+  return (state, dispatch) => {
+    if (!isInTable(state)) return false
+    const { map, table, tableStart } = selectedRect(state)
+    const widths = columnWidths(table)
+    if (widths.every((width) => width === null)) return false
+    if (dispatch) {
+      const total = widths.reduce<number>((sum, width) => sum + (width ?? cellMinWidth), 0)
+      const base = Math.floor(total / map.width)
+      const extra = total - base * map.width
+      const equal = Array.from({ length: map.width }, (_column, index) =>
+        index < extra ? base + 1 : base,
+      )
+      const transaction = state.tr
+      for (const position of new Set(map.map)) {
+        const cell = table.nodeAt(position)
+        if (!cell) continue
+        const { left, right } = map.findCell(position)
+        transaction.setNodeMarkup(tableStart + position, undefined, {
+          ...cell.attrs,
+          colwidth: equal.slice(left, right),
+        })
+      }
+      dispatch(transaction)
+    }
+    return true
+  }
 }
 
 function createTable(schema: Schema, rows: number, cols: number, headerRow: boolean) {
@@ -259,6 +468,14 @@ function tableSpecs(cellMinWidth: number): Record<string, NodeSpec> {
     table: {
       ...specs.table,
       content: 'tableRow+',
+      attrs: {
+        width: { default: null },
+        align: { default: null },
+        border: { default: null },
+        striped: { default: false },
+        borderColor: { default: null },
+      },
+      parseDOM: [{ tag: 'table', getAttrs: (dom) => parseTable(dom) }],
       toDOM: (node) => renderTable(node, cellMinWidth),
     },
     tableRow: { ...specs.table_row, content: '(tableCell | tableHeader)*' },
@@ -295,6 +512,26 @@ export const Table: Extension<TableOptions> = defineExtension({
       const value = cellVertical(align)
       return align !== null && value === null ? () => false : setCellStyle('verticalAlign', value)
     },
+    setCellTextAlign: (align: CellTextAlign | null) => {
+      const value = cellTextAlign(align)
+      return align !== null && value === null ? () => false : setCellStyle('textAlign', value)
+    },
+    setTableWidth: (width: TableWidth | null) =>
+      width === null || width === 'full' ? setTableAttr('width', width) : () => false,
+    setTableAlign: (align: TableAlign | null) =>
+      align === null || align === 'center' ? setTableAttr('align', align) : () => false,
+    setTableBorder: (border: TableBorder | null) =>
+      border === null || tableBorder(border) ? setTableAttr('border', border) : () => false,
+    setTableStriped: (striped: boolean) =>
+      typeof striped === 'boolean' ? setTableAttr('striped', striped) : () => false,
+    setTableBorderColor: (color: string | null) => {
+      const value = normalizeColor(color)
+      return color !== null && value === null ? () => false : setTableAttr('borderColor', value)
+    },
+    selectRow: () => selectCells('row'),
+    selectColumn: () => selectCells('column'),
+    selectTable: () => selectCells('table'),
+    distributeColumns: () => distributeColumns(options.cellMinWidth),
   }),
   queries: () => ({
     inTable: (state) => isInTable(state),
@@ -304,7 +541,13 @@ export const Table: Extension<TableOptions> = defineExtension({
       return {
         background: cellBackground(attrs?.background),
         verticalAlign: cellVertical(attrs?.verticalAlign),
+        textAlign: cellTextAlign(attrs?.textAlign),
       }
+    },
+    tableStyle: (state) => {
+      const position = tablePosition(state)
+      const table = position === null ? null : state.doc.nodeAt(position)
+      return table ? tableStyleOf(table) : null
     },
   }),
   keymap: () => ({
@@ -313,10 +556,10 @@ export const Table: Extension<TableOptions> = defineExtension({
   }),
   plugins: ({ options }) => {
     let escaped = false
-    const view = (node: ProseMirrorNode) => new TableView(node, options.cellMinWidth)
+    const view = (node: ProseMirrorNode) => new StyledTableView(node, options.cellMinWidth)
     return [
       options.resizable
-        ? columnResizing({ cellMinWidth: options.cellMinWidth, View: TableView })
+        ? columnResizing({ cellMinWidth: options.cellMinWidth, View: StyledTableView })
         : new Plugin({ props: { nodeViews: { table: view } } }),
       tableEditing(),
       new Plugin({

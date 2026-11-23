@@ -237,6 +237,19 @@ describe('embed editing', () => {
     expect(editor.getHTML()).toContain('title="Tanıtım  videosu"')
   })
 
+  it('gives the watch address of the selected embed and nothing without one', async () => {
+    const editor = await mount(
+      {},
+      { content: '<p>x</p><div data-embed="youtube" data-id="dQw4w9WgXcQ"></div>' },
+    )
+    const empty = editor.query.selectedEmbedUrl()
+    const view = viewOf(editor)
+    view.dispatch(view.state.tr.setSelection(NodeSelection.create(view.state.doc, 3)))
+
+    expect(empty).toBeNull()
+    expect(editor.query.selectedEmbedUrl()).toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+  })
+
   it('turns a pasted bare link on an empty line into an embed that one undo turns back', async () => {
     const editor = await mount({}, { content: '<p></p>' })
 

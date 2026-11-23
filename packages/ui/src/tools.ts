@@ -39,6 +39,27 @@ export interface BlockSpec {
 export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
   [
     {
+      id: 'fontFamily',
+      command: 'unsetFontFamily',
+      label: 'fontFamily',
+      glyph: 'fontFamilyUnset',
+      narrow: false,
+      collapse: 5,
+      popup: 'menu',
+    },
+    {
+      id: 'fontSize',
+      command: 'setFontSize',
+      args: [12],
+      label: 'fontSize',
+      glyph: 'glyphFontSize',
+      narrow: false,
+      collapse: 6,
+      popup: 'dialog',
+    },
+  ],
+  [
+    {
       id: 'bold',
       command: 'toggleBold',
       active: 'bold',
@@ -164,6 +185,17 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       collapse: 8,
     },
     {
+      id: 'listStyle',
+      command: 'setListType',
+      args: ['1'],
+      label: 'listStyle',
+      icon: 'listStyle',
+      narrow: false,
+      collapse: 3,
+      popup: 'dialog',
+      enabledQuery: 'listStyle',
+    },
+    {
       id: 'taskList',
       command: 'toggleTaskList',
       active: 'taskList',
@@ -238,6 +270,16 @@ export const TOOL_GROUPS: readonly (readonly ToolSpec[])[] = [
       icon: 'alignLeft',
       narrow: false,
       collapse: 6,
+      popup: 'menu',
+    },
+    {
+      id: 'lineHeight',
+      command: 'setLineHeight',
+      args: ['1.5'],
+      label: 'lineHeight',
+      icon: 'lineHeight',
+      narrow: false,
+      collapse: 3,
       popup: 'menu',
     },
   ],

@@ -111,12 +111,13 @@ return [
         'embeds' => false,
         'allowBase64' => false,
         'allowRelativeImages' => false,
+        'fontFamilies' => null,
     ],
 
 ];
 ```
 
-Editörde video yerleştirmeyi açtıysanız burada `embeds` değerini `true` yapın; yoksa HTML temizlenirken yerleştirmeler kaldırılır.
+Editörde video yerleştirmeyi açtıysanız burada `embeds` değerini `true` yapın; yoksa HTML temizlenirken yerleştirmeler kaldırılır. Editöre kendi yazı tipi listenizi verdiyseniz aynı listeyi `fontFamilies` içine yazın; `null` varsayılan listeyi kullanır.
 
 ## İçerik Güvenliği Politikası (CSP)
 

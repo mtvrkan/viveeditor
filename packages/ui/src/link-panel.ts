@@ -19,6 +19,12 @@ export interface LinkPanelOptions {
   onClose: () => void
 }
 
+interface CurrentLink {
+  href: string
+  title: string | null
+  newTab: boolean
+}
+
 const SCHEME = /^[a-z][a-z\d+.-]*:/i
 const EMAIL = /^[^\s@/:]+@[^\s@/:]+\.[^\s@/:]+$/u
 const DOMAIN = /^(?:www\.)?[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)+(?:[/?#:]|$)/u
@@ -52,6 +58,7 @@ export function createLinkPanel(options: LinkPanelOptions): LinkPanel {
     [icon('unlink')],
   )
   const hint = h('p', { id: hintId, class: 've-hint', 'aria-live': 'polite' })
+  const newTab = h('input', { id: `${inputId}-tab`, type: 'checkbox' })
   const element = h(
     'div',
     {
@@ -64,6 +71,7 @@ export function createLinkPanel(options: LinkPanelOptions): LinkPanel {
       h('label', { class: 've-eyebrow', for: inputId }, [messages.linkLabel]),
       h('div', { class: 've-field-row' }, [input, apply, remove]),
       hint,
+      h('label', { class: 've-checkbox', for: `${inputId}-tab` }, [newTab, messages.linkNewTab]),
     ],
   )
   let returnTarget: HTMLElement | null = null
@@ -106,9 +114,15 @@ export function createLinkPanel(options: LinkPanelOptions): LinkPanel {
       input.focus()
       return
     }
-    commands.run('setLink', { href: normalizeHref(input.value) })
+    const title = currentLink()?.title ?? null
+    commands.run('setLink', { href: normalizeHref(input.value), title, newTab: newTab.checked })
     close(false)
     editor.focus()
+  }
+
+  const currentLink = (): CurrentLink | null => {
+    const link = commands.query('link')
+    return typeof link === 'object' && link !== null ? (link as CurrentLink) : null
   }
 
   const open = (returnTo: HTMLElement | null): void => {
@@ -119,6 +133,8 @@ export function createLinkPanel(options: LinkPanelOptions): LinkPanel {
     input.value = typeof current === 'string' ? current : ''
     input.disabled = !canLink
     apply.disabled = !canLink
+    newTab.disabled = !canLink
+    newTab.checked = linked && currentLink()?.newTab === true
     remove.hidden = !linked
     element.hidden = false
     options.place(element)

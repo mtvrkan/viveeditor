@@ -50,6 +50,8 @@ export type IconName =
   | 'folder'
   | 'download'
   | 'print'
+  | 'lineHeight'
+  | 'listStyle'
 
 const PATHS: Record<IconName, string> = {
   strike:
@@ -111,6 +113,8 @@ const PATHS: Record<IconName, string> = {
   accessibility: `${DOT(12, 4.5)}M5 8.5l7 1.5 7-1.5M12 10v4.5L9 21M12 14.5 15 21`,
   keyboard: `M3 6h18v12H3zM8 14.5h8${DOT(7, 10)}${DOT(10.5, 10)}${DOT(14, 10)}${DOT(17.5, 10)}`,
   fullscreen: 'M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5',
+  lineHeight: 'M11 6h9M11 12h9M11 18h9M5 4v16M2.5 6.5 5 4l2.5 2.5M2.5 17.5 5 20l2.5-2.5',
+  listStyle: `M10 7h10M10 12h10M10 17h10M4 6h2v2H4z${DOT(5, 12)}M3.5 18.5l1.5-3 1.5 3z`,
 }
 
 const SVG = 'http://www.w3.org/2000/svg'

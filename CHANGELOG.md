@@ -4,6 +4,13 @@
 
 ### Added
 
+- Right-click menu for tables, images, links, code blocks, videos and formulas (`contextMenu` option); plain text keeps the browser menu. [2026-11-23]
+- Toolbar controls for font family, line height and list style; new-tab option for links and a link field for images. [2026-11-23]
+- Rich table properties: cell horizontal alignment, full-width and centred tables, row-only or no borders, striped rows, border colour, row/column/table selection and equal column widths. [2026-11-23]
+- Line height, font family list, numbered list type and start, bullet style, links that open in a new tab, linked images and a Copy button on code blocks. [2026-11-23]
+- Font size in points: a toolbar control with a typed size, step buttons and common sizes; Word export and import keep the size. [2026-11-23]
+- Server sanitizers (Node and PHP) keep point font sizes, line height, a font family list (`fontFamilies` option, also in the Laravel config), cell alignment, table width/alignment/borders/stripes, numbered list types and bullet styles. [2026-11-23]
+- Custom text and highlight colours: a colour picker, a colour code field and recent colours, including the ones already in the document. [2026-11-23]
 - Docs: the versioning page now states the rules from 1.0 (what counts as a breaking change, deprecation for at least six months and only removed in a major, security fixes for the previous major for six months) and an upgrade guide from 0.x to 1.0. [2026-11-21]
 - Monorepo foundation: pnpm workspaces, Turborepo, strict TypeScript, Biome, Vitest, Playwright (Chromium, Firefox, WebKit, mobile Safari), size budgets and Changesets. [2026-10-30]
 - `@viveeditor/core` first engine slice on ProseMirror: `Editor.create`, HTML and JSON input/output, schema-based sanitization, bold/italic, undo/redo, change/focus/blur/error/destroy events. [2026-10-30]
@@ -101,6 +108,7 @@
 
 ### Changed
 
+- Documentation covers the table panel, font, size, line spacing and list style controls, the right-click menu, the code block Copy button, linked images and the new Word mappings. [2026-11-23]
 - End-to-end tests run on Playwright 1.65.1, whose Firefox build starts on macOS 27. [2026-11-21]
 - `MountDestroyedError` is now a `ViveEditorError` with the code `DESTROYED`, like the other editor errors; `instanceof MountDestroyedError` still works. [2026-11-21]
 - The API report leaves out source map comments, so a source change no longer shows hash-only differences in `api/`. [2026-11-21]
@@ -134,6 +142,11 @@
 
 ### Fixed
 
+- Images opened from a Word file no longer come with an empty paragraph before them. [2026-11-23]
+- Opening a Word file from the File menu keeps the fonts of a custom font family list. [2026-11-23]
+- The CDN build loads the font size panel. [2026-11-23]
+- Adding a link with the cursor inside an existing link no longer links the whole paragraph. [2026-11-23]
+- Menus and panels no longer show stray scrollbars on systems that always show them, and the code block language picker looks the same in every browser. [2026-11-23]
 - Angular: bindings to a reactive form value or its touched state now update while typing in apps without zone.js and with OnPush components, the Angular 22 default; they used to stop after the first keystroke. [2026-11-23]
 - With Caps Lock on in Windows and Linux, Ctrl+Shift+E centres the text instead of turning it into inline code: shortcuts from every extension are now looked up together, so an exact match wins over another extension's shortcut without Shift. [2026-11-23]
 - Markdown export keeps the Vimeo private link part and the YouTube or Vimeo start time in video links, so exported unlisted videos play. [2026-11-21]

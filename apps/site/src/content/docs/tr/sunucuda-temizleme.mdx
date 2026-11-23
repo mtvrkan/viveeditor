@@ -53,6 +53,7 @@ Her öğe ve öznitelik tam bir HTML5 ayrıştırıcısıyla (Node'da `parse5`, 
 | `embeds` | `false` | Video ve ses yerleştirmelerini tutar. Oynatıcılar kopyalanmaz, sağlayıcı ve kimlikten yeniden kurulur. |
 | `allowBase64` | `false` | `data:` adresi olarak saklanan görsellere (PNG, JPEG, GIF, WebP, AVIF) izin verir. |
 | `allowRelativeImages` | `false` | Göreli görsel adreslerine izin verir. |
+| `fontFamilies` | 8 yaygın aile | `span` üzerinde kalabilecek yazı tipi ailelerinin listesini değiştirir. Her girdi düz adlardan oluşan, virgülle ayrılmış bir aile listesidir: `Inter, sans-serif` ya da `'Fira Code', monospace` gibi. Başka bir şey içeren girdi, temizleyici başlarken hata fırlatır. Varsayılan liste: `serif`, `sans-serif`, `monospace`, `Arial, Helvetica, sans-serif`, `Georgia, serif`, `'Times New Roman', Times, serif`, `'Courier New', Courier, monospace` ve `Verdana, Geneva, sans-serif`. Editöre verdiğiniz listenin aynısını verin. |
 | `maxBytes` | 2 MB | Bundan büyük HTML `TOO_LARGE` hatası fırlatır. |
 | `maxTags` | 100 000 | Bundan fazla açılış etiketi olan HTML `TOO_COMPLEX` hatası fırlatır. 2 MB'lık olağan içerikte yaklaşık 20 000 ile 40 000 etiket bulunur. |
 
@@ -102,7 +103,9 @@ try {
 - **Görseller** `https` adresi ister. `allowBase64` ve `allowRelativeImages` bunu genişletir.
 - **Yerleştirmeler** `embeds: true` verilmedikçe kaldırılır.
 - **Şekiller** `figure` ve `figcaption` olarak kalır; `data-align` yalnızca `left`, `center` ya da `right` ise korunur.
-- **`style`** yalnızca metin hizalamasını, paragraf girintisini (paragraf ve başlıklarda 2 em adımlarla en çok 16 em), editörün beş yazı boyutunu (`span` üzerinde), metin ve vurgu rengini, tablo genişliklerini ve tablo hücrelerinin arka plan rengiyle dikey hizasını (orta ya da alt) tutar. Başka bir yazı boyutunun içindeki yazı boyutu ve üst ya da alt simgenin içindeki üst ya da alt simge atılır; böylece iç içe yazarak metin büyütülemez ya da gizlenemez.
+- **Tablolar** `data-width="full"`, `data-align="center"`, `data-border` (`rows` ya da `none`) ve `data-striped="true"` özelliklerini tutar. Tam genişlikteki tablonun sabit genişliği atılır.
+- **Numaralı listeler** `start` ile `a`, `A`, `i` ya da `I` değerli `type` özelliğini tutar.
+- **`style`** yalnızca metin hizalamasını, paragraf girintisini (paragraf ve başlıklarda 2 em adımlarla en çok 16 em), satır aralığını (paragraf ve başlıklarda 1, 1.15, 1.5 ya da 2), `span` üzerindeki yazı boyutunu (editörün adımları ya da yarım punto hassasiyetle 6–96 pt), `fontFamilies` listesindeki yazı tiplerini, metin ve vurgu rengini, tablo genişliğiyle kenarlık rengini, listenin madde biçimini (dolu daire, boş daire ya da kare) ve tablo hücrelerinin arka plan rengiyle yatay ve dikey hizasını (orta ya da alt) tutar. Başka bir yazı boyutunun içindeki yazı boyutu ve üst ya da alt simgenin içindeki üst ya da alt simge atılır; böylece iç içe yazarak metin büyütülemez ya da gizlenemez.
 - **`id`, `name`, `form` ve olay işleyicileri** hiçbir zaman geçmez.
 - **Betikler, stiller, çerçeveler, SVG ve benzeri öğeler** içerikleriyle birlikte kaldırılır.
 - **Bahsetmeler, formüller ve dipnotlar** tam olarak editörün yazdığı biçimde tutulur. Kimliği ya da formülü denetimden geçmeyen, veya bir bağlantının ya da dipnotun içine konmuş bahsetme ve formüller düz metne indirilir. Dipnotlar yalnızca kalın, italik ve bağlantı tutar. Bir bağlantının içine konmuş dipnot düz metne indirilir.

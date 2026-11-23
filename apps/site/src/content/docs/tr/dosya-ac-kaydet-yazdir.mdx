@@ -2,7 +2,7 @@
 key: files
 title: Dosya aç, kaydet, yazdır
 description: Dosya menüsüyle Word, Markdown, HTML ve metin dosyalarını açın, belgeyi Word, Markdown ya da HTML olarak kaydedin ve yazdırın.
-updated: 2026-11-21
+updated: 2026-11-23
 faq:
   - q: PDF olarak nasıl kaydederim?
     a: Dosya menüsünden "Yazdır veya PDF" seçin ve tarayıcının yazdırma penceresinde "PDF olarak kaydet" seçeneğini kullanın.
@@ -98,13 +98,15 @@ Markdown'da yazı rengi, vurgu, altı çizili ve hizalama için bir karşılık 
 
 | Açarken ve kaydederken korunur | Atlanır |
 | --- | --- |
-| Başlıklar (Word'deki konu başlığı 1. düzey başlık olarak açılır), kalın, italik, altı çizili, üstü çizili, yazı rengi, vurgu, hizalama | Yorumlar, dipnotlar, üst ve alt bilgiler, metin kutuları, denklemler |
-| Madde işaretli, numaralı ve iç içe listeler | Silinmiş izlenen değişiklikler (eklemeler korunur), gizli metin |
-| Web ve e-posta adreslerine giden bağlantılar | Diğer bağlantılar düz metne dönüşür; alan kodlarından yalnızca görünen metin kalır |
-| Birleştirilmiş hücreli ve başlık satırlı tablolar, alıntılar, kod | Kod bloğunun dili |
-| Görseller (açarken yükleme fonksiyonunuz ya da `allowBase64` gerekir) | Bunlar yoksa görseller atlanır ve menü kaç tane olduğunu söyler |
+| Başlıklar (Word'deki konu başlığı 1. düzey başlık olarak açılır), kalın, italik, altı çizili, üstü çizili, yazı rengi, vurgu, hizalama, punto cinsinden yazı boyutu, editörün listesindeki yazı tipleri, satır aralığı | Yorumlar, dipnotlar, üst ve alt bilgiler, metin kutuları, denklemler |
+| Madde işaretli, numaralı ve iç içe listeler, numaralandırma türü (1, a, A, i, I), başlangıç numarası ve madde işareti biçimi | Silinmiş izlenen değişiklikler (eklemeler korunur), gizli metin |
+| Web ve e-posta adreslerine giden bağlantılar, yeni sekmede açılanlar dahil | Diğer bağlantılar düz metne dönüşür; alan kodlarından yalnızca görünen metin kalır |
+| Birleştirilmiş hücreli ve başlık satırlı tablolar, hücre rengi ve hizası, tablo genişliği ve hizası, kenarlıklar, kenarlık rengi ve renkli satırlar; alıntılar, kod | Kod bloğunun dili |
+| Görseller ve bağlantılı görseller (açarken yükleme fonksiyonunuz ya da `allowBase64` gerekir) | Bunlar yoksa görseller atlanır ve menü kaç tane olduğunu söyler |
 
 Görev listeleri ☐ ve ☑ karakterleriyle, video oynatıcıları bağlantı olarak kaydedilir. Kaydedilen dosya A4 boyutundadır ve içinde yazar bilgisi bulunmaz.
+
+Yazı boyutları punto olarak yazılır; eski göreli boyutlar da bu sırada puntoya çevrilir. Satır aralığı editörün dört değeri için (tek, 1,15, 1,5 ve çift) korunur. Word dosyasındaki bir yazı tipi ancak editörün yazı tipi listesindeki bir girdiyle eşleşirse korunur; listede adı geçen yazı tipi yoksa ama `sans-serif`, `serif` ya da `monospace` varsa Arial, Times New Roman ve Courier New bunlara düşer, diğer yazı tipleri atılır. `FontFamily` için kendi `fontFamilies` listenizi tanımladıysanız `importDocx` fonksiyonunu kendiniz çağırırken aynı listeyi verin: `importDocx(file, { fontFamilies })`. Tablo kenarlık rengi, ancak tablonun görünen bütün kenarlıkları aynı rengi taşıyorsa geri okunur.
 
 <Callout type="note" title="Word'e kaydedilen görseller">
 Data adresli görseller dosyaya gömülür. Web adresindeki görseller yalnızca `exportDocx` fonksiyonunu `fetchImages: true` ile kendiniz çağırırsanız indirilip gömülür; Dosya menüsü bunu yapmaz ve bu görselleri bağlantı olarak yazar.

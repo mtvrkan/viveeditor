@@ -121,6 +121,50 @@ describe('link safety', () => {
       '<p><a rel="noopener noreferrer nofollow" href="https://a.test" target="_blank">x</a></p>',
     )
   })
+
+  it('opens one link in a new tab and reports it', async () => {
+    const editor = await mount({ content: '<p>metin</p>' })
+    editor.commands.selectAll()
+
+    editor.commands.setLink({ href: 'https://viveeditor.dev', newTab: true })
+    editor.commands.setTextSelection(3)
+
+    expect(editor.getHTML()).toBe(
+      '<p><a rel="noopener noreferrer nofollow" href="https://viveeditor.dev" target="_blank">metin</a></p>',
+    )
+    expect(editor.query.link()).toEqual({
+      href: 'https://viveeditor.dev',
+      title: null,
+      newTab: true,
+    })
+  })
+
+  it('updates the link at the cursor and drops the new tab when not asked', async () => {
+    const editor = await mount({
+      content: '<p><a href="https://a.test" target="_BLANK">bağ</a> metin</p>',
+    })
+    editor.commands.setTextSelection(2)
+
+    const before = editor.query.link()
+    editor.commands.setLink({ href: 'https://b.test' })
+
+    expect(before?.newTab).toBe(true)
+    expect(editor.getHTML()).toBe(
+      '<p><a rel="noopener noreferrer nofollow" href="https://b.test">bağ</a> metin</p>',
+    )
+  })
+
+  it('keeps only _blank as a target and reports no link outside one', async () => {
+    const editor = await mount({
+      content: '<p><a href="https://a.test" target="_top">x</a> y</p>',
+    })
+    editor.commands.setTextSelection(4)
+
+    expect(editor.getHTML()).toBe(
+      '<p><a rel="noopener noreferrer nofollow" href="https://a.test">x</a> y</p>',
+    )
+    expect(editor.query.link()).toBeNull()
+  })
 })
 
 describe('block commands', () => {

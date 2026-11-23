@@ -1,12 +1,14 @@
-import type { Editor } from '@viveeditor/core'
+import type { Editor, JSONContent } from '@viveeditor/core'
 import { createAlignControl } from './align.js'
 import { HIGHLIGHT_COLORS, HIGHLIGHT_DEFAULT, TEXT_COLORS } from './colors.js'
 import type { CommandAccess } from './commands.js'
-import { placeInDock } from './dom.js'
+import { h, placeInDock } from './dom.js'
+import { currentFontFamily, fontFamilyItems, fontFamilyName } from './font-family.js'
 import { icon } from './icons.js'
 import { createLazyPopover, type PanelKit, type PanelSource } from './lazy-popover.js'
+import { lineHeightItems } from './line-height.js'
 import { createMenu, type Menu, type MenuItem } from './menu.js'
-import type { Messages } from './messages.js'
+import { format, formatPoints, type MessageKey, type Messages } from './messages.js'
 import type { Popover } from './popover.js'
 import { indentItems, textStyleItems } from './text-style.js'
 
@@ -29,10 +31,24 @@ export interface FormatTools {
   readonly menus: readonly Menu[]
   readonly popovers: ReadonlyMap<string, Popover>
   readonly menuItems: ReadonlyMap<string, readonly MenuItem[]>
+  loadKit(): Promise<PanelKit>
   sync(): void
 }
 
 const stringOrNull = (value: unknown): string | null => (typeof value === 'string' ? value : null)
+
+function markColors(editor: Editor, mark: string): string[] {
+  const colors = new Set<string>()
+  const visit = (node: JSONContent): void => {
+    for (const entry of node.marks ?? []) {
+      const color = entry.type === mark ? entry.attrs?.color : undefined
+      if (typeof color === 'string') colors.add(color)
+    }
+    for (const child of node.content ?? []) visit(child)
+  }
+  visit(editor.getJSON())
+  return [...colors]
+}
 
 export function createFormatTools(options: FormatToolsOptions): FormatTools {
   const { editor, commands, messages, pill, dock } = options
@@ -78,12 +94,22 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
     ['align', [...align.items, ...indentItems(commands, messages)]],
     ['textStyle', textStyleItems(editor, commands, messages, options.locale)],
   ])
+  if (commands.has('setFontFamily'))
+    menuItems.set('fontFamily', fontFamilyItems(commands, messages))
+  if (commands.has('setLineHeight')) {
+    menuItems.set('lineHeight', lineHeightItems(commands, messages, options.locale))
+  }
+  const menuLabels: Readonly<Record<string, MessageKey>> = {
+    align: 'align',
+    fontFamily: 'fontFamily',
+    lineHeight: 'lineHeight',
+  }
   for (const [id, items] of menuItems) {
     const trigger = button(id)
     if (!trigger) continue
     menus.push(
       createMenu({
-        label: messages[id === 'align' ? 'align' : 'textStyle'],
+        label: messages[menuLabels[id] ?? 'textStyle'],
         trigger,
         items,
         place: (element) => place(element, trigger),
@@ -107,6 +133,12 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
           commands.run('setTextColor', swatch.value)
           options.returnToEditor()
         },
+        applyColor: (color) => {
+          commands.run('setTextColor', color)
+          options.returnToEditor()
+        },
+        recentKey: 'textColor',
+        documentColors: () => markColors(editor, 'textColor'),
         clear: () => {
           commands.run('unsetTextColor')
           options.returnToEditor()
@@ -134,6 +166,12 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
           else commands.run('setHighlight', swatch.color)
           options.returnToEditor()
         },
+        applyColor: (color) => {
+          commands.run('setHighlight', color)
+          options.returnToEditor()
+        },
+        recentKey: 'highlight',
+        documentColors: () => markColors(editor, 'highlight'),
         clear: () => {
           commands.run('unsetHighlight')
           options.returnToEditor()
@@ -144,9 +182,45 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
     )
   }
 
+  const familyButton = button('fontFamily')
+  const familyValue = h('span', { class: 've-family-value', 'aria-hidden': 'true' })
+  if (familyButton) {
+    familyButton.classList.add('ve-family-button')
+    familyButton.replaceChildren(familyValue)
+  }
+
+  const sizeButton = button('fontSize')
+  const sizeValue = h('span', { class: 've-size-value', 'aria-hidden': 'true' })
+  if (sizeButton) {
+    sizeButton.classList.add('ve-size-button')
+    sizeButton.replaceChildren(sizeValue)
+    lazy('fontSize', (panels) =>
+      panels.createFontSizePanel({
+        commands,
+        messages,
+        locale: options.locale,
+        place,
+        returnToEditor: options.returnToEditor,
+        onClose: options.onClose,
+      }),
+    )
+  }
+
   if (commands.has('insertTable')) {
     lazy('table', (panels) =>
       panels.createTablePanel({
+        commands,
+        messages,
+        place,
+        returnToEditor: options.returnToEditor,
+        onClose: options.onClose,
+      }),
+    )
+  }
+
+  if (button('listStyle')) {
+    lazy('listStyle', (panels) =>
+      panels.createListStylePanel({
         commands,
         messages,
         place,
@@ -233,6 +307,26 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
         alignButton.replaceChildren(icon(name))
       }
     }
+    if (familyButton) {
+      const family = currentFontFamily(commands)
+      const name = family === null ? messages.fontFamilyUnset : fontFamilyName(family, messages)
+      if (familyValue.textContent !== name) {
+        familyValue.textContent = name
+        const label = format(messages.fontFamilyCurrent, { name })
+        familyButton.setAttribute('aria-label', label)
+        familyButton.title = label
+      }
+    }
+    if (sizeButton) {
+      const points = commands.query('fontSizePoints')
+      const size = formatPoints(typeof points === 'number' ? points : 12, options.locale)
+      if (sizeValue.textContent !== size) {
+        sizeValue.textContent = size
+        const label = format(messages.fontSizeCurrent, { size })
+        sizeButton.setAttribute('aria-label', label)
+        sizeButton.title = label
+      }
+    }
     const colorButton = button('textColor')
     if (colorButton) {
       const color = stringOrNull(editor.getAttributes('textColor').color)
@@ -241,5 +335,5 @@ export function createFormatTools(options: FormatToolsOptions): FormatTools {
     }
   }
 
-  return { menus, popovers, menuItems, sync }
+  return { menus, popovers, menuItems, loadKit, sync }
 }

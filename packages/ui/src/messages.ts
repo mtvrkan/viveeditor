@@ -19,6 +19,14 @@ export interface Messages {
   code: string
   bulletList: string
   orderedList: string
+  listStyle: string
+  bulletStyle: string
+  bulletDisc: string
+  bulletCircle: string
+  bulletSquare: string
+  numberingType: string
+  listStart: string
+  listStartInvalid: string
   taskList: string
   blockquote: string
   codeBlock: string
@@ -39,6 +47,7 @@ export interface Messages {
   imageAlignLeft: string
   imageAlignCenter: string
   imageAlignRight: string
+  imageLink: string
   imageAdd: string
   imageApply: string
   imageUnsafe: string
@@ -119,6 +128,7 @@ export interface Messages {
   linkLabel: string
   linkApply: string
   linkRemove: string
+  linkNewTab: string
   linkSafe: string
   linkUnsafe: string
   linkNeedsSelection: string
@@ -152,11 +162,26 @@ export interface Messages {
   alignRight: string
   alignJustify: string
   textStyle: string
-  fontTiny: string
-  fontSmall: string
-  fontNormal: string
-  fontBig: string
-  fontHuge: string
+  fontSize: string
+  fontSizeCurrent: string
+  fontSizeField: string
+  fontSizeInvalid: string
+  fontSizeSmaller: string
+  fontSizeLarger: string
+  fontSizePresets: string
+  fontSizeDefault: string
+  glyphFontSize: string
+  fontFamily: string
+  fontFamilyCurrent: string
+  fontFamilyDefault: string
+  fontFamilyUnset: string
+  fontSerif: string
+  fontSansSerif: string
+  fontMonospace: string
+  lineHeight: string
+  lineHeightDefault: string
+  lineHeightSingle: string
+  lineHeightDouble: string
   superscript: string
   subscript: string
   caseUpper: string
@@ -178,6 +203,12 @@ export interface Messages {
   highlight: string
   colorDefault: string
   highlightNone: string
+  customColor: string
+  colorCode: string
+  colorPicker: string
+  colorApply: string
+  colorInvalid: string
+  recentColors: string
   colorRed: string
   colorOrange: string
   colorYellow: string
@@ -193,6 +224,52 @@ export interface Messages {
   cellAlignTop: string
   cellAlignMiddle: string
   cellAlignBottom: string
+  tableTabCell: string
+  tableTabTable: string
+  cellTextAlign: string
+  cellAlignLeft: string
+  cellAlignCenter: string
+  cellAlignRight: string
+  cellAlignJustify: string
+  selectRow: string
+  selectColumn: string
+  selectTable: string
+  headerColumn: string
+  tableWidth: string
+  tableWidthAuto: string
+  tableWidthFull: string
+  tableAlign: string
+  tableBorders: string
+  tableBorderAll: string
+  tableBorderRows: string
+  tableBorderNone: string
+  tableStriped: string
+  tableBorderColor: string
+  tableBorderDefault: string
+  distributeColumns: string
+  colorLightGray: string
+  colorDarkGray: string
+  contextMenu: string
+  menuCell: string
+  menuRow: string
+  menuColumn: string
+  tableProperties: string
+  imageEdit: string
+  copyImageAddress: string
+  deleteImage: string
+  openLink: string
+  editLink: string
+  copyLinkAddress: string
+  codeLanguage: string
+  copyCode: string
+  deleteCodeBlock: string
+  editEmbed: string
+  copyEmbedLink: string
+  deleteObject: string
+  editMath: string
+  cut: string
+  copy: string
+  copied: string
 }
 
 export type MessageKey = keyof Messages
@@ -221,6 +298,14 @@ const tr: Messages = {
   code: 'Satır içi kod',
   bulletList: 'Madde işaretli liste',
   orderedList: 'Numaralı liste',
+  listStyle: 'Liste stili',
+  bulletStyle: 'Madde işareti',
+  bulletDisc: 'Dolu daire',
+  bulletCircle: 'Boş daire',
+  bulletSquare: 'Kare',
+  numberingType: 'Numaralandırma',
+  listStart: 'Başlangıç numarası',
+  listStartInvalid: '0 ile {max} arasında bir tam sayı yazın',
   taskList: 'Görev listesi',
   blockquote: 'Alıntı',
   codeBlock: 'Kod bloğu',
@@ -241,6 +326,7 @@ const tr: Messages = {
   imageAlignLeft: 'Sola',
   imageAlignCenter: 'Ortaya',
   imageAlignRight: 'Sağa',
+  imageLink: 'Bağlantı',
   imageAdd: 'Ekle',
   imageApply: 'Uygula',
   imageUnsafe: 'Bu adres kullanılamaz, https ile başlayan bir görsel adresi girin',
@@ -322,6 +408,7 @@ const tr: Messages = {
   linkLabel: 'Bağlantı adresi',
   linkApply: 'Uygula',
   linkRemove: 'Bağlantıyı kaldır',
+  linkNewTab: 'Yeni sekmede aç',
   linkSafe: 'Güvenli adres',
   linkUnsafe: 'Bu adres kabul edilmez. http, https, mailto veya tel kullanın.',
   linkNeedsSelection: 'Önce bağlantı yapılacak metni seçin.',
@@ -355,11 +442,26 @@ const tr: Messages = {
   alignRight: 'Sağa hizala',
   alignJustify: 'İki yana yasla',
   textStyle: 'Yazı biçimi',
-  fontTiny: 'Çok küçük',
-  fontSmall: 'Küçük',
-  fontNormal: 'Normal boyut',
-  fontBig: 'Büyük',
-  fontHuge: 'Çok büyük',
+  fontSize: 'Yazı boyutu',
+  fontSizeCurrent: 'Yazı boyutu: {size} pt',
+  fontSizeField: 'Punto',
+  fontSizeInvalid: '{min} ile {max} arasında bir sayı yazın, ör. 12 ya da 10,5',
+  fontSizeSmaller: 'Yazıyı küçült',
+  fontSizeLarger: 'Yazıyı büyüt',
+  fontSizePresets: 'Hazır boyutlar',
+  fontSizeDefault: 'Varsayılan boyut',
+  glyphFontSize: 'pt',
+  fontFamily: 'Yazı tipi',
+  fontFamilyCurrent: 'Yazı tipi: {name}',
+  fontFamilyDefault: 'Varsayılan yazı tipi',
+  fontFamilyUnset: 'Varsayılan',
+  fontSerif: 'Tırnaklı',
+  fontSansSerif: 'Tırnaksız',
+  fontMonospace: 'Eş aralıklı',
+  lineHeight: 'Satır aralığı',
+  lineHeightDefault: 'Varsayılan',
+  lineHeightSingle: 'Tek',
+  lineHeightDouble: 'Çift',
   superscript: 'Üst simge',
   subscript: 'Alt simge',
   caseUpper: 'BÜYÜK HARF',
@@ -381,6 +483,12 @@ const tr: Messages = {
   highlight: 'Vurgu',
   colorDefault: 'Varsayılan renk',
   highlightNone: 'Vurguyu kaldır',
+  customColor: 'Özel renk',
+  colorCode: 'Renk kodu',
+  colorPicker: 'Renk seçici',
+  colorApply: 'Uygula',
+  colorInvalid: 'Geçerli bir renk kodu yazın, ör. #1a73e8',
+  recentColors: 'Son kullanılanlar',
   colorRed: 'Kırmızı',
   colorOrange: 'Turuncu',
   colorYellow: 'Sarı',
@@ -396,6 +504,52 @@ const tr: Messages = {
   cellAlignTop: 'Üst',
   cellAlignMiddle: 'Orta',
   cellAlignBottom: 'Alt',
+  tableTabCell: 'Hücre',
+  tableTabTable: 'Tablo',
+  cellTextAlign: 'Yatay hizalama',
+  cellAlignLeft: 'Sola',
+  cellAlignCenter: 'Ortala',
+  cellAlignRight: 'Sağa',
+  cellAlignJustify: 'İki yana',
+  selectRow: 'Satırı seç',
+  selectColumn: 'Sütunu seç',
+  selectTable: 'Tabloyu seç',
+  headerColumn: 'Başlık sütunu',
+  tableWidth: 'Genişlik',
+  tableWidthAuto: 'Otomatik',
+  tableWidthFull: 'Tam genişlik',
+  tableAlign: 'Tablo hizası',
+  tableBorders: 'Kenarlıklar',
+  tableBorderAll: 'Tüm kenarlıklar',
+  tableBorderRows: 'Yalnızca satırlar',
+  tableBorderNone: 'Kenarlıksız',
+  tableStriped: 'Satırları renklendir',
+  tableBorderColor: 'Kenarlık rengi',
+  tableBorderDefault: 'Varsayılan',
+  distributeColumns: 'Sütunları eşitle',
+  colorLightGray: 'Açık gri',
+  colorDarkGray: 'Koyu gri',
+  contextMenu: 'Bağlam menüsü',
+  menuCell: 'Hücre',
+  menuRow: 'Satır',
+  menuColumn: 'Sütun',
+  tableProperties: 'Tablo özellikleri…',
+  imageEdit: 'Görseli düzenle…',
+  copyImageAddress: 'Görsel adresini kopyala',
+  deleteImage: 'Görseli sil',
+  openLink: 'Bağlantıyı aç',
+  editLink: 'Bağlantıyı düzenle…',
+  copyLinkAddress: 'Bağlantı adresini kopyala',
+  codeLanguage: 'Dil',
+  copyCode: 'Kodu kopyala',
+  deleteCodeBlock: 'Kod bloğunu sil',
+  editEmbed: 'Videoyu düzenle…',
+  copyEmbedLink: 'Bağlantıyı kopyala',
+  deleteObject: 'Sil',
+  editMath: 'Formülü düzenle…',
+  cut: 'Kes',
+  copy: 'Kopyala',
+  copied: 'Kopyalandı',
 }
 
 const en: Messages = {
@@ -420,6 +574,14 @@ const en: Messages = {
   code: 'Inline code',
   bulletList: 'Bulleted list',
   orderedList: 'Numbered list',
+  listStyle: 'List style',
+  bulletStyle: 'Bullet',
+  bulletDisc: 'Filled circle',
+  bulletCircle: 'Hollow circle',
+  bulletSquare: 'Square',
+  numberingType: 'Numbering',
+  listStart: 'Start at',
+  listStartInvalid: 'Enter a whole number from 0 to {max}',
   taskList: 'Task list',
   blockquote: 'Quote',
   codeBlock: 'Code block',
@@ -440,6 +602,7 @@ const en: Messages = {
   imageAlignLeft: 'Left',
   imageAlignCenter: 'Center',
   imageAlignRight: 'Right',
+  imageLink: 'Link',
   imageAdd: 'Insert',
   imageApply: 'Apply',
   imageUnsafe: 'This address cannot be used, enter an image address starting with https',
@@ -521,6 +684,7 @@ const en: Messages = {
   linkLabel: 'Link address',
   linkApply: 'Apply',
   linkRemove: 'Remove link',
+  linkNewTab: 'Open in a new tab',
   linkSafe: 'Safe address',
   linkUnsafe: 'This address is not allowed. Use http, https, mailto or tel.',
   linkNeedsSelection: 'Select the text to link first.',
@@ -554,11 +718,26 @@ const en: Messages = {
   alignRight: 'Align right',
   alignJustify: 'Justify',
   textStyle: 'Text style',
-  fontTiny: 'Tiny',
-  fontSmall: 'Small',
-  fontNormal: 'Normal size',
-  fontBig: 'Big',
-  fontHuge: 'Huge',
+  fontSize: 'Font size',
+  fontSizeCurrent: 'Font size: {size} pt',
+  fontSizeField: 'Points',
+  fontSizeInvalid: 'Enter a number from {min} to {max}, e.g. 12 or 10.5',
+  fontSizeSmaller: 'Decrease font size',
+  fontSizeLarger: 'Increase font size',
+  fontSizePresets: 'Preset sizes',
+  fontSizeDefault: 'Default size',
+  glyphFontSize: 'pt',
+  fontFamily: 'Font',
+  fontFamilyCurrent: 'Font: {name}',
+  fontFamilyDefault: 'Default font',
+  fontFamilyUnset: 'Default',
+  fontSerif: 'Serif',
+  fontSansSerif: 'Sans serif',
+  fontMonospace: 'Monospace',
+  lineHeight: 'Line spacing',
+  lineHeightDefault: 'Default',
+  lineHeightSingle: 'Single',
+  lineHeightDouble: 'Double',
   superscript: 'Superscript',
   subscript: 'Subscript',
   caseUpper: 'UPPERCASE',
@@ -580,6 +759,12 @@ const en: Messages = {
   highlight: 'Highlight',
   colorDefault: 'Default color',
   highlightNone: 'Remove highlight',
+  customColor: 'Custom color',
+  colorCode: 'Color code',
+  colorPicker: 'Color picker',
+  colorApply: 'Apply',
+  colorInvalid: 'Enter a valid color code, e.g. #1a73e8',
+  recentColors: 'Recent colors',
   colorRed: 'Red',
   colorOrange: 'Orange',
   colorYellow: 'Yellow',
@@ -595,6 +780,52 @@ const en: Messages = {
   cellAlignTop: 'Top',
   cellAlignMiddle: 'Middle',
   cellAlignBottom: 'Bottom',
+  tableTabCell: 'Cell',
+  tableTabTable: 'Table',
+  cellTextAlign: 'Horizontal alignment',
+  cellAlignLeft: 'Align left',
+  cellAlignCenter: 'Center',
+  cellAlignRight: 'Align right',
+  cellAlignJustify: 'Justify',
+  selectRow: 'Select row',
+  selectColumn: 'Select column',
+  selectTable: 'Select table',
+  headerColumn: 'Header column',
+  tableWidth: 'Width',
+  tableWidthAuto: 'Auto width',
+  tableWidthFull: 'Full width',
+  tableAlign: 'Table alignment',
+  tableBorders: 'Borders',
+  tableBorderAll: 'All borders',
+  tableBorderRows: 'Rows only',
+  tableBorderNone: 'No borders',
+  tableStriped: 'Striped rows',
+  tableBorderColor: 'Border color',
+  tableBorderDefault: 'Default',
+  distributeColumns: 'Distribute columns',
+  colorLightGray: 'Light gray',
+  colorDarkGray: 'Dark gray',
+  contextMenu: 'Context menu',
+  menuCell: 'Cell',
+  menuRow: 'Row',
+  menuColumn: 'Column',
+  tableProperties: 'Table properties…',
+  imageEdit: 'Edit image…',
+  copyImageAddress: 'Copy image address',
+  deleteImage: 'Delete image',
+  openLink: 'Open link',
+  editLink: 'Edit link…',
+  copyLinkAddress: 'Copy link address',
+  codeLanguage: 'Language',
+  copyCode: 'Copy code',
+  deleteCodeBlock: 'Delete code block',
+  editEmbed: 'Edit video…',
+  copyEmbedLink: 'Copy link',
+  deleteObject: 'Delete',
+  editMath: 'Edit formula…',
+  cut: 'Cut',
+  copy: 'Copy',
+  copied: 'Copied',
 }
 
 export const MESSAGES: Readonly<Record<Locale, Messages>> = { tr, en }
@@ -605,6 +836,18 @@ export function resolveLocale(requested?: string): Locale {
     (typeof document === 'undefined' ? undefined : document.documentElement.lang) ??
     (typeof navigator === 'undefined' ? undefined : navigator.language)
   return source?.toLowerCase().startsWith('tr') ? 'tr' : 'en'
+}
+
+export function formatPoints(points: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 1, useGrouping: false }).format(
+    points,
+  )
+}
+
+export function formatDecimal(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false }).format(
+    value,
+  )
 }
 
 export function format(template: string, values: Record<string, string | number>): string {

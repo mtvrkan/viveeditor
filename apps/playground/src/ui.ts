@@ -86,7 +86,12 @@ const editor = await Editor.create(host, {
       facade: params.has('facade'),
       labels: { play: 'Oynat', invalid: 'Bu içerik desteklenmiyor' },
     }),
-    CodeBlock.configure({ languageLabel: 'Dil', plainTextLabel: 'Düz metin' }),
+    CodeBlock.configure({
+      languageLabel: 'Dil',
+      plainTextLabel: 'Düz metin',
+      copyLabel: 'Kodu kopyala',
+      copiedLabel: 'Kopyalandı',
+    }),
     CodeHighlight.configure({ highlighter: shikiHighlighter(() => import('shiki')) }),
   ],
   label: 'Makale metni',

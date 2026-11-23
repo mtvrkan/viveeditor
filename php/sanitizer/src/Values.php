@@ -10,6 +10,9 @@ final class Values
     private const SCHEME = '/^([a-z][a-z0-9+.-]*):/i';
     private const HEX = '/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\z/i';
     private const PIXELS = '/^([0-9]{1,5})px\z/';
+    private const POINTS = '/^([0-9]{1,2})(?:\.([05]))?pt\z/';
+    private const FAMILY_PART = "/^(?:'[A-Za-z][A-Za-z0-9 -]*'|[A-Za-z][A-Za-z0-9 -]*)\\z/";
+    private const MAX_FAMILY_BYTES = 64;
     private const DIGITS = '/^[0-9]{1,5}\z/';
     private const LANGUAGE = '/^[a-z0-9][a-z0-9+#.-]{0,31}\z/i';
     private const HTTPS_URL = '/^https:\/\/[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?::[0-9]{1,5})?(?:[\/?#][\x21-\x7e]*)?\z/i';
@@ -202,7 +205,58 @@ final class Values
         return in_array($lower, Profile::get()['namedColors'], true) ? $lower : null;
     }
 
-    private static function styleValue(string $property, string $value): ?string
+    private static ?array $defaultFonts = null;
+
+    private static function familyKey(string $value): string
+    {
+        $parts = explode(',', str_replace(['"', "'"], '', self::lowerAscii($value)));
+        $space = self::SPACE;
+        return implode(',', array_map(
+            fn (string $part): string => preg_replace("/{$space}+/", ' ', self::trimAscii($part)),
+            $parts,
+        ));
+    }
+
+    public static function fontFamilyMap(array $list): array
+    {
+        $map = [];
+        foreach ($list as $entry) {
+            $parts = is_string($entry) ? array_map(self::trimAscii(...), explode(',', $entry)) : [];
+            $valid = $parts !== [] && strlen($entry) <= self::MAX_FAMILY_BYTES;
+            foreach ($parts as $part) {
+                $valid = $valid && self::matches(self::FAMILY_PART, $part);
+            }
+            if (!$valid) {
+                throw new \InvalidArgumentException('Each font family must be a comma-separated list of plain family names.');
+            }
+            $canonical = implode(', ', $parts);
+            $map[self::familyKey($canonical)] = $canonical;
+        }
+        return $map;
+    }
+
+    public static function defaultFontFamilies(): array
+    {
+        return self::$defaultFonts ??= self::fontFamilyMap(Profile::get()['fontFamilies']);
+    }
+
+    public static function cleanFontSize(string $value): ?string
+    {
+        $step = self::lowerAscii($value);
+        if (in_array($step, Profile::get()['fontSizes'], true)) {
+            return $step;
+        }
+        if (preg_match(self::POINTS, $step, $parts) !== 1) {
+            return null;
+        }
+        $halves = (int) $parts[1] * 2 + (($parts[2] ?? '') === '5' ? 1 : 0);
+        if ($halves < Profile::limit('minFontSizePt') * 2 || $halves > Profile::limit('maxFontSizePt') * 2) {
+            return null;
+        }
+        return intdiv($halves, 2) . ($halves % 2 === 1 ? '.5' : '') . 'pt';
+    }
+
+    private static function styleValue(string $property, string $value, array $fonts): ?string
     {
         if ($property === 'text-align') {
             $align = self::lowerAscii($value);
@@ -212,20 +266,33 @@ final class Values
             $align = self::lowerAscii($value);
             return in_array($align, Profile::get()['verticalAlign'], true) ? $align : null;
         }
-        if ($property === 'color' || $property === 'background-color') {
+        if ($property === 'color' || $property === 'background-color' || $property === '--vive-table-border-color') {
             return self::cleanColor($value);
         }
-        if ($property === 'font-size' || $property === 'margin-inline-start') {
+        if ($property === 'font-size') {
+            return self::cleanFontSize($value);
+        }
+        if ($property === 'margin-inline-start') {
             $step = self::lowerAscii($value);
-            $allowed = Profile::get()[$property === 'font-size' ? 'fontSizes' : 'indents'];
-            return in_array($step, $allowed, true) ? $step : null;
+            return in_array($step, Profile::get()['indents'], true) ? $step : null;
+        }
+        if ($property === 'line-height') {
+            return in_array($value, Profile::get()['lineHeights'], true) ? $value : null;
+        }
+        if ($property === 'list-style-type') {
+            $style = self::lowerAscii($value);
+            return in_array($style, Profile::get()['bulletStyles'], true) ? $style : null;
+        }
+        if ($property === 'font-family') {
+            return $fonts[self::familyKey($value)] ?? null;
         }
         $number = preg_match(self::PIXELS, $value, $parts) === 1 ? (int) $parts[1] : 0;
         return $number > 0 && $number <= Profile::limit('maxTableWidth') ? $number . 'px' : null;
     }
 
-    public static function cleanStyle(string $value, array $allowed): ?string
+    public static function cleanStyle(string $value, array $allowed, ?array $fonts = null): ?string
     {
+        $fonts ??= self::defaultFontFamilies();
         if (strlen($value) > count($allowed) * (Profile::limit('maxStyleValueLength') + 32)) {
             return null;
         }
@@ -249,7 +316,7 @@ final class Values
             if (strlen($raw) > Profile::limit('maxStyleValueLength')) {
                 continue;
             }
-            $clean = self::styleValue($property, $raw);
+            $clean = self::styleValue($property, $raw, $fonts);
             if ($clean !== null) {
                 $result[$property] = $clean;
             }

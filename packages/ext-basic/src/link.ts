@@ -11,6 +11,13 @@ import type { Command, EditorState } from 'prosemirror-state'
 export interface LinkAttributes {
   href: string
   title?: string | null
+  newTab?: boolean
+}
+
+export interface CurrentLink {
+  href: string
+  title: string | null
+  newTab: boolean
 }
 
 export interface LinkOptions {
@@ -24,13 +31,45 @@ declare module '@viveeditor/core' {
     setLink: (attributes: LinkAttributes) => Command
     unsetLink: () => Command
   }
+  interface QueryRegistry {
+    link: () => CurrentLink | null
+  }
+}
+
+const NEW_TAB = '_blank'
+
+function targetOf(element: HTMLElement): string | null {
+  return (element.getAttribute('target') ?? '').trim().toLowerCase() === NEW_TAB ? NEW_TAB : null
+}
+
+function currentLink(state: EditorState, type: MarkType): CurrentLink | null {
+  const { $from, from, to, empty } = state.selection
+  let mark: Mark | undefined
+  if (empty) {
+    mark =
+      type.isInSet($from.marks()) ??
+      type.isInSet($from.nodeAfter?.marks ?? []) ??
+      type.isInSet($from.nodeBefore?.marks ?? [])
+  } else {
+    state.doc.nodesBetween(from, to, (node) => {
+      if (mark) return false
+      if (node.isText) mark = type.isInSet(node.marks)
+      return !mark
+    })
+  }
+  if (!mark) return null
+  return {
+    href: String(mark.attrs.href ?? ''),
+    title: typeof mark.attrs.title === 'string' ? mark.attrs.title : null,
+    newTab: mark.attrs.target === NEW_TAB,
+  }
 }
 
 function linkRange(state: EditorState, mark: Mark): { from: number; to: number } | null {
   const { $from } = state.selection
   const parent = $from.parent
   const hasLink = (index: number): boolean =>
-    index >= 0 && index < parent.childCount && mark.isInSet(parent.child(index).marks) !== undefined
+    index >= 0 && index < parent.childCount && mark.isInSet(parent.child(index).marks)
   let index = $from.index()
   if (!hasLink(index)) {
     if (!hasLink(index - 1)) return null
@@ -66,7 +105,7 @@ export const Link: Extension<LinkOptions> = defineExtension({
   },
   marks: (options) => ({
     link: {
-      attrs: { href: {}, title: { default: null } },
+      attrs: { href: {}, title: { default: null }, target: { default: null } },
       inclusive: false,
       parseDOM: [
         {
@@ -75,7 +114,7 @@ export const Link: Extension<LinkOptions> = defineExtension({
             const element = node as HTMLElement
             const href = element.getAttribute('href') ?? ''
             if (!isAllowedUrl(href, options.protocols)) return false
-            return { href, title: element.getAttribute('title') }
+            return { href, title: element.getAttribute('title'), target: targetOf(element) }
           },
         },
       ],
@@ -84,18 +123,18 @@ export const Link: Extension<LinkOptions> = defineExtension({
         const attributes: Record<string, string> = { rel: options.rel }
         if (isAllowedUrl(href, options.protocols)) attributes.href = href
         if (typeof mark.attrs.title === 'string') attributes.title = mark.attrs.title
-        if (options.openInNewTab) attributes.target = '_blank'
+        if (options.openInNewTab || mark.attrs.target === NEW_TAB) attributes.target = NEW_TAB
         return ['a', attributes, 0]
       },
     },
   }),
   commands: ({ schema, options }) => ({
     setLink:
-      ({ href, title = null }) =>
+      ({ href, title = null, newTab = false }) =>
       (state, dispatch) => {
         if (!isAllowedUrl(href, options.protocols)) return false
         const type = getMarkType(schema, 'link')
-        const mark = type.create({ href: href.trim(), title })
+        const mark = type.create({ href: href.trim(), title, target: newTab ? NEW_TAB : null })
         const { from, to, empty } = state.selection
         if (empty) {
           const range = linkAtCursor(state, type)
@@ -121,5 +160,8 @@ export const Link: Extension<LinkOptions> = defineExtension({
       dispatch?.(state.tr.removeMark(from, to, type))
       return true
     },
+  }),
+  queries: ({ schema }) => ({
+    link: (state) => currentLink(state, getMarkType(schema, 'link')),
   }),
 })

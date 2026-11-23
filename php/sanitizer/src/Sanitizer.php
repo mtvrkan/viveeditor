@@ -20,6 +20,7 @@ final class Sanitizer
     private bool $embeds;
     private bool $allowBase64;
     private bool $allowRelative;
+    private array $fonts;
 
     private function __construct(array $options)
     {
@@ -28,6 +29,9 @@ final class Sanitizer
         $this->embeds = ($options['embeds'] ?? false) === true;
         $this->allowBase64 = ($options['allowBase64'] ?? false) === true;
         $this->allowRelative = ($options['allowRelativeImages'] ?? false) === true;
+        $this->fonts = isset($options['fontFamilies'])
+            ? Values::fontFamilyMap($options['fontFamilies'])
+            : Values::defaultFontFamilies();
     }
 
     public static function sanitize(string $html, array $options = []): string
@@ -137,7 +141,7 @@ final class Sanitizer
         if ($allowed === null || $style === null) {
             return [];
         }
-        $clean = Values::cleanStyle($style, $allowed);
+        $clean = Values::cleanStyle($style, $allowed, $this->fonts);
         return $clean === null ? [] : [['style', $clean]];
     }
 
@@ -199,6 +203,26 @@ final class Sanitizer
         }
         array_push($result, ...$this->styleOf($tag, $source));
         return $result;
+    }
+
+    private static function enumAttribute(array $source, string $name, array $allowed): array
+    {
+        $value = Values::lowerAscii(Values::trimAscii($source[$name] ?? ''));
+        return in_array($value, $allowed, true) ? [[$name, $value]] : [];
+    }
+
+    private function tableAttributes(array $source): array
+    {
+        $profile = Profile::get();
+        $width = self::enumAttribute($source, 'data-width', $profile['tableWidths']);
+        $striped = Values::lowerAscii(Values::trimAscii($source['data-striped'] ?? '')) === 'true';
+        return [
+            ...$width,
+            ...self::enumAttribute($source, 'data-align', $profile['tableAlign']),
+            ...self::enumAttribute($source, 'data-border', $profile['tableBorders']),
+            ...($striped ? [['data-striped', 'true']] : []),
+            ...$this->styleOf('table', $source, $width !== [] ? 'width' : null),
+        ];
     }
 
     private function embed(array $source, Element $node, Node $target): void
@@ -359,7 +383,7 @@ final class Sanitizer
                 return;
             case 'ul':
                 $next['taskList'] = ($source['data-type'] ?? null) === 'taskList';
-                $attributes = $next['taskList'] ? [['data-type', 'taskList']] : [];
+                $attributes = $next['taskList'] ? [['data-type', 'taskList']] : $this->styleOf('ul', $source);
                 break;
             case 'li':
                 $next['taskItem'] = $context['taskList'] && ($source['data-type'] ?? null) === 'taskItem';
@@ -372,7 +396,11 @@ final class Sanitizer
                 break;
             case 'ol':
                 $start = Values::cleanInteger($source['start'] ?? null, 0, Profile::limit('maxListStart'));
-                $attributes = $start !== null && $start !== 1 ? [['start', (string) $start]] : [];
+                $type = Values::trimAscii($source['type'] ?? '');
+                $attributes = [
+                    ...($start !== null && $start !== 1 ? [['start', (string) $start]] : []),
+                    ...(in_array($type, Profile::get()['orderedListTypes'], true) ? [['type', $type]] : []),
+                ];
                 break;
             case 'pre':
                 $language = Values::cleanLanguage($source['data-language'] ?? null);
@@ -402,6 +430,9 @@ final class Sanitizer
             case 'td':
             case 'th':
                 $attributes = $this->cellAttributes($tag, $source);
+                break;
+            case 'table':
+                $attributes = $this->tableAttributes($source);
                 break;
             case 'figure':
                 $align = Values::lowerAscii($source['data-align'] ?? '');

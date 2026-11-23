@@ -1,8 +1,8 @@
 ---
 key: code
 title: Kod blokları
-description: Dil seçicili kod blokları, varsayılan dil listesi ve Shiki ile isteğe bağlı sözdizimi renklendirme; CSP için WebAssembly'siz kurulum.
-updated: 2026-11-01
+description: Dil seçicili ve Kopyala düğmeli kod blokları, varsayılan dil listesi ve Shiki ile isteğe bağlı sözdizimi renklendirme; CSP için WebAssembly'siz kurulum.
+updated: 2026-11-23
 faq:
   - q: Renkler kaydedilen HTML'e girer mi?
     a: Hayır. Renklendirme yalnızca editör içinde gösterilir. Kaydedilen HTML dil bilgisini taşır, renkleri taşımaz.
@@ -12,7 +12,7 @@ faq:
     a: Evet. CodeHighlight isteğe bağlıdır. Tek betikli kurulumdaki kod bloğu da renklendiricisiz gelir.
 ---
 
-`@viveeditor/ext-code-block` dil seçicili kod blokları ekler. Sözdizimi renklendirme isteğe bağlıdır: `CodeHighlight` sizin verdiğiniz renklendiriciyi yalnızca sayfada kod olduğunda yükler ve renkler kaydedilen HTML'e hiç girmez. Bu sayfa kod bloğunu, dil listesini ve Shiki ile renklendirmeyi anlatır.
+`@viveeditor/ext-code-block` dil seçicili ve Kopyala düğmeli kod blokları ekler. Sözdizimi renklendirme isteğe bağlıdır: `CodeHighlight` sizin verdiğiniz renklendiriciyi yalnızca sayfada kod olduğunda yükler ve renkler kaydedilen HTML'e hiç girmez. Bu sayfa kod bloğunu, dil listesini ve Shiki ile renklendirmeyi anlatır.
 
 ## Kurulum
 
@@ -24,7 +24,12 @@ import '@viveeditor/ext-code-block/style.css'
 
 const editor = await Editor.create(document.querySelector('#editor'), {
   extensions: [
-    CodeBlock.configure({ languageLabel: 'Dil', plainTextLabel: 'Düz metin' }),
+    CodeBlock.configure({
+      languageLabel: 'Dil',
+      plainTextLabel: 'Düz metin',
+      copyLabel: 'Kodu kopyala',
+      copiedLabel: 'Kopyalandı',
+    }),
     CodeHighlight.configure({ highlighter: shikiHighlighter(() => import('shiki')) }),
   ],
 })
@@ -37,6 +42,8 @@ Tek betikli kurulumda kod bloğu renklendiricisiz olarak zaten yüklüdür.
 | `languages` | `DEFAULT_LANGUAGES` | Dil seçicideki diller. |
 | `languageLabel` | `'Language'` | Dil seçicinin erişilebilir adı. |
 | `plainTextLabel` | `'Plain text'` | Dilsiz blok için seçenek adı. |
+| `copyLabel` | `'Copy code'` | Kopyala düğmesinin metni. |
+| `copiedLabel` | `'Copied'` | Kopyaladıktan sonra düğmede kısa bir süre görünen metin; ekran okuyucular da bunu duyurur. |
 | `tabSize` | `2` | <kbd>Tab</kbd> tuşunun eklediği boşluk sayısı. |
 
 ## Kod bloğu eklemek
@@ -72,6 +79,12 @@ const codeBlock = CodeBlock.configure({
   languages: [...DEFAULT_LANGUAGES, { value: 'dart', label: 'Dart' }],
 })
 ```
+
+## Kopyala düğmesi
+
+Her bloğun dil seçicisinin yanında bir Kopyala düğmesi vardır. Bloğun kodunu renkler olmadan düz metin olarak kopyalar ve kısa bir süre "Kopyalandı" yazar. Düğme yalnızca editörün görünümüne aittir, kaydedilen HTML'e girmez. Tek betikli kurulum ve çerçeve bileşenleri düğmeye arayüz diline göre Türkçe ya da İngilizce etiket verir; npm ile kuruyorsanız `copyLabel` ve `copiedLabel` değerlerini kendiniz verin.
+
+Kod bloğu [sağ tık menüsünde](/dokumantasyon/arac-cubugu-ve-kisayollar/) de "Dil", "Kodu kopyala" ve "Kod bloğunu sil" seçenekleriyle yer alır.
 
 ## Kod bloğunda klavye
 

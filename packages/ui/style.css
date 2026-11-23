@@ -327,9 +327,17 @@
 }
 
 .ve-solid {
-  background: var(--ve-card);
+  border-color: transparent;
+  background:
+    linear-gradient(var(--ve-card) 0 0) padding-box,
+    var(--ve-glass-edge) border-box,
+    linear-gradient(var(--ve-border) 0 0) border-box;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+
+.ve-solid::before {
+  content: none;
 }
 
 .ve-dock,
@@ -898,6 +906,136 @@ i.ve-glyph {
   background: var(--ve-swatch, var(--ve-swatch-any));
 }
 
+.ve-size-button {
+  min-width: calc(var(--ve-target) + 12px);
+  padding: 0 8px;
+  font: 600 13px / 1 var(--ve-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ve-font-size {
+  width: min(260px, calc(100% - 16px));
+}
+
+.ve-family-button {
+  max-width: 132px;
+  padding: 0 10px;
+  font: 600 13px / 1 var(--ve-ui);
+}
+
+.ve-family-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ve-menu .ve-item .ve-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ve-list-style {
+  width: min(260px, calc(100% - 16px));
+}
+
+.ve-list-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding-bottom: 8px;
+}
+
+.ve-list-bullets {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ve-list-choice {
+  min-width: 0;
+  min-height: var(--ve-target);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: var(--ve-muted);
+  color: inherit;
+  font: 600 14px var(--ve-ui);
+  cursor: pointer;
+}
+
+.ve-list-choice:hover {
+  background: color-mix(in oklab, var(--ve-muted) 70%, var(--ve-fg) 8%);
+}
+
+.ve-list-choice[aria-pressed="true"] {
+  background: var(--ve-accent-bg);
+  color: var(--ve-accent-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 28%, transparent);
+}
+
+.ve-list-choice[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ve-list-start {
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-list-form .ve-hint[hidden] {
+  display: none;
+}
+
+.ve-size-form {
+  margin-bottom: 8px;
+}
+
+.ve-size-form .ve-hint[hidden] {
+  display: none;
+}
+
+.ve-size-field {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ve-size-step {
+  font-size: 18px;
+  background: var(--ve-muted);
+}
+
+.ve-size-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  padding-bottom: 8px;
+}
+
+.ve-size-preset {
+  min-width: 0;
+  min-height: var(--ve-target);
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font: 13px var(--ve-mono);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.ve-size-preset:hover {
+  background: var(--ve-muted);
+}
+
+.ve-size-preset[aria-pressed="true"] {
+  background: var(--ve-accent-bg);
+  color: var(--ve-accent-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 28%, transparent);
+}
+
 .ve-swatches {
   width: auto;
 }
@@ -908,9 +1046,60 @@ i.ve-glyph {
   background: var(--ve-border);
 }
 
+.ve-item-more {
+  display: inline-grid;
+  place-items: center;
+  margin-left: auto;
+  color: var(--ve-muted-fg);
+}
+
+.ve-item-more .ve-icon {
+  width: 14px;
+  height: 14px;
+  transform: rotate(-90deg);
+}
+
+.ve-item[aria-expanded="true"] {
+  background: var(--ve-muted);
+}
+
+.ve-item.ve-danger {
+  color: var(--ve-danger);
+}
+
+.ve-item.ve-danger:hover {
+  background: color-mix(in oklab, var(--ve-danger) 10%, var(--ve-card));
+}
+
+.ve-context-menu,
+.ve-context .ve-menu {
+  max-width: min(320px, calc(100vw - 16px));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.ve-context .ve-item .ve-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ve-root select.ve-input {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 30px;
+  background:
+    linear-gradient(45deg, transparent 40%, currentColor 40% 60%, transparent 60%) calc(100% - 17px)
+    50% / 5px 5px no-repeat,
+    linear-gradient(135deg, transparent 40%, currentColor 40% 60%, transparent 60%)
+    calc(100% - 12px) 50% / 5px 5px no-repeat,
+    var(--ve-muted);
+  font-family: var(--ve-ui);
+  cursor: pointer;
+}
+
 .ve-char-group {
   width: 100%;
-  font: inherit;
 }
 
 .ve-char-grid {
@@ -975,12 +1164,53 @@ i.ve-glyph {
   opacity: 1;
 }
 
+.ve-color-field {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 10px;
+}
+
+.ve-color-recent[hidden],
+.ve-color-form .ve-hint[hidden] {
+  display: none;
+}
+
+.ve-color-field .ve-eyebrow {
+  padding: 0 0 6px;
+}
+
+.ve-color-picker {
+  flex: none;
+  width: var(--ve-target);
+  height: var(--ve-target);
+  padding: 4px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--ve-muted);
+  box-shadow: inset 0 0 0 1px var(--ve-border);
+  cursor: pointer;
+}
+
+.ve-color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.ve-color-picker::-webkit-color-swatch {
+  border: 0;
+  border-radius: 7px;
+}
+
+.ve-color-picker::-moz-color-swatch {
+  border: 0;
+  border-radius: 7px;
+}
+
 .ve-clear .ve-item-icon .ve-icon {
   color: var(--ve-muted-fg);
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .ve-glass {
+  .ve-glass:not(.ve-solid) {
     background: var(--ve-card);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -1005,33 +1235,141 @@ i.ve-glyph {
   min-width: 0;
 }
 
-.ve-table-panel .ve-table-actions {
-  min-width: 220px;
+.ve-table-panel[data-mode="edit"] {
+  width: min(340px, calc(100% - 16px));
 }
 
-.ve-cell-style {
+.ve-table-panel .ve-eyebrow[hidden],
+.ve-table-tabpanel[hidden],
+.ve-table-edit[hidden] {
+  display: none;
+}
+
+.ve-tabs,
+.ve-segment {
   display: grid;
-  gap: 4px;
-  margin-bottom: 8px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--ve-border);
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--ve-muted);
 }
 
-.ve-cell-style .ve-swatch-grid .ve-swatch {
+.ve-tabs {
+  margin-bottom: 12px;
+}
+
+.ve-tab,
+.ve-segment-option {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: calc(var(--ve-target) - 6px);
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ve-muted-fg);
+  font: 600 13px / 1.2 var(--ve-ui);
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.ve-segment-option {
+  font-size: 12px;
+}
+
+.ve-tab:hover,
+.ve-segment-option:hover {
+  color: var(--ve-fg);
+}
+
+.ve-tab[aria-selected="true"],
+.ve-segment-option[aria-pressed="true"] {
+  background: var(--ve-card);
+  color: var(--ve-fg);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--ve-fg) 14%, transparent),
+    inset 0 0 0 1px var(--ve-border);
+}
+
+.ve-segment-option[aria-pressed="true"] {
+  color: var(--ve-accent-fg);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ve-primary) 32%, transparent);
+}
+
+.ve-tab:focus-visible,
+.ve-segment-option:focus-visible {
+  outline: 2px solid var(--ve-primary);
+  outline-offset: 1px;
+}
+
+.ve-segment .ve-segment-option .ve-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.ve-table-tabpanel {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ve-table-section {
+  min-width: 0;
+}
+
+.ve-table-section .ve-color-field {
+  margin-bottom: 0;
+}
+
+.ve-table-switch {
+  margin-top: 0;
+}
+
+.ve-table-panel .ve-table-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px;
+  min-width: 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--ve-border);
+}
+
+.ve-table-actions .ve-item {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.25;
+  white-space: normal;
+}
+
+.ve-table-actions .ve-sep {
+  grid-column: 1 / -1;
+}
+
+.ve-table-actions .ve-table-danger {
+  grid-column: 1 / -1;
+  color: var(--ve-danger);
+}
+
+.ve-table-actions .ve-table-danger:hover {
+  background: color-mix(in oklab, var(--ve-danger) 10%, var(--ve-card));
+}
+
+.ve-table-swatches .ve-swatch:not([data-tone="dark"]) {
   color: var(--ve-on-light);
 }
 
-.ve-cell-style .ve-swatch.ve-swatch-none {
+.ve-table-swatches .ve-swatch.ve-swatch-none {
+  --ve-swatch: var(--ve-muted-fg);
   background: var(--ve-card);
   color: var(--ve-muted-fg);
 }
 
-.ve-cell-style .ve-swatch-none .ve-icon {
+.ve-table-swatches .ve-swatch-none .ve-icon {
   opacity: 1;
-}
-
-.ve-cell-align {
-  grid-template-columns: repeat(3, 1fr);
 }
 
 .ve-image-scale .ve-quiet[aria-pressed="true"] {
@@ -1158,6 +1496,10 @@ i.ve-glyph {
 
 .ve-image-panel .ve-input {
   width: 100%;
+}
+
+.ve-image-link {
+  margin-top: 4px;
 }
 
 .ve-checkbox {

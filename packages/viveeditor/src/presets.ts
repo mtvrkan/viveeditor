@@ -16,6 +16,8 @@ interface PresetLabels {
   checkbox: string
   language: string
   plainText: string
+  copy: string
+  copied: string
   uploading: string
   failed: string
   missingAlt: string
@@ -28,6 +30,8 @@ const LABELS: Record<Locale, PresetLabels> = {
     checkbox: 'Tamamlandı',
     language: 'Dil',
     plainText: 'Düz metin',
+    copy: 'Kodu kopyala',
+    copied: 'Kopyalandı',
     uploading: 'Yükleniyor',
     failed: 'Görsel eklenemedi',
     missingAlt: 'Alt metin yok',
@@ -38,6 +42,8 @@ const LABELS: Record<Locale, PresetLabels> = {
     checkbox: 'Done',
     language: 'Language',
     plainText: 'Plain text',
+    copy: 'Copy code',
+    copied: 'Copied',
     uploading: 'Uploading',
     failed: 'Image could not be added',
     missingAlt: 'No alt text',
@@ -61,7 +67,12 @@ export function classicPreset(
     ...formatExtensions,
     TaskItem.configure({ checkboxLabel: labels.checkbox }),
     TaskList,
-    CodeBlock.configure({ languageLabel: labels.language, plainTextLabel: labels.plainText }),
+    CodeBlock.configure({
+      languageLabel: labels.language,
+      plainTextLabel: labels.plainText,
+      copyLabel: labels.copy,
+      copiedLabel: labels.copied,
+    }),
     Table,
     Search,
     Image.configure({

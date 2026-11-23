@@ -13,7 +13,7 @@
 .vive-content th {
   position: relative;
   padding: 6px 10px;
-  border: 1px solid var(--ve-border, hsl(220 13% 85%));
+  border: 1px solid var(--vive-table-border-color, var(--ve-border, hsl(220 13% 85%)));
   text-align: start;
   vertical-align: top;
   overflow-wrap: anywhere;
@@ -53,4 +53,29 @@
 .vive-content.resize-cursor,
 .resize-cursor .vive-content {
   cursor: col-resize;
+}
+
+.vive-content table[data-width="full"] {
+  width: 100%;
+}
+
+.vive-content table[data-align="center"] {
+  margin-inline: auto;
+}
+
+.vive-content table[data-border="rows"] :is(td, th) {
+  border-inline-width: 0;
+}
+
+.vive-content table[data-border="none"] :is(td, th) {
+  border-width: 0;
+}
+
+.vive-content[contenteditable="true"] table[data-border="none"] :is(td, th) {
+  outline: 1px dashed var(--vive-table-border-color, var(--ve-border, hsl(220 13% 85%)));
+  outline-offset: -1px;
+}
+
+.vive-content table[data-striped="true"] tr:nth-child(even) > td {
+  background-color: var(--ve-muted, hsl(220 14% 95%));
 }

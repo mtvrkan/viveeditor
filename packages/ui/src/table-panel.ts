@@ -1,8 +1,16 @@
+import { createColorField } from './color-field.js'
 import type { CommandAccess } from './commands.js'
-import { h, moveFocus } from './dom.js'
-import { icon } from './icons.js'
+import { h, moveFocus, uniqueId } from './dom.js'
+import { type IconName, icon } from './icons.js'
 import { format, type MessageKey, type Messages } from './messages.js'
 import type { Popover } from './popover.js'
+import {
+  canRunTableAction,
+  runTableAction,
+  TABLE_ACTIONS,
+  TABLE_CELL_ACTIONS,
+  type TableAction,
+} from './table-actions.js'
 
 export interface TablePanelOptions {
   commands: CommandAccess
@@ -12,18 +20,33 @@ export interface TablePanelOptions {
   onClose: () => void
 }
 
-interface TableAction {
-  label: MessageKey
-  command: string
-  args?: readonly unknown[]
-}
-
 interface CellStyle {
   background: string | null
   verticalAlign: string | null
+  textAlign: string | null
 }
 
-const CELL_COLORS: readonly { value: string; name: MessageKey }[] = [
+interface TableStyle {
+  width: string | null
+  align: string | null
+  border: string | null
+  striped: boolean
+  borderColor: string | null
+}
+
+interface Choice {
+  value: string | null
+  label: MessageKey
+  icon?: IconName
+}
+
+interface PaletteColor {
+  value: string
+  name: MessageKey
+  tone?: 'dark'
+}
+
+const CELL_COLORS: readonly PaletteColor[] = [
   { value: '#fff2a8', name: 'colorYellow' },
   { value: '#c8f2c2', name: 'colorGreen' },
   { value: '#cde8ff', name: 'colorBlue' },
@@ -33,44 +56,55 @@ const CELL_COLORS: readonly { value: string; name: MessageKey }[] = [
   { value: '#eceff1', name: 'colorGray' },
 ]
 
-const VERTICAL: readonly { value: string | null; label: MessageKey }[] = [
+const BORDER_COLORS: readonly PaletteColor[] = [
+  { value: '#d0d5dd', name: 'colorLightGray' },
+  { value: '#98a2b3', name: 'colorGray' },
+  { value: '#475467', name: 'colorDarkGray', tone: 'dark' },
+  { value: '#7ea6d8', name: 'colorBlue' },
+]
+
+const TEXT_ALIGN: readonly Choice[] = [
+  { value: null, label: 'cellAlignLeft', icon: 'alignLeft' },
+  { value: 'center', label: 'cellAlignCenter', icon: 'alignCenter' },
+  { value: 'right', label: 'cellAlignRight', icon: 'alignRight' },
+  { value: 'justify', label: 'cellAlignJustify', icon: 'alignJustify' },
+]
+
+const VERTICAL: readonly Choice[] = [
   { value: null, label: 'cellAlignTop' },
   { value: 'middle', label: 'cellAlignMiddle' },
   { value: 'bottom', label: 'cellAlignBottom' },
 ]
 
+const WIDTH: readonly Choice[] = [
+  { value: null, label: 'tableWidthAuto' },
+  { value: 'full', label: 'tableWidthFull' },
+]
+
+const TABLE_ALIGN: readonly Choice[] = [
+  { value: null, label: 'cellAlignLeft', icon: 'alignLeft' },
+  { value: 'center', label: 'cellAlignCenter', icon: 'alignCenter' },
+]
+
+const BORDER: readonly Choice[] = [
+  { value: null, label: 'tableBorderAll' },
+  { value: 'rows', label: 'tableBorderRows' },
+  { value: 'none', label: 'tableBorderNone' },
+]
+
 const isCellStyle = (value: unknown): value is CellStyle =>
   typeof value === 'object' && value !== null && 'background' in value
 
+const isTableStyle = (value: unknown): value is TableStyle =>
+  typeof value === 'object' && value !== null && 'striped' in value
+
 const COLUMNS = 6
 const ROWS = 6
-const RESIZE_STEP = 40
-
-const ACTIONS: readonly (readonly TableAction[])[] = [
-  [
-    { label: 'rowAbove', command: 'addRowBefore' },
-    { label: 'rowBelow', command: 'addRowAfter' },
-    { label: 'columnLeft', command: 'addColumnBefore' },
-    { label: 'columnRight', command: 'addColumnAfter' },
-  ],
-  [
-    { label: 'mergeCells', command: 'mergeCells' },
-    { label: 'splitCell', command: 'splitCell' },
-    { label: 'headerRow', command: 'toggleHeaderRow' },
-    { label: 'widenColumn', command: 'resizeColumn', args: [RESIZE_STEP] },
-    { label: 'narrowColumn', command: 'resizeColumn', args: [-RESIZE_STEP] },
-  ],
-  [
-    { label: 'deleteRow', command: 'deleteRow' },
-    { label: 'deleteColumn', command: 'deleteColumn' },
-    { label: 'deleteTable', command: 'deleteTable' },
-  ],
-]
 
 export function createTablePanel(options: TablePanelOptions): Popover {
   const { commands, messages } = options
-  const run = (command: string, args: readonly unknown[]): void => {
-    commands.run(command, ...args)
+  const insert = (rows: number, cols: number): void => {
+    commands.run('insertTable', { rows, cols, headerRow: true })
     close(false)
     options.returnToEditor()
   }
@@ -85,7 +119,7 @@ export function createTablePanel(options: TablePanelOptions): Popover {
       tabindex: '-1',
       'aria-label': format(messages.tableSize, { rows, cols }),
     })
-    cell.addEventListener('click', () => run('insertTable', [{ rows, cols, headerRow: true }]))
+    cell.addEventListener('click', () => insert(rows, cols))
     cell.addEventListener('pointerenter', () => mark(index))
     cell.addEventListener('focus', () => mark(index))
     return cell
@@ -95,86 +129,266 @@ export function createTablePanel(options: TablePanelOptions): Popover {
     size,
   ])
 
-  const actions = ACTIONS.flat().map((action) => {
-    const button = h('button', { type: 'button', class: 've-item', tabindex: '-1' }, [
-      h('span', { class: 've-item-label' }, [messages[action.label]]),
-    ])
-    button.addEventListener('click', () => {
-      if (button.getAttribute('aria-disabled') !== 'true') run(action.command, action.args ?? [])
-    })
-    return { action, button }
-  })
-  const list = h(
-    'div',
-    { class: 've-table-actions' },
-    ACTIONS.flatMap((group, index) => [
-      index > 0 ? h('div', { class: 've-sep', role: 'separator' }) : null,
-      ...actions.filter((entry) => group.includes(entry.action)).map((entry) => entry.button),
-    ]),
-  )
+  const cellStyle = (): CellStyle | null => {
+    const style = commands.query('cellStyle')
+    return isCellStyle(style) ? style : null
+  }
+  const tableStyle = (): TableStyle | null => {
+    const style = commands.query('tableStyle')
+    return isTableStyle(style) ? style : null
+  }
 
-  const styleButtons: { button: HTMLButtonElement; pressed: (style: CellStyle) => boolean }[] = []
-  const styleButton = (
-    attributes: Record<string, string>,
-    children: (Node | string)[],
+  const syncs: (() => void)[] = []
+  const sync = (): void => {
+    for (const update of syncs) update()
+  }
+
+  const apply = (command: string, args: readonly unknown[]): void => {
+    commands.run(command, ...args)
+    if (commands.query('inTable') !== true) {
+      close(false)
+      options.returnToEditor()
+      return
+    }
+    sync()
+    if (!element.contains(document.activeElement)) tabs[activeTab]?.focus()
+  }
+
+  const eyebrow = (label: MessageKey): HTMLElement =>
+    h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages[label]])
+
+  const section = (label: MessageKey, ...children: HTMLElement[]): HTMLElement =>
+    h('div', { class: 've-table-section' }, [eyebrow(label), ...children])
+
+  const segmented = (
+    label: MessageKey,
+    choices: readonly Choice[],
     command: string,
-    value: string | null,
-    pressed: (style: CellStyle) => boolean,
-  ): HTMLButtonElement => {
-    const button = h(
-      'button',
-      { type: 'button', tabindex: '-1', 'aria-pressed': 'false', ...attributes },
-      children,
-    )
-    button.addEventListener('click', () => run(command, [value]))
-    styleButtons.push({ button, pressed })
-    return button
-  }
-  const swatchButton = (value: string | null, name: string): HTMLButtonElement => {
-    const button = styleButton(
-      {
-        class: value ? 've-swatch' : 've-swatch ve-swatch-none',
-        'aria-label': name,
-        title: name,
-      },
-      [icon(value ? 'check' : 'clear')],
-      'setCellBackground',
-      value,
-      (style) => style.background === value,
-    )
-    if (value) button.style.setProperty('--ve-swatch', value)
-    return button
-  }
-  const colorLabel = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages.cellColor])
-  const colors = h(
-    'div',
-    { class: 've-swatch-grid', role: 'group', 'aria-label': messages.cellColor },
-    [
-      swatchButton(null, messages.cellColorNone),
-      ...CELL_COLORS.map((color) => swatchButton(color.value, messages[color.name])),
-    ],
-  )
-  const alignLabel = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' }, [messages.cellAlign])
-  const aligns = h(
-    'div',
-    { class: 've-image-scale ve-cell-align', role: 'group', 'aria-label': messages.cellAlign },
-    VERTICAL.map((option) =>
-      styleButton(
-        { class: 've-quiet' },
-        [messages[option.label]],
-        'setCellVerticalAlign',
-        option.value,
-        (style) => style.verticalAlign === option.value,
+    current: () => string | null | undefined,
+    extraClass = '',
+  ): HTMLElement => {
+    const buttons = choices.map((choice) => {
+      const name = messages[choice.label]
+      const button = h(
+        'button',
+        {
+          type: 'button',
+          class: 've-segment-option',
+          'aria-pressed': 'false',
+          ...(choice.icon ? { 'aria-label': name, title: name } : {}),
+        },
+        [choice.icon ? icon(choice.icon) : name],
+      )
+      button.addEventListener('click', () => apply(command, [choice.value]))
+      return button
+    })
+    syncs.push(() => {
+      const value = current()
+      choices.forEach((choice, index) => {
+        buttons[index]?.setAttribute('aria-pressed', String(value === choice.value))
+      })
+    })
+    return section(
+      label,
+      h(
+        'div',
+        {
+          class: `ve-segment${extraClass ? ` ${extraClass}` : ''}`,
+          role: 'group',
+          'aria-label': messages[label],
+        },
+        buttons,
       ),
-    ),
-  )
-  const cellStyle = h('div', { class: 've-cell-style' }, [colorLabel, colors, alignLabel, aligns])
+    )
+  }
 
+  const palette = (
+    label: MessageKey,
+    noneLabel: MessageKey,
+    colors: readonly PaletteColor[],
+    command: string,
+    recentKey: string,
+    current: () => string | null | undefined,
+  ): HTMLElement => {
+    const swatch = (color: PaletteColor | null): HTMLButtonElement => {
+      const name = messages[color ? color.name : noneLabel]
+      const button = h(
+        'button',
+        {
+          type: 'button',
+          class: color ? 've-swatch' : 've-swatch ve-swatch-none',
+          'aria-label': name,
+          title: name,
+          'aria-pressed': 'false',
+          ...(color?.tone ? { 'data-tone': color.tone } : {}),
+        },
+        [icon(color ? 'check' : 'clear')],
+      )
+      if (color) button.style.setProperty('--ve-swatch', color.value)
+      button.addEventListener('click', () => apply(command, [color ? color.value : null]))
+      syncs.push(() => {
+        const value = current()
+        button.setAttribute(
+          'aria-pressed',
+          String(value !== undefined && value === (color ? color.value : null)),
+        )
+      })
+      return button
+    }
+    const field = createColorField({
+      messages,
+      recentKey,
+      current: () => current() ?? null,
+      exclude: colors.map((color) => color.value),
+      apply: (color) => apply(command, [color]),
+    })
+    syncs.push(() => field.sync())
+    return section(
+      label,
+      h(
+        'div',
+        { class: 've-swatch-grid ve-table-swatches', role: 'group', 'aria-label': messages[label] },
+        [swatch(null), ...colors.map((color) => swatch(color))],
+      ),
+      field.element,
+    )
+  }
+
+  const actionList = (actions: readonly TableAction[]): HTMLElement => {
+    const children: HTMLElement[] = []
+    actions.forEach((action, index) => {
+      if (index > 0 && actions[index - 1]?.group !== action.group) {
+        children.push(h('div', { class: 've-sep', role: 'separator' }))
+      }
+      const button = h(
+        'button',
+        {
+          type: 'button',
+          class: action.destructive ? 've-item ve-table-danger' : 've-item',
+          'data-action': action.id,
+        },
+        [h('span', { class: 've-item-label' }, [messages[action.label]])],
+      )
+      button.addEventListener('click', () => {
+        if (button.getAttribute('aria-disabled') === 'true') return
+        if (action.destructive) {
+          runTableAction(commands, action)
+          close(false)
+          options.returnToEditor()
+          return
+        }
+        apply(action.command, action.args ?? [])
+      })
+      syncs.push(() =>
+        button.setAttribute('aria-disabled', String(!canRunTableAction(commands, action))),
+      )
+      children.push(button)
+    })
+    return h('div', { class: 've-table-actions' }, children)
+  }
+
+  const striped = h('input', { type: 'checkbox', role: 'switch' })
+  striped.addEventListener('change', () => apply('setTableStriped', [striped.checked]))
+  syncs.push(() => {
+    striped.checked = tableStyle()?.striped === true
+  })
+
+  const cellPanel = h('div', { class: 've-table-tabpanel ve-cell-style', role: 'tabpanel' }, [
+    segmented(
+      'cellTextAlign',
+      TEXT_ALIGN,
+      'setCellTextAlign',
+      () => cellStyle()?.textAlign,
+      've-cell-text-align',
+    ),
+    segmented(
+      'cellAlign',
+      VERTICAL,
+      'setCellVerticalAlign',
+      () => cellStyle()?.verticalAlign,
+      've-cell-align',
+    ),
+    palette(
+      'cellColor',
+      'cellColorNone',
+      CELL_COLORS,
+      'setCellBackground',
+      'cellBackground',
+      () => cellStyle()?.background,
+    ),
+    actionList(TABLE_CELL_ACTIONS),
+  ])
+  const tablePanel = h('div', { class: 've-table-tabpanel ve-table-style', role: 'tabpanel' }, [
+    segmented('tableWidth', WIDTH, 'setTableWidth', () => tableStyle()?.width),
+    segmented('tableAlign', TABLE_ALIGN, 'setTableAlign', () => tableStyle()?.align),
+    segmented('tableBorders', BORDER, 'setTableBorder', () => tableStyle()?.border),
+    h('label', { class: 've-checkbox ve-table-switch' }, [
+      striped,
+      h('span', {}, [messages.tableStriped]),
+    ]),
+    palette(
+      'tableBorderColor',
+      'tableBorderDefault',
+      BORDER_COLORS,
+      'setTableBorderColor',
+      'tableBorder',
+      () => tableStyle()?.borderColor,
+    ),
+    actionList(TABLE_ACTIONS),
+  ])
+
+  const tabId = uniqueId('ve-table-tab')
+  const tabPanels = [cellPanel, tablePanel]
+  const tabLabels: MessageKey[] = ['tableTabCell', 'tableTabTable']
+  const tabs = tabPanels.map((panel, index) => {
+    panel.id = `${tabId}-panel-${index}`
+    panel.setAttribute('aria-labelledby', `${tabId}-${index}`)
+    const tab = h(
+      'button',
+      {
+        type: 'button',
+        class: 've-tab',
+        role: 'tab',
+        id: `${tabId}-${index}`,
+        'aria-controls': panel.id,
+      },
+      [messages[tabLabels[index] ?? 'tableTabCell']],
+    )
+    tab.addEventListener('click', () => selectTab(index))
+    return tab
+  })
+  const tablist = h(
+    'div',
+    { class: 've-tabs', role: 'tablist', 'aria-label': messages.table },
+    tabs,
+  )
+  let activeTab = 0
+
+  function selectTab(index: number): void {
+    activeTab = index
+    tabs.forEach((tab, position) => {
+      const selected = position === index
+      tab.setAttribute('aria-selected', String(selected))
+      tab.tabIndex = selected ? 0 : -1
+      const panel = tabPanels[position]
+      if (panel) panel.hidden = !selected
+    })
+  }
+
+  tablist.addEventListener('keydown', (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    event.preventDefault()
+    const index = moveFocus(tabs, activeTab, event.key)
+    selectTab(index)
+    tabs[index]?.focus()
+  })
+
+  const editing = h('div', { class: 've-table-edit' }, [tablist, cellPanel, tablePanel])
   const title = h('div', { class: 've-eyebrow', 'aria-hidden': 'true' })
   const element = h(
     'div',
     { class: 've-panel ve-table-panel ve-glass ve-solid', role: 'dialog', hidden: '' },
-    [title, picker, cellStyle, list],
+    [title, picker, editing],
   )
   let anchor: HTMLElement | null = null
 
@@ -204,25 +418,20 @@ export function createTablePanel(options: TablePanelOptions): Popover {
     const inTable = commands.query('inTable') === true
     const label = inTable ? messages.table : messages.tableInsert
     title.textContent = label
+    title.hidden = inTable
     element.setAttribute('aria-label', label)
+    element.dataset.mode = inTable ? 'edit' : 'insert'
     picker.hidden = inTable
-    list.hidden = !inTable
-    const style = commands.query('cellStyle')
-    cellStyle.hidden = !inTable || !isCellStyle(style)
-    for (const { button, pressed } of styleButtons) {
-      button.setAttribute('aria-pressed', String(isCellStyle(style) && pressed(style)))
-    }
-    for (const { action, button } of actions) {
-      button.setAttribute(
-        'aria-disabled',
-        String(!commands.can(action.command, ...(action.args ?? []))),
-      )
+    editing.hidden = !inTable
+    if (inTable) {
+      selectTab(0)
+      sync()
     }
     element.hidden = false
     target.setAttribute('aria-expanded', 'true')
     options.place(element, target)
     if (inTable) {
-      actions.find(({ button }) => button.getAttribute('aria-disabled') === 'false')?.button.focus()
+      tabs[activeTab]?.focus()
     } else {
       mark(0)
       cells[0]?.focus()
@@ -237,32 +446,20 @@ export function createTablePanel(options: TablePanelOptions): Popover {
       return
     }
     const cell = cells.indexOf(document.activeElement as HTMLButtonElement)
-    if (cell >= 0) {
-      const steps: Record<string, number> = {
-        ArrowRight: 1,
-        ArrowLeft: -1,
-        ArrowDown: COLUMNS,
-        ArrowUp: -COLUMNS,
-      }
-      const step = steps[event.key]
-      if (step === undefined) return
-      event.preventDefault()
-      const target = cell + step
-      const wraps =
-        Math.abs(step) === 1 && Math.floor(target / COLUMNS) !== Math.floor(cell / COLUMNS)
-      if (!wraps && target >= 0 && target < cells.length) cells[target]?.focus()
-      return
+    if (cell < 0) return
+    const steps: Record<string, number> = {
+      ArrowRight: 1,
+      ArrowLeft: -1,
+      ArrowDown: COLUMNS,
+      ArrowUp: -COLUMNS,
     }
-    if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key))
-      return
+    const step = steps[event.key]
+    if (step === undefined) return
     event.preventDefault()
-    const buttons = [
-      ...(cellStyle.hidden ? [] : styleButtons.map((entry) => entry.button)),
-      ...actions.map((entry) => entry.button),
-    ]
-    buttons[
-      moveFocus(buttons, buttons.indexOf(document.activeElement as HTMLButtonElement), event.key)
-    ]?.focus()
+    const target = cell + step
+    const wraps =
+      Math.abs(step) === 1 && Math.floor(target / COLUMNS) !== Math.floor(cell / COLUMNS)
+    if (!wraps && target >= 0 && target < cells.length) cells[target]?.focus()
   })
 
   return { element, open, close, isOpen }

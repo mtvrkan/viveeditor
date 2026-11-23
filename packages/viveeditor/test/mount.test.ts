@@ -111,3 +111,15 @@ describe('mountEditor', () => {
     expect(document.querySelector('[role="toolbar"]')).toBeNull()
   })
 })
+
+describe('classic preset labels', () => {
+  it('names the code block copy button in the mount locale', async () => {
+    const turkish = mount({ value: '<pre><code>a</code></pre>', locale: 'tr' })
+    const english = mount({ value: '<pre><code>b</code></pre>', locale: 'en' })
+
+    const [tr, en] = await Promise.all([turkish.ready, english.ready])
+
+    expect(tr.dom.querySelector('.vive-code-copy')?.textContent).toBe('Kodu kopyala')
+    expect(en.dom.querySelector('.vive-code-copy')?.textContent).toBe('Copy code')
+  })
+})

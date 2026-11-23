@@ -19,10 +19,14 @@ import {
   cleanMentionLabel,
   cleanStyle,
   cleanText,
+  DEFAULT_FONT_FAMILIES,
+  type FontFamilies,
+  fontFamilyMap,
   type ImagePolicy,
   isMentionId,
   lowerAscii,
   takeCodePoints,
+  trimAscii,
 } from './values.js'
 
 type Element = DefaultTreeAdapterMap['element']
@@ -34,6 +38,7 @@ export interface SanitizeOptions {
   allowRelativeImages?: boolean
   maxBytes?: number
   maxTags?: number
+  fontFamilies?: readonly string[]
 }
 
 export type SanitizeErrorCode = 'TOO_LARGE' | 'TOO_COMPLEX'
@@ -61,6 +66,7 @@ interface Context {
 interface Settings {
   embeds: boolean
   image: ImagePolicy
+  fonts: FontFamilies
 }
 
 const { limits } = VIVE_PROFILE
@@ -103,12 +109,13 @@ function append(target: ParentNode, tag: string, attributes: [string, string][])
 function styleOf(
   tag: string,
   source: Map<string, string>,
+  fonts: FontFamilies,
   without: string | null = null,
 ): [string, string][] {
   const allowed = VIVE_PROFILE.elements[tag]?.styles?.filter((style) => style !== without)
   const style = source.get('style')
   if (!allowed || style === undefined) return []
-  const clean = cleanStyle(style, allowed)
+  const clean = cleanStyle(style, allowed, fonts)
   return clean === null ? [] : [['style', clean]]
 }
 
@@ -151,7 +158,11 @@ function imageAttributes(
   return result
 }
 
-function cellAttributes(tag: string, source: Map<string, string>): [string, string][] {
+function cellAttributes(
+  tag: string,
+  source: Map<string, string>,
+  fonts: FontFamilies,
+): [string, string][] {
   const result: [string, string][] = []
   for (const name of ['colspan', 'rowspan']) {
     const span = cleanInteger(source.get(name), 2, limits.maxSpan)
@@ -159,8 +170,29 @@ function cellAttributes(tag: string, source: Map<string, string>): [string, stri
   }
   const widths = cleanColWidth(source.get('data-colwidth'))
   if (widths !== null) result.push(['data-colwidth', widths])
-  result.push(...styleOf(tag, source))
+  result.push(...styleOf(tag, source, fonts))
   return result
+}
+
+function enumAttribute(
+  source: Map<string, string>,
+  name: string,
+  allowed: readonly string[],
+): [string, string][] {
+  const value = lowerAscii(trimAscii(source.get(name) ?? ''))
+  return allowed.includes(value) ? [[name, value]] : []
+}
+
+function tableAttributes(source: Map<string, string>, fonts: FontFamilies): [string, string][] {
+  const width = enumAttribute(source, 'data-width', VIVE_PROFILE.tableWidths)
+  const striped = lowerAscii(trimAscii(source.get('data-striped') ?? '')) === 'true'
+  return [
+    ...width,
+    ...enumAttribute(source, 'data-align', VIVE_PROFILE.tableAlign),
+    ...enumAttribute(source, 'data-border', VIVE_PROFILE.tableBorders),
+    ...(striped ? ([['data-striped', 'true']] as [string, string][]) : []),
+    ...styleOf('table', source, fonts, width.length > 0 ? 'width' : null),
+  ]
 }
 
 function embed(source: Map<string, string>, node: Element, target: ParentNode): void {
@@ -332,7 +364,9 @@ function element(
       return
     case 'ul':
       next.taskList = source.get('data-type') === 'taskList'
-      attributes = next.taskList ? [['data-type', 'taskList']] : []
+      attributes = next.taskList
+        ? [['data-type', 'taskList']]
+        : styleOf('ul', source, settings.fonts)
       break
     case 'li':
       next.taskItem = context.taskList && source.get('data-type') === 'taskItem'
@@ -345,7 +379,15 @@ function element(
       break
     case 'ol': {
       const start = cleanInteger(source.get('start'), 0, limits.maxListStart)
-      attributes = start !== null && start !== 1 ? [['start', String(start)]] : []
+      const type = trimAscii(source.get('type') ?? '')
+      attributes = [
+        ...(start !== null && start !== 1
+          ? ([['start', String(start)]] as [string, string][])
+          : []),
+        ...(VIVE_PROFILE.orderedListTypes.includes(type)
+          ? ([['type', type]] as [string, string][])
+          : []),
+      ]
       break
     }
     case 'pre': {
@@ -374,7 +416,10 @@ function element(
     }
     case 'td':
     case 'th':
-      attributes = cellAttributes(tag, source)
+      attributes = cellAttributes(tag, source, settings.fonts)
+      break
+    case 'table':
+      attributes = tableAttributes(source, settings.fonts)
       break
     case 'figure': {
       const align = lowerAscii(source.get('data-align') ?? '')
@@ -383,7 +428,7 @@ function element(
     }
     default:
       attributes = Object.hasOwn(VIVE_PROFILE.elements, tag)
-        ? styleOf(tag, source, context.inFontSize ? 'font-size' : null)
+        ? styleOf(tag, source, settings.fonts, context.inFontSize ? 'font-size' : null)
         : null
       next.inFontSize ||= tag === 'span' && hasStyle(attributes, 'font-size')
   }
@@ -449,6 +494,10 @@ export function sanitizeHtml(input: string, options: SanitizeOptions = {}): stri
       allowBase64: options.allowBase64 === true,
       allowRelative: options.allowRelativeImages === true,
     },
+    fonts:
+      options.fontFamilies === undefined
+        ? DEFAULT_FONT_FAMILIES
+        : fontFamilyMap(options.fontFamilies),
   }
   const html = scrub(input)
   const maxTags = options.maxTags ?? limits.maxTags

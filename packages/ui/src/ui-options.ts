@@ -8,6 +8,8 @@ import type { UiPlugin } from './plugins.js'
 
 export type UiTheme = 'light' | 'dark' | 'auto'
 
+export type ContextMenuMode = 'objects' | 'always' | false
+
 export interface UiOptions {
   locale?: string
   messages?: Partial<Messages & DocumentMessages>
@@ -15,6 +17,7 @@ export interface UiOptions {
   readability?: ReadabilityFormula | false
   bubble?: boolean
   slash?: boolean
+  contextMenu?: ContextMenuMode
   source?: boolean
   files?: FileOptions | false
   plugins?: readonly UiPlugin[]

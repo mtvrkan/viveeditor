@@ -1,6 +1,6 @@
 import { Editor } from '@viveeditor/core'
 import { basicExtensions } from '@viveeditor/ext-basic'
-import { CleanDocument } from '@viveeditor/ext-format'
+import { CleanDocument, FontFamily } from '@viveeditor/ext-format'
 import { listExtensions } from '@viveeditor/ext-list'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
@@ -159,6 +159,31 @@ describe('file menu', () => {
     await choose(root, new File(['x'], 'rapor.docx'))
 
     expect(notice(root)?.textContent).toContain('Dönüştürücü yüklenemedi')
+  })
+
+  it('passes the editor font family list to the Word reader', async () => {
+    const families = ['Inter, sans-serif', 'Georgia, serif']
+    const importDocx = vi.fn().mockResolvedValue({ html: '<p>w</p>', warnings: [] })
+    const { root } = await mount(
+      { files: { docx: async () => ({ importDocx, exportDocx: vi.fn() }) } },
+      '',
+      [...basicExtensions, FontFamily.configure({ fontFamilies: families })],
+    )
+
+    await choose(root, new File(['x'], 'rapor.docx'))
+
+    expect(importDocx.mock.calls[0]?.[1]?.fontFamilies).toEqual(families)
+  })
+
+  it('leaves the Word reader on its own font list without the font family extension', async () => {
+    const importDocx = vi.fn().mockResolvedValue({ html: '<p>w</p>', warnings: [] })
+    const { root } = await mount({
+      files: { docx: async () => ({ importDocx, exportDocx: vi.fn() }) },
+    })
+
+    await choose(root, new File(['x'], 'rapor.docx'))
+
+    expect(importDocx.mock.calls[0]?.[1]).not.toHaveProperty('fontFamilies')
   })
 
   it('maps converter errors to plain messages', async () => {
